@@ -1,3 +1,6 @@
+import Prelude
+
+
 -- 2. Tuple Types
 
 type ShopItem = (String, Int)
@@ -29,7 +32,9 @@ fibPair n
     | n == 0    = (0, 1)
     | otherwise = fibStep (fibPair (n-1))
 
---fastFib   :: Integer -> Integer
+fastFib   :: Integer -> Integer
+fastFib n = fst (fibPair n)
+-- help:: todo: the below doesn't work - why?
 --fastFib n = fst . (fibPair n)
 
 
