@@ -147,6 +147,7 @@
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../HaskellCourse" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -648,12 +649,12 @@
       <created>1462603099811</created>
       <option name="number" value="Default" />
       <updated>1462603099811</updated>
-      <workItem from="1462603103343" duration="1713000" />
+      <workItem from="1462603103343" duration="1815000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1713000" />
+    <option name="totallyTimeSpent" value="1815000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="4" y="2" width="794" height="782" extended-state="0" />
