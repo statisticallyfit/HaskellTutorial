@@ -7,6 +7,11 @@ maxOccurs a b
     | otherwise = (a, 2)
 
 
+--maxThreeOccurs :: Integer -> Integer -> Integer -> (Integer, Integer)
+--maxThreeOccurs a b c
+--    |
+
+
 main = do
     print $ maxOccurs 3 4
     print $ maxOccurs 4 1
