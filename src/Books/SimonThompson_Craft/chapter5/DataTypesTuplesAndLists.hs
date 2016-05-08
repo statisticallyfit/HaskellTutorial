@@ -44,15 +44,34 @@ fastFib n = fst (fibPair n)
 
 -- 5.3 Algebraic data types -------------------------------------------------------
 
-data Move = Rock | Paper | Scissors
+-- (1) enumerated types
+data Move = Rock | Paper | Scissors -- note: this is a nullary constructor
             deriving (Eq, Show)
 
 
 score :: Move -> Move -> Integer
-score Rock Rock = 0
-score Rock Paper = -1
-score Paper Rock = 1
-score Rock Scissors = 1
+score Rock Rock         = 0
+score Paper Paper       = 0
+score Scissors Scissors = 0
+score Rock Paper        = -1
+score Paper Rock        = 1
+score Rock Scissors     = 1
+score Scissors Rock     = -1
+score Paper Scissors    = -1
+score Scissors Paper    = 1
+
+-- (2) product types
+data People = Person Name Age -- note: this is a binary constructor
+              deriving (Eq, Show)
+type Name = String
+type Age = Int
+
+showPerson :: People -> String
+showPerson (Person str n) = str ++ " -- " ++ show n
+
+
+-- (3) tuples and data types
+--type People = (Name, Age)
 
 
 main = do
@@ -60,3 +79,7 @@ main = do
     print $ fibStep (9, 14)
     print $ fibPair 5; print $ fibPair 8
     ---------------------------------------------------- algebraic types
+    print $ score Rock Scissors
+    print $ Person "Electric Aunt Jemima" 77
+    print $ Person "Ronnie" 14
+    print $ showPerson (Person "Electric Aunt Jemima" 77)
