@@ -1,7 +1,7 @@
 import Prelude
 
 
--- 2. Tuple Types
+-- 5.2. Tuple Types
 
 type ShopItem = (String, Int)
 --("Salt: 1kg", 139) :: ShopItem
@@ -38,6 +38,25 @@ fastFib n = fst (fibPair n)
 --fastFib n = fst . (fibPair n)
 
 
+
+
+
+
+-- 5.3 Algebraic data types -------------------------------------------------------
+
+data Move = Rock | Paper | Scissors
+            deriving (Eq, Show)
+
+
+score :: Move -> Move -> Integer
+score Rock Rock = 0
+score Rock Paper = -1
+score Paper Rock = 1
+score Rock Scissors = 1
+
+
 main = do
-    print $ fibStep (0, 1); print $ fibStep (2, 3); print $ fibStep (9, 14)
+    print $ fibStep (0, 1); print $ fibStep (2, 3)----- tuple tupes
+    print $ fibStep (9, 14)
     print $ fibPair 5; print $ fibPair 8
+    ---------------------------------------------------- algebraic types
