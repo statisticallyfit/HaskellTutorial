@@ -136,6 +136,11 @@ note: m ~ Maybe
 
 return :: Monad m => a ->     m a
 return ::            a -> Maybe a
+
+instance Monad Maybe where
+    return x = Just x
+    (Just x) >>= k     = k x    key so run the entire computation over x
+    Nothing >>=  _     Nothing  key so the entire computation is dropped
 -}
 
 
@@ -175,7 +180,7 @@ mkSphericalCow name' age' weight' =
                         weightCheck (Cow nammy agey weighty)
 
 
--- note: cleaning up function with monad
+-- note: cleaning up function with monad - no need to repeat anymore like above.
 mkSphericalCow' :: String -> Int -> Int -> Maybe Cow
 mkSphericalCow' name' age' weight' = do
     nammy   <- noEmpty name'
@@ -183,7 +188,7 @@ mkSphericalCow' name' age' weight' = do
     weighty <- noNegative weight'
     weightCheck (Cow nammy agey weighty)
 
-
+-- note: this is how the above code looks like, desugared:
 mkSphericalCow'' :: String -> Int -> Int -> Maybe Cow
 mkSphericalCow'' name' age' weight' = do
     noEmpty name' >>=
@@ -256,10 +261,14 @@ actions produce Nothing, because of:
 instance Monad Maybe where
     return x = Just x
     (Just x) >>= k     = k x    key so run the entire computation over x
-    Nothing >>=  _     NOthing  key so the entire computation is dropped
+    Nothing >>=  _     Nothing  key so the entire computation is dropped
 -}
 
--- note: if you return() something at the end of this type of pattern,
+
+
+
+-- note: Why we can't use this with Applicative:
+-- if you return() something at the end of this type of pattern,
 -- then use Applicative but if you just have a statement then that is going to
 -- produce more monadic structure so you need the implicit monad join to crunch
 -- it back down.
