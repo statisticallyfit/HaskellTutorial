@@ -40,11 +40,11 @@ binding' =
 -- note: join merges the two IO effects
 -- notes: goes from String -> IO -> IO(IO())
 -- to: String -> IO() -- note: it merges the two IOs
-h :: IO (IO ()) -- note: outer IO is for getLine, inner IO is for putStrLn
-h = putStrLn <$> getLine
+q :: IO (IO ()) -- note: outer IO is for getLine, inner IO is for putStrLn
+q = putStrLn <$> getLine
 -- now
-h' :: IO()
-h' = join $ putStrLn <$> getLine
+q' :: IO()
+q' = join $ putStrLn <$> getLine
 
 -------------------------------------------------------------------------------------
 -- note: desugar do syntax
@@ -130,6 +130,7 @@ d xs = [[x^2,x^2] | x <- xs, even x]
 
 -- MAYBE ---------------------------------------------------------------------------
 {-
+note: m ~ Maybe
 (>>=) :: Monad m => m a -> (a ->     m b) ->     m b
 (>>=) ::        Maybe a -> (a -> Maybe b) -> Maybe b
 
@@ -194,6 +195,167 @@ mkSphericalCow'' name' age' weight' = do
                 weightCheck (Cow nammy agey weighty)
 
 
+{-
+example: passing some arguments:
+
+mkSphericalCow'' "Bess" 5 499
+    noEmpty "Bess" >>=
+        \nammy ->
+        noNegative 5 >>=
+            \agey ->
+            noNegative 499 >>=
+                \weighty ->
+                weightCheck (Cow nammy agey weight)
+
+
+
+mkSphericalCow'' "Bess" 5 499
+    noEmpty "Bess" >>=
+        \"Bess" ->              equals: Just "Bess" but with >>= it is "Bess"
+        noNegative 5 >>=
+            \agey ->
+            noNegative 499 >>=
+                \weighty ->
+                weightCheck (Cow nammy agey weight)
+
+
+
+mkSphericalCow'' "Bess" 5 499
+    noEmpty "Bess" >>=
+        \"Bess" ->
+        noNegative 5 >>=
+            \5 ->               equals: Just 5 but with >>= it is (5)
+            noNegative 499 >>=
+                \weighty ->
+                weightCheck (Cow nammy agey weight)
+
+
+mkSphericalCow'' "Bess" 5 499
+    noEmpty "Bess" >>=
+        \"Bess" ->
+        noNegative 5 >>=
+            \5 ->
+            noNegative 499 >>=
+                \499 ->          equals: Just 499 but with >>= it is (499)
+                weightCheck (Cow nammy agey weight)
+
+
+-- note: but if had a "" for name?
+mkSphericalCow'' "" 5 499
+    noEmpty "" >>=    equals: Nothing >>= _ so the entire computation drops.
+        \nammy ->
+        noNegative 5 >>=
+            \agey ->
+            noNegative 499 >>=
+                \weighty ->
+                weightCheck (Cow nammy agey weight)
+
+summary: entire computation drops any moment that any function in the Maybe Monad
+actions produce Nothing, because of:
+
+instance Monad Maybe where
+    return x = Just x
+    (Just x) >>= k     = k x    key so run the entire computation over x
+    Nothing >>=  _     NOthing  key so the entire computation is dropped
+-}
+
+-- note: if you return() something at the end of this type of pattern,
+-- then use Applicative but if you just have a statement then that is going to
+-- produce more monadic structure so you need the implicit monad join to crunch
+-- it back down.
+-- EXAMPLE
+
+f :: Maybe Integer
+f = Just 1
+g :: Maybe String
+g = Just "1"
+h :: Maybe Integer
+h = Just 10191
+
+zed :: a -> b -> c -> (a, b, c)
+zed = (,,)
+
+doSomething = do
+    a <- f
+    b <- g
+    c <- h
+    return (zed a b c)
+
+zedM :: Monad m => a -> b -> c -> m (a, b, c)
+zedM a b c = return (a, b, c)
+
+doSomethingM = do
+    a <- f
+    b <- g
+    c <- h
+    zedM a b c
+
+-- help: how does this relate to above text? how does it get crunched?
+
+
+
+
+
+-- EITHER --------------------------------------------------------------------------
+
+{-
+note: m ~ Either e
+(>>=) :: Monad m => m a -> (a ->        m b) ->        m b
+(>>=) ::     Either e a -> (a -> Either e b) -> Either e b
+
+return :: Monad m => a ->        m a
+return ::            a -> Either e a
+
+-}
+-- years ago
+type Founded = Int
+-- number of programmers
+type Coders = Int
+
+data SoftwareShop =
+    Shop {
+        founded     :: Founded,
+        programmers :: Coders
+    } deriving (Eq, Show)
+
+data FoundedError = NegativeYears Founded
+                  | TooManyYears Founded
+                  | NegativeCoders Coders
+                  | TooManyCoders Coders
+                  | TooManyCodersForYears Founded Coders
+                  deriving (Eq, Show)
+
+validateFounded :: Int -> Either FoundedError Founded
+validateFounded n
+    | n < 0     = Left $ NegativeYears n
+    | n > 500   = Left $ TooManyYears n
+    | otherwise = Right n
+
+
+validateCoders :: Int -> Either FoundedError Coders
+validateCoders n
+    | n < 0     = Left $ NegativeCoders n
+    | n > 5000  = Left $ TooManyCoders n
+    | otherwise = Right n
+
+
+mkSoftware :: Int -> Int -> Either FoundedError SoftwareShop
+mkSoftware years coders = do
+    founded     <- validateFounded years
+    programmers <- validateCoders coders
+    if programmers > founded `div` 10
+        then Left $ TooManyCodersForYears founded programmers
+        else Right $ Shop founded programmers
+
+
+
+
+
+
+
+-- note: todo: finish this chapter + exercises later.
+
+
 main = do
     print $ d [1..10]
     print $ join $ d [1..10]
@@ -205,3 +367,14 @@ main = do
 
     print $ mkSphericalCow' "Bess" 5 499
     print $ mkSphericalCow' "Bess" 5 500
+    putStrLn ""
+    --------------------------------------
+    print $ mkSoftware 0 0
+    print $ mkSoftware (-1) 0
+    print $ mkSoftware (-1) (-1)
+    print $ mkSoftware 0 (-1)
+    print $ mkSoftware 500 0
+    print $ mkSoftware 501 0
+    print $ mkSoftware 501 501
+    print $ mkSoftware 100 5001
+    print $ mkSoftware 0 500

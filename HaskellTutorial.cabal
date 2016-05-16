@@ -7,4 +7,4 @@ cabal-version:     >= 1.2
 executable HaskellTutorial
   main-is:         Main.hs
   hs-source-dirs:  src
-  build-depends:   base
+  build-depends:   base, Test.QuickCheck
