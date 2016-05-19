@@ -290,9 +290,6 @@ newtype NonEmpty a = NonEmpty (a, [a])
 -- help: todo: understand why there is no identity value in design of NonEmpty.
 
 
--- TODO TODO TODO start from page 589 semigroups once you install
--- the semigroups package
-
 -- you need to have `semigroups` installed
 {-
 Prelude> import Data.List.NonEmpty as N
