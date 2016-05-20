@@ -39,5 +39,6 @@ type FourAssoc = Four String Ordering String Ordering ->
                  Four String Ordering String Ordering -> Bool
 
 
+
 main :: IO()
 main = quickCheck (semigroupAssoc :: FourAssoc)

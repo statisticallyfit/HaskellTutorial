@@ -2,8 +2,6 @@ import Data.Semigroup (Semigroup, (<>))
 import Data.Monoid (Monoid)
 import Test.QuickCheck (Arbitrary, arbitrary, quickCheck)
 
--- Given a data type implement the Monoid instance.
--- Add Monoid constraints to type variables where needed
 
 semigroupAssoc :: (Eq m, Semigroup m) => m -> m -> m -> Bool
 semigroupAssoc a b c = (a <> (b <> c)) == ((a <> b) <> c)
@@ -23,8 +21,7 @@ data Two a b = Two a b
 instance (Semigroup a, Semigroup b) => Semigroup (Two a b) where
     (Two a b) <> (Two c d) = Two (a <> c) (b <> d) -- help meaning?
 
-instance (Semigroup a, Monoid a, Semigroup b, Monoid b) =>
-    Monoid (Two a b) where
+instance (Semigroup a, Monoid a, Semigroup b, Monoid b) => Monoid (Two a b) where
     mempty = Two mempty mempty -- for both a and b mempties
     mappend = (<>)
 

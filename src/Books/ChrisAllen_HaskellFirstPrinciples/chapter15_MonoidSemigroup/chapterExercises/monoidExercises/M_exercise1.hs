@@ -21,7 +21,7 @@ data Trivial = Trivial
 
 
 instance Semigroup Trivial where
-    (<>) = Trivial
+    _ <> _ = Trivial
 
 instance Monoid Trivial where
     mempty = Trivial
