@@ -16,10 +16,15 @@ data Or a b = Fst a | Snd b
 
 
 instance (Semigroup a, Semigroup b) => Semigroup (Or a b) where
+
+{-
     (Snd a) <> _ = Snd a
     _ <> (Snd a) = Snd a
     _ <> b       = b -- help what does this mean, result in?
+-}
 
+--orMappend :: Or a b -> Or a b -> Or a b
+--orMappend = (<>)
 
 instance (Arbitrary a, Arbitrary b) => Arbitrary (Or a b) where
     arbitrary = do
@@ -28,7 +33,8 @@ instance (Arbitrary a, Arbitrary b) => Arbitrary (Or a b) where
         elements [(Fst a), (Snd b)] -- help meaning?
 
 
-type OrAssoc = Or String Ordering -> Or String Ordering -> Or String Ordering -> Bool
+type OrAssoc = Or String Ordering -> Or String Ordering
+            -> Or String Ordering -> Bool
 -- help why these not other types?
 
 
@@ -64,5 +70,11 @@ Fst "$\168/\ACK\246\SYN\130\150"
 
 
 main :: IO()
-main =
+main = do
     quickCheck (semigroupAssoc :: OrAssoc)
+    {-putStrLn ((Fst 1) <> (Snd 2))
+    putStrLn ((Fst 1) <> (Fst 2))
+    putStrLn ((Fst 3) <> (Fst 1))
+    putStrLn ((Snd 1) <> (Fst 2))
+    putStrLn ((Snd 1) <> (Snd 2))
+-} -- help why don't these work?
