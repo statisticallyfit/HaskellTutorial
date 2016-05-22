@@ -149,22 +149,76 @@ main = do
 
 
 
-data CountingBad a = Heisenberg Int a deriving (Eq, Show)
+data CountingBad a = HeisenbergB Int a deriving (Eq, Show)
+data CountingGood a = HeisenbergG Int a deriving (Eq, Show)
 
 -- NOTE this is NOT law abiding (composition)
 instance Functor CountingBad where
-    fmap f (Heisenberg n a) = Heisenberg (n+1) (f a)
+    fmap f (HeisenbergB n a) = HeisenbergB (n+1) (f a)
 
 
 -- NOTE this IS law abiding (composition)
+instance Functor CountingGood where
+    fmap f (HeisenbergG n a) = HeisenbergG (n) (f a) -- NOTE: just leave alone what is
+    -- not the final type argument in our f in Functor.
 
 
-
-
-oneWhoKnocks = Heisenberg 0 "Uncle"
+oneWhoKnocks = HeisenbergG 0 "Uncle"  -- doesn't matter which heisenberg is used.
 f = (++ " Jesse")
 g = (++ " lol")
 
+
+{-uncover
 main = do
     print $ fmap (f . g) oneWhoKnocks
-    print $ fmap f . fmap g $ oneWhoKnocks
+    print $ fmap f . fmap g $ oneWhoKnocks -- note: see? supposed to be the same.
+    ------------------------------------------
+-}
+
+
+
+
+
+
+
+
+
+-- 16.7 COMMONLY USED FUNCTORS
+
+replaceWithP = const 'p'
+-- note: const :: a -> b -> a so it takes another argument to yield an 'a'.
+
+tossEmOne = fmap (+1) negate
+
+{-uncover
+main = do
+    -- data Maybe a = Nothing | Just a
+    print $ fmap replaceWithP (Just 10)
+    print $ fmap replaceWithP Nothing
+    -- data [] a = [] | a : [a]     help what does this mean?
+    print $ fmap replaceWithP [1,2,3,4,5]
+    print $ fmap replaceWithP "Ave"
+    print $ fmap (+1) []
+    print $ fmap replaceWithP []
+    -- data (,) a b = (,) a b    note the tuple
+    print $ fmap replaceWithP (10, 20) -- help why does it only do the last component?
+    print $ fmap replaceWithP (10, "woo")
+    -- now the instance for functions
+    print $ tossEmOne 10
+    print $ tossEmOne (-10)
+-}
+
+
+
+
+-- NOTE: functors are stacked!
+lms = [Just "Ave", Nothing, Just "woohoo"]
+--replaceWithP = const 'p'
+
+
+main = do
+    print $ replaceWithP lms
+    print $ fmap replaceWithP lms
+    -------------------------------------
+
+
