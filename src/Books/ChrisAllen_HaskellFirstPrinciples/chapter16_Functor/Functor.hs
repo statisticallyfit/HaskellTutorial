@@ -212,13 +212,33 @@ main = do
 
 
 -- NOTE: functors are stacked!
-lms = [Just "Ave", Nothing, Just "woohoo"]
+lms = [Just "Ave", Nothing, Just "woohoo"]  -- type equals List (Maybe (String))
 --replaceWithP = const 'p'
 
+{-uncover
+main = do
+    -- equals List (Maybe (String)) -> Char
+    print $ replaceWithP lms
+    -- equals List ( FMAPARG (Maybe String)) -> List Char
+    print $ fmap replaceWithP lms
+    -- equals List ( Maybe (FMAPARG String)) -> List (Maybe Char)
+    -- equals List ( Maybe (FMAPARG (List Char))) -> List (Maybe Char)
+    print $ (fmap . fmap) replaceWithP lms
+    -- equals List (Maybe ( List (FMAP ARG Char))) -> List (Maybe List (Char))
+    print $ (fmap . fmap . fmap) replaceWithP lms
+-}
+
+
+
+
+--lmls ~ List (Maybe (List String))
+ha = Just ["Ha", "Ha"]
+lmls = [ha, Nothing, Just[]]
 
 main = do
-    print $ replaceWithP lms
-    print $ fmap replaceWithP lms
-    -------------------------------------
+    print $ fmap replaceWithP lmls
+    print $ (fmap . fmap) replaceWithP lmls
+    print $ (fmap . fmap . fmap) replaceWithP lmls
+    print $ (fmap . fmap . fmap . fmap) replaceWithP lmls
 
 
