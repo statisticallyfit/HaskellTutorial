@@ -234,11 +234,28 @@ main = do
 --lmls ~ List (Maybe (List String))
 ha = Just ["Ha", "Ha"]
 lmls = [ha, Nothing, Just[]]
-
+{-uncover
 main = do
     print $ fmap replaceWithP lmls
     print $ (fmap . fmap) replaceWithP lmls
     print $ (fmap . fmap . fmap) replaceWithP lmls
     print $ (fmap . fmap . fmap . fmap) replaceWithP lmls
+-}
 
 
+
+
+
+
+-- 16.8 Mapping over structure to transform the unapplied type arg ------------
+data Two a b = Two a b deriving (Eq, Show)
+
+data Or a b = First a | Second b deriving (Eq, Show)
+
+
+instance Functor Two where
+    fmap f (Two a b) = Two $ (f a) (f b)
+
+
+main = do
+    print ""
