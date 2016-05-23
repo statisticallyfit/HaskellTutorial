@@ -248,14 +248,50 @@ main = do
 
 
 -- 16.8 Mapping over structure to transform the unapplied type arg ------------
+
+{-
+NOTE when you include more args, you reduce kindedness of the type.
+So that is why we include args for Two and Or in Functor instances, to
+fit the Functor * -> * kind
+HELP what does it mean that functor has a kind? Where does this fit?
+
+Prelude> :k Either
+Either :: * -> * -> *
+Prelude> :k Either Integer
+Either Integer :: * -> *
+Prelude> :k Either Integer String
+Either Integer String :: *
+-}
+
+
 data Two a b = Two a b deriving (Eq, Show)
 
 data Or a b = First a | Second b deriving (Eq, Show)
 
 
-instance Functor Two where
-    fmap f (Two a b) = Two $ (f a) (f b)
+-- note we must leave the argument 'a' alone now that it has been put in
+-- the type of fmap
+{-
+class Functor f where
+    fmap :: Functor => (a -> b) -> f a -> f b
 
+    so here f ~ (Two a)    note so we can't touch 'a' now.
+
+    key can also have b in the title, letter doesn't matter
+    instance Functor (Two b) where
+        fmap f (Two a b) = Two a (f b)
+
+    key letter doesn't matter
+    instance Functor (Or b) where
+        fmap _ (First a) = First a
+        fmap f (Second b) = Second (f b)
+-}
+instance Functor (Two a) where
+    fmap f (Two a b) = Two a (f b)
+
+instance Functor (Or a) where
+    fmap _ (First a) = First a
+    fmap f (Second b) = Second (f b)
 
 main = do
     print ""
