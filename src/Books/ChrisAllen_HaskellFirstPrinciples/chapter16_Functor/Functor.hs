@@ -1,4 +1,6 @@
-import Data.Either
+import Test.QuickCheck
+import Test.QuickCheck.Function -- for Fun type in functorCompose'
+
 {-
 NOTE
 class Functor f where
@@ -293,5 +295,406 @@ instance Functor (Or a) where
     fmap _ (First a) = First a
     fmap f (Second b) = Second (f b)
 
+
+
+
+
+
+
+
+
+
+
+-- 16.9 QuickCheck Functor instances
+
+
+functorIdentity :: (Functor f, Eq (f a)) => f a -> Bool
+functorIdentity f = fmap id f == f
+
+functorCompose :: (Eq (f c), Functor f) => (a -> b) -> (b -> c) -> f a -> Bool
+functorCompose f g x = (fmap g (fmap f x)) == (fmap (g . f) x)
+
+
+functorCompose' :: (Eq (f c), Functor f) => f a -> Fun a b -> Fun b c -> Bool
+functorCompose' x (Fun _ f) (Fun _ g) = (fmap (g . f) x) == (fmap g . fmap f $ x)
+
+
+li x = functorCompose (+1) (*2) (x :: [Int])
+
+
+type IntToInt = Fun Int Int
+type IntFC = [Int] -> IntToInt -> IntToInt -> Bool
+
+{- NOTE (pag 629 pdf)
+There are a couple things going on here. One is that we needed
+to import a new module from QuickCheck. Another is that we’re
+pattern matching on the Fun value that we’re asking QuickCheck to
+generate. The underlying Fun type is essentially a product of the
+weird function type and an ordinary Haskell function generated from
+the weirdo. The weirdo QuickCheck-speciﬁc concrete function is
+a function represented by a datatype which can be inspected and
+recursed. We only want the second part, the ordinary Haskell function,
+so we’re pattern-matching that one out. HELP what pattern matching out?
+-}
+
+{-uncover
 main = do
-    print ""
+    quickCheck $ \x -> functorIdentity (x :: [Int])
+    quickCheck li
+    quickCheck (functorCompose' :: IntFC) -- HELP why  f a equals [Int]???
+-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- 16.11 MAYBE and EITHER FUNCTORS -----------------------------------------------
+
+-- MAYBE -------------------------------------------------------------------------
+
+incIfJust :: Num a => Maybe a -> Maybe a
+incIfJust (Just n) = Just $ n + 1
+incIfJust Nothing = Nothing
+
+showIfJust :: Show a => Maybe a -> Maybe String
+showIfJust (Just s) = Just $ show s
+showIfJust Nothing = Nothing
+
+
+
+-- more cleaner versions
+incMaybe :: Num a => Maybe a -> Maybe a
+incMaybe m = fmap (+1) m
+
+showMaybe :: Show a => Maybe a -> Maybe String
+showMaybe s = fmap show s
+
+
+-- more abstract
+incMaybe' :: Num a => Maybe a -> Maybe a
+incMaybe' = fmap (+1)
+
+showMaybe' :: Show a => Maybe a -> Maybe String
+showMaybe' = fmap show
+
+
+-- lifted versions
+-- figured out by typing: :t fmap (+1) gives (Functor f, Num b) => ....
+liftedIncM :: (Functor f, Num b) => f b -> f b
+liftedIncM = fmap (+1)
+
+liftedShowM :: (Functor f, Show a) => f a -> f String
+liftedShowM = fmap show
+
+
+{-uncover
+main = do
+    print $ incMaybe (Just 1); print $ incIfJust (Just 1)
+    print $ showMaybe (Just 9001); print $ showIfJust (Just 9001)
+    --print $ showMaybe Nothing  -- HELP why error when prints??
+    --fmap incMaybe Nothing
+
+    --print $ liftedIncM (Just 1) -- HELP why error?
+    --print $ liftedIncM Nothing
+    --print $ liftedShowM (Just 1)
+    --print $ liftedShowM Nothing
+    -- liftedIncM [1..5]
+-}
+
+
+
+
+
+
+-- EITHER -------------------------------------------------------------------------
+
+-- HELP what is the 'e' and 'a' mean? Is 'n' the 'a'?
+incIfRight :: Num a => Either e a -> Either e a
+incIfRight (Right n) = Right $ n + 1
+incIfRight (Left e) = Left e
+
+showIfRight :: Show a => Either e a -> Either e String
+showIfRight (Right s) = Right $ show s
+showIfRight (Left e) = Left e
+
+
+
+-- clearer
+incEither :: Num a => Either e a -> Either e a
+incEither m = fmap (+1) m
+
+showEither :: Show a => Either e a -> Either e String
+showEither s = fmap show s
+
+
+-- eta contract
+incEither' :: Num a => Either e a -> Either e a
+incEither' = fmap (+1)
+
+showEither' :: Show a => Either e a -> Either e String
+showEither' = fmap show
+
+
+-- f ~ Either e
+liftedIncE :: (Functor f, Num b) => f b -> f b
+liftedIncE = fmap (+1)
+
+liftedShowE :: (Functor f, Show a) => f a -> f String
+liftedShowE = fmap show
+
+
+--uncover
+--main = do
+    -- HELP how to print without errors?
+    --(fmap . print) (incEither (Right 1)) --; print $ incEither (Left 1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- 16.12 SURPRISING FUNCTOR -------------------------------------------------------
+
+{-
+note
+The constant data type has a phanton type (b), meaning it has no corresponding
+witness at the value/term level. But it does exist since
+:k Constant
+Constant :: * -> * -> *
+-}
+newtype Constant a b = Constant {getConstant :: a} deriving (Eq, Show)
+
+
+instance Functor (Constant a) where
+    fmap _ (Constant b) = Constant b
+
+{-
+functorIdentity :: (Functor f, Eq (f a)) => f a -> Bool
+functorIdentity f = fmap id f == f
+
+functorCompose :: (Eq (f c), Functor f) => f a -> Fun a b -> Fun b c -> Bool
+functorCompose x (Fun _ f) (Fun _ g) = (fmap (g . f) x) == (fmap g . fmap f $ x)
+
+type IntToInt = Fun Int Int
+type IntFC = [Int] -> IntToInt -> IntToInt -> Bool
+-}
+{--uncover
+main = do
+    print $ Constant 2
+    putStr "#1: "; print $ (const 2) (Constant 3)
+    putStr "#2: "; print $ const 2 (getConstant (Constant 3))
+    putStr "#3: "; print $ fmap (const 2) (Constant 3)
+    putStr "#3a "; print $ fmap (const "hi") (Just 4)
+    putStr "#4: "; print $ getConstant $ fmap (const 2) (Constant 3)
+    putStr "#5: "; print $ getConstant $ fmap (const "blah") (Constant 3)
+-}
+-- HELP why does this work the way it does?
+-- understand better:
+{-
+When you fmap the const function over the Constant type, the ﬁrst
+argument to const is never used because the partially applied const is
+itself never used. The ﬁrst type argument to Constant’s type constructor
+is in the part of the structure that Functor skips over. The second
+argument to the Constant type constructor is the phantom type variable
+b which has no value or term-level witness in the datatype. Since
+there are no values of the type the Functor is supposed to be mapping,
+we have nothing we’re allowed to apply the fmap’d function to, so we
+never use the const expressions.
+-}
+
+-- NOTE: checking if Constant adheres to Functor laws
+{-
+separate = fmap (const 3) . fmap (const 5)
+fused = fmap ((const 3) . (const 5))
+
+main = do
+    -- identity
+    print $ getConstant (id (Constant 3))  -- HELP why do both work? How?
+    print $ getConstant (fmap id (Constant 3))
+    -- composition
+    print $ ((const 3) . (const 5)) 10
+    print $ ((const 5) . (const 3)) 10
+    print $ getConstant $ separate $ (Constant "WOOHOO")
+    print $ getConstant $ fused $ (Constant "WOOHOO")
+-}
+
+
+
+
+
+
+
+
+
+
+-- 16.13 MORE STRUCTURE MORE FUNCTORS ---------------------------------------------
+
+data Wrap f a = Wrap (f a) deriving (Eq, Show)
+
+instance Functor f => Functor (Wrap f) where
+    fmap f (Wrap fa) = Wrap (fmap f fa)
+    -- HELP understand better
+{-uncover
+main = do
+    print $ fmap (+1) (Wrap (Just 1))
+    print $ fmap (+1) (Wrap [1,2,3])
+-}
+
+
+
+
+
+
+
+
+-- 16.14 IO FUNCTOR ---------------------------------------------------------------
+
+--getLine :: IO String
+-- read :: Read a => String -> a
+
+getInt :: IO Int
+getInt = fmap read getLine -- note: fmap lifts read over the IO type
+
+{-uncover
+main = do
+    --print $ fmap (const ()) getInt            -- HELP understand better
+    print $ (const ()) getInt                   -- note: prints the () from const
+    --print $ fmap (+1) getInt                  -- HELP errors again
+    --print $ fmap (++ " and me too!") getLine
+-}
+
+
+
+
+meTooIsm :: IO String
+meTooIsm = do
+    input <- getLine
+    return (input ++ " and me too!")
+
+bumpIt :: IO Int
+bumpIt = do
+    intVal <- getInt
+    return (intVal + 1)
+
+{-uncover
+main = do
+    meTooIsm
+    putStrLn ""
+    --bumpIt -- help why doesn't this work to have them both in the same main?
+-}
+
+
+
+
+
+
+
+
+
+
+
+
+-- 16.15 NATURAL TRANSFORMATIONS -------------------------------------------------
+-- note means leaving contents unchanged and changing the structure
+
+type Nat f g = forall a . f a -> g a -- like opposite of functor
+
+-- NOTE: in prelude ghci, do :
+-- :set -XRank2Types  so the above notation works
+
+-- This'll work
+maybeToList :: Nat Maybe []
+maybeToList Nothing = []
+maybeToList (Just a) = [a]
+-- This will not work, not allowed.
+degenerateMtl :: Nat Maybe []
+degenerateMtl Nothing = []
+degenerateMtl (Just a) = [a+1]
+
+
+
+
+-- Bad because a is in the type
+type BadNat f g a = f a -> g a
+
+-- This'll work
+maybeToList' :: BadNat Maybe [] a
+maybeToList' Nothing = []
+maybeToList' (Just a) = [a]
+-- But this will too if we tell it
+-- 'a' is Num a => a
+degenerateMtl' :: Num a => BadNat Maybe [] a
+degenerateMtl' Nothing = []
+degenerateMtl' (Just a) = [a+1]
+
+-- note: bad that it works since we're only supposed to change the structure
+-- and not the internal content!
+
+
+
+
+
+
+
+
+
+
+
+
+-- 16.16 UNIQUE FUNCTORS ---------------------------------------------------------
+-- note functors are unique for a given data type
+ -- page 642 pdf HELP understand this section better
+
+data Tuple a b = Tuple a b deriving (Eq, Show)
+
+
+-- note impossible in haskell
+{-
+instance Functor (Tuple ? b) where
+    fmap f (Tuple a b) = Tuple (f a) b
+-}
+
+-- note two ways to address this - 1) flip args to type constructor, 2) make new
+-- datatype using Flip newtype
+
+
+newtype Flip f a b = Flip (f b a) deriving (Eq, Show)
+
+{- note
+:k (Flip Tuple)
+(Flip Tuple) :: * -> * -> *
+so take out the arg 'a' :
+-}
+-- HELP says illegal declaration
+--instance Functor (Flip Tuple a) where
+--    fmap f (Flip (Tuple a b)) = Flip $ Tuple (f a) b
+
+
+--main = print $ fmap (+1) (Flip (Tuple 1 "blah"))
+
+
+
+
+
+
