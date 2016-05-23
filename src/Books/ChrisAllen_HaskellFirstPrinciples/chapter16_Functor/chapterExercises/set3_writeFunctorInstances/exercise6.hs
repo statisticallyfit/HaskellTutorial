@@ -13,15 +13,16 @@ functorCompose x (Fun _ f) (Fun _ g) = (fmap (g . f) x) == (fmap g . fmap f $ x)
 
 
 
+{-
+:k Parappa
+Parappa :: (* -> *) -> (* -> *) -> * -> *
+-}
 
+data Parappa f g a = DaWrappa (f a) (g a) deriving (Eq, Show)
 
-
-newtype Flip f a b = Flip (f b a) deriving (Eq, Show)
-newtype K a b = K a deriving (Eq, Show)
-
-instance Functor (Flip K a) where
-    fmap f (Flip (K a)) = Flip (K (f a)) -- applying to b from K HELP
-
+instance (Functor f, Functor g) => Functor (Parappa f g) where
+    fmap f (DaWrappa fa ga) = DaWrappa (fmap f fa) (fmap f ga)
+    -- HELP why doesn't g get applied?
 
 
 
@@ -34,3 +35,9 @@ main = do
     quickCheck $ \x -> functorIdentity (x :: [Int])
     quickCheck (functorIdentity :: [Int] -> Bool )
     quickCheck (functorCompose :: IntFC)
+
+    {-
+    NOTE testing
+    fmap (*2) (DaWrappa [1..3] [2..4])
+    DaWrappa [2,4,6] [4,6,8]
+    -}

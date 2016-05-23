@@ -15,7 +15,7 @@ functorCompose x (Fun _ f) (Fun _ g) = (fmap (g . f) x) == (fmap g . fmap f $ x)
 
 
 
-data Quant a b = Finance | Desk a | Bloor b
+data Quant a b = Finance | Desk a | Bloor b deriving (Eq, Show)
 
 instance Functor (Quant q) where
     fmap _ Finance = Finance
@@ -32,3 +32,13 @@ main = do
     quickCheck $ \x -> functorIdentity (x :: [Int])
     quickCheck (functorIdentity :: [Int] -> Bool )
     quickCheck (functorCompose :: IntFC)
+    putStrLn ""
+
+    {- NOTE HELP why doesn't work with print?
+    *Main> fmap (*3) Finance
+    Finance
+    *Main> fmap (*3) (Desk 3)
+    Desk 3
+    *Main> fmap (*3) (Bloor 4)
+    Bloor 12
+    -}
