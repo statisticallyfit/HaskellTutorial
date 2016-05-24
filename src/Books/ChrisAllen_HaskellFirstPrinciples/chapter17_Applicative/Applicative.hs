@@ -297,7 +297,7 @@ main = do
 
 
 
--- IDENTITY
+-- IDENTITY -------------------------------------------------------------------------
 
 {- NOTE
 -- f ~ Identity
@@ -316,14 +316,127 @@ instance Functor Identity where
     fmap f (Identity a) = Identity (f a)
 
 instance Applicative Identity where
-    pure a = Identity a
+    pure x = Identity x -- note or could just write pure = Identity
     (Identity f) <*> (Identity a) = Identity (f a)
 
-
+{-uncover
 main = do
     print $ const <$> [1,2,3] <*> [9,9]
     print $ const <$> Identity [1,2,3] <*> Identity [9,9]
+-}
+
+
+{-
+NOTE translation:
+
+  const <$> [1,2,3] <*> [9,9,9,9]
+= [const 1 9, const 1 9, const 1 9, const 1 9, const 2 9 ...] <*> [9,9,9,9]
+= [1,1,1,1,  2,2,2,2,  3,3,3,3]
+
+help is this what it looks like? Or are there lists of lists:
+[[const 1 9, const 1 9, const 1 9, const 1 9], [const 2 9...]...]?
+-}
 
 
 
 
+
+
+
+
+-- CONSTANT ----------------------------------------------------------------------
+
+{-
+NOTE
+
+-- f ~ Constant e
+
+(<*>) :: f (a -> b) -> f a -> f b
+(<*>) :: Constant e (a -> b) -> Constant e a -> Constant e b
+
+pure :: a -> f a
+pure :: a -> Constant e a
+-}
+
+
+newtype Constant a b = Constant {getConstant :: a} deriving (Eq, Ord, Show)
+
+instance Functor (Constant a) where
+    -- note definition of Constant - throwing away function application
+    fmap f (Constant b) = Constant b
+
+
+instance Monoid a => Applicative (Constant a) where
+    --pure x = Constant x -- HELP why wrong?
+    pure _ = Constant mempty
+    (Constant x) <*> (Constant y) = Constant (x <> y)
+    -- HELP where is function aplication being thrown away? Why not like
+    -- the Identity instance?
+
+
+{-uncover
+main = do
+    print $ Constant (Sum 1) <*> Constant (Sum 2)
+    --print $ Constant undefined <*> Constant (Sum 2)
+    --print $ Constant (Sum 2) <*> Constant undefined
+    print $ (pure 1 :: Constant String Int)
+-}
+
+    {-
+    NOTE HELP figure out this error
+    pure 1 :: Constant Int String
+    pure 1 :: Constant Int Int
+    -}
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- MAYBE APPLICATIVE --------------------------------------------------------------
+
+{-
+NOTE
+-- f ~ Maybe
+
+(<*>) :: f (a -> b) -> f a -> f b
+(<*>) :: Maybe (a -> b) -> Maybe a -> Maybe b
+
+pure :: a -> f a
+pure :: a -> Maybe a
+-}
+
+
+validateLength :: Int -> String -> Maybe String
+validateLength maxLen s =
+    if (length s) > maxLen
+    then Nothing
+    else Just s
+
+newtype Name = Name String deriving (Eq, Show)
+newtype Address = Address String deriving (Eq, Show)
+
+mkName :: String -> Maybe Name
+mkName s = fmap Name $ validateLength 25 s
+
+mkAddress :: String -> Maybe Address
+mkAddress a = fmap Address $ validateLength 100 a
+
+
+data Person = Person Name Address deriving (Eq, Show)
+
+mkPerson :: String -> String -> Maybe Person
+mkPerson n a =
+    case mkName n of
+        Nothing -> Nothing
+        Just n' ->
+            case mkAddress a of
+                Nothing -> Nothing
+                Just a' -> Just $ Person n' a' 

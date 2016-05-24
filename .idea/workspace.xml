@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="eb0702c0-b7c3-41d6-bca5-72cdf359dc76" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter17_Applicative/ex17.5_applicativeInUse.hs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter17_Applicative/Applicative.hs" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter17_Applicative/Applicative.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
@@ -30,8 +28,8 @@
       <file leaf-file-name="Applicative.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter17_Applicative/Applicative.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.631664">
-              <caret line="323" column="13" selection-start-line="323" selection-start-column="13" selection-end-line="323" selection-end-column="13" />
+            <state vertical-scroll-proportion="0.907916">
+              <caret line="441" column="47" selection-start-line="441" selection-start-column="47" selection-end-line="441" selection-end-column="47" />
               <folding />
             </state>
           </provider>
@@ -798,12 +796,12 @@
       <workItem from="1463809153671" duration="3419000" />
       <workItem from="1463897325454" duration="8693000" />
       <workItem from="1463981840914" duration="27933000" />
-      <workItem from="1464066164419" duration="9271000" />
+      <workItem from="1464066164419" duration="13439000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="130227000" />
+    <option name="totallyTimeSpent" value="134395000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="806" height="783" extended-state="0" />
@@ -1203,8 +1201,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter17_Applicative/Applicative.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.631664">
-          <caret line="323" column="13" selection-start-line="323" selection-start-column="13" selection-end-line="323" selection-end-column="13" />
+        <state vertical-scroll-proportion="0.907916">
+          <caret line="441" column="47" selection-start-line="441" selection-start-column="47" selection-end-line="441" selection-end-column="47" />
           <folding />
         </state>
       </provider>
