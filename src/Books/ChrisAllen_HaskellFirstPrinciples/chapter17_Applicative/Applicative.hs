@@ -522,7 +522,7 @@ Just f <*> Just a = Just (f a)
 u = Just ((*8))
 v = Just ((+3))
 w = Just 10
-
+{-uncover
 main = do
     -- note IDENTITY LAW: pure id <*> v = v
     print $ pure id <*> [1..5] -- same as:
@@ -547,7 +547,7 @@ main = do
     print $ pure ($ 1) <*> [(+1), (*3)]
     print $ Just (+3) <*> pure 1
     print $ pure ($ 1) <*> Just (+3)
-
+-}
     {-
     NOTE ABOUT INTERCHANGE LAW:
     u = always a structure containing a function
@@ -564,3 +564,27 @@ main = do
     = Just 4
 
     -}
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- 17.8 ZIPLIST MONOID -------------------------------------------------------------
+
+{- NOTE
+[1, 2, 3] <> [4, 5, 6]
+-- changes to
+[
+1 <> 4
+, 2 <> 5
+, 3 <> 6
+]
+-}
