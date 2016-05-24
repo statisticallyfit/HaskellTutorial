@@ -588,3 +588,7 @@ main = do
 , 3 <> 6
 ]
 -}
+
+-- ZERO vs IDENTITY ------------------------------------------------------------------
+-- HELP how to get identity for ZipList?
+-- Sum 1 `mappend` ??? -> Sum 1
