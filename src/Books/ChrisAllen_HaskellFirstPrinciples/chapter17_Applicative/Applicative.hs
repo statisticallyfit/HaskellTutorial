@@ -196,7 +196,7 @@ this Monoid:
 
 {-
 
-note LIST APPLICATIVE -------------------------------------------------------------
+LIST APPLICATIVE --------------------------------------------------------------------
 
 -- f ~ []
 (<*>) :: f (a -> b) -> f a -> f b
@@ -205,6 +205,8 @@ note LIST APPLICATIVE ----------------------------------------------------------
 -- more syntactically typical
 (<*>) :: [(a -> b)] -> [a] -> [b]
 
+-- equals means a function containing functions mapped over content to return
+-- changed content wrapped in the outside function.
 
 pure :: a -> f a
 pure :: a -> [ ] a
@@ -255,3 +257,73 @@ example
 = liftA2 max [1,2] [1,4]
 = [1,4,2,4]
 -}
+
+
+
+-- example
+
+f x = lookup x [(3, "hello"), (4, "julie"), (5, "jbai")]
+g y = lookup y [(7, "sup?"), (8, "chris"), (9, "aloha")]
+
+h z = lookup z [(2,3), (5,6), (7,8)]
+m x = lookup x [(4, 10), (8, 13), (1, 9001)]
+
+{-uncover
+main = do
+    print $ f 3
+    print $ g 8
+    print $ (++ ) <$> f 3 <*> g 7 -- HELP why can't add space to attachment symbol?
+    print $ (+) <$> h 5 <*> m 1
+    print $ (+) <$> h 5 <*> m 6
+    ----------------------------------------- with liftA2
+    print $ liftA2 (++) (g 9) (f 4) -- note fmap length $ liftA2 (++) (g 9) (f 4)
+    print $ liftA2 (^) (h 5) (m 4)
+    print $ liftA2 (*) (h 5) (m 4)
+    print $ liftA2 (*) (h 1) (m 1)
+    ----------------------------------------- IO
+    putStrLn "Get two for (++) "
+    (++) <$> getLine <*> getLine
+    putStrLn "Get two for (,) "
+    (,) <$> getLine <*> getLine
+-}
+
+
+
+
+
+
+
+
+
+
+
+-- IDENTITY
+
+{- NOTE
+-- f ~ Identity
+-- Applicative f =>
+(<*>) :: f (a -> b) -> f a -> f b
+(<*>) :: Identity (a -> b) -> Identity a -> Identity b
+
+pure :: a -> f a
+pure :: a -> Identity a
+-}
+
+-- Identity Exercise 17.5
+newtype Identity a = Identity a deriving (Eq, Ord, Show)
+
+instance Functor Identity where
+    fmap f (Identity a) = Identity (f a)
+
+instance Applicative Identity where
+    pure a = Identity a
+    (Identity f) <*> (Identity a) = Identity (f a)
+
+
+main = do
+    print $ const <$> [1,2,3] <*> [9,9]
+    print $ const <$> Identity [1,2,3] <*> Identity [9,9]
+
+
+
+
