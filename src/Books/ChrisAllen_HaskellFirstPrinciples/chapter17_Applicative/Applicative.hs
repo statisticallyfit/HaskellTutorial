@@ -423,6 +423,15 @@ validateLength maxLen s =
 newtype Name = Name String deriving (Eq, Show)
 newtype Address = Address String deriving (Eq, Show)
 
+{-
+NOTE
+(a -> b) -> f a -> f b
+:t Name :: (String -> Name)
+:t Just "babe" :: Maybe String
+
+(a -> b) -> f a -> f b
+(String -> Name) -> Maybe String -> Maybe Name
+-}
 mkName :: String -> Maybe Name
 mkName s = fmap Name $ validateLength 25 s
 
@@ -433,10 +442,88 @@ mkAddress a = fmap Address $ validateLength 100 a
 data Person = Person Name Address deriving (Eq, Show)
 
 mkPerson :: String -> String -> Maybe Person
-mkPerson n a =
+mkPerson n a = Person <$> mkName n <*> mkAddress a
+{-mkPerson n a =
     case mkName n of
         Nothing -> Nothing
         Just n' ->
             case mkAddress a of
                 Nothing -> Nothing
-                Just a' -> Just $ Person n' a' 
+                Just a' -> Just $ Person n' a'
+-}
+
+{-
+NOTE EXPLANATION
+
+Person <$> Just (Name "babe") <*> Just (Address "farm")
+
+:t Person :: Name -> Address -> Person
+:t (Just (Name "babe")) :: Maybe Name
+
+(a -> b) -> f a -> f b
+
+(Name -> (Address -> Person)) -> Maybe Name -> Maybe (Address -> Person)
+   a  ->           b               f      a ->      f       b
+
+
+note the fmap part: Person <$> mkName
+
+fmap    f   (Just      a)        = Just (f         a)
+fmap Person (Just (Name "babe")) = Just (Person (Name "babe"))
+f ~ Person
+a ~ Name "babe"
+
+
+note the applicative part: <*> Just (Address "farm")
+
+Person (Name "babe") is still awaiting the address function argument, so it is a
+partially applied function.
+
+:t Just (Person (Name "babe")) :: Maybe (Address -> Person)
+:t Just (Address "farm") :: Maybe Address
+
+-- We want to apply the partiall applied Person "babe" inside the Just to the farm
+inside the Just
+
+f (a -> b) -> f a -> f b
+
+Maybe (Address -> Person) -> Maybe Address -> Maybe Person
+f     (   a    ->    b  ) ->   f     a     ->   f     b
+ f ~ Maybe
+ a ~ Address
+ b ~ Person
+
+
+
+THis is the applicative maybe instance case we use:
+
+Just f <*> Just a = Just (f a)
+
+= Just (Person (Name "babe")) <*> Just  (Address "farm")
+= Just (Person (Name "babe") (Address "farm"))
+-} -- note look at cow example
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- 17.6 APPLICATIVE LAWS ----------------------------------------------------------
+
+-- note LAW: pure id <*> v = v
+main = do
+    print $ pure id <*> [1..5] -- same as:
+    print $ id <$> [1..5]
+    print $ pure id <*> Just "Hello Applicative"
+    print $ pure id <*> Nothing
+    print $ pure id <*> Left "Error'ish"
+    print $ pure id <*> Right 8001
