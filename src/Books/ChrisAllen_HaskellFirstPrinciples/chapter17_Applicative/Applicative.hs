@@ -519,11 +519,48 @@ Just f <*> Just a = Just (f a)
 
 -- 17.6 APPLICATIVE LAWS ----------------------------------------------------------
 
--- note LAW: pure id <*> v = v
+u = Just ((*8))
+v = Just ((+3))
+w = Just 10
+
 main = do
+    -- note IDENTITY LAW: pure id <*> v = v
     print $ pure id <*> [1..5] -- same as:
     print $ id <$> [1..5]
     print $ pure id <*> Just "Hello Applicative"
-    print $ pure id <*> Nothing
-    print $ pure id <*> Left "Error'ish"
-    print $ pure id <*> Right 8001
+    --print $ pure id <*> Nothing -- HELP find out why throws error
+    --print $ pure id <*> Left "Error'ish"
+    --print $ pure id <*> Right 8001
+
+    -- note COMPOSITION LAW: pure (.) <*> u <*> v <*> w = u <*> (v <*> w)
+    print $ pure (.) <*> u <*> v <*> w
+    print $ (.) <$> u <*> v <*> w
+
+    -- note HOMOMORPHISM LAW: structure preservation
+    -- pure f <*> pure x
+    print $ pure (+1) <*> (pure 1 :: Maybe Int)
+    print $ pure (+1) <*> (pure 1 :: [Int])
+    --print $ pure (+1) <*> (pure 1 :: (Either a Int)) -- HElp why error?
+
+    -- note INTERCHANGE LAW: u <*> pure y = pure ($y) <*> u
+    print $ [(+1), (*3)] <*> pure 1
+    print $ pure ($ 1) <*> [(+1), (*3)]
+    print $ Just (+3) <*> pure 1
+    print $ pure ($ 1) <*> Just (+3)
+
+    {-
+    NOTE ABOUT INTERCHANGE LAW:
+    u = always a structure containing a function
+    y = just a simple arg
+
+    By section the $ function with the y we create an environment where y is there
+    awaiting a function to apply to it:
+
+    pure ($    y) <*>  u
+      f  (a -> b)     f a
+    pure ($    2) <*>  Just (+2)
+    = Just ((+2) $ 2)
+       f     a  -> b ->
+    = Just 4
+
+    -}
