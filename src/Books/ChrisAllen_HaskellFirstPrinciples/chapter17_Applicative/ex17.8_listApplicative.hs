@@ -38,6 +38,6 @@ instance Eq a => EqProp (List a) where (=-=) = eq
 
 
 main = do
-    quickBatch $ applicative [("b", "w", 1)]
-    quickBatch $ applicative (Just ("b", "w", 1))
-    quickBatch $ applicative (Cons ("b", "w", 1) Nil )
+    quickBatch $ applicative ( [("b", "w", 1)] :: [(String, String, Int)])
+    quickBatch $ applicative ((Just ("b", "w", 1)) :: (Maybe (String, String, Int)))
+    quickBatch $ applicative ((Cons ("b", "w", 1) Nil) :: (List (String, String, Int)))
