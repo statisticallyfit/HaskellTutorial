@@ -44,7 +44,7 @@ instance Functor List where
     fmap f (Cons x xs) = Cons (f x) (fmap f xs)
 
 instance Applicative List where
-    pure x = Cons x Nil -- HELP is this the same as pure = const Nil ?
+    pure x = Cons x Nil -- HELP why is this the same as pure = const Nil ?
     (<*>) Nil _ = Nil
     (<*>) _ Nil = Nil
     (Cons f fs) <*> xs = fmap f xs <> (fs <*> xs)
