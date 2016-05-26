@@ -3,6 +3,21 @@ import Test.QuickCheck
 import Test.QuickCheck.Checkers
 import Test.QuickCheck.Classes
 
+{- NOTE
+[1, 2, 3] <> [4, 5, 6]
+-- changes to
+[
+1 <> 4
+, 2 <> 5
+, 3 <> 6
+]
+-}
+
+-- ZERO vs IDENTITY ------------------------------------------------------------------
+-- HELP how to get identity for ZipList?
+-- Sum 1 `mappend` ??? -> Sum 1
+
+
 
 zipListWith :: (a -> b -> c) -> List a -> List b -> List c
 zipListWith _ Nil _ = Nil

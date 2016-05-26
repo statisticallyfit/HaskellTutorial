@@ -138,7 +138,7 @@ instance (Monoid a, Monoid b) => Monoid (a, b) where
 
 HELP what does the tuple in the first part of the tuple mean?
 
-instance Monoid a => Applicative ((,), a) where
+instance Monoid a => Applicative ((,) a) where
     pure x = (mempty, x)
     (u, f) <*> (v, x) = (u `mappend` v, f x)
 
@@ -564,31 +564,3 @@ main = do
     = Just 4
 
     -}
-
-
-
-
-
-
-
-
-
-
-
-
-
--- 17.8 ZIPLIST MONOID -------------------------------------------------------------
-
-{- NOTE
-[1, 2, 3] <> [4, 5, 6]
--- changes to
-[
-1 <> 4
-, 2 <> 5
-, 3 <> 6
-]
--}
-
--- ZERO vs IDENTITY ------------------------------------------------------------------
--- HELP how to get identity for ZipList?
--- Sum 1 `mappend` ??? -> Sum 1
