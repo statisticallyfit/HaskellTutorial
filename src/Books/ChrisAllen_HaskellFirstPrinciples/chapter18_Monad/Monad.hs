@@ -2,6 +2,132 @@ import Control.Applicative ((*>))
 import Control.Monad (join)
 
 
+{-
+NOTE
+class Applicative m => Monad m where
+
+    -- note takes result from operatoin on left side and puts it as arg to
+    the operation on the right side
+    (>>=) :: m a -> (a -> m b) -> m b
+
+    -- note sequences two operations, discards result of first action
+    (>>) :: m a -> m b -> m b
+
+    return :: a -> m a
+-}
+
+{-
+NOTE
+fmap f xs  ======= xs >>= return . f
+
+-}
+
+{-
+NOTE
+
+fmap  :: Functor f     =>   (a -> b) -> f a        -> f b
+(<*>) :: Applicative f => f (a -> b) -> f a        -> f b
+(>>=) :: Monad f       => f a        -> (a -> f b) -> f b
+-}
+
+
+{-
+NOTE
+
+join :: Monad m => m (m a) -> m a
+concat :: [[a]] -> [a]
+-}
+
+
+{-
+SUMMARY KEY EQUALS
+SUMMARY KEY EQUALS
+SUMMARY KEY EQUALS
+--> 1. fmap a function over the contents that are held in a monadic structure.
+--> 2. that function used to fmap returns a monadic structure. When we fmap that
+function over the monadic structure we get two layers of monadic structure
+around the content.
+--> 3. after getting double layers, smush them - Join!
+-}
+-- ANSWER
+bind :: Monad m => (a -> m b) -> m a -> m b
+bind f xs = join $ fmap f xs
+
+
+
+
+
+{-
+NOTE: monad also lifts!
+
+liftA :: Applicative f => (a -> b) -> f a -> f b
+liftA f a = pure f <*> a
+
+liftM :: Monad m =>  (a -> r) -> m a -> m r
+liftM = same as fmap just with different typeclass constraint
+
+example
+fmap (+1) [1,2,3]
+= [2,3,4]
+
+liftA (+1) [1,2,3]
+= [2,3,4]
+
+liftM (+1) [1,2,3]
+= [2,3,4]
+-------------------------------------------------------------------------------
+
+liftA2 :: Applicative f => (a -> b -> c) -> f a -> f b -> f c
+liftA2 f a b = f <$> a <*> b
+
+liftM2 :: Monad m => (a -> b -> c) -> m a -> m b -> m c
+
+example  they are the same
+
+(,) <$> (Just 3) (Just 5)
+= Just (3,5)
+
+liftA2 (,) (Just 3) (Just 5)
+= Just (3,5)
+
+liftm2 (,) (Just 3) (Just 5)
+= Just (3,5)
+
+-------------------------------------------------------------------------------
+liftA3 :: Applicative f => (a -> b -> c -> d) -> f a -> f b -> f c -> f d
+liftA3 f a b c = f <$> a <*> b <*> c
+
+liftM3 :: Monad m => (a -> b -> c -> d) -> m a -> m b -> m c -> m d
+
+example they are the same
+
+liftA3 (,,) [1,2] [3,4] [5,6]
+= [(1,3,5),(1,3,6),(1,4,5),(1,4,6),(2,3,5),(2,3,6),(2,4,5),(2,4,6)]
+
+liftM3 (,,) [1,2] [3,4] [5,6]
+= [(1,3,5),(1,3,6),(1,4,5),(1,4,6),(2,3,5),(2,3,6),(2,4,5),(2,4,6)]
+-}
+
+
+
+
+
+
+
+
+
+
+-- 18.3 DO SYNTAX AND MONADS --------------------------------------------------
+
+{-
+NOTE These operators do the same thing.
+
+(*>) :: Applicative f => f a -> f b -> f b
+
+(>>) :: Monad m => m a -> m b -> m b
+
+-}
+
 sequencing :: IO()
 sequencing = do
     putStrLn "blah"
@@ -44,7 +170,8 @@ q :: IO (IO ()) -- note: outer IO is for getLine, inner IO is for putStrLn
 q = putStrLn <$> getLine
 -- now
 q' :: IO()
-q' = join $ putStrLn <$> getLine
+q' = join $ putStrLn <$> getLine -- will repeat your input on next line
+q'' = join $ fmap putStrLn getLine -- will repeat your input on next line
 
 -------------------------------------------------------------------------------------
 -- note: desugar do syntax
@@ -93,8 +220,8 @@ twoBinds'' =
         (\name ->                  -- note: need to do \name and \age separately since we
         putStrLn "age pls: " >>   -- must mark down the user input else it would be
         getLine >>=               -- covered by the next input.
-        (\age ->
-        putStrLn ("y helo thar: " ++ name ++ " who is: " ++ age ++ " years old.")))
+            (\age ->
+            putStrLn ("y helo thar: " ++ name ++ " who is: " ++ age ++ " years old.")))
 
 
 
@@ -144,126 +271,6 @@ instance Monad Maybe where
 -}
 
 
-data Cow = Cow {
-    name   :: String,
-    age    :: Int,
-    weight :: Int
-} deriving (Eq, Show)
-
-noEmpty     :: String -> Maybe String
-noEmpy ""   = Nothing
-noEmpty str = Just str
-
-noNegative               :: Int -> Maybe Int
-noNegative n | n >= 0    = Just n
-             | otherwise = Nothing
-
-weightCheck   :: Cow -> Maybe Cow
-weightCheck c =
-    let w = weight c
-        n = name c
-        in if n == "Bess" && w > 499
-        then Nothing
-        else Just c
-
-mkSphericalCow :: String -> Int -> Int -> Maybe Cow
-mkSphericalCow name' age' weight' =
-    case noEmpty name' of
-    Nothing    -> Nothing
-    Just nammy ->
-        case noNegative age' of
-            Nothing   -> Nothing
-            Just agey ->
-                case noNegative weight' of
-                    Nothing      -> Nothing
-                    Just weighty ->
-                        weightCheck (Cow nammy agey weighty)
-
-
--- note: cleaning up function with monad - no need to repeat anymore like above.
-mkSphericalCow' :: String -> Int -> Int -> Maybe Cow
-mkSphericalCow' name' age' weight' = do
-    nammy   <- noEmpty name'
-    agey    <- noNegative age'
-    weighty <- noNegative weight'
-    weightCheck (Cow nammy agey weighty)
-
--- note: this is how the above code looks like, desugared:
-mkSphericalCow'' :: String -> Int -> Int -> Maybe Cow
-mkSphericalCow'' name' age' weight' = do
-    noEmpty name' >>=
-        \nammy ->
-        noNegative age' >>=
-            \agey ->
-            noNegative weight' >>=
-                \weighty ->
-                weightCheck (Cow nammy agey weighty)
-
-
-{-
-example: passing some arguments:
-
-mkSphericalCow'' "Bess" 5 499
-    noEmpty "Bess" >>=
-        \nammy ->
-        noNegative 5 >>=
-            \agey ->
-            noNegative 499 >>=
-                \weighty ->
-                weightCheck (Cow nammy agey weight)
-
-
-
-mkSphericalCow'' "Bess" 5 499
-    noEmpty "Bess" >>=
-        \"Bess" ->              equals: Just "Bess" but with >>= it is "Bess"
-        noNegative 5 >>=
-            \agey ->
-            noNegative 499 >>=
-                \weighty ->
-                weightCheck (Cow nammy agey weight)
-
-
-
-mkSphericalCow'' "Bess" 5 499
-    noEmpty "Bess" >>=
-        \"Bess" ->
-        noNegative 5 >>=
-            \5 ->               equals: Just 5 but with >>= it is (5)
-            noNegative 499 >>=
-                \weighty ->
-                weightCheck (Cow nammy agey weight)
-
-
-mkSphericalCow'' "Bess" 5 499
-    noEmpty "Bess" >>=
-        \"Bess" ->
-        noNegative 5 >>=
-            \5 ->
-            noNegative 499 >>=
-                \499 ->          equals: Just 499 but with >>= it is (499)
-                weightCheck (Cow nammy agey weight)
-
-
--- note: but if had a "" for name?
-mkSphericalCow'' "" 5 499
-    noEmpty "" >>=    equals: Nothing >>= _ so the entire computation drops.
-        \nammy ->
-        noNegative 5 >>=
-            \agey ->
-            noNegative 499 >>=
-                \weighty ->
-                weightCheck (Cow nammy agey weight)
-
-summary: entire computation drops any moment that any function in the Maybe Monad
-actions produce Nothing, because of:
-
-instance Monad Maybe where
-    return x = Just x
-    (Just x) >>= k     = k x    key so run the entire computation over x
-    Nothing >>=  _     Nothing  key so the entire computation is dropped
--}
-
 
 
 
@@ -272,6 +279,18 @@ instance Monad Maybe where
 -- then use Applicative but if you just have a statement then that is going to
 -- produce more monadic structure so you need the implicit monad join to crunch
 -- it back down.
+
+{-
+NOTE SUMMARY :
+1. a) With Maybe Applicative you can have a fail then success right after.
+   The computation doesn't end because ofa fail - it goes on.
+   b) Each Maybe computation fails or succeeds independently of each other. SO
+   unlike in Monad, the arg isn't used to fuel the next action.
+
+2. a) With Maybe Monad, computations halt when a fail is encountered.
+   b) Computations are fuled by each other. So an arg is used to fuel the next
+   computation.
+-}
 -- EXAMPLE
 
 f :: Maybe Integer
@@ -300,7 +319,7 @@ doSomethingM = do
     zedM a b c
 
 -- help: how does this relate to above text? how does it get crunched?
-
+-- HELP also how is one fit for applicative and the other fit for monad?
 
 
 
@@ -369,13 +388,6 @@ main = do
     print $ d [1..10]
     print $ join $ d [1..10]
     (print . join . d) [1..10]
-    putStrLn ""
-    --------------------------------------
-    print $ mkSphericalCow "Bess" 5 499
-    print $ mkSphericalCow "Bess" 5 500
-
-    print $ mkSphericalCow' "Bess" 5 499
-    print $ mkSphericalCow' "Bess" 5 500
     putStrLn ""
     --------------------------------------
     print $ mkSoftware 0 0

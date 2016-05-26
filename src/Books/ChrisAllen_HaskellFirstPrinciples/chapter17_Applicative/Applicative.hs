@@ -21,21 +21,14 @@ note
 Along with these core functions, the Control.Applicative library provides
 some other convenient functions: liftA, liftA2, and liftA3:
 
-liftA :: Applicative f =>
-    (a -> b)
-    -> f a
-    -> f b
-liftA2 :: Applicative f =>
-    (a -> b -> c)
-    -> f a
-    -> f b
-    -> f c
-liftA3 :: Applicative f =>
-    (a -> b -> c -> d)
-    -> f a
-    -> f b
-    -> f c
-    -> f d
+liftA :: Applicative f => (a -> b) -> f a -> f b
+liftA f a = pure f <*> a
+
+liftA2 :: Applicative f => (a -> b -> c) -> f a -> f b -> f c
+liftA2 f a b = f <$> a <*> b
+
+liftA3 :: Applicative f => (a -> b -> c -> d) -> f a -> f b -> f c -> f d
+liftA3 f a b c = f <$> a <*> b <*> c
 
 
     note liftA is basically fmap only with an Applicative typeclass constraint

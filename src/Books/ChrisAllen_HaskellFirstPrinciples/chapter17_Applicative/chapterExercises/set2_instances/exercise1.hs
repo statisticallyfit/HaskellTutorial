@@ -13,7 +13,7 @@ instance Functor Identity where
 
 instance Applicative Identity where
     pure = Identity
-    (<*>) (Identity f) (Identity a) = Identity (f a)
+    (<*>) (Identity f) x = fmap f x
 
 
 instance Arbitrary a => Arbitrary (Identity a) where
@@ -26,4 +26,5 @@ instance Eq a => EqProp (Identity a) where
 
 
 main = do
-    quickBatch $ applicative (undefined :: (String, String, Int))
+    quickBatch $ applicative (undefined :: Identity(String,String,Int))
+    --quickBatch $ applicative ((Identity ("b", "w", 1)):: Identity (String,String,Int))
