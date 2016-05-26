@@ -40,6 +40,7 @@ instance Applicative List where
 instance Functor ZipList where
     fmap f (ZipList xs) = ZipList (fmap f xs)
 
+-- HELP HELP HELP figure out how to implement without helper methods.
 instance Applicative ZipList where
     pure x = ZipList (repeatList x)
     (ZipList fs) <*> (ZipList xs) = ZipList (zipListWith id fs xs)
