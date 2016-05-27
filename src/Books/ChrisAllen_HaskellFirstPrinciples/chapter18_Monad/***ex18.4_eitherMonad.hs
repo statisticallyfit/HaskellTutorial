@@ -33,11 +33,12 @@ instance Applicative (Either' e) where
 
 instance Monad (Either' e) where
     return = pure
-    (>>=) _ (Left' e) = Left' e
+    --(>>=) _ (Left' e) = Left' e
     (>>=) (Left' e) _ = Left' e
     (>>=) (Right' a) f = f a
-    --(>>=) (Right' f) (Right' a) = join $ fmap (f a)
-
+    -- note: takes the content out of the structure on the left and applies
+    -- the function on the right to the content to return content with structure
+    -- wrapped around it.
 
 ------------------------------------------------------------------------------
 instance (Arbitrary e, Arbitrary a) => Arbitrary (Either' e a)  where
@@ -52,9 +53,9 @@ instance (Eq e, Eq a) => EqProp (Either' e a) where
 
 
 {-
-
+HELP FIX
 t1 = return 1 :: Either' String Int
-t2 = (Left' "hi") (>>=) (Right' 1)
+t2 = (Left' "hi") (>>=) return . (+1)
 t3 = (Right' 1) (>>=) return . (+7)
 -}
 

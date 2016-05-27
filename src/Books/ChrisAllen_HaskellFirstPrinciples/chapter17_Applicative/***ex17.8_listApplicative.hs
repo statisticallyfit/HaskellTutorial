@@ -48,7 +48,9 @@ instance Applicative List where
     (<*>) Nil _ = Nil
     (<*>) _ Nil = Nil
     (Cons f fs) <*> xs = fmap f xs <> (fs <*> xs)
-
+    -- NOTE IMPORTANT need mappend operator (<>) since result of (fmap f xs) is
+    -- a list: Cons a (Cons a1 (Cons a2 ...)) and we need to mappend this
+    -- to the result of (fs <*> xs)
 
 
 instance Arbitrary a => Arbitrary (List a) where

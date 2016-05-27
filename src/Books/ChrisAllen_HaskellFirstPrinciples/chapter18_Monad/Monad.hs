@@ -1,5 +1,5 @@
 import Control.Applicative ((*>))
-import Control.Monad (join)
+import Control.Monad (join, (>=>), fmap)
 
 
 {-
@@ -461,5 +461,80 @@ NOTE
 
 2. Associativity laws:
 
+-- note argument on the left (m) and function on the right (f)
+(m >>= f) >>= g    = m >>= (\x -> f x >>= g)
 
+-}
+
+
+
+
+
+
+
+
+
+
+
+-- 18.6 COMPOSITION + APPLICATION -----------------------------------------------
+
+{-
+NOTE
+
+defining monadic composition
+
+idea -- but gives error
+mcomp :: Monad m => (b -> m c) -> (a -> m b) -> a -> m c
+mcomp f g a = f (g a)
+-}
+
+
+mcomp :: Monad m => (b -> m c) -> (a -> m b) -> a -> m c
+mcomp f g a = join (f <$> (g a))
+
+mcomp' f g a = g a >>= f
+
+-- HELP see how this works in practice
+
+
+
+
+
+
+-- KLEISLI OPERATOR
+
+
+{-
+NOTE
+
+(>=>)    :: Monad m => (a -> m b) -> (b -> m c) -> a   -> m c
+flip (.) ::             (a -> b)  -> (b -> c)   -> a   -> c
+(>>=)    :: Monad m => m a        -> (a -> m b) -> m b
+
+compare
+>=> kleisli operator has functions on both sides
+>>= bind operator has function on right, value wrapped in structure on its left.
+-}
+
+sayHi :: String -> IO String
+sayHi greeting = do
+    putStrLn greeting
+    getLine
+
+readM :: Read a => String -> IO a
+readM = return . read
+
+getAge :: String -> IO Int
+getAge = sayHi >=> readM
+
+askForAge :: IO Int
+askForAge = getAge "Hello! How old are you? "
+
+
+-- TODO apply these functions to test understanding
+
+{-
+[1]       [2] [3]     [4]     [5] [6]      [7]    [8] [9]
+(a     ->  m  b)   -> (b     -> m  c)   ->   a   -> m c
+String -> IO String   String -> IO a     String    IO a
 -}
