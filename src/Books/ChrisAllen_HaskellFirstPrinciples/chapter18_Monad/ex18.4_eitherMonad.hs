@@ -3,11 +3,18 @@ import Control.Applicative
 import Control.Monad (join)
 import Test.QuickCheck (Arbitrary, arbitrary, elements, frequency)
 import Test.QuickCheck.Checkers (quickBatch, eq, (=-=), EqProp)
-import Test.QuickCheck.Classes (applicative)
+import Test.QuickCheck.Classes (applicative, monad)
 
 
--- note: todo: come back to do this once I cover previous chapters too:
--- https://lukleh.github.io/haskell-book-exercises/#_18_4_examples_of_monad_use
+
+
+{-
+-- note takes result from operatoin on left side and puts it as arg to
+    the operation on the right side
+
+    (>>=) :: Monad m => m a -> (a -> m b) -> m b
+-}
+
 
 
 data Either' e a = Left' e | Right' a deriving (Eq, Show)
@@ -26,7 +33,7 @@ instance Applicative (Either' e) where
 
 instance Monad (Either' e) where
     return = pure
-    --(>>=) _ (Left' e) = Left' e
+    (>>=) _ (Left' e) = Left' e
     (>>=) (Left' e) _ = Left' e
     (>>=) (Right' a) f = f a
     --(>>=) (Right' f) (Right' a) = join $ fmap (f a)
@@ -44,5 +51,17 @@ instance (Eq e, Eq a) => EqProp (Either' e a) where
 
 
 
+{-
+
+t1 = return 1 :: Either' String Int
+t2 = (Left' "hi") (>>=) (Right' 1)
+t3 = (Right' 1) (>>=) return . (+7)
+-}
+
+
 main = do
-    print $ ""
+    {-print t1
+    print t2
+    print t3-}
+    quickBatch $ applicative (undefined :: Either' String (Int,Int,Int))
+    quickBatch $ monad (undefined :: Either' String (Int,Int,Int))

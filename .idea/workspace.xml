@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="eb0702c0-b7c3-41d6-bca5-72cdf359dc76" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/ex18.4_2.hs" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/ex18.4_2.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/ex18.2_1.hs" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/ex18.2_bindOperator.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/ex18.4_2.hs" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/ex18.4_eitherMonad.hs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/Monad.hs" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/Monad.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -25,31 +28,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="ex18.4_2.hs" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/ex18.4_2.hs">
+      <file leaf-file-name="Monad.hs" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/Monad.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.55250406">
-              <caret line="30" column="4" selection-start-line="30" selection-start-column="4" selection-end-line="30" selection-end-column="4" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ApplicativeCowExample.hs" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter17_Applicative/ApplicativeCowExample.hs">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="38" column="15" selection-start-line="38" selection-start-column="15" selection-end-line="38" selection-end-column="15" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="exercise1.hs" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter17_Applicative/chapterExercises/set2_instances/exercise1.hs">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="4" selection-end-column="44" />
+            <state vertical-scroll-proportion="0.9386107">
+              <caret line="463" column="0" selection-start-line="463" selection-start-column="0" selection-end-line="463" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -68,7 +51,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter16_Functor/chapterExercises/set3_writeFunctorInstances/ex2.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter16_Functor/Functor.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter16_Functor/chapterExercises/set3_writeFunctorInstances/ex3.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter16_Functor/chapterExercises/set3_writeFunctorInstances/ex4.hs" />
@@ -116,9 +98,10 @@
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter17_Applicative/Applicative.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter17_Applicative/chapterExercises/combinations.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/MonadCowExample.hs" />
-        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/Monad.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/***ex18.2_1.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/ex18.4_2.hs" />
+        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/ex18.4_eitherMonad.hs" />
+        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/Monad.hs" />
       </list>
     </option>
   </component>
@@ -229,96 +212,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="chapter18_Monad" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="HaskellTutorial" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="HaskellTutorial" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Books" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ChrisAllen_HaskellFirstPrinciples" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="chapter17_Applicative" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="HaskellTutorial" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="HaskellTutorial" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Books" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ChrisAllen_HaskellFirstPrinciples" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="chapter17_Applicative" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="chapterExercises" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="HaskellTutorial" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="HaskellTutorial" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Books" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ChrisAllen_HaskellFirstPrinciples" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="chapter17_Applicative" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="chapterExercises" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="set2_instances" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -919,12 +812,12 @@
       <workItem from="1464184071185" duration="1252000" />
       <workItem from="1464186201529" duration="6352000" />
       <workItem from="1464238441346" duration="30779000" />
-      <workItem from="1464326643186" duration="2197000" />
+      <workItem from="1464326643186" duration="5157000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="189304000" />
+    <option name="totallyTimeSpent" value="192264000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="773" height="783" extended-state="0" />
@@ -941,10 +834,10 @@
       <window_info id="GhcMod" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.43430153" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Cabal" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Cabal" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.0" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="SBT Execute" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24896266" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
@@ -1261,22 +1154,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/ex18.2_1.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.21486267">
-          <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/Monad.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="397" column="46" selection-start-line="397" selection-start-column="46" selection-end-line="397" selection-end-column="46" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter17_Applicative/***ex17.8_listApplicative.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="1.5040388">
@@ -1289,14 +1166,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter17_Applicative/ex17.8_eitherAndValidationApplicative.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.2584814">
-          <caret line="41" column="0" selection-start-line="41" selection-start-column="0" selection-end-line="47" selection-end-column="14" />
           <folding />
         </state>
       </provider>
@@ -1325,6 +1194,14 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter17_Applicative/chapterExercises/set2_instances/exercise1.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.21486267">
+          <caret line="7" column="51" selection-start-line="7" selection-start-column="51" selection-end-line="7" selection-end-column="51" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter17_Applicative/ApplicativeCowExample.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1333,18 +1210,34 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter17_Applicative/chapterExercises/set2_instances/exercise1.hs">
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter17_Applicative/ex17.8_eitherAndValidationApplicative.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="4" selection-end-column="44" />
+          <caret line="24" column="28" selection-start-line="24" selection-start-column="28" selection-end-line="24" selection-end-column="28" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/ex18.4_2.hs">
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/ex18.2_bindOperator.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.55250406">
-          <caret line="30" column="4" selection-start-line="30" selection-start-column="4" selection-end-line="30" selection-end-column="4" />
+        <state vertical-scroll-proportion="0.21486267">
+          <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/ex18.4_eitherMonad.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.21486267">
+          <caret line="20" column="0" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/Monad.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.9386107">
+          <caret line="463" column="0" selection-start-line="463" selection-start-column="0" selection-end-line="463" selection-end-column="0" />
           <folding />
         </state>
       </provider>

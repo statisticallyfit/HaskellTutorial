@@ -28,7 +28,7 @@ NOTE
 fmap  :: Functor f     =>   (a -> b) -> f a        -> f b
 (<*>) :: Applicative f => f (a -> b) -> f a        -> f b
 (>>=) :: Monad f       => f a        -> (a -> f b) -> f b
-
+-}
 
 
 
@@ -424,4 +424,42 @@ main = do
     print $ mkSoftware 501 501
     print $ mkSoftware 100 5001
     print $ mkSoftware 0 500
+-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- 18.5 MONAD LAWS -----------------------------------------------------------
+
+{-
+NOTE
+
+(>>=) :: Monad m => m a -> (a -> m b) -> m b
+--                 [1]        [2]        [3]
+
+1. Identity laws:
+
+    right identity:
+    m >>= return = m
+   [1]      [2]   [3]
+
+    left identity:
+    return x >>= f = f x
+       [1]      [2]  [3]
+
+
+
+2. Associativity laws:
+
+
 -}
