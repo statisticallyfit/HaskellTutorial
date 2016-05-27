@@ -28,7 +28,8 @@ NOTE
 fmap  :: Functor f     =>   (a -> b) -> f a        -> f b
 (<*>) :: Applicative f => f (a -> b) -> f a        -> f b
 (>>=) :: Monad f       => f a        -> (a -> f b) -> f b
--}
+
+
 
 
 {-
@@ -381,9 +382,33 @@ mkSoftware years coders = do
 
 
 
--- note: todo: finish this chapter + exercises later.
+
+{-
+NOTE monad instance of apply operator (<*>) must quit the moment a failure
+pops up since arguments are fed into the next operation, which can't continue
+if there's a failure.
+For applicative, things happen independently and are not fed into continuations.
+
+note
+
+(<*>) :: Applicative f => f (a -> b) -> f a -> f b
+ap    ::      Monad  m => m (a -> b) -> m a -> m b
 
 
+HELP understand what point this is delivering:
+ap :: (Monad m) => m (a -> b) m a -> m b
+ap m m' = do
+    x <- m
+    x' <- m'
+    return (x x')
+
+-}
+
+
+
+
+
+{-uncover
 main = do
     print $ d [1..10]
     print $ join $ d [1..10]
@@ -399,3 +424,4 @@ main = do
     print $ mkSoftware 501 501
     print $ mkSoftware 100 5001
     print $ mkSoftware 0 500
+-}
