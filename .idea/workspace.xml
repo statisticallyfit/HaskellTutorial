@@ -2,49 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="eb0702c0-b7c3-41d6-bca5-72cdf359dc76" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/aaa.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter19_ApplyingStructure/ApplyingStructure.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter3/TypesAndClasses.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter3/TypesAndClasses.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter4/DefiningFunctions.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter4/DefiningFunctions.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter4/exercise4.1.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter4/exercise4.1.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter4/exercise4.2.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter4/exercise4.2.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter4/exercise4.3.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter4/exercise4.3.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter4/exercise4.4.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter4/exercise4.4.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter4/exercise4.5.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter4/exercise4.5.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter4/exercise4.6.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter4/exercise4.6.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter5/CaesarCipher.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter5/CaesarCipher.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter5/ListComprehensions.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter5/ListComprehensions.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter5/exercise5.1.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter5/exercise5.1.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter5/exercise5.2.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter5/exercise5.2.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter5/exercise5.3.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter5/exercise5.3.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter5/exercise5.4.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter5/exercise5.4.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter5/exercise5.5.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter5/exercise5.5.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter5/exercise5.6.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter5/exercise5.6.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter5/exercise5.7.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter5/exercise5.7.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter6/Recursion.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter6/Recursion.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter6/exercise6.1.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter6/exercise6.1.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter6/exercise6.3.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter6/exercise6.3.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter6/exercise6.4_6.5.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter6/exercise6.4_6.5.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter6/exercise6.6.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter6/exercise6.6.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter7/HigherOrderFunctions.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter7/HigherOrderFunctions.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter7/StringTransmitter.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter7/StringTransmitter.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter7/exercise7.1.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter7/exercise7.1.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter7/exercise7.2.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter7/exercise7.2.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter7/exercise7.3.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter7/exercise7.3.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter7/exercise7.4.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter7/exercise7.4.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter7/exercise7.6.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter7/exercise7.6.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter7/exercise7.7.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter7/exercise7.7.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter7/exercise7.8.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter7/exercise7.8.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter8/FunctionalParser_book.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter8/FunctionalParser_book.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter8/FunctionalParser_videocode.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter8/FunctionalParser_videocode.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/bookHutton/chapter8/Parser_StephenDiehl.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter8/Parser_StephenDiehl.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/course/Lab4.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Course/Lab4.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/course/Lab5.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Course/Lab5.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/course/Lab6.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Course/Lab6.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/course/Quiz4.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Course/Quiz4.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/course/Quiz5.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Course/Quiz5.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter10/exercise10.8.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/../HaskellCourse/src/Books/aaa.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Course/Quiz8.hs" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../HaskellCourse/.idea/workspace.xml" afterPath="$PROJECT_DIR$/../HaskellCourse/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter10/AbstractMachine.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter10/AbstractMachine.hs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter10/TautologyChecker.hs" afterPath="$PROJECT_DIR$/../HaskellCourse/src/Books/GrahamHutton_ProgrammingInHaskell/chapter10/TautologyChecker.hs" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/***ex18.4_eitherMonad.hs" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/***ex18.4_eitherMonad.hs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set1_instances/***exercise2_PhhhbbtttEither.hs" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set1_instances/***exercise2_PhhhbbtttEither.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -70,18 +35,8 @@
       <file leaf-file-name="Monad.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/Monad.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.4911147">
-              <caret line="16" column="2" selection-start-line="16" selection-start-column="2" selection-end-line="16" selection-end-column="2" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="***ex18.4_eitherMonad.hs" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/***ex18.4_eitherMonad.hs">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="39" column="76" selection-start-line="39" selection-start-column="76" selection-end-line="39" selection-end-column="76" />
+            <state vertical-scroll-proportion="0.9208401">
+              <caret line="78" column="73" selection-start-line="78" selection-start-column="73" selection-end-line="78" selection-end-column="73" />
               <folding />
             </state>
           </provider>
@@ -100,7 +55,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter16_Functor/chapterExercises/set3_writeFunctorInstances/exercise10.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter16_Functor/chapterExercises/set3_writeFunctorInstances/exercise11.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter17_Applicative/ex17.5_appinuse.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter17_Applicative/ex17.5_applicativeInUse.hs" />
@@ -137,7 +91,6 @@
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/exercise1_Nope.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/ex18.4_eitherMonad.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/exercise2_PhhhbbtttEither.hs" />
-        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/***ex18.4_eitherMonad.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/***exercise2_PhhhbbtttEither.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/exercise3_Identity.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter17_Applicative/***ex17.8_listApplicative.hs" />
@@ -151,6 +104,8 @@
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set2_functions/exercise5_bind.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set2_functions/***exercise6_flipType.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter19_ApplyingStructure/ApplyingStructure.hs" />
+        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set1_instances/***exercise2_PhhhbbtttEither.hs" />
+        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/***ex18.4_eitherMonad.hs" />
       </list>
     </option>
   </component>
@@ -160,6 +115,8 @@
     <detection-done>true</detection-done>
   </component>
   <component name="ProjectFrameBounds">
+    <option name="x" value="137" />
+    <option name="y" value="1" />
     <option name="width" value="773" />
     <option name="height" value="783" />
   </component>
@@ -188,9 +145,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
       <pane id="Scratches" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -289,8 +245,73 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Books" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ChrisAllen_HaskellFirstPrinciples" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="chapter18_Monad" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="chapterExercises" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Books" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ChrisAllen_HaskellFirstPrinciples" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="chapter18_Monad" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="chapterExercises" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="set1_instances" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -865,14 +886,16 @@
       <workItem from="1464326643186" duration="25153000" />
       <workItem from="1464415973388" duration="2052000" />
       <workItem from="1464419232673" duration="287000" />
+      <workItem from="1464676711274" duration="2372000" />
+      <workItem from="1464715049671" duration="1506000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="214599000" />
+    <option name="totallyTimeSpent" value="218477000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="773" height="783" extended-state="0" />
+    <frame x="137" y="1" width="773" height="783" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -915,7 +938,14 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="18" />
+      <breakpoints>
+        <line-breakpoint enabled="true" type="haskell-line-breakpoint">
+          <url>file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/***ex18.4_eitherMonad.hs</url>
+          <line>34</line>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="19" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -1183,20 +1213,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set1_instances/***exercise2_PhhhbbtttEither.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="69" column="14" selection-start-line="69" selection-start-column="14" selection-end-line="69" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set1_instances/exercise1_Nope.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set2_functions/exercise1_join.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1246,18 +1262,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set1_instances/exercise3_Identity.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.27625203">
-          <caret line="9" column="0" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter19_ApplyingStructure/ApplyingStructure.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1265,22 +1273,43 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.46042004">
           <caret line="15" column="33" selection-start-line="15" selection-start-column="33" selection-end-line="15" selection-end-column="33" />
-          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set1_instances/exercise1_Nope.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/***ex18.4_eitherMonad.hs">
       <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="2.0872376">
+          <caret line="68" column="16" selection-start-line="68" selection-start-column="16" selection-end-line="68" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set1_instances/***exercise2_PhhhbbtttEither.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.6930533">
+          <caret line="75" column="43" selection-start-line="75" selection-start-column="43" selection-end-line="75" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set1_instances/exercise3_Identity.hs">
+      <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="39" column="76" selection-start-line="39" selection-start-column="76" selection-end-line="39" selection-end-column="76" />
+          <caret line="28" column="0" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/Monad.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.4911147">
-          <caret line="16" column="2" selection-start-line="16" selection-start-column="2" selection-end-line="16" selection-end-column="2" />
+        <state vertical-scroll-proportion="0.9208401">
+          <caret line="78" column="73" selection-start-line="78" selection-start-column="73" selection-end-line="78" selection-end-column="73" />
           <folding />
         </state>
       </provider>

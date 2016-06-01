@@ -52,17 +52,20 @@ instance (Eq e, Eq a) => EqProp (Either' e a) where
 
 
 
-{-
-HELP FIX
+
+
+
+
 t1 = return 1 :: Either' String Int
-t2 = (Left' "hi") (>>=) return . (+1)
-t3 = (Right' 1) (>>=) return . (+7)
--}
+t2 = (Left' "hi") >>= return . (+1)
+t3 = (Right' 1) >>= return . (+7)
+
+
 
 
 main = do
-    {-print t1
+    print t1
     print t2
-    print t3-}
-    quickBatch $ applicative (undefined :: Either' String (Int,Int,Int))
-    quickBatch $ monad (undefined :: Either' String (Int,Int,Int))
+    -- print t3 -- HELP WHY WRONG?
+    --quickBatch $ applicative (undefined :: Either' String (Int,Int,Int))
+    --quickBatch $ monad (undefined :: Either' String (Int,Int,Int))
