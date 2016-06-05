@@ -12,7 +12,7 @@ superimposeLine l1 l2 = [superimposeChar c1 c2 | (c1, c2) <- zip l1 l2]
 
 superimpose :: Picture -> Picture -> Picture
 superimpose p1 p2 = [superimposeLine l1 l2 | (l1, l2) <- zip p1 p2{-l1 <- p1, l2 <- p2-}]
--- note the commented out part is basically a foreach - best to use zip. So eitherwise
+-- note the commented out part is basically a foreach - best to use zip. So otherwise
 -- it would be for each l1, do the same l2, ...
 
 

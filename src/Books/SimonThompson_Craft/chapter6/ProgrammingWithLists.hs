@@ -38,11 +38,9 @@ invertColour pic = [invertLine line | line <- pic]
 
 
 
-onSeperateLines :: Picture -> String
-onSeperateLines stringList = concat [word ++ "\n" | word <- stringList]
-
 draw :: Picture -> IO()
 draw pic = putStr $ onSeperateLines pic
+           where onSeperateLines pic = [letter | picLine <- pic, letter <- picLine ++ "\n"]
 
 
 p1 = ["##########", "######....", "###.......", "##........", "#........."]
@@ -70,22 +68,41 @@ prop_AboveFlipV p1 p2 = flipV (p1 `above` p2) == (flipV p1) `above` (flipV p2)
 
 -- help fails because quickcheck generates random data with lists not of same length ...
 prop_AboveFlipH :: Picture -> Picture -> Bool
-prop_AboveFlipH p1 p2 = flipH (p1 `above` p2) == (flipH p1) `beside` (flipH p2)
+prop_AboveFlipH p1 p2 = flipH (p1 `above` p2) == (flipH p1) `above` (flipH p2)
 
 
 
 -- note ==> means implies and property following ==> is only checked when condition before
 -- it is true.
 -- HELP doesn't work, what does this test mean ?
+{-
+
 propAboveBeside3Correct :: Picture -> Picture -> Property
 propAboveBeside3Correct w e = (rectangular w $$ rectangular e $$ height w == height e)
     ==>
         (w `beside` e) `above` (w `beside` e)
             ==
         (w `above` w) `beside` (e `above` e)
+-}
 
-
+{-
+uncover
 main = do
     quickCheck prop_AboveFlipV
     --quickCheck prop_AboveFlipH
     -- quickCheck propAboveBeside3Correct-- HELP
+-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
