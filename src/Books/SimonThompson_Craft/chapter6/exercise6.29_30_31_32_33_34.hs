@@ -150,8 +150,29 @@ width pic = length (pic !! 0) -- length of any row
 ----------------------------------------------------------------------------------------
 
 -- precondition picture doesn't have to be padded
--- precondition assume position is top left corner of image
+-- precondition assume position is top left corner of image. When flipped, the new corner
+-- is the top right corner.
 flipHGeo :: Image -> Image
-flipHGeo (pic, (x,y)) = (flipHNaive pic, (x + w, y))
-                        where pic' = padPicture pic
-                              w = width pic'
+flipHGeo (pic, (x,y)) = (flipH pic', (x + 2*w, y))
+                        where
+                            pic' = padPicture pic
+                            w = width pic'
+
+-- note new corner is bottom left.
+flipVGeo :: Image -> Image
+flipVGeo (pic (x,y)) = (flipV pic', (x, y + 2*h))
+                       where pic' = padPicture pic
+                             h = height pic'
+
+-- note the new corner is the top right of the rotated figure
+rotateGeo :: Image -> Image
+rotateGeo (pic, (x,y)) = (rotate pic', (h,w))
+                         where pic' = padPicture pic
+                               h = height pic'
+                               w = width pic'
+-- note new corner is bottom left. It should go past the original figure, but not
+-- doing that here.
+rotateCounterGeo :: Image -> Image
+rotateCounterGeo (pic, (x,y)) = (rotate pic', (x, newHeight))
+                                where pic' = padPicture pic
+                                      newHeight = width pic'

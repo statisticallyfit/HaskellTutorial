@@ -105,5 +105,46 @@ main = do
 
 
 
+-- 6.7 SUPERMARKET BILLING ------------------------------------------------------------
 
+type Name    = String
+type Price   = Int
+type BarCode = Int
+
+type Database = [(BarCode, Name, Price)]
+type TillType = [BarCode]
+type BillType = [(Name, Price)]
+
+{-
+NOTE supermarket bill example
+
+dry sherry, 1lt ...............5.40
+fish fingers ..................1.21
+orange jelly ..................0.56
+dry sherry, 1lt ...............5.40
+
+total ........................13.90
+-}
+
+
+codeIndex :: Database
+codeIndex = [ (4719, "Fish Fingers", 121),
+              (5643, "Nappies", 1010),
+              (3814, "Orange Jelly", 56),
+              (1111, "Hula Hoops", 21),
+              (1112, "Hula Hoops (Giant)", 133),
+              (1234, "Dry Sherry, 1lt", 540)]
+
+-- NOTE: GOAL: convert list of bar codes into a list of name,price pairs
+
+makeBill :: TillType -> BillType
+
+formatBill :: BillType -> String
+
+produceBill :: TillType -> String
+produceBill = formatBill . makeBill
+
+
+lineLength :: Int
+lineLenght = 30 -- bill line length
 
