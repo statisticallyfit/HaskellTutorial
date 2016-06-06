@@ -40,7 +40,8 @@ invertColour pic = [invertLine line | line <- pic]
 
 draw :: Picture -> IO()
 draw pic = putStr $ onSeperateLines pic
-           where onSeperateLines pic = [letter | picLine <- pic, letter <- picLine ++ "\n"]
+ where
+    onSeperateLines pic = [letter | picLine <- pic, letter <- picLine ++ "\n"]
 
 
 p1 = ["##########", "######....", "###.......", "##........", "#........."]

@@ -51,21 +51,21 @@ p = [[(3, '.'), (4, '#'), (3, '.')],
         [(3, '.'), (1, '#'), (6, '.')],
         [(3, '.'), (1, '#'), (6, '.')]
         ]
-l = [[(2, '.'), (1, '#'), (7, '.')],
+l = [[(2, '.'), (1, '#'), (3, '.')],    -- last should be 7
         [(2, '.'), (1, '#'), (7, '.')],
-        [(2, '.'), (1, '#'), (7, '.')],
-        [(2, '.'), (1, '#'), (7, '.')],
-        [(2, '.'), (6, '#'), (2, '.')]
+        [(2, '.'), (1, '#'), (1, '.')], -- lsat should be 7
+        [(2, '.'), (1, '#'), (4, '.')], -- last should be 7
+        [(2, '.'), (6, '#'), (1, '.')] -- last should be 2
         ]
 
 
 
-maxW pic = maximum [sum [n | line <- pic, (n,c) <- line]]
+
 
 padPicture     :: PictureRLE -> PictureRLE
-padPicture pic = [line ++ [(maxW pic - (sumN line), '.')] | line <- pic]
-                  where --maxWidth = maximum [sum [n | line <- pic, (n,c) <- line]]
-                        sumN aLine = sum [n | (n, c) <- aLine]
+padPicture pic = [line ++ [(maxW - (sumN line), '.')] | line <- pic]
+           where maxW = maximum (fmap sum [[n | (n,c) <- line] | line <- pic])
+                 sumN aLine = sum [n | (n, c) <- aLine]
 
 flipH :: PictureRLE -> PictureRLE
 flipH = map reverse
