@@ -5,7 +5,6 @@ data Value = Two | Three | Four | Five | Six | Seven | Eight |
              Nine | Ten | Jack | Queen | King | Ace
              deriving (Eq, Ord, Show{-,Enum-})
 
-
 data Card = Card Suit Value deriving (Eq, Ord{-, Show, Enum-}) -- help why error when Enum?
 
 type Deck = [Card]
@@ -14,6 +13,13 @@ data Player = North | South | East | West deriving (Eq, Ord, Show, Enum)
 
 -- note need to know which player was the lead, so use list. Lead is first in the list.
 type Trick = [(Player, Card)]
+
+-- exercise 59
+type Hand = (Player, [Card]) -- collection of cards held by one player at any point.
+
+-- exercise 60
+type Hands = [Hand]
+
 
 
 
@@ -56,17 +62,30 @@ deck = [Card suit value | suit <- [Spades .. Clubs], value <- [Two .. Ace]]
 
 
 displayDeck      :: Deck -> IO()
-displayDeck deck = putStrLn $ concat ["\n" ++ show card | card <- deck]  ++ "\n"
+displayDeck deck = putStrLn $ showDeck
+                   where showDeck = concat ["\n" ++ show card | card <- deck]  ++ "\n"
+---------------------------------------------------------------------------------------
+showTrick :: Trick -> String
+showTrick trick = concat ["\n" ++ show p ++ " = " ++ show c | (p,c) <- trick] ++ "\n"
 
 displayTrick :: Trick -> IO()
 displayTrick trick = putStrLn $ showTrick trick
 
 displayTricks :: [Trick] -> IO()
 displayTricks trickList = putStrLn $ concat [showTrick trick | trick <- trickList]
+---------------------------------------------------------------------------------------
 
-showTrick :: Trick -> String
-showTrick trick = concat ["\n" ++ show p ++ " = " ++ show c | (p,c) <- trick] ++ "\n"
+showHand :: Hand -> String
+showHand (p,cs) = "\n" ++ show p ++ ":" ++ concat["\t" ++ show c ++ "\n"|c <- cs]
 
+displayHand :: Hand -> IO()
+displayHand hand = putStrLn $ showHand hand
+---------------------------------------------------------------------------------------
+showHands :: Hands -> String
+showHands hands = concat [showHand hand | hand <- hands]
+
+displayHands :: Hands -> IO()
+displayHands hands = putStrLn $ showHands hands
 
 
 
@@ -96,13 +115,7 @@ winT trumpSuit trick = playerOfHighestTrump
 
 
 
--- exercise 59 --------------------------------------------------------------------------
 
-type Hand = (Player, [Card]) -- collection of cards held by one player at any point.
-
--- exercise 60 --------------------------------------------------------------------------
-
-type Hands = [Hand]
 
 -- exercise 61 --------------------------------------------------------------------------
 
@@ -212,7 +225,7 @@ possible hand cardPlayed = isCard cardPlayed hand
 -- note checks if the player played legally.
 -- Means: if the firstSuit in trick is not equal to suit of player, then we must
 -- investigate. Next if firstSuit is inside the hand, then player could have played it
--- so he fooled us to it's illegal. Take oppposite to make it legal.
+-- so he fooled us to it's illegal.
 legal :: Hand -> Suit -> Suit -> Bool
 legal hand suitPlayed suitFirst = not ((suitFirst /= suitPlayed) &&
                                           (isSuit suitFirst hand))
@@ -248,39 +261,22 @@ checkPlay hs t = allLegal && allPossible
 
 
 
-
-
 -- exercise 62 -------------------------------------------------------------------------
 
 data Team = NorthSouth | EastWest deriving (Eq, Show)
 
 -- assume - no need for 13 tricks
-ts1 :: [Trick]
-ts1 = [t1] ++ [t4] ++ [t8]
+tlist1 :: [Trick]
+tlist1 = [t1] ++ [t4] ++ [t8]
 
-ts2 :: [Trick]
-ts2 = [t1] ++ [t2] ++ [t3] ++ [t4] ++ [t5] ++ [t6] ++ [t7] ++ [t8]
+tlist2 :: [Trick]
+tlist2 = [t1] ++ [t2] ++ [t3] ++ [t4] ++ [t5] ++ [t6] ++ [t7] ++ [t8]
 
 
 toTeam :: Player -> Team
 toTeam player
     | player == North || player == South = NorthSouth
     | otherwise                          = EastWest
-
-toPlayer :: Team -> (Player, Player)
-toPlayer team
-    | team == NorthSouth = (North, South)
-    | team == EastWest   = (East, West)
-
--- note finds score of a player i-- trump suit does not matter here.
--- note does not return the actual suit value, since enum starst Two from 0. But
--- numbers are still in right rank, so we can still tell who won.
-playerScore :: Player -> Trick -> Int
-playerScore player trick = fromEnum $ head [v | (p, Card s v) <- trick, p == player]
-
-teamScore :: Team -> Trick -> Int
-teamScore team trick = playerScore p1 trick + playerScore p2 trick
-                       where (p1, p2) = toPlayer team
 
 winnerNT :: [Trick] -> Team
 winnerNT trickList
@@ -291,6 +287,13 @@ winnerNT trickList
           numTricksWonEW = length [team | team <- winningTeams, team == EastWest]
 
 
+winnerT :: Suit -> [Trick] -> Team
+winnerT trumpSuit trickList
+    | numTricksWonNS > numTricksWonEW = NorthSouth
+    | otherwise                       = EastWest
+    where winningTeams = [toTeam $ winT trumpSuit trick | trick <- trickList]
+          numTricksWonNS = length [team | team <- winningTeams, team == NorthSouth]
+          numTricksWonEW = length [team | team <- winningTeams, team == EastWest]
 {-
 winNT :: Trick -> Player
 winNT trick = winT (suitLead trick) trick
@@ -301,19 +304,62 @@ winT trumpSuit trick = playerOfHighestTrump
               trumpSuit' = if hasTrumps then trumpSuit else suitLead trick
               maxTrumpValue = maximum [v | (p, Card s v) <- trick, s == trumpSuit']
               playerOfHighestTrump = head [p | (p, Card s v) <- trick, v == maxTrumpValue]
+-}
 
-t4 = [(North, Card Spades Six),
-      (East, Card Spades Two),
-      (South, Card Clubs Ten),
-      (West, Card Diamonds Four)]
 
-t7 = [(North, Card Clubs Three),
-      (East, Card Diamonds Jack),
-      (South, Card Clubs Jack),
-      (West, Card Diamonds Ace)]
 
-t8 = [(North, Card Spades Six),
-      (East, Card Spades Five),
-      (South, Card Clubs Jack),
-      (West, Card Diamonds Ace) ]
+
+
+
+
+
+-- exercise 63 -------------------------------------------------------------------------
+
+testHands :: Hands
+testHands = [ (North,
+                [Card Spades Four, Card Spades Two, Card Hearts Ace, Card Hearts Queen,
+                 Card Hearts Seven, Card Hearts Four, Card Diamonds Ace,
+                 Card Diamonds Seven, Card Diamonds Five, Card Diamonds Three,
+                 Card Diamonds Two, Card Clubs Six, Card Clubs Three]
+              ),
+              (East,
+                [Card Spades Five, Card Spades Three, Card Hearts Eight,
+                 Card Hearts Six, Card Hearts Five, Card Diamonds King,
+                 Card Diamonds Queen, Card Diamonds Ten, Card Clubs Queen,
+                 Card Clubs Jack, Card Clubs Five, Card Clubs Four, Card Clubs Two]
+              ),
+              (South,
+                [Card Spades Ace, Card Spades King, Card Spades Ten, Card Spades Nine,
+                 Card Spades Seven, Card Hearts King, Card Hearts Jack,
+                 Card Hearts Ten, Card Hearts Nine, Card Diamonds Six, Card Clubs Ten,
+                 Card Clubs Eight, Card Clubs Seven]
+              ),
+              (West,
+                [Card Spades Queen, Card Spades Jack, Card Spades Eight,
+                 Card Spades Six, Card Hearts Three, Card Hearts Two,
+                 Card Diamonds Jack, Card Diamonds Nine, Card Diamonds Eight,
+                 Card Diamonds Four, Card Clubs Ace, Card Clubs King, Card Clubs Nine]
+              )
+           ]
+
+-- note removes tricks from hands once they are used.
+--checkAllPlays :: Hands -> [Trick] -> Bool
+--checkAllPlays hands trickList =
+-- and [checkPlay hands trick | trick <- trickList]
+
+
+
+
+
+removeCardFromHand :: Card -> Hand -> Hand
+removeCardFromHand removeCard (p,cs) = (p, [c | c <- cs, c /= removeCard])
+
+{-
+checkPlay :: Hands -> Trick -> Bool
+checkPlay hs t = allLegal && allPossible
+    where firstSuit = suitLead t
+          allLegal = and [legal (playerHand p hs) (playerSuit p t) firstSuit
+                         | (p,c) <- t]
+          allPossible = and [possible (playerHand p hs) (playerCard p t)
+                            | (p,c) <- t ]
 -}

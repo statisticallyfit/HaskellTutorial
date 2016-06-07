@@ -38,8 +38,8 @@
       <file leaf-file-name="exercise6.53.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter6/exercise6.53.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.907916">
-              <caret line="301" column="30" selection-start-line="301" selection-start-column="30" selection-end-line="301" selection-end-column="30" />
+            <state vertical-scroll-proportion="0.47819063">
+              <caret line="351" column="0" selection-start-line="351" selection-start-column="0" selection-end-line="351" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -829,11 +829,12 @@
       <workItem from="1465106141018" duration="20714000" />
       <workItem from="1465192187823" duration="29949000" />
       <workItem from="1465275207333" duration="5261000" />
+      <workItem from="1465286016594" duration="4081000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="289913000" />
+    <option name="totallyTimeSpent" value="293994000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="832" height="783" extended-state="0" />
@@ -886,7 +887,7 @@
           <option name="timeStamp" value="18" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="19" />
+      <option name="time" value="20" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -1249,8 +1250,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter6/exercise6.53.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.907916">
-          <caret line="301" column="30" selection-start-line="301" selection-start-column="30" selection-end-line="301" selection-end-column="30" />
+        <state vertical-scroll-proportion="0.47819063">
+          <caret line="351" column="0" selection-start-line="351" selection-start-column="0" selection-end-line="351" selection-end-column="0" />
           <folding />
         </state>
       </provider>
