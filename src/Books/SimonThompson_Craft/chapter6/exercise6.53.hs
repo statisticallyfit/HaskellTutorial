@@ -3,9 +3,10 @@ data Suit = Spades | Hearts | Diamonds | Clubs deriving (Eq, Ord, Show, Enum)
 
 data Value = Two | Three | Four | Five | Six | Seven | Eight |
              Nine | Ten | Jack | Queen | King | Ace
-             deriving (Eq, Ord, Show, Enum)
+             deriving (Eq, Ord, Show{-,Enum-})
 
-data Card = Card Suit Value deriving (Eq, Ord, Show{-, Enum-}) -- help why error when Enum?
+
+data Card = Card Suit Value deriving (Eq, Ord{-, Show, Enum-}) -- help why error when Enum?
 
 type Deck = [Card]
 
@@ -16,14 +17,57 @@ type Trick = [(Player, Card)]
 
 
 
+instance Show Card where
+    show (Card s v) = show v ++ " of " ++ show s
+
+instance Enum Value where
+    toEnum 2 = Two
+    toEnum 3 = Three
+    toEnum 4 = Four
+    toEnum 5 = Five
+    toEnum 6 = Six
+    toEnum 7 = Seven
+    toEnum 8 = Eight
+    toEnum 9 = Nine
+    toEnum 10 = Ten
+    toEnum 11 = Jack
+    toEnum 12 = Queen
+    toEnum 13 = King
+    toEnum 14 = Ace
+
+    fromEnum Two = 2
+    fromEnum Three = 3
+    fromEnum Four = 4
+    fromEnum Five = 5
+    fromEnum Six = 6
+    fromEnum Seven = 7
+    fromEnum Eight = 8
+    fromEnum Nine = 9
+    fromEnum Ten = 10
+    fromEnum Jack = 11
+    fromEnum Queen = 12
+    fromEnum King = 13
+    fromEnum Ace = 14
+
+
 deck :: Deck
 deck = [Card suit value | suit <- [Spades .. Clubs], value <- [Two .. Ace]]
 
 
 
 displayDeck      :: Deck -> IO()
-displayDeck deck = putStrLn $ concat [show value ++ " of " ++ show suit ++ "\n"
-                    | (Card suit value) <- deck]
+displayDeck deck = putStrLn $ concat ["\n" ++ show card | card <- deck]  ++ "\n"
+
+displayTrick :: Trick -> IO()
+displayTrick trick = putStrLn $ showTrick trick
+
+displayTricks :: [Trick] -> IO()
+displayTricks trickList = putStrLn $ concat [showTrick trick | trick <- trickList]
+
+showTrick :: Trick -> String
+showTrick trick = concat ["\n" ++ show p ++ " = " ++ show c | (p,c) <- trick] ++ "\n"
+
+
 
 
 -- exercise 57 --------------------------------------------------------------------------
@@ -127,7 +171,6 @@ t8 = [(North, Card Spades Six),
       (West, Card Diamonds Ace) ]
 
 
-
 hands :: Hands
 hands = [ (North, [Card Hearts Queen, Card Hearts Ace, Card Spades Six,
                    Card Clubs Three]),
@@ -212,9 +255,40 @@ checkPlay hs t = allLegal && allPossible
 data Team = NorthSouth | EastWest deriving (Eq, Show)
 
 -- assume - no need for 13 tricks
+ts1 :: [Trick]
+ts1 = [t1] ++ [t4] ++ [t8]
+
+ts2 :: [Trick]
+ts2 = [t1] ++ [t2] ++ [t3] ++ [t4] ++ [t5] ++ [t6] ++ [t7] ++ [t8]
+
+
+toTeam :: Player -> Team
+toTeam player
+    | player == North || player == South = NorthSouth
+    | otherwise                          = EastWest
+
+toPlayer :: Team -> (Player, Player)
+toPlayer team
+    | team == NorthSouth = (North, South)
+    | team == EastWest   = (East, West)
+
+-- note finds score of a player i-- trump suit does not matter here.
+-- note does not return the actual suit value, since enum starst Two from 0. But
+-- numbers are still in right rank, so we can still tell who won.
+playerScore :: Player -> Trick -> Int
+playerScore player trick = fromEnum $ head [v | (p, Card s v) <- trick, p == player]
+
+teamScore :: Team -> Trick -> Int
+teamScore team trick = playerScore p1 trick + playerScore p2 trick
+                       where (p1, p2) = toPlayer team
 
 winnerNT :: [Trick] -> Team
-winnerNT trickList = [winNT trick | trick <- trickList]
+winnerNT trickList
+    | numTricksWonNS > numTricksWonEW = NorthSouth
+    | otherwise                       = EastWest
+    where winningTeams = [toTeam $ winNT trick | trick <- trickList]
+          numTricksWonNS = length [team | team <- winningTeams, team == NorthSouth]
+          numTricksWonEW = length [team | team <- winningTeams, team == EastWest]
 
 
 {-
@@ -227,4 +301,19 @@ winT trumpSuit trick = playerOfHighestTrump
               trumpSuit' = if hasTrumps then trumpSuit else suitLead trick
               maxTrumpValue = maximum [v | (p, Card s v) <- trick, s == trumpSuit']
               playerOfHighestTrump = head [p | (p, Card s v) <- trick, v == maxTrumpValue]
+
+t4 = [(North, Card Spades Six),
+      (East, Card Spades Two),
+      (South, Card Clubs Ten),
+      (West, Card Diamonds Four)]
+
+t7 = [(North, Card Clubs Three),
+      (East, Card Diamonds Jack),
+      (South, Card Clubs Jack),
+      (West, Card Diamonds Ace)]
+
+t8 = [(North, Card Spades Six),
+      (East, Card Spades Five),
+      (South, Card Clubs Jack),
+      (West, Card Diamonds Ace) ]
 -}
