@@ -259,8 +259,6 @@ checkPlay hs t = allLegal && allPossible
 
 
 
-
-
 -- exercise 62 -------------------------------------------------------------------------
 
 data Team = NorthSouth | EastWest deriving (Eq, Show)
@@ -294,20 +292,6 @@ winnerT trumpSuit trickList
     where winningTeams = [toTeam $ winT trumpSuit trick | trick <- trickList]
           numTricksWonNS = length [team | team <- winningTeams, team == NorthSouth]
           numTricksWonEW = length [team | team <- winningTeams, team == EastWest]
-{-
-winNT :: Trick -> Player
-winNT trick = winT (suitLead trick) trick
-
-winT :: Suit -> Trick -> Player
-winT trumpSuit trick = playerOfHighestTrump
-        where hasTrumps = length [p| (p, Card s v) <- trick, s == trumpSuit] > 0
-              trumpSuit' = if hasTrumps then trumpSuit else suitLead trick
-              maxTrumpValue = maximum [v | (p, Card s v) <- trick, s == trumpSuit']
-              playerOfHighestTrump = head [p | (p, Card s v) <- trick, v == maxTrumpValue]
--}
-
-
-
 
 
 
@@ -342,24 +326,70 @@ testHands = [ (North,
               )
            ]
 
--- note removes tricks from hands once they are used.
---checkAllPlays :: Hands -> [Trick] -> Bool
---checkAllPlays hands trickList =
--- and [checkPlay hands trick | trick <- trickList]
+
+testTricks :: [Trick]
+testTricks = [tt1, tt2, tt3, tt4, tt5, tt6, tt7, tt8, tt9, tt10, tt11, tt12, tt13]
+
+tt1, tt2, tt3, tt4, tt5, tt6, tt7, tt8, tt9, tt10, tt11, tt12, tt13 :: Trick
+-- E/W
+tt1 = [(West, Card Clubs Ace), (North, Card Clubs Six), (East, Card Clubs Two),
+       (South, Card Clubs Eight)]
+-- E/W
+tt2 = [(West, Card Clubs King), (North, Card Clubs Three), (East, Card Clubs Four),
+       (South, Card Clubs Ten)]
+-- N/S
+tt3 =[(West, Card Diamonds Four), (North, Card Diamonds Ace),
+      (East, Card Diamonds Ten), (South, Card Diamonds Six)]
+
+tt4 = [(North, Card Spades Two), (East, Card Spades Five), (South, Card Spades Ace),
+       (West, Card Spades Six)]
+
+tt5 = [(South, Card Spades King), (West, Card Spades Eight), (North, Card Spades Four),
+       (East, Card Spades Three)]
+
+tt6 = [(South, Card Spades Seven), (West, Card Spades Queen),
+       (North, Card Hearts Queen), (East, Card Clubs Five)]
+
+tt7 = [(North, Card Hearts Four), (East, Card Hearts Eight), (South, Card Hearts Nine),
+       (West, Card Hearts Two)]
+
+tt8 = [(South, Card Spades Nine), (West, Card Spades Jack), (North, Card Hearts Ace),
+       (East, Card Clubs Jack)]
+
+tt9 = [(North, Card Hearts Seven), (East, Card Hearts Six), (South, Card Hearts Ten),
+       (West, Card Hearts Three)]
+
+tt10 = [(South, Card Hearts Jack), (West, Card Diamonds Nine),
+        (North, Card Diamonds Two), (East, Card Hearts Five)]
+
+tt11 = [(South, Card Spades Ten), (West, Card Diamonds Eight),
+        (North, Card Diamonds Three), (East, Card Diamonds Queen)]
+
+tt12 = [(South, Card Hearts King), (West, Card Diamonds Jack),
+        (North, Card Diamonds Five), (East, Card Diamonds King)]
+-- N/S
+tt13 = [(South, Card Clubs Seven), (West, Card Clubs Nine),
+        (North, Card Diamonds Seven), (East, Card Clubs Queen)]
 
 
 
-
+-- had major help on this part.
 
 removeCardFromHand :: Card -> Hand -> Hand
 removeCardFromHand removeCard (p,cs) = (p, [c | c <- cs, c /= removeCard])
 
-{-
-checkPlay :: Hands -> Trick -> Bool
-checkPlay hs t = allLegal && allPossible
-    where firstSuit = suitLead t
-          allLegal = and [legal (playerHand p hs) (playerSuit p t) firstSuit
-                         | (p,c) <- t]
-          allPossible = and [possible (playerHand p hs) (playerCard p t)
-                            | (p,c) <- t ]
--}
+-- note for each hand, remove the card that was played in the trick.
+-- by the player from the hand.
+removeCardsFromHands :: Hands -> Trick -> Hands
+removeCardsFromHands hands trick = [removeCardFromHand c (pH,cs)
+                                   | (pH,cs) <- hands, (pT,c) <- trick, pT == pH]
+
+-- note removes tricks from hands once they are used.
+checkAllPlays :: Hands -> [Trick] -> Bool
+checkAllPlays [] _            = True
+checkAllPlays _ []            = True
+checkAllPlays hands trickList = checkPlay hands currentTrick &&
+                                checkAllPlays emptiedHands remainderTricks
+                          where currentTrick = head trickList
+                                emptiedHands = removeCardsFromHands hands currentTrick
+                                remainderTricks = tail trickList
