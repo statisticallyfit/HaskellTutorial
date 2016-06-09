@@ -1,3 +1,6 @@
+import Data.List (elemIndex)
+
+
 -- note for joinLines : add justifications on all lines but the last til linelen reached.
 
 
@@ -45,6 +48,8 @@ blankify (p:ps) str = blankify rs blankedStr
 -}
 
 
+
+
 -- note inserts one blank at the specified position
 --insertBlank 3 "012345"    ==   "012 345"
 insertBlank :: Int -> String -> String
@@ -78,6 +83,33 @@ justifyLine lineLen str
 
 
 ----------------------------------------------------------------------------------------
+--- These methods are for testing:
+
+
+-- note the "once" version of splitAtBlanks. Splits only at first blank
+splitAtBlank :: String -> [String]
+splitAtBlank str
+    | elem ' ' str = [fst splitStr, snd splitStr]
+    | otherwise    = [str]
+    where splitStr = splitAt pos str
+          (Just pos) = elemIndex ' ' str
+
+-- note splits the line into pieces based at the starting position of each blank.
+--splitAtBlanks :: String -> [String]
+
+splitAtBlanks []   = []
+splitAtBlanks str
+    | elem ' ' str = [fstSplit, splitAtBlanks sndSplit]
+    | otherwise    = [str]
+    where (fstSplit, sndSplit) = (fst splitted, snd splitted)
+          splitted = splitAt pos str
+          (Just pos) = elemIndex ' ' str
+
+
+--testBlanksLengths :: String -> [Int]
+--testBlanksLengths splitStr = [| sp <- splitStr]
+
+
 
 str = "stellar cosmos in the milky way"
 n = length str + 20
