@@ -78,3 +78,72 @@ convertToMove 2 = Scissors
 echo :: Strategy
 echo (latest : rest) = latest
 echo []              = Rock -- note when not eprevious moves do Rock
+
+
+
+
+
+
+
+
+
+
+-- 8.4 EXAMPLES  OF DO NOTATION --------------------------------------------------------
+
+reverseTwoLines :: IO()
+reverseTwoLines = do line1 <- getLine
+                     line2 <- getLine
+                     let rev1 = reverse line1
+                     let rev2 = reverse line2 -- since no longer io, cannot use do <-
+                     putStrLn rev2
+                     putStrLn rev1
+
+getInt :: IO Integer
+getInt = do line <- getLine
+            return (read line :: Integer)
+
+main = do
+    reverseTwoLines
+    getInt
+
+
+
+
+
+
+
+
+
+-- 8.5 LOOPS AND RECURSION -----------------------------------------------------------
+
+-- note called tail recursive since only recursive part is last statement.
+copy :: IO()
+copy = do line <- getLine
+          putStrLn line
+          copy
+
+
+copyN :: Integer -> IO()
+copyN n = if n <= 0
+          then return ()
+          else do line <- getLine
+                  putStrLn line
+                  copyN (n - 1)
+
+-- note copy lines until empty line is encountered
+copyEmpty :: IO()
+copyEmpty = do line <- getLine
+               if line == ""
+               then return ()
+               else do putStrLn line
+                       copyEmpty
+
+
+
+-- note count num lines you have copied. n is accumulator, start it with 0.
+copyCount :: Integer -> IO()
+copyCount n = do line <- getLine
+                 if line == ""
+                 then putStrLn (show n ++ " lines copied.")
+                 else do putStrLn line
+                         copyCount (n + 1)

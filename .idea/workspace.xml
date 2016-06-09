@@ -2,13 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="eb0702c0-b7c3-41d6-bca5-72cdf359dc76" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.33.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/IOGame.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.1.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.3.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.27.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.27_28_29_32_34.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.10.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.11.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.12.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.13.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.3.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.3_4_5_6_7.hs" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.31.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.31.hs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/IOGame.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/IOGame.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -31,31 +31,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="IOGame.hs" pinned="false" current-in-tab="false">
+      <file leaf-file-name="IOGame.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/IOGame.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="62" column="21" selection-start-line="62" selection-start-column="21" selection-end-line="62" selection-end-column="21" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="exercise8.3.hs" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.3.hs">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.631664">
-              <caret line="145" column="22" selection-start-line="145" selection-start-column="22" selection-end-line="145" selection-end-column="22" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="exercise8.1.hs" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.1.hs">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="19" column="0" selection-start-line="19" selection-start-column="0" selection-end-line="28" selection-end-column="29" />
+            <state vertical-scroll-proportion="0.6930533">
+              <caret line="144" column="32" selection-start-line="144" selection-start-column="32" selection-end-line="144" selection-end-column="32" />
               <folding />
             </state>
           </provider>
@@ -74,10 +54,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter5/exercise5.11_5.12.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter5/exercise5.11_5.12_5.13.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter5/exercise5.18.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter5/exercise5.19.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter5/exercise5.20.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter5/exercise5.21.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter5/exercise5.22.hs" />
@@ -122,9 +98,13 @@
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.33.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.27_28_29_32.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.1.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/IOGame.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise8.3.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.3.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.10.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.11.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.12.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.13.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/IOGame.hs" />
       </list>
     </option>
   </component>
@@ -847,12 +827,12 @@
       <workItem from="1465275207333" duration="5261000" />
       <workItem from="1465286016594" duration="27508000" />
       <workItem from="1465366824619" duration="26077000" />
-      <workItem from="1465452329444" duration="17910000" />
+      <workItem from="1465452329444" duration="27615000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="361408000" />
+    <option name="totallyTimeSpent" value="371113000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="832" height="783" extended-state="0" />
@@ -914,34 +894,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set2_functions/exercise5_bind.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.22778675">
-          <caret line="4" column="0" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter19_ApplyingStructure/ApplyingStructure.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/MonadCowExample.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.46042004">
-          <caret line="15" column="33" selection-start-line="15" selection-start-column="33" selection-end-line="15" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set1_instances/exercise1_Nope.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/***ex18.4_eitherMonad.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="2.0872376">
@@ -1223,26 +1175,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.31.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="94" column="0" selection-start-line="94" selection-start-column="0" selection-end-line="94" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/DefiningFunctionsOverLists.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="2.5347335">
           <caret line="172" column="59" selection-start-line="172" selection-start-column="59" selection-end-line="172" selection-end-column="59" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.33.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="21" column="30" selection-start-line="21" selection-start-column="30" selection-end-line="21" selection-end-column="30" />
           <folding />
         </state>
       </provider>
@@ -1263,18 +1199,66 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/IOGame.hs">
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.3_4_5_6_7.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="62" column="21" selection-start-line="62" selection-start-column="21" selection-end-line="62" selection-end-column="21" />
+        <state vertical-scroll-proportion="0.47819063">
+          <caret line="207" column="0" selection-start-line="207" selection-start-column="0" selection-end-line="207" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.3.hs">
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.33.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.631664">
-          <caret line="145" column="22" selection-start-line="145" selection-start-column="22" selection-end-line="145" selection-end-column="22" />
+        <state vertical-scroll-proportion="0.24555735">
+          <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.31.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="2.0743134">
+          <caret line="94" column="0" selection-start-line="94" selection-start-column="0" selection-end-line="94" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.10.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="23" column="0" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.11.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.12.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="9" column="10" selection-start-line="9" selection-start-column="10" selection-end-line="9" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.13.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.36833602">
+          <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/IOGame.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.6930533">
+          <caret line="144" column="32" selection-start-line="144" selection-start-column="32" selection-end-line="144" selection-end-column="32" />
           <folding />
         </state>
       </provider>

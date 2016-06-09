@@ -82,15 +82,21 @@ echo (latest : rest) = latest
 echo []              = Rock -- note when not eprevious moves do Rock
 
 
-
-
-
-
-
-
-
-
-
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
 
 -- exercise 3 --------------------------------------------------------------------------
 
@@ -115,7 +121,7 @@ Scissors because we draw if she has Scissors and I win if she has Paper.
 -}
 lastTwo :: Strategy
 lastTwo (a:b:cs)
-    | a == b    = elimOneStrategy (a:b:cs)
+    | a == b    = elimOneStrategy [a] -- note must be list because of strategy's type
     | otherwise = randomStrategy (a:b:cs)
 
 -- precondition assume last two moves are the same so that m1 == m2. Note that it
@@ -139,18 +145,75 @@ t3 = lastTwo [Scissors, Scissors, Paper] == Paper
 
 -- exercise 5 --------------------------------------------------------------------------
 
+-- note takes a list of moves and returns their frequencies
+-- returns a list of length 3 which holds the move and its frequency
+-- postcondition (rockCount, paperCount, scissorsCount)
+frequencies :: [Move] -> (Int, Int, Int) -> (Int, Int, Int)
+frequencies [] (rc, pc, sc) = (rc, pc, sc)
+frequencies (m:ms) (rc, pc, sc)
+    | m == Rock      = frequencies ms (rc + 1, pc, sc)
+    | m == Paper     = frequencies ms (rc, pc + 1, sc)
+    | otherwise      = frequencies ms (rc, pc, sc + 1)
+
 
 -- note: assume the opponent is about to choose his least frequent move. Now
 -- choose the move that will either win or draw in response to that one.
+-- So if least Frequent is Scissors, then choose the best of Rock/Paper. Paper beats
+-- Rock so choose Rock. That way
+-- > if she chooses Rock, you beat her
+-- > if she cooses Paper, there is a draw
 leastFrequentStrategy :: Strategy
-leastFrequentStrategy 
+leastFrequentStrategy moves = elimOneStrategy [leastFreqMove]
+        where (rc,pc,sc) = frequencies moves (0,0,0)
+              leastFreqCount = minimum [rc, pc, sc]
+              [rBool, pBool, sBool] = fmap (== leastFreqCount) [rc, pc, sc]
+              leastFreqMove | rBool = Rock
+                            | pBool = Paper
+                            | sBool = Scissors
 
+
+
+-- exercise 6 --------------------------------------------------------------------------
 
 -- note: assume the opponent is about to choose his MOST frequent move. Now
 -- choose the move that will either win or draw in response to that one.
+mostFrequentStrategy :: Strategy
+mostFrequentStrategy moves = elimOneStrategy [mostFreqMove]
+        where (rc,pc,sc) = frequencies moves (0,0,0)
+              mostFreqCount = maximum [rc, pc, sc]
+              [rBool, pBool, sBool] = fmap (== mostFreqCount) [rc, pc, sc]
+              mostFreqMove | rBool = Rock
+                           | pBool = Paper
+                           | sBool = Scissors
+
+
+ms = [Rock, Rock, Rock, Rock, Paper, Paper, Scissors, Paper, Paper, Scissors, Paper,
+      Rock, Scissors, Rock, Scissors, Rock, Rock, Scissors, Paper, Paper, Rock,
+      Rock, Rock, Rock, Rock, Rock, Paper, Scissors]
+
+f1 = leastFrequentStrategy ms -- will be Paper since leastFreq is Scissors
+f2 = mostFrequentStrategy ms -- will be Scissors since mostfreq is Rock
 
 
 
 
 
+-- exercise 7 --------------------------------------------------------------------------
+-- Had help here now i understand answer. But how to test these since none of the
+-- strategies return list of moves?
+alternate :: Strategy -> Strategy -> Strategy
+alternate primaryStrategy secondaryStrategy moves
+    | even (length moves) = primaryStrategy moves
+    | otherwise           = secondaryStrategy moves
 
+
+alternate' :: Strategy -> Strategy -> Strategy
+alternate' firstStrategy alternateStrategy moves
+    = map ($ moves) [firstStrategy, alternateStrategy]
+                            !! (length moves `rem` 2)
+
+
+
+
+-- exercise 8 --------------------------------------------------------------------------
+-- HELP HELP HELP TODO IMPORTANT
