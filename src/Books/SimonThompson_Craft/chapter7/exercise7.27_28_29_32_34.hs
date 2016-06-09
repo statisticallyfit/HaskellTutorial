@@ -1,4 +1,5 @@
 import Prelude hiding (Word, getLine)
+import Data.List (elemIndex, splitAt)
 
 
 whitespace = ['\n', '\t', ' ']
@@ -84,10 +85,6 @@ dropLine len (w:ws)
 
 
 -- note n = line length
-{-splitLines :: Int -> [Word] -> [Line]
-splitLines _ [] = []
-splitLines n ws = getLine n ws : splitLines n (dropLine n ws)-}
-
 splitLines :: [Word] -> [Line]
 splitLines [] = []
 splitLines ws = getLine n ws : splitLines (dropLine n ws)
@@ -97,7 +94,8 @@ splitLines ws = getLine n ws : splitLines (dropLine n ws)
 
 -- note could have used joinLines
 printLines :: [Line] -> IO()
-printLines lines = putStrLn $ concat ["\t" ++ joinLine line ++ "\n" | line <- lines]
+printLines lines = putStrLn $ "\n" ++ concat ["   " ++ joinLine line ++ "\n"
+                                                | line <- lines]
 
 
 -- note fills a text string into lines
@@ -122,16 +120,21 @@ blackSheepLines = fill blackSheepString
 
 
 -- exercise 28 ------------------------------------------------------------------------
+-- note joins and trims the end
 joinLine :: Line -> String
-joinLine []     = []
-joinLine (w:ws) = w ++ " " ++ joinLine ws
+joinLine str = trim $ join str
+    where join str = concat (fmap (++ " ") str)
+          trim str = trimmedBack (trimmedFront str)
+          trimmedFront str = dropWhile (== ' ') str
+          trimmedBack str = reverse $ dropWhile (== ' ') (reverse str)
 
 -- exercise 29 ------------------------------------------------------------------------
 joinLines :: [Line] -> String
 joinLines []     = []
 joinLines (l:ls) = joinLine l ++ "\n" ++ joinLines ls
 
-
+{-
+uncover
 main = do
     print $ dropLine 0 line
     print $ dropLine 1 line
@@ -156,3 +159,53 @@ main = do
                        \ three bags full!"
     putStrLn ""
     print $ joinLines blackSheepLines
+-}
+
+
+
+
+
+
+-- exercise 32 -----------------------------------------------------------------------
+
+wc :: Text -> (Int, Int, Int)
+wc text = (numChars, numWords, numLines)
+    where words = splitWords text
+          numChars = sum $ fmap length words
+          numWords = length $ words
+          numLines = length $ fill text
+
+wcFormat :: Text -> (Int, Int, Int)
+wcFormat text = (numChars, numWords, numLines)
+        where filledLines = fill text
+              filledText = joinLines $ filledLines
+              words = splitWords filledText
+              numChars = sum $ fmap length words
+              numWords = length $ words
+              numLines = length $ filledLines
+
+
+
+-- exercise 34 -----------------------------------------------------------------------
+-- precondition - the element with is for certain the list to be replcae by rep at n pos.
+{-
+replace :: String -> String -> [String] -> [String] -- Ord a => a -> a -> [a] -> [a]
+replace rep with xs = first ++ [with] ++ second
+    where (Just pos) = elemIndex rep xs
+          xs' = [x | x <- xs, x /= rep ] -- return all elements with rep removed
+          (first, second) = splitAt pos xs'
+-}
+
+subst :: String -> String -> String -> String
+subst oldSub newSub text
+    | elemIndex oldSub words == Nothing = text
+    | otherwise                         = joinLine editedList
+    where words = splitWords text
+          (Just oldSubIndex) = elemIndex oldSub words
+          (firstWordList, secondWordList) = splitAt oldSubIndex words
+          editedList = firstWordList ++ [newSub] ++ (tail secondWordList)
+
+
+main = do
+    print $ subst "much" "tall" "How much is that?"
+    print $ subst "good" "tall" "How much is that?"

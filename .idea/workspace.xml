@@ -2,6 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="eb0702c0-b7c3-41d6-bca5-72cdf359dc76" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.33.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/IOGame.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.1.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.3.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.27.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.27_28_29_32_34.hs" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.31.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.31.hs" />
     </list>
@@ -26,31 +31,31 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="DefiningFunctionsOverLists.hs" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/DefiningFunctionsOverLists.hs">
+      <file leaf-file-name="IOGame.hs" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/IOGame.hs">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="172" column="59" selection-start-line="172" selection-start-column="59" selection-end-line="172" selection-end-column="59" />
+              <caret line="62" column="21" selection-start-line="62" selection-start-column="21" selection-end-line="62" selection-end-column="21" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="exercise7.27.hs" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.27.hs">
+      <file leaf-file-name="exercise8.3.hs" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.3.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="53" column="0" selection-start-line="53" selection-start-column="0" selection-end-line="53" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.631664">
+              <caret line="145" column="22" selection-start-line="145" selection-start-column="22" selection-end-line="145" selection-end-column="22" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="exercise7.31.hs" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.31.hs">
+      <file leaf-file-name="exercise8.1.hs" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.1.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.8901454">
-              <caret line="108" column="38" selection-start-line="108" selection-start-column="38" selection-end-line="108" selection-end-column="38" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="19" column="0" selection-start-line="19" selection-start-column="0" selection-end-line="28" selection-end-column="29" />
               <folding />
             </state>
           </provider>
@@ -69,12 +74,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set2_functions/exercise5_bind.hs" />
-        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set2_functions/***exercise6_flipType.hs" />
-        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter19_ApplyingStructure/ApplyingStructure.hs" />
-        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set1_instances/***exercise2_PhhhbbtttEither.hs" />
-        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/***ex18.4_eitherMonad.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter5/exercise5.5.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter5/exercise5.11_5.12.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter5/exercise5.11_5.12_5.13.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter5/exercise5.18.hs" />
@@ -120,6 +119,12 @@
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/DefiningFunctionsOverLists.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.27.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.31.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.33.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.27_28_29_32.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.1.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/IOGame.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise8.3.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.3.hs" />
       </list>
     </option>
   </component>
@@ -157,9 +162,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
-      <pane id="Scratches" />
       <pane id="Scope" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -232,7 +236,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="chapter7" />
+              <option name="myItemId" value="chapter8" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -260,6 +264,7 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -283,16 +288,16 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/Books/SimonThompson_Craft" />
+      <recent name="$PROJECT_DIR$/src" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8" />
       <recent name="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7" />
       <recent name="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set1_instances" />
       <recent name="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter16_Functor/chapterExercises/set2_flipArguments" />
       <recent name="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter16_Functor/chapterExercises/set2_flipargs" />
-      <recent name="$PROJECT_DIR$/src/Books" />
-    </key>
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/src/Books/SimonThompson_Craft" />
-      <recent name="$PROJECT_DIR$/src" />
     </key>
   </component>
   <component name="RunManager" selected="Haskell.HaskellTutorial">
@@ -842,12 +847,12 @@
       <workItem from="1465275207333" duration="5261000" />
       <workItem from="1465286016594" duration="27508000" />
       <workItem from="1465366824619" duration="26077000" />
-      <workItem from="1465452329444" duration="1947000" />
+      <workItem from="1465452329444" duration="17910000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="345445000" />
+    <option name="totallyTimeSpent" value="361408000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="832" height="783" extended-state="0" />
@@ -909,34 +914,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set2_functions/exercise3_liftM2.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="6" column="3" selection-start-line="0" selection-start-column="0" selection-end-line="6" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set2_functions/exercise4_flippedApply.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.18416801">
-          <caret line="6" column="17" selection-start-line="0" selection-start-column="0" selection-end-line="6" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set1_instances/exercise4_List.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="60" column="28" selection-start-line="60" selection-start-column="28" selection-end-line="60" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set2_functions/exercise6_flipType.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7980614">
-          <caret line="26" column="9" selection-start-line="26" selection-start-column="9" selection-end-line="26" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter18_Monad/chapterExercises/set2_functions/exercise5_bind.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-0.22778675">
@@ -1246,26 +1223,58 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/DefiningFunctionsOverLists.hs">
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.31.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
+          <caret line="94" column="0" selection-start-line="94" selection-start-column="0" selection-end-line="94" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/DefiningFunctionsOverLists.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="2.5347335">
           <caret line="172" column="59" selection-start-line="172" selection-start-column="59" selection-end-line="172" selection-end-column="59" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.27.hs">
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.33.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="53" column="0" selection-start-line="53" selection-start-column="0" selection-end-line="53" selection-end-column="0" />
+          <caret line="21" column="30" selection-start-line="21" selection-start-column="30" selection-end-line="21" selection-end-column="30" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.31.hs">
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.27_28_29_32_34.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.8901454">
-          <caret line="108" column="38" selection-start-line="108" selection-start-column="38" selection-end-line="108" selection-end-column="38" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="195" column="38" selection-start-line="195" selection-start-column="38" selection-end-line="195" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.1.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="19" column="0" selection-start-line="19" selection-start-column="0" selection-end-line="28" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/IOGame.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="62" column="21" selection-start-line="62" selection-start-column="21" selection-end-line="62" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.3.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.631664">
+          <caret line="145" column="22" selection-start-line="145" selection-start-column="22" selection-end-line="145" selection-end-column="22" />
           <folding />
         </state>
       </provider>
