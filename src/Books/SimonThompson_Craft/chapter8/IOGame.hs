@@ -1,5 +1,6 @@
 import Data.Time
 import System.IO.Unsafe
+import Text.PrettyPrint.Boxes
 
 
 data Move = Rock | Paper | Scissors deriving (Eq, Show)
@@ -147,3 +148,48 @@ copyCount n = do line <- getLine
                  then putStrLn (show n ++ " lines copied.")
                  else do putStrLn line
                          copyCount (n + 1)
+
+
+
+
+
+
+
+-- 8.6 ROCK PAPER SCISSORS - PLAYING THE GAME.
+
+
+t1, t2, t3, t4, t5 :: Tournament
+t1 = ([Rock, Rock,Paper],[Scissors,Paper,Rock])
+t2 = ([Scissors, Rock,Paper],[Scissors,Rock,Paper])
+t3 = ([Paper, Rock, Paper],[Scissors, Paper, Rock])
+t4 = ([Scissors, Paper, Rock],[Rock, Scissors, Paper])
+t5 = ([Rock, Scissors, Paper], [Scissors, Paper, Rock])
+
+
+
+showTournament :: Tournament -> String
+showTournament (myMoves, yourMoves) =
+    printBox $ hsep 2 left (map (vcat left . map text) (transpose rows))
+    where rows = [ [m, y] | (m, y) <- zip myMoves yourMoves]
+
+{-"Mine:          Yours:\n" ++
+    concat [show m ++ "          " ++ show y ++ "\n" | (m, y) <- zip myMoves yourMoves]-}
+
+
+{-"mine:  "
+                                      ++ concat [show m ++ ", " | m <- myMoves]
+                                      ++ "\nyours: "
+                                      ++ concat [show y ++ ", " | y <- yourMoves]-}
+
+{-
+
+play :: Strategy -> IO()
+play strategy = playInteractive strategy ([], [])
+
+playInteractive :: Strategy -> Tournament -> IO()
+playInteractive s t@(mine, yours) =
+    do
+        ch <- getChar
+        if not (ch 'elem' "rpsRPS")
+        then (showResults t)
+-}
