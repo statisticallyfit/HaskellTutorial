@@ -1,6 +1,6 @@
 import Data.Time
 import System.IO.Unsafe
-import Text.PrettyPrint.Boxes
+import Data.Text (pack, unpack, justifyLeft)
 
 
 data Move = Rock | Paper | Scissors deriving (Eq, Show)
@@ -13,16 +13,6 @@ type Strategy = [Move] -> Move -- note next move depends on previous opponent mo
 
 
 
-beat :: Move -> Move
-beat Rock = Paper
-beat Paper = Scissors
-beat _ = Rock
-
-lose :: Move -> Move
-lose Rock = Scissors
-lose Paper = Rock
-lose _ = Paper
-
 outcome :: Move -> Move -> Result
 outcome Rock Scissors     = Win
 outcome Paper Rock        = Win
@@ -34,10 +24,110 @@ outcome Rock Rock         = Draw
 outcome Paper Paper       = Draw
 outcome Scissors Scissors = Draw
 
+-- OFFICIAL STRATEGIES --------------------------------------------------------------
 
 
 
--- STRATEGIES ------------------------------------------------------------------------
+randomInt :: Integer -> IO Integer -- note uses the IO monad
+randomInt n = do time <- getCurrentTime
+                 return ((`rem` n) $ read $ take 6 $
+                                formatTime defaultTimeLocale "%q" time)
+
+randInt :: Integer -> Integer
+randInt = unsafePerformIO . randomInt
+
+convertIntegerToMove :: Integer -> Move
+convertIntegerToMove 0 = Rock
+convertIntegerToMove 1 = Paper
+convertIntegerToMove 2 = Scissors
+
+
+frequencies :: [Move] -> (Int, Int, Int) -> (Int, Int, Int)
+frequencies [] (rc, pc, sc) = (rc, pc, sc)
+frequencies (m:ms) (rc, pc, sc)
+    | m == Rock      = frequencies ms (rc + 1, pc, sc)
+    | m == Paper     = frequencies ms (rc, pc + 1, sc)
+    | otherwise      = frequencies ms (rc, pc, sc + 1)
+
+beat :: Move -> Move
+beat Rock = Paper
+beat Paper = Scissors
+beat _ = Rock
+
+lose :: Move -> Move
+lose Rock = Scissors
+lose Paper = Rock
+lose _ = Paper
+------------------------------------------------------------------------------------------
+cycle :: Strategy
+cycle moves = case (length moves) `rem` 3 of
+                0 -> Rock
+                1 -> Paper
+                2 -> Scissors
+
+
+echo :: Strategy
+echo (latest : rest) = latest
+echo []              = Rock
+
+
+
+beatLastMove :: Strategy
+beatLastMove []     = Rock -- arbitrary choice
+beatLastMove (m:ms) = beat m
+
+loseLastMove :: Strategy
+loseLastMove []     = Scissors
+loseLastMove (m:ms) = lose m
+
+
+lastTwo :: Strategy
+lastTwo (a:b:cs)
+    | a == b    = elimOneStrategy [a]
+    | otherwise = randomStrategy (a:b:cs)
+
+elimOneStrategy :: Strategy
+elimOneStrategy (m:ms)
+    | m == Rock  = Scissors
+    | m == Paper = Rock
+    | otherwise  = Paper
+
+randomStrategy :: Strategy
+randomStrategy _ = convertIntegerToMove (randInt 3)
+
+
+
+leastFrequentStrategy :: Strategy
+leastFrequentStrategy moves = elimOneStrategy [leastFreqMove]
+        where (rc,pc,sc) = frequencies moves (0,0,0)
+              leastFreqCount = minimum [rc, pc, sc]
+              [rBool, pBool, sBool] = fmap (== leastFreqCount) [rc, pc, sc]
+              leastFreqMove | rBool = Rock
+                            | pBool = Paper
+                            | sBool = Scissors
+
+mostFrequentStrategy :: Strategy
+mostFrequentStrategy moves = elimOneStrategy [mostFreqMove]
+        where (rc,pc,sc) = frequencies moves (0,0,0)
+              mostFreqCount = maximum [rc, pc, sc]
+              [rBool, pBool, sBool] = fmap (== mostFreqCount) [rc, pc, sc]
+              mostFreqMove | rBool = Rock
+                           | pBool = Paper
+                           | sBool = Scissors
+
+
+alternate :: Strategy -> Strategy -> Strategy
+alternate primaryStrategy secondaryStrategy moves
+    | even (length moves) = primaryStrategy moves
+    | otherwise           = secondaryStrategy moves
+
+
+
+
+
+
+
+-- MAKING STRATEGIES -----------------------------------------------------------------
 
 -- 1 constant
 rock, paper, scissors :: Strategy
@@ -45,6 +135,7 @@ rock _ = Rock
 paper _ = Paper
 scissors _ = Scissors
 
+{-
 
 -- 2 cycle through all three possibilities
 cycle :: Strategy
@@ -56,7 +147,7 @@ cycle moves = case (length moves) `rem` 3 of
 
 -- 3 random
 randomStrategy :: Strategy
-randomStrategy _ = convertToMove (randInt 3)
+randomStrategy _ = convertIntegerToMove (randInt 3)
 
 randomInt :: Integer -> IO Integer -- note uses the IO monad
 randomInt n = do time <- getCurrentTime
@@ -66,10 +157,10 @@ randomInt n = do time <- getCurrentTime
 randInt :: Integer -> Integer
 randInt = unsafePerformIO . randomInt
 
-convertToMove :: Integer -> Move
-convertToMove 0 = Rock
-convertToMove 1 = Paper
-convertToMove 2 = Scissors
+convertIntegerToMove :: Integer -> Move
+convertIntegerToMove 0 = Rock
+convertIntegerToMove 1 = Paper
+convertIntegerToMove 2 = Scissors
 
 
 -- 4 echo last move
@@ -82,6 +173,7 @@ echo []              = Rock -- note when not eprevious moves do Rock
 
 
 
+-}
 
 
 
@@ -102,12 +194,6 @@ reverseTwoLines = do line1 <- getLine
 getInt :: IO Integer
 getInt = do line <- getLine
             return (read line :: Integer)
-
-main = do
-    reverseTwoLines
-    getInt
-
-
 
 
 
@@ -164,32 +250,65 @@ t2 = ([Scissors, Rock,Paper],[Scissors,Rock,Paper])
 t3 = ([Paper, Rock, Paper],[Scissors, Paper, Rock])
 t4 = ([Scissors, Paper, Rock],[Rock, Scissors, Paper])
 t5 = ([Rock, Scissors, Paper], [Scissors, Paper, Rock])
+tLong = (fst t1 ++ fst t2 ++ fst t3, snd t1 ++ snd t2 ++ snd t3 )
+
 
 
 
 showTournament :: Tournament -> String
-showTournament (myMoves, yourMoves) =
-    printBox $ hsep 2 left (map (vcat left . map text) (transpose rows))
-    where rows = [ [m, y] | (m, y) <- zip myMoves yourMoves]
+showTournament (myMoves, yourMoves) = "Mine:" ++ topSpace ++ " | Yours:\n" ++
+    take 19 (repeat '-') ++ "\n" ++ -- note len of above top line + 2 for Scissors (rs)
+    concat [(justifyAndLine m) ++ show y ++ "\n" | (m,y) <- zip myMoves yourMoves]
+    where justifyAndLine m = take (lenM m - 2) (justify m) ++ "| "
+          lenM m = length (justify m)
+          justify m = unpack (justifyLeft n ' ' (pack (show m)))
+          n = length space + 3 -- length (space ++ "    ") -- + a space of 4
+          space = take lenScis (repeat ' ')  -- take 16 (repeat ' ')
+          topSpace = take (lenScis - (length "Mine:")) (repeat ' ')
+          lenScis = length (show Scissors)
 
-{-"Mine:          Yours:\n" ++
-    concat [show m ++ "          " ++ show y ++ "\n" | (m, y) <- zip myMoves yourMoves]-}
+-- note assume most recent is first so show that last in the tournament box.
+printTournament :: Tournament -> IO()
+printTournament (myMoves, yourMoves) = putStrLn $ showTournament (reverse myMoves,
+                                                                  reverse yourMoves)
 
 
-{-"mine:  "
-                                      ++ concat [show m ++ ", " | m <- myMoves]
-                                      ++ "\nyours: "
-                                      ++ concat [show y ++ ", " | y <- yourMoves]-}
 
-{-
+
+convertCharToMove :: Char -> Move
+convertCharToMove ch | ch == 'r' = Rock
+                     | ch == 's' = Scissors
+                     | ch == 'p' = Paper
+
 
 play :: Strategy -> IO()
 play strategy = playInteractive strategy ([], [])
 
+-- note the @ matches the constructor 't' to what is inside (mine, yours) so now
+-- t is holding mine and yours lists.
+-- note assume computer is responding to player.
 playInteractive :: Strategy -> Tournament -> IO()
-playInteractive s t@(mine, yours) =
-    do
-        ch <- getChar
-        if not (ch 'elem' "rpsRPS")
-        then (showResults t)
+playInteractive strategy t@(mine, yours) =
+    do putStr "Input char >  "
+       ch <- getChar
+       if not (ch `elem` "rpsRPS")
+       then do putStrLn "\n"
+               printTournament t
+       else do let yourMove = convertCharToMove ch
+               let next = strategy (yourMove:yours) --- note since yours is opponent for computer.
+               putStrLn ("\nYou played: " ++ [ch] ++ " now I play: " ++ show next)
+               playInteractive strategy (next:mine, yourMove:yours)
+
+
+{-
+NOTE original by book - wasn't responding direclty to most recent play of opponent (ME)
+
+       else do let next = strategy yours --- note since yours is opponent for computer.
+               putStrLn ("\nYou played: " ++ [ch] ++ " now I play: " ++ show next)
+               let yourMove = convertCharToMove ch
+               playInteractive strategy (next:mine, yourMove:yours)
 -}
+
+
+
+
