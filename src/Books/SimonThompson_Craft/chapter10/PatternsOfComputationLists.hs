@@ -83,7 +83,7 @@ foldr1 (*) [1..6] = 720
 
 NOTE foldr --- only different thing is the seed value (a) before [a]
 
-foldr            :: (a -> a -> a) -> a -> [a] -> a
+foldr            :: (a -> b -> b) -> b -> [a] -> b
 foldr f s []     = s
 foldr f s (x:xs) = f x (foldr f s xs)
 
@@ -101,3 +101,38 @@ foldr1 f xs = foldr f (last xs) (init xs)
 -- equals (because seed last xs) will be fed in at the end.
 
 -}
+
+
+-- FOLDR Examples
+rev :: [a] -> [a]
+rev xs = foldr snoc [] xs
+
+snoc :: a -> [a] -> [a]
+snoc x xs = xs ++ [x]
+
+rev' [] = []
+rev' (x:xs) = snoc x (rev xs)
+
+{-
+NOTE evaluation
+
+rev [1,2,3,4]
+= snoc 1 (rev [2,3,4])
+= snoc 1 (snoc 2 (snoc 3 [4]))
+= snoc 1 (snoc 2 [4,3])
+= snoc 1 [4,3,2]
+= [4,3,2,1]
+-}
+
+
+
+iSort :: [Integer] -> [Integer]
+iSort xs = foldr insert [] xs
+
+-- precondition: the list y:ys is sorted ascendingly. Duplicates are allowed.
+-- postcondition: the result list is sorted ascendingly and duplicates are removed.
+insert           :: Integer -> [Integer] -> [Integer]
+insert x []      = [x]
+insert x (y:ys)
+    | y >= x     = x : y : ys
+    | otherwise  = y : insert x ys
