@@ -28,12 +28,13 @@ init' (x:xs) = x : init' xs
 
 
 
---init :: [a] -> [a]
-init xs = foldr skipLast [] xs
+init :: [a] -> [a]
+init xs = tail $ foldr shiftLastToFirst [] xs
 
 
 shiftLastToFirst :: a -> [a] -> [a]
-
+shiftLastToFirst last [] = [last]
+shiftLastToFirst pred (last : preds) = last : pred : preds
 ---------------------------------------------------------------------------------
 
 init'' :: Eq a => [a] -> [a]
