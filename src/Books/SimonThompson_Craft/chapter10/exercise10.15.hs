@@ -29,11 +29,10 @@ init' (x:xs) = x : init' xs
 
 
 --init :: [a] -> [a]
---init xs = foldr skipLast [] xs
+init xs = foldr skipLast [] xs
 
 
-skipLast :: Eq a => a -> [a] -> [a]
-skipLast x y 
+shiftLastToFirst :: a -> [a] -> [a]
 
 ---------------------------------------------------------------------------------
 
@@ -44,7 +43,7 @@ init'' (x:xs)
     where rest = skipLast x xs
 
 -- needs to be the type of the foldr function (a -> b -> b), b = [a]
-skipLast'' :: Eq a => a -> [a] -> [a]
-skipLast'' x y
+skipLast :: Eq a => a -> [a] -> [a]
+skipLast x y
     | length y == 1 = [x]
     | otherwise     = y
