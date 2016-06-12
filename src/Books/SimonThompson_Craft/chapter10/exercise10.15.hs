@@ -25,3 +25,26 @@ init'        :: [a] -> [a]
 init' [x]    = []
 init' (x:xs) = x : init' xs
 
+
+
+
+--init :: [a] -> [a]
+--init xs = foldr skipLast [] xs
+
+
+skipLast :: Eq a => a -> [a] -> [a]
+skipLast x y 
+
+---------------------------------------------------------------------------------
+
+init'' :: Eq a => [a] -> [a]
+init'' (x:xs)
+    | length rest == 1 = rest -- note if only one element
+    | otherwise        = x : init'' (rest)-- note otherwise if tail then continue
+    where rest = skipLast x xs
+
+-- needs to be the type of the foldr function (a -> b -> b), b = [a]
+skipLast'' :: Eq a => a -> [a] -> [a]
+skipLast'' x y
+    | length y == 1 = [x]
+    | otherwise     = y
