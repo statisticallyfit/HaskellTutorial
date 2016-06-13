@@ -23,12 +23,12 @@ unzip xs = foldr (\(a,b) (as,bs) -> (a:as, b:bs)) ([], []) xs
 
 -- method 1
 init :: [a] -> [a]
-init xs = tail $ foldr shiftLastToFirst [] xs
+init xs = tail $ foldr shiftLastToFirstOnce [] xs
 
 -- method 2
 init'        :: [a] -> [a]
 init' []     = []
-init' (x:xs) = shiftLastToFirst x (init' xs) -- pattern: f x (foldr f s xs)
+init' (x:xs) = shiftLastToFirstOnce x (init' xs) -- pattern: f x (foldr f s xs)
 
 -- method 3
 init''        :: [a] -> [a]
@@ -37,9 +37,9 @@ init'' (x:xs) = x : init'' xs
 
 
 
-shiftLastToFirst :: a -> [a] -> [a]
-shiftLastToFirst last [] = [last]
-shiftLastToFirst pred (last : preds) = last : pred : preds
+shiftLastToFirstOnce :: a -> [a] -> [a]
+shiftLastToFirstOnce last [] = [last]
+shiftLastToFirstOnce pred (last : preds) = last : pred : preds
 ---------------------------------------------------------------------------------
 
 -- method 4
@@ -47,11 +47,11 @@ init''' :: Eq a => [a] -> [a]
 init''' (x:xs)
     | length rest == 1 = rest -- note if only one element
     | otherwise        = x : init''' (rest)-- note otherwise if tail then continue
-    where rest = skipLast x xs
+    where rest = skipLastOnce x xs
 
 -- needs to be the type of the foldr function (a -> b -> b), b = [a]
-skipLast :: Eq a => a -> [a] -> [a]
-skipLast x y
+skipLastOnce :: Eq a => a -> [a] -> [a]
+skipLastOnce x y
     | length y == 1 = [x]
     | otherwise     = y
 
@@ -66,18 +66,18 @@ skipLast x y
 
 -- 3
 last1    :: [a] -> a
-last1 xs = head $ foldr shiftLastToFirst [] xs
+last1 xs = head $ foldr shiftLastToFirstOnce [] xs
 
 
 last2 :: [a] -> a
-last2 xs = head $ foldr keepLast [] xs
+last2 xs = head $ foldr keepLastOnce [] xs
 
 
 -- HELP how to declare this to return just last item (non list) but at same
 -- time have type signature [a] -> a not [a] -> [a] ?
 --last'        :: [a] -> a
 last' []    = []
-last' (x:xs) = keepLast x (last' xs)
+last' (x:xs) = keepLastOnce x (last' xs)
 
 
 last''    :: [a] -> a
@@ -85,6 +85,6 @@ last'' xs = head $ reverse xs
 
 -- note this is just like shiftLastToFirst except it ignores the rest, cares
 -- just about the last (successor value)
-keepLast                   :: a -> [a] -> [a]
-keepLast lastItem []       = [lastItem]
-keepLast _ (successor : _) = [successor]
+keepLastOnce                   :: a -> [a] -> [a]
+keepLastOnce lastItem []       = [lastItem]
+keepLastOnce _ (successor : _) = [successor]
