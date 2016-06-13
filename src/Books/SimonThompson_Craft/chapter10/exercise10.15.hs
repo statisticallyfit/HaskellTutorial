@@ -53,16 +53,30 @@ unzip xs = foldr (\(a,b) (as,bs) -> (a:as, b:bs)) ([], []) xs
 -- method 1 ------------------------------------------
 init :: [a] -> [a]
 init xs = tail $ foldr shiftLastToFirstOnce [] xs
+{-
+NOTE EVALUATION
 
+init [1,2,3,4,5]
+= foldr shift [] [1,2,3,4,5] -- IMPORTANT: f x (foldr f s xs)
+= shift 1 (foldr shift [] [2,3,4,5])
+= shift 1 (shift 2 (foldr shift [] [3,4,5]))
+= shift 1 (shift 2 (shift 3 (foldr shift [] [4,5])))
+= shift 1 (shift 2 (shift 3 (shift 4 (foldr shift [] [5]))))
+= shift 1 (shift 2 (shift 3 (shift 4 (shift 5 (foldr shift [] [])))))
+= shift 1 (shift 2 (shift 3 (shift 4 (shift 5 [] )))) -- help - does it end with []?
+= shift 1 (shift 2 (shift 3 (shift 4 [5] )))
+= shift 1 (shift 2 (shift 3 [5,4]))
+= shift 1 (shift 2 [5,3,4])
+= shift 1 [5,2,3,4]
+= [5,1,2,3,4]
+
+-}
 -- method 2 ------------------------------------------
 init'        :: [a] -> [a]
 init' []     = []
 init' (x:xs) = shiftLastToFirstOnce x (init' xs) -- pattern: f x (foldr f s xs)
 
-{-
-NOTE EVALUATION
 
--}
 -- method 3 ------------------------------------------
 init''        :: [a] -> [a]
 init'' [x]    = []
@@ -76,7 +90,7 @@ shiftLastToFirstOnce pred (last : preds) = last : pred : preds
 ------------------------------------------------------------------------------------
 
 -- method 4 ------------------------------------------
-init''' :: Eq a => [a] -> [a]
+init'''                :: Eq a => [a] -> [a]
 init''' (x:xs)
     | length rest == 1 = rest -- note if only one element
     | otherwise        = x : init''' (rest)-- note otherwise if tail then continue
@@ -84,11 +98,15 @@ init''' (x:xs)
 
 -- needs to be the type of the foldr function (a -> b -> b), b = [a]
 skipLastOnce :: Eq a => a -> [a] -> [a]
+skipLastOnce z [] = []
+skipLastOnce a bs = bs
+{-skipLastOnce :: Eq a => a -> [a] -> [a]
 skipLastOnce x y
     | length y == 1 = [x]
-    | otherwise     = y
+    | otherwise     = y-}
 
-
+-- HELP HELP HELP how to do this with skiplast and foldr?
+init4 xs = foldr skipLastOnce [] xs
 
 
 
