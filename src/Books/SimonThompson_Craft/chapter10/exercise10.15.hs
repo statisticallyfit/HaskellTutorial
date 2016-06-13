@@ -1,14 +1,43 @@
 import Prelude hiding (unzip, last, init)
 
 
--- 1 unzip
+-- 1 unzip ----------------------------------------------------------------------
+-- method 1 ------------------------------------------
 unzip' :: [(a, b)] -> ([a], [b])
 unzip' [] = ([], [])
 unzip' xs = (foldr first [] xs, foldr second [] xs)
      where first pair zs = [fst pair] ++ zs
            second pair zs = [snd pair] ++ zs
 
+{-
+NOTE EVALUATION
 
+foldr first [] [(1,'a'), (2,'b'), (3,'c')]
+= first (1, 'a') (foldr first [] [(2,'b'), (3,'c')])
+= 1 : (first (2,'b') (foldr first [] [(3,'c')])
+= 1 : 2 : (foldr first [] [(3,'c')])
+= 1 : 2 : (first (3,'c') (foldr first [] [])
+= 1 : 2 : 3 : []
+= [1,2,3]
+
+-}
+-- method 2 ------------------------------------------
+unzip'' :: [(a,b)] -> ([a],[b])
+unzip'' xs = (unzipFirst xs, unzipSecond xs)
+
+unzipFirst :: [(a, b)] -> [a]
+unzipFirst [] = []
+unzipFirst (p:ps) = first p (unzipFirst ps) -- IMPORTANTNOTE: f x (foldr f s xs)
+
+unzipSecond :: [(a,b)] -> [b]
+unzipSecond [] = []
+unzipSecond (p:ps) = second p (unzipSecond ps)
+
+first p zs = [fst p] ++ zs
+second p zs = [snd p] ++ zs
+
+
+-- method 3 ------------------------------------------
 -- HElP
 unzip :: [(a, b)] -> ([a], [b])
 unzip xs = foldr (\(a,b) (as,bs) -> (a:as, b:bs)) ([], []) xs
@@ -19,18 +48,22 @@ unzip xs = foldr (\(a,b) (as,bs) -> (a:as, b:bs)) ([], []) xs
 
 
 
--- 2 last
+-- 2 init  -------------------------------------------------------------------------
 
--- method 1
+-- method 1 ------------------------------------------
 init :: [a] -> [a]
 init xs = tail $ foldr shiftLastToFirstOnce [] xs
 
--- method 2
+-- method 2 ------------------------------------------
 init'        :: [a] -> [a]
 init' []     = []
 init' (x:xs) = shiftLastToFirstOnce x (init' xs) -- pattern: f x (foldr f s xs)
 
--- method 3
+{-
+NOTE EVALUATION
+
+-}
+-- method 3 ------------------------------------------
 init''        :: [a] -> [a]
 init'' [x]    = []
 init'' (x:xs) = x : init'' xs
@@ -40,9 +73,9 @@ init'' (x:xs) = x : init'' xs
 shiftLastToFirstOnce :: a -> [a] -> [a]
 shiftLastToFirstOnce last [] = [last]
 shiftLastToFirstOnce pred (last : preds) = last : pred : preds
----------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
 
--- method 4
+-- method 4 ------------------------------------------
 init''' :: Eq a => [a] -> [a]
 init''' (x:xs)
     | length rest == 1 = rest -- note if only one element
@@ -64,22 +97,23 @@ skipLastOnce x y
 
 
 
--- 3
+-- 3 last -------------------------------------------------------------------------
+-- method 1 ------------------------------------------
 last1    :: [a] -> a
 last1 xs = head $ foldr shiftLastToFirstOnce [] xs
 
-
+-- method 2 ------------------------------------------
 last2 :: [a] -> a
 last2 xs = head $ foldr keepLastOnce [] xs
 
-
+-- method 3 ------------------------------------------
 -- HELP how to declare this to return just last item (non list) but at same
 -- time have type signature [a] -> a not [a] -> [a] ?
 --last'        :: [a] -> a
 last' []    = []
 last' (x:xs) = keepLastOnce x (last' xs)
 
-
+-- method 4 ------------------------------------------
 last''    :: [a] -> a
 last'' xs = head $ reverse xs
 
