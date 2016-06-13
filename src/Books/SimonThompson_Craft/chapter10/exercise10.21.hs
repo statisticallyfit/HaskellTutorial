@@ -48,7 +48,7 @@ firstEvenPos a (b:cs) = (a:cs)
 
 
 ------------------------------------------------------------------------------------
--- note merge the type:
+-- note merge works as follows:
 -- merge ([1,3,5], [2,4]) = [1,2,3,4,5]
 -- note will not merge in order if list tuple is unordered.
 merge :: ([a], [a]) -> [a]
@@ -57,7 +57,9 @@ merge ([a], []) = [a]
 merge (a : left, b : right) = a : b : merge (left, right)
 
 
-
+-- NOTE HELP is it true we cannot use foldr here because the type of (f)
+-- is a -> b -> b not a -> a -> b -> b? Cannot take two args at a time, like
+-- we need it to here.
 
 
 

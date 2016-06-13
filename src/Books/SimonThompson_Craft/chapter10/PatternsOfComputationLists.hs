@@ -136,3 +136,31 @@ insert x []      = [x]
 insert x (y:ys)
     | y >= x     = x : y : ys
     | otherwise  = y : insert x ys
+
+
+
+
+
+
+
+
+
+-- 10.4 GENERALIZING : SPLITTING UP LISTS ---------------------------------------
+whitespace = ['\n', '\t', ' ']
+
+-- note original definition
+getWord :: String -> String
+getWord [] = []
+getWord (x:xs)
+    | elem x whitespace = []
+    | otherwise         = x : getWord xs
+
+getUntil :: (a -> Bool) -> [a] -> [a]
+gteUntil p []   = []
+getUntil p (x:xs)
+    | p x       = []
+    | otherwise = x : getUntil p xs
+
+getWord' :: String -> String
+getWord' xs = getUntil p xs
+    where p x = elem x whitespace

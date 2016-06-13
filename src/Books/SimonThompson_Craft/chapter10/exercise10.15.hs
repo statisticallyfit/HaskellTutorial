@@ -33,6 +33,7 @@ unzipSecond :: [(a,b)] -> [b]
 unzipSecond [] = []
 unzipSecond (p:ps) = second p (unzipSecond ps)
 
+-- IMPORTANT NOTE backgward motion, see, not forward motion.
 first p zs = [fst p] ++ zs
 second p zs = [snd p] ++ zs
 
@@ -83,7 +84,12 @@ init'' [x]    = []
 init'' (x:xs) = x : init'' xs
 
 
-
+-- IMPORTANT NOTE
+-- must define the foldr function (f) where the base case is when the
+-- function is first evaluated (foldr has finished applying through the layers)
+-- and the rest of the function is what happens when the function is folded
+-- upward through the unfolded layers. So it has backward motion,
+-- not forward motion like usual functions do.
 shiftLastToFirstOnce :: a -> [a] -> [a]
 shiftLastToFirstOnce last [] = [last]
 shiftLastToFirstOnce pred (last : preds) = last : pred : preds
@@ -98,8 +104,21 @@ init''' (x:xs)
 
 -- needs to be the type of the foldr function (a -> b -> b), b = [a]
 skipLastOnce :: Eq a => a -> [a] -> [a]
-skipLastOnce z [] = []
-skipLastOnce a bs = bs
+skipLastOnce y [z] = [y]
+skipLastOnce a bs = a : (id bs)
+
+
+{-
+== HELP doesn't seem to work because you cannot take tail without skipping
+-- the head too, and then you are left wihth empty list:
+
+foldr skipLastOnce [] [1,2,3,4,5]
+[1]
+
+
+skipLast :: Eq a => a -> [a] -> [a]
+skipLast y [z]  = [y]
+skipLast a (b:cs) = a -}
 {-skipLastOnce :: Eq a => a -> [a] -> [a]
 skipLastOnce x y
     | length y == 1 = [x]
