@@ -20,7 +20,7 @@ splitN n line = spaced : splitN n (drop n line)
 spacify     :: String -> String
 spacify bit = trim spaced
     where spaced = concat $ map (\c -> [c] ++ " ") bit
-          trim s = dropWhile (== ' ') (reverse s)
+          trim s = reverse $ dropWhile (== ' ') (reverse s)
 
 
 -- returns strings separated by newlines

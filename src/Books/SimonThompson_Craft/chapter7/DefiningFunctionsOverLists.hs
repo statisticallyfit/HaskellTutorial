@@ -2,6 +2,9 @@ import Prelude hiding (sum, concat, zip, take, Word, getLine)
 import qualified Prelude
 import Test.QuickCheck
 
+
+
+
 sum        :: [Int] -> Int
 sum []     = 0
 sum (x:xs) = x + sum xs

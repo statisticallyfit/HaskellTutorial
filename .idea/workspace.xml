@@ -2,27 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="eb0702c0-b7c3-41d6-bca5-72cdf359dc76" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/HigherOrderFunctions.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.1.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.11.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.13.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.14.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.15.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.17.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.18.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.19.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.21.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.22.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.23.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.24.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.3.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.31.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.7.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.8.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.9.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/DevelopingHigherOrderPrograms.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.1.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/***exercise12.11_12.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/***exercise12.14_15.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.13.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.3.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.4.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.7.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.9.hs" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/DevelopingHigherOrderPrograms.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/DevelopingHigherOrderPrograms.hs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.1.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.1.hs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/DefiningFunctionsOverLists.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/DefiningFunctionsOverLists.hs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/Strategies.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/Strategies.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -51,22 +42,12 @@
     <favorites_list name="HaskellTutorial" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file leaf-file-name="DevelopingHigherOrderPrograms.hs" pinned="false" current-in-tab="false">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="DevelopingHigherOrderPrograms.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/DevelopingHigherOrderPrograms.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="32" column="4" selection-start-line="32" selection-start-column="4" selection-end-line="32" selection-end-column="4" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="exercise12.1.hs" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.1.hs">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.3381877">
-              <caret line="11" column="0" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.81583196">
+              <caret line="167" column="29" selection-start-line="167" selection-start-column="29" selection-end-line="167" selection-end-column="29" />
               <folding />
             </state>
           </provider>
@@ -85,18 +66,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/exercise8.20.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter9/exercise9.2.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter9/Proofs.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.2.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.3.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.6.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.7.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.8.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.9.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.9_10.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise10.13.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.13.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.14.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.17.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.18.hs" />
@@ -134,8 +103,20 @@
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/HigherOrderFunctions.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.31.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.31.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/DevelopingHigherOrderPrograms.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.1.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.3.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.4.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/***exercise12.3.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/DefiningFunctionsOverLists.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.7.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.8.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/Strategies.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.11.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.11_12.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.13.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.14.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.14_15.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/DevelopingHigherOrderPrograms.hs" />
       </list>
     </option>
   </component>
@@ -184,6 +165,7 @@
     </navigator>
     <panes>
       <pane id="PackagesPane" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -270,7 +252,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
       <pane id="Scope" />
     </panes>
   </component>
@@ -861,11 +842,12 @@
       <workItem from="1465796444996" duration="608000" />
       <workItem from="1465798135905" duration="22163000" />
       <workItem from="1465882502045" duration="25617000" />
+      <workItem from="1465969425111" duration="27600000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="471116000" />
+    <option name="totallyTimeSpent" value="498716000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="800" height="782" extended-state="0" />
@@ -881,7 +863,7 @@
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32872504" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="GhcMod" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.392" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39171124" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Cabal" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.0" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32933334" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="SBT Execute" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32872504" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
@@ -927,118 +909,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/***exercise10.22.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="18" column="30" selection-start-line="18" selection-start-column="30" selection-end-line="18" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.15.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7686084">
-          <caret line="116" column="0" selection-start-line="116" selection-start-column="0" selection-end-line="116" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.21.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.23.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.21521036">
-          <caret line="7" column="36" selection-start-line="7" selection-start-column="36" selection-end-line="7" selection-end-column="36" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.24.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="11" column="38" selection-start-line="11" selection-start-column="38" selection-end-line="11" selection-end-column="38" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/DefiningFunctionsOverLists.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.23139158">
-          <caret line="103" column="20" selection-start-line="103" selection-start-column="20" selection-end-line="103" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.25.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.15372169">
-          <caret line="5" column="0" selection-start-line="5" selection-start-column="0" selection-end-line="9" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.26.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="29" column="0" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/PatternsOfComputationLists.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.26213592">
-          <caret line="147" column="35" selection-start-line="147" selection-start-column="35" selection-end-line="147" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.29.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.4158576">
-          <caret line="15" column="19" selection-start-line="15" selection-start-column="19" selection-end-line="15" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter6/exercise6.4_5_6.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.49190938">
-          <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter6/exercise6.10.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter6/exercise6.11_12.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-1.0291262">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter6/exercise6.17.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.59870553">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter6/exercise6.23.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-2.4433658">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter6/ProgrammingWithLists.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.43042073">
-          <caret line="40" column="8" selection-start-line="40" selection-start-column="8" selection-end-line="40" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.30.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.8300971">
@@ -1106,7 +976,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="102" column="2" selection-start-line="102" selection-start-column="2" selection-end-line="102" selection-end-column="2" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1114,7 +983,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.5080906">
           <caret line="169" column="0" selection-start-line="169" selection-start-column="0" selection-end-line="169" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1122,7 +990,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="47" column="27" selection-start-line="47" selection-start-column="27" selection-end-line="47" selection-end-column="27" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1130,7 +997,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.5695793">
           <caret line="28" column="0" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1138,7 +1004,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.3381877">
           <caret line="11" column="0" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1146,7 +1011,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.7540453">
           <caret line="30" column="9" selection-start-line="30" selection-start-column="9" selection-end-line="30" selection-end-column="9" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1154,7 +1018,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="5" column="24" selection-start-line="5" selection-start-column="24" selection-end-line="5" selection-end-column="24" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1162,7 +1025,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.43042073">
           <caret line="14" column="28" selection-start-line="14" selection-start-column="28" selection-end-line="14" selection-end-column="28" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1170,23 +1032,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.29288027">
           <caret line="73" column="42" selection-start-line="73" selection-start-column="42" selection-end-line="73" selection-end-column="42" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.3.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7847896">
-          <caret line="30" column="0" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.7.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.122977346">
-          <caret line="4" column="22" selection-start-line="4" selection-start-column="22" selection-end-line="4" selection-end-column="22" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1194,7 +1039,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.09223301">
           <caret line="3" column="28" selection-start-line="0" selection-start-column="0" selection-end-line="3" selection-end-column="44" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1202,7 +1046,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.30744338">
           <caret line="10" column="11" selection-start-line="10" selection-start-column="11" selection-end-line="10" selection-end-column="11" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1210,7 +1053,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="17" column="21" selection-start-line="17" selection-start-column="21" selection-end-line="17" selection-end-column="21" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1218,7 +1060,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="11" column="34" selection-start-line="11" selection-start-column="34" selection-end-line="11" selection-end-column="34" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1226,7 +1067,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="41" column="12" selection-start-line="41" selection-start-column="12" selection-end-line="41" selection-end-column="12" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1234,7 +1074,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.15372169">
           <caret line="5" column="0" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1242,7 +1081,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.24595469">
           <caret line="8" column="45" selection-start-line="8" selection-start-column="45" selection-end-line="8" selection-end-column="45" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1250,7 +1088,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.9385113">
           <caret line="35" column="27" selection-start-line="35" selection-start-column="27" selection-end-line="35" selection-end-column="27" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1258,15 +1095,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.5388349">
           <caret line="323" column="8" selection-start-line="323" selection-start-column="8" selection-end-line="323" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.36.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1274,7 +1102,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="2" column="14" selection-start-line="2" selection-start-column="14" selection-end-line="2" selection-end-column="14" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1282,7 +1109,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="29" column="0" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1290,22 +1116,173 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.9385113">
           <caret line="39" column="0" selection-start-line="39" selection-start-column="0" selection-end-line="39" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.29.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.35541195">
+          <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/DevelopingHigherOrderPrograms.hs">
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.23.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="32" column="4" selection-start-line="32" selection-start-column="4" selection-end-line="32" selection-end-column="4" />
+        <state vertical-scroll-proportion="0.21486267">
+          <caret line="7" column="36" selection-start-line="7" selection-start-column="36" selection-end-line="7" selection-end-column="36" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.24.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33764136">
+          <caret line="11" column="38" selection-start-line="11" selection-start-column="38" selection-end-line="11" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.25.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.15347335">
+          <caret line="5" column="0" selection-start-line="5" selection-start-column="0" selection-end-line="9" selection-end-column="35" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.26.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.8901454">
+          <caret line="29" column="0" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter10/exercise10.36.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.03069467">
+          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.7.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.12277868">
+          <caret line="4" column="22" selection-start-line="4" selection-start-column="22" selection-end-line="4" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.3.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.7851373">
+          <caret line="30" column="0" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.1.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.3381877">
-          <caret line="11" column="0" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="20" column="6" selection-start-line="20" selection-start-column="6" selection-end-line="20" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.4.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.46042004">
+          <caret line="15" column="30" selection-start-line="15" selection-start-column="30" selection-end-line="15" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.3.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.44749597">
+          <caret line="20" column="18" selection-start-line="20" selection-start-column="18" selection-end-line="20" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter6/ProgrammingWithLists.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.03069467">
+          <caret line="40" column="8" selection-start-line="40" selection-start-column="8" selection-end-line="40" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/exercise7.24.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/DefiningFunctionsOverLists.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.092084005">
+          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.7.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="1" column="12" selection-start-line="1" selection-start-column="12" selection-end-line="1" selection-end-column="12" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.9.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.18416801">
+          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/***exercise12.11_12.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.07915994">
+          <caret line="79" column="52" selection-start-line="79" selection-start-column="52" selection-end-line="79" selection-end-column="52" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter8/Strategies.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.26332796">
+          <caret line="91" column="25" selection-start-line="91" selection-start-column="25" selection-end-line="91" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/exercise12.13.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.092084005">
+          <caret line="3" column="12" selection-start-line="3" selection-start-column="12" selection-end-line="3" selection-end-column="12" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/***exercise12.14_15.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.57027465">
+          <caret line="54" column="20" selection-start-line="54" selection-start-column="20" selection-end-line="54" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/DevelopingHigherOrderPrograms.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.81583196">
+          <caret line="167" column="29" selection-start-line="167" selection-start-column="29" selection-end-line="167" selection-end-column="29" />
           <folding />
         </state>
       </provider>

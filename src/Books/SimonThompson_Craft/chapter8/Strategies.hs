@@ -55,8 +55,6 @@ echo :: Strategy
 echo (latest : rest) = latest
 echo []              = Rock
 
-
-
 beatLastMove :: Strategy
 beatLastMove []     = Rock -- arbitrary choice
 beatLastMove (m:ms) = beat m
@@ -105,3 +103,8 @@ alternate :: Strategy -> Strategy -> Strategy
 alternate primaryStrategy secondaryStrategy moves
     | even (length moves) = primaryStrategy moves
     | otherwise           = secondaryStrategy moves
+
+
+
+beatStrategy :: Strategy -> Strategy
+beatStrategy opponentStrat moves = beat (opponentStrat moves)
