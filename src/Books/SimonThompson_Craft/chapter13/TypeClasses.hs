@@ -32,7 +32,7 @@ instance Info Bool where
 
 instance Info Int where
     examples = [-100 .. 100]
-    --size _   = 1
+    size _   = 1
 
 
 
@@ -121,12 +121,17 @@ class Checkable b where
 
 -- note definition of infoCheck.1 is same as instance for Bool)
 instance Checkable Bool where
+    -- note all properties take Int args so the exam.ples list must be
+    -- exam.ples :: [Int] from the Info Int instance.
     infoCheck property = and (map property examples)
 
 -- note for infoCheck2
 -- HELP meaning? what does Checkable (a -> b) mean and why is the type of
 -- infoCheck2 (b -> a -> Bool)? Why need b and a? Why need a Info and b Checkable?
 instance (Info a, Checkable b) => Checkable (a -> b) where
+    -- note maps the function (info . prop) instead of just prop because
+    -- (info . prop) :: Int -> Bool not Int -> Int -> Bool anymore, valid
+    -- for mapping over examp.les :: [Int] list.
     infoCheck property = and (map (infoCheck . property) examples)
 
 
@@ -141,6 +146,8 @@ p2 :: Int -> Int -> Bool
 p2 = (\x y -> (x <= (0 :: Int) || y <= 0 || x*y > x))
 
 
+
+-- HELP understand how this works.
 test0 = infoCheck p0
 test1 = infoCheck p1
 test2 = infoCheck p2
@@ -148,7 +155,32 @@ test2 = infoCheck p2
 xs = [-10,-1,0,1,2,3,4,5,6,7]
 
 
+
+
+
+
+
 main = do
     print $ map p0 xs
     print $ map (p1 2) xs
     print $ map (p2 2) xs
+
+
+
+
+    {-
+
+    NOTE:
+    e.xamples :: [Int]
+    [-100,-99, .. 100]
+
+    map p0 (exam.ples ) -- list of trues
+    and it -- True
+
+    map (infoCheck . p1) examp.les -- list of trues
+    and it -- True
+
+    map (infoCheck . p2) ex.amples --- list of Trues with Falses towards end
+    and it -- False
+
+    -}

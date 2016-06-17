@@ -1,3 +1,6 @@
+
+
+
 data Shape = Circle Float | Rectangle Float Float deriving (Eq, Ord, Show)
 
 
@@ -29,6 +32,11 @@ instance Info Shape  where
 
 [n1, n2, n3] = examples :: [Float]
 [s1, s2] = examples :: [Shape]
+
+
+
+
+
 
 
 
