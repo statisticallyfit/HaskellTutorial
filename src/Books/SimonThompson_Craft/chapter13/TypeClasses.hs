@@ -128,3 +128,27 @@ instance Checkable Bool where
 -- infoCheck2 (b -> a -> Bool)? Why need b and a? Why need a Info and b Checkable?
 instance (Info a, Checkable b) => Checkable (a -> b) where
     infoCheck property = and (map (infoCheck . property) examples)
+
+
+
+p0 :: Int -> Bool
+p0 = (\x   -> (x <= (0 :: Int) || x > 0))
+
+p1 :: Int -> Int -> Bool
+p1 = (\x y -> (x <= (0 :: Int) || y <= 0 || x*y >= x ))
+
+p2 :: Int -> Int -> Bool
+p2 = (\x y -> (x <= (0 :: Int) || y <= 0 || x*y > x))
+
+
+test0 = infoCheck p0
+test1 = infoCheck p1
+test2 = infoCheck p2
+
+xs = [-10,-1,0,1,2,3,4,5,6,7]
+
+
+main = do
+    print $ map p0 xs
+    print $ map (p1 2) xs
+    print $ map (p2 2) xs
