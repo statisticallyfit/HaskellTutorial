@@ -2,15 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="eb0702c0-b7c3-41d6-bca5-72cdf359dc76" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter13/***exercise13.13.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter13/***exercise13.24_25.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter13/exercise13.11.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter13/exercise13.14.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter13/exercise13.15.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter13/exercise13.7.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter14/AlgebraicTypes.hs" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter13/TypeClasses.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter13/TypeClasses.hs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter13/exercise13.6.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter13/exercise13.6.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -40,11 +33,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="TypeClasses.hs" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter13/TypeClasses.hs">
+      <file leaf-file-name="AlgebraicTypes.hs" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter14/AlgebraicTypes.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.15347335">
-              <caret line="143" column="0" selection-start-line="143" selection-start-column="0" selection-end-line="143" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.7851373">
+              <caret line="54" column="49" selection-start-line="54" selection-start-column="49" selection-end-line="54" selection-end-column="49" />
               <folding />
             </state>
           </provider>
@@ -63,7 +56,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.9.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.8.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.11.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.13.hs" />
@@ -114,6 +106,7 @@
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter13/***exercise13.13.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter13/exercise13.14.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter13/exercise13.15.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter14/AlgebraicTypes.hs" />
       </list>
     </option>
   </component>
@@ -219,7 +212,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="chapter13" />
+              <option name="myItemId" value="chapter14" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -842,12 +835,12 @@
       <workItem from="1465969425111" duration="27600000" />
       <workItem from="1466053449922" duration="27781000" />
       <workItem from="1466140609800" duration="4744000" />
-      <workItem from="1466150491065" duration="16286000" />
+      <workItem from="1466150491065" duration="18574000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="547527000" />
+    <option name="totallyTimeSpent" value="549815000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="800" height="782" extended-state="0" />
@@ -909,13 +902,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.1.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.29288027">
-          <caret line="73" column="42" selection-start-line="73" selection-start-column="42" selection-end-line="73" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter11/exercise11.8.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.09223301">
@@ -1272,6 +1258,14 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.15347335">
           <caret line="143" column="0" selection-start-line="143" selection-start-column="0" selection-end-line="143" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter14/AlgebraicTypes.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.7851373">
+          <caret line="54" column="49" selection-start-line="54" selection-start-column="49" selection-end-line="54" selection-end-column="49" />
           <folding />
         </state>
       </provider>
