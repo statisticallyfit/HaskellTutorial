@@ -1,25 +1,27 @@
 
 data Expr = Lit Integer | Add Expr Expr | Sub Expr Expr deriving (Eq, Show)
 
-expr1, expr2  :: Expr
-expr1 = (Add (Sub (Lit 3) (Lit 1)) (Lit 3))
-expr2 = (Add (Lit 67) (Lit (-34)))
+
+-- exercise 4 -------------------------------------------------------------------------
+
+-- note counts number of operators in an expression
+size :: Expr -> Integer
+size (Lit n) = 0
+size (Add e1 e2) = 1 + size e1 + size e2
+size (Sub e1 e2) = 1 + size e1 + size e2
+
+---------------------------------------------------------------------------------------
 
 
-{-
-NOTE evaluations
-
-eval (Add (Sub (Lit 3) (Lit 1)) (Lit 3))
-= eval (Sub (Lit 3) (Lit 1))    +    eval (Lit 3)
-= (eval (Lit 3) - eval (Lit 1)) + eval (Lit 3)
-= (3 - 1) + 3
-
-showExpr (Add (Lit 67) (Lit (-34)))
-= showExpr (Lit 67) ++ " + " ++ showExpr (Lit (-34))
-= "(67 + -34)"
--}
 
 
+expr1, expr2, expr3, expr4, expr5, expr6 :: Expr
+expr1 = Lit 2                             -- 2
+expr2 = Add (Lit 2) (Lit 3)               -- 2 + 3
+expr3 = Add (Sub (Lit 3) (Lit 1)) (Lit 3) -- (3-1) + 3
+expr4 = Add (Add (Lit 2) (Lit 3)) (Lit 4)
+expr5 = Add expr4 (Lit 5)
+expr6 = Add (Add (Sub (Lit 2) (Add (Add (Lit 6) (Lit 7)) (Lit 8))) (Lit 4)) (Lit 5)
 
 eval :: Expr -> Integer
 eval (Lit n) = n
