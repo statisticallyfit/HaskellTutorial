@@ -1,29 +1,29 @@
-
+import Prelude hiding (either)
 
 -- 14.2 RECURSIVE ALGEBRAIC TYPES ----------------------------------------------------
 
 -- recursive types examples
 
 
-data NTree = NilT | Node Integer NTree NTree deriving (Eq, Show)
+data NTree = NilT | NodeNTree Integer NTree NTree deriving (Eq, Show)
 
 tree1, tree2 :: NTree
-tree1 = Node 10 NilT NilT
-tree2 = Node 17 (Node 14 NilT NilT) (Node 20 NilT NilT)
-tree3 = Node 3 (Node 4 NilT NilT) NilT
+tree1 = NodeNTree 10 NilT NilT
+tree2 = NodeNTree 17 (NodeNTree 14 NilT NilT) (NodeNTree 20 NilT NilT)
+tree3 = NodeNTree 3 (NodeNTree 4 NilT NilT) NilT
 
 sumTree :: NTree -> Integer
 sumTree NilT = 0
-sumTree (Node n t1 t2) = n + sumTree t1 + sumTree t2
+sumTree (NodeNTree n t1 t2) = n + sumTree t1 + sumTree t2
 
-depth :: NTree -> Integer
-depth NilT = 0
-depth (Node n t1 t2) = 1 + max (depth t1) (depth t2)
+depthNTree :: NTree -> Integer
+depthNTree NilT = 0
+depthNTree (NodeNTree n t1 t2) = 1 + max (depthNTree t1) (depthNTree t2)
 
 -- note num times a number p occurs in tree
 occurs :: NTree -> Integer -> Integer
 occurs NilT p = 0
-occurs (Node n t1 t2) p
+occurs (NodeNTree n t1 t2) p
     | n == p    = 1 + occurs t1 p + occurs t2 p
     | otherwise = occurs t1 p + occurs t2 p
 
@@ -144,3 +144,94 @@ showPerson (Adult n a b) = show n ++ show a ++ showBio b
 
 showBio :: Bio -> String
 showBio (Parent st ps) = st ++ concat (map showPerson ps)
+
+
+
+
+
+
+
+
+
+
+-- 14.3 POLYMORPHIC ALGEBRAIC TYPES -------------------------------------------------
+
+{-
+NOTE polymorphic types contain types a,b and etc
+-}
+
+-- EXAMPLE 1
+
+data Pairs a = Pr a a deriving (Eq, Show)
+
+
+p1 :: Pairs Integer
+p1 = Pr 2 3
+p2 :: Pairs [Int]
+p2 = Pr [] [3]
+p3 :: Pairs [a]
+p3 = Pr [] [] -- HELP why can't it take a string for (a)?
+
+
+equalPair :: Eq a => Pairs a -> Bool
+equalPair (Pr x y) = x == y
+
+
+
+
+-- EXAMPLE 2
+infixr 5 ::: -- HELP is this the fixity declaration?
+data List a = NilL | a ::: (List a)
+    deriving (Eq, Ord, Show, Read)
+
+{-
+NOTE
+2+3 ::: 4+5 ::: NilL
+5 ::: (9 ::: NilL)
+-}
+
+
+
+
+-- EXAMPLE 3
+
+data Tree a = Nil | Node a (Tree a) (Tree a) deriving (Eq, Ord, Show, Read)
+
+t1 :: Tree Integer
+t1 = Node 12 (Node 34 Nil Nil) (Node 3 (Node 17 Nil Nil) Nil)
+
+depth :: Tree a -> Integer
+depth Nil = 0
+depth (Node n t1 t2) = 1 + max (depth t1) (depth t2)
+
+collapse :: Tree a -> [a]
+collapse Nil = []
+collapse (Node n t1 t2) = collapse t1 ++ [n] ++ collapse t2
+
+mapTree :: (a -> b) -> Tree a -> Tree b
+mapTree f Nil = Nil
+mapTree f (Node n t1 t2) = Node (f n) (mapTree f t1) (mapTree f t2)
+
+
+
+
+-- EXAMPLE 4
+{-
+data Either a b = Left a | Right b
+-}
+either1, either2 :: Either String Int
+either1 = Left "Duke of Prunes"
+either2 = Right 33312
+
+isLeft :: Either a b -> Bool
+isLeft (Left _) = True
+isLeft (Right _) = False
+
+
+either :: (a -> c) -> (b -> c) -> Either a b -> c
+either f g (Left x) = f x
+either f g (Right y) = g y
+
+applyLeft :: (a -> c) -> Either a b -> c
+applyLeft f (Left x) = f x
+applyLeft f (Right _) = error "applyLeft applied to Right"

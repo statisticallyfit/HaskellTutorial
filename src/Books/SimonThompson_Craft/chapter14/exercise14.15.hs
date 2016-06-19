@@ -53,7 +53,7 @@ eval (Op Div e1 e2)
 
 
 
-
+--------------------------------------------------------
 
 showExpr :: Expr -> String
 showExpr expr = sho expr 0
@@ -65,7 +65,8 @@ sho (Op Sub e1 e2) c = applySho c (sho e1 (c+1) ++ " - " ++ sho e2 (c+1))
 sho (Op Mul e1 e2) c = applySho c (sho e1 (c+1) ++ " * " ++ sho e2 (c+1))
 sho (Op Div e1 e2) c = applySho c (sho e1 (c+1) ++ " / " ++ sho e2 (c+1))
 sho (Op Mod e1 e2) c = applySho c (sho e1 (c+1) ++ " % " ++ sho e2 (c+1))
-
+sho (If b e1 e2) c = "IF " ++ shoB b c ++ "\nTHEN " ++ applySho c (sho e1 (c+1))
+                    ++ "\nELSE " ++ applySho c (sho e2 (c+1))
 -- NOTE add: | If BoolExpr Expr Expr
 
 applySho :: Int -> String -> String
@@ -73,10 +74,7 @@ applySho count exprStr
     | count == 0 = exprStr
     | otherwise = applyOuterParens exprStr
 
-applyOuterParens :: String -> String
-applyOuterParens s = "(" ++ s ++ ")"
-
-
+--------------------------------------------------------
 
 showBExpr :: BoolExpr -> String
 showBExpr bExpr = shoB bExpr 0
@@ -84,7 +82,7 @@ showBExpr bExpr = shoB bExpr 0
 shoB :: BoolExpr -> Int -> String
 shoB (BoolLit n) c = show n
 shoB (And b1 b2) c = applyShoB c (shoB b1 (c+1) ++ " && " ++ shoB b2 (c+1))
-shoB (Not b) c = applyShoB c (" NOT " ++ shoB b (c+1))
+shoB (Not b) c = applyShoB c ("NOT " ++ shoB b (c+1))
 shoB (Equal e1 e2) c = applySho c (sho e1 (c+1) ++ " == " ++ sho e2 (c+1))
 shoB (Greater e1 e2) c = applySho c (sho e1 (c+1) ++ " > " ++ sho e2 (c+1))
 
@@ -93,13 +91,14 @@ applyShoB count bexprStr
     | count == 0 = bexprStr
     | otherwise = applyOuterParens bexprStr
 
+------------------------------
+applyOuterParens :: String -> String
+applyOuterParens s = "(" ++ s ++ ")"
 
-{-
+----------------------------------------------------------
 
-data BoolExpr = BoolLit Bool
-              | And BoolExpr BoolExpr -- true when both bool exprs are true
-              | Not BoolExpr          -- true when boolexpr is false
-              | Equal Expr Expr       -- true when both exprs are equal
-              | Greater Expr Expr     -- true when first expr is greater than second.
-              deriving (Eq, Show)
--}
+printExpr :: Expr -> IO()
+printExpr e = putStrLn $ showExpr e
+
+printBExpr :: BoolExpr -> IO()
+printBExpr b = putStrLn $ showBExpr b
