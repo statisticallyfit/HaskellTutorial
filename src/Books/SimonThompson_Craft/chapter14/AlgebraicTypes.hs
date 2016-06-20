@@ -1,4 +1,6 @@
 import Prelude hiding (either)
+import Test.QuickCheck
+import Test.QuickCheck.Property
 
 -- 14.2 RECURSIVE ALGEBRAIC TYPES ----------------------------------------------------
 
@@ -235,3 +237,164 @@ either f g (Right y) = g y
 applyLeft :: (a -> c) -> Either a b -> c
 applyLeft f (Left x) = f x
 applyLeft f (Right _) = error "applyLeft applied to Right"
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- 14.4 ERROR HANDLING -----------------------------------------------------------
+
+
+-- note type: transmitting an error
+mapMaybe :: (a -> b) -> Maybe a -> Maybe b
+mapMaybe g Nothing = Nothing
+mapMaybe g (Just x) = Just (g x)
+
+errDiv :: Integer -> Integer -> Maybe Integer
+errDiv n m
+    | (m /= 0) = Just (n `div` m)
+    | otherwise = Nothing
+
+
+-- note type: trapping an error
+maybe' :: b -> (a -> b) -> Maybe a -> b
+maybe' n f Nothing = n
+maybe' n f (Just x) = f x
+
+
+
+
+{-
+main = do
+    print $ maybe' 56 (1+) (mapMaybe (*3) (errDiv 9 0))
+    print $ maybe' 56 (1+) (mapMaybe (*3) (errDiv 9 1))
+    print $ maybe' 56 (1+) (mapMaybe (*3) (Just 4))
+-}
+
+
+
+
+
+
+-- 14.5 DESIGN WITH ALGEBRAIC TYPES ------------------------------------------------
+
+-- EXAMPLE PROBLEM 1 - edit distance - how many edit sequences to result in a
+-- particular string?
+{-
+NOTe: types of edits:
+1. convert character into another
+2. copy a char without modifying it
+3. delete one char
+4. insert one char
+5. delete (kill) to the end of the string
+
+NOTE design stages
+1. identify types of data involved
+data Edit = ...
+
+2. different sorts of data in each of the types. Each sort is the constructor
+data Edit = Chagne .. | Copy .. | Deelte .. | Insert .. | Kill ..
+
+3. types of args for each constructor (decide component of the constructor)
+data Edit = Change Char | Copy | Delete | Insert Char | Kill
+-}
+
+
+
+
+
+{-
+-- EXAMPLE PROBLEM 2 - Simulation - get input of customer arrivals (queues) and
+give output their departures (decide how many bank clerks need to be working at
+certain times of the day).
+
+1. type of input message: Inmess.
+At a given time
+    => no one arrives (No)
+    => someone arrives (Yes (arrival time of customer) (time to serve them))
+
+    => data InputMsg = No | Yes Arrival Service
+       type Arrival = Integer
+       type Service = Integer
+
+2.outmess - type of output messages.At a given time, either
+    =>  no one leaves (None)
+    => or a person is discharged (Discharge) which takes the time the customer
+    waited and time of their arrival and time it took to serve them.
+
+    data OutputMsg = None | Discharge Arrival Wait Service
+    type Wait = Integer
+-}
+
+
+
+-- BACK TO EXAMPLE PROBLEM 1
+
+data Edit = Change Char
+          | Copy
+          | Delete
+          | Insert Char
+          | Kill
+          deriving (Eq, Show)
+
+-- note finds lowest cost sequence of edits to take us from one string to another.
+-- in general case, if first two chars of strnisg are equal, then Copy. Otherwise,
+-- try all possibilities and choose the best of them.
+transform :: String -> String -> [Edit]
+transform [] [] = []
+transform xs [] = [Kill] -- note to turn xs -> [] just kill it
+transform [] ys = map Insert ys  -- note to turn [] -> ys insert ys.
+transform (x:xs) (y:ys)
+    | x == y = Copy : transform xs ys
+    | otherwise = best [Delete   : transform xs (y:ys),
+                        Insert y : transform (x:xs) ys,
+                        Change y : transform xs ys]
+
+
+best :: [[Edit]] -> [Edit]
+best [es] = es
+best (es : ess)
+    | cost es <= cost b = es
+    | otherwise = b
+    where b = best ess
+
+-- note cost is given by charging one for every operation except copy which means
+-- leave unchanged
+cost :: [Edit] -> Int
+cost = length . filter (/= Copy)
+
+
+
+-- HELP HELP HELP TODO why do these properties fail?
+
+-- NOTE properties of transform:
+-- PROP 1: cost if its operations should be no larger than cost of building target
+-- string letter by letter and then killing oridinal string (cost of length ys +1)
+propTransformLength :: String -> String -> Property
+propTransformLength xs ys = length (xs ++ ys) <= 15 ==> -- constrained < 15 for efficiency
+    cost (transform xs ys) <= length ys + 1
+
+-- PROP 2: sequence of edits resulting should indeed take the string xs to ys
+-- when it is applied
+propTransform xs ys = length (xs ++ ys) <= 15 ==>
+    edit (transform xs ys) xs == ys
+
+-- note builds the new string from the old string using the operations in the list.
+-- test edit [Insert 'c', Change 'h', Copy, Insert 'p', Copy, Kill] "fish" == chips
+edit :: [Edit] -> String -> String
+edit _ [] = []
+edit [] xs = xs
+edit (Insert c : rest) (x:xs) = c : edit rest (x:xs)
+edit (Change c : rest) (x:xs) = c : edit rest xs
+edit (Copy : rest) (x:xs) = x : edit rest xs
+edit (Delete : rest) (x:xs) = edit rest xs
+edit (Kill : rest) xs = []
+

@@ -23,50 +23,55 @@ t10 = Gnode [Gnode [Leaf 7, Gnode [Leaf 3]]]
 t11 = Gnode [Leaf 1, Gnode [Leaf 2], Leaf 3]
 
 
-countLeaves :: Eq a => GTree a -> Integer
+
+
+countLeaves :: GTree a -> Integer
 countLeaves (Leaf _) = 1
-countLeaves (Gnode ts) = count ts
-
-count :: [GTree a] -> Integer
---count [] = 0
-count [Leaf _] = 1
---count [Gnode []] = 0
-count [Gnode (t:[])] = count [t]
-count [Gnode (t:ts)] = count [t] + count ts
-count (t:[]) = count [t]
-count (t:ts) = count [t] + count ts
-
+countLeaves (Gnode ts) = sum $ map countLeaves ts
 
 -----------------------------------------------------
 depth :: GTree a -> Integer
 depth (Leaf _) = 1
-depth (Gnode ts) = 1 + dep ts
+depth (Gnode ts) = 1 + (maximum $ map depth ts) -- note need these parens else error!!
 
-
-dep :: [GTree a] -> Integer
-dep [Leaf _] = 1
-dep [Gnode (t:[])] = 1 + dep [t]
-dep [Gnode (t:ts)] = 1 + max (dep [t]) (dep ts)
-dep (t:[]) = dep [t]
-dep (t:ts) = max (dep [t]) (dep ts)
-
-{-
-sumGTree :: GTree Int -> Int
+-----------------------------------------------------
+sumGTree :: GTree Integer -> Integer
 sumGTree (Leaf n) = n
-sumGTree (Gnode (t:ts)) = sumGTree t + sumGTree ts
+sumGTree (Gnode ts) = sum $ map sumGTree ts
 
 -----------------------------------------------------
 occurs :: Eq a => a -> GTree a -> Bool
 occurs elem (Leaf n) = elem == n
-occurs elem (Gnode (t:ts)) = occurs elem t || occurs elem ts
+occurs elem (Gnode ts) = or $ map (occurs elem) ts
 
 -----------------------------------------------------
+
 mapGTree :: (a -> b) -> GTree a -> GTree b
 mapGTree f (Leaf n) = Leaf (f n)
-mapGTree f (Gnode (t:ts)) = Gnode (mapGTree f t) (mapGTree f ts)
+mapGTree f (Gnode ts) = Gnode (map (mapGTree f) ts)
+
 
 -----------------------------------------------------
 flattenGTree :: GTree a -> [a]
 flattenGTree (Leaf n) = [n]
-flattenGTree (Gnode (t:ts)) = flattenGTree t ++ flattenGTree ts
+flattenGTree (Gnode ts) = concat $ map flattenGTree ts
+-- HELP understand evaluation.
+
+-----------------------------------------------------
+
+
+
+-- HELP exercise 14.22 - how to make completely empty tree?
+
+
+
+-- NOTE sample of how I did it before using map (before got blocked defining
+-- mapGTree
+{-
+sumG :: [GTree Integer] -> Integer
+sumG [Leaf n] = n
+sumG [Gnode (t:[])] = sumG [t]
+sumG [Gnode (t:ts)] = sumG [t] + sumG ts
+sumG (t:[]) = sumG [t]
+sumG (t:ts) = sumG [t] + sumG ts
 -}
