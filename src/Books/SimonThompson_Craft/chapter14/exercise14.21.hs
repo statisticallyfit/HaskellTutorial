@@ -3,28 +3,38 @@
 data GTree a = Leaf a | Gnode [GTree a] deriving (Eq, Show)
 
 
-t13 :: GTree Int
-t1 = Leaf 2
-t13 = Gnode [Leaf 1, Leaf 3]
-t12345 = Gnode [Gnode [Leaf 1, Leaf 2], tmidlayer, Gnode [Leaf 4, Leaf 5]]
+
+t0 = Leaf 2
+t1 = Gnode [Leaf 1, Leaf 3]
+t2 = Gnode [Leaf 1]
+t12345 = Gnode [Gnode [Leaf 1, Leaf 2], t10, Gnode [Leaf 4, Leaf 5]]
 t1245 =  Gnode [Gnode [Leaf 1, Leaf 2], Gnode [Leaf 4, Leaf 5]]
-tlayers1 = Gnode [Gnode [Leaf 7, Gnode [Leaf 3, Gnode [Leaf 111, Gnode [Gnode [Leaf 8]]]]]]
-tlayers2 = Gnode [Gnode [Gnode [Leaf 3]]]
-tlayers3 = Gnode [Gnode [Gnode []]]
-tlayers4 = Gnode [Gnode [Leaf 10]]
-tmidlayer = Gnode [Gnode [Leaf 7, Gnode [Leaf 3]]]
+t3 = Gnode [Gnode [Leaf 7, Gnode [Leaf 3, Gnode [Leaf 111, Gnode [Gnode [Leaf 8]]]]]]
+t4 = Gnode [Gnode [Gnode [Leaf 3]]]
+t5 = Gnode [Gnode [Gnode []]]
+t6 = Gnode [Gnode [Leaf 10]]
+-- NOTE as soon as pattern is Leaf, Node, Leaf then it throws exception.
+--  pattern Node, Leaf, Node also results in error.
+t7 = Gnode [Leaf 1, Gnode [Gnode [Gnode [Gnode [Leaf 3, Gnode [Gnode [Gnode [Leaf 10]], Leaf 23]]], Leaf 41]],
+    Leaf 44, Gnode [Leaf 1]]
+t8 = Gnode [Gnode [Leaf 7, Gnode [Leaf 3], Leaf 10, Leaf 5, Gnode [Leaf 1]]]
+t9 = Gnode [Gnode [Leaf 1, Leaf 2, Gnode [Leaf 8, Gnode [Leaf 9], Leaf 7]]]
+t10 = Gnode [Gnode [Leaf 7, Gnode [Leaf 3]]]
+t11 = Gnode [Leaf 1, Gnode [Leaf 2], Leaf 3]
 
 
-countLeaves :: GTree a -> Integer
+countLeaves :: Eq a => GTree a -> Integer
 countLeaves (Leaf _) = 1
-countLeaves (Gnode (t:ts)) = countL [t] + countL ts
+countLeaves (Gnode ts) = count [Gnode ts]
+{-countLeaves (Gnode (t:ts))
+    | ts == [] = countL [t]
+    | otherwise = countL [t] + countL ts-}
 
-countL :: [GTree a] -> Integer
-countL [Leaf _] = 1
-countL [Gnode []] = 0
-countL [Gnode [t]] = countL [t]
-countL [Gnode (t:ts)] = countL [t] + countL ts
-
+count :: [GTree a] -> Integer
+count [Leaf _] = 1
+count [Gnode []] = 0
+count [Gnode (t:[])] = count [t]
+count [Gnode (t:ts)] = count [t] + count ts
 
 {-
 depth :: GTree a -> Integer
