@@ -1,4 +1,4 @@
-import 
+
 
 
 data Edit = Change Char
@@ -74,3 +74,24 @@ edit (Copy : rest) (x:xs) = x : edit rest xs
 edit (Swap : rest) (a:b:cs) = b: a : edit rest cs
 edit (Delete : rest) (x:xs) = edit rest xs
 edit (Kill : rest) xs = []
+
+
+
+
+transform' :: String -> String -> [Edit]
+transform' [] [] = []
+transform' xs [] = [Kill] -- note to turn xs -> [] just kill it
+transform' [] ys = map Insert ys  -- note to turn [] -> ys insert ys.
+transform' (x:xs) (y:ys)
+    | x == y = Copy : transform' xs ys
+    | otherwise = best [Delete   : transform' xs (y:ys),
+                        Insert y : transform' (x:xs) ys,
+                        Change y : transform' xs ys]
+
+
+
+
+-- Testing -- exercise 30 
+
+-- NOTE: Uses for transform function.
+-- NOTE: how the transform function works.
