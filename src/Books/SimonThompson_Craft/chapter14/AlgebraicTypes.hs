@@ -201,7 +201,6 @@ NOTE
 
 
 -- EXAMPLE 3
-
 data Tree a = Nil | Node a (Tree a) (Tree a) deriving (Eq, Ord, Show, Read)
 
 t1 :: Tree Integer
@@ -770,16 +769,42 @@ CASE 3    Sub
 
 -}
 
+-- HELP TODO understand how these definitions work
+
+
 -- data Expr = Lit Integer | Add Expr Expr | Sub Expr Expr
 instance Arbitrary Expr where
     arbitrary = sized arbExpr
-
 arbExpr 0 = liftM Lit arbitrary
 arbExpr n = frequency [(1, liftM Lit arbitrary),
-                       (4, liftM2 Add (arbExpr (n `div` 2)), (arbExpr (n `div` 2))),
-                       (4, liftM2 Sub (arbExpr (n `div` 2)), (arbExpr (n `div` 2)))]
+                       (4, liftM2 Add (arbExpr (n `div` 2)) (arbExpr (n `div` 2))),
+                       (4, liftM2 Sub (arbExpr (n `div` 2)) (arbExpr (n `div` 2)))]
+
+
+-- data NTree = NilT | NodeT Integer NTree NTree
+instance Arbitrary NTree where
+    arbitrary = sized arbNTree
+arbNTree 0 = return NilT --liftM NilT arbitrary
+arbNTree n = frequency [(1, return NilT ),
+                        (4, liftM3 NodeT arbitrary (arbNTree (n `div` 2))
+                                                   (arbNTree (n `div` 2)) )]
+
+
+-- data Tree a = Nil | Node a (Tree a) (Tree a)
+instance Arbitrary a => Arbitrary (Tree a) where
+    arbitrary = sized arbTree
+arbTree 0 = return Nil --liftM NilT arbitrary
+arbTree n = frequency [(1, return Nil),
+                       (4, liftM3 Node arbitrary (arbTree (n `div` 2))
+                                                 (arbTree (n `div` 2)) )]
 
 {-
+func :: (a -> Gen b) -> Gen (a -> b)
+
+instance (Coarbitrary a, Arbitrary b) => Arbitrary (a -> b) where
+    arbitrary = func (\a -> coarbitrary a arbitrary)-}
+{-
+NOTE does not terminate
 arbitrary = frequency
         [(1, liftM Lit arbitrary),
          (2, liftM2 Add arbitrary arbitrary),
@@ -793,5 +818,11 @@ propAssoc expr = eval expr == eval (assoc expr)
 propDepth :: NTree -> Bool
 propDepth t = sizeNTree t < 2^(depthNTree t)
 
+
+-- HELP HELP HELP TODO why doesn't this work?
 propCollapse :: Eq b => (a -> b) -> Tree a -> Bool
-propCollapse f t = map f (collapse t) == collapse (mapTree f t)
+propCollapse f = \t -> map f (collapse t) == collapse (mapTree f t)
+
+main = do
+    quickCheckWith stdArgs {maxSuccess = 500} propAssoc
+    quickCheckWith stdArgs {maxSuccess = 500} propDepth
