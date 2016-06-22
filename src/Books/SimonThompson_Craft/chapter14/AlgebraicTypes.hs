@@ -772,20 +772,18 @@ CASE 3    Sub
 
 -- data Expr = Lit Integer | Add Expr Expr | Sub Expr Expr
 instance Arbitrary Expr where
-    arbitrary = frequency
+    arbitrary = sized arbExpr
+
+arbExpr 0 = liftM Lit arbitrary
+arbExpr n = frequency [(1, liftM Lit arbitrary),
+                       (4, liftM2 Add (arbExpr (n `div` 2)), (arbExpr (n `div` 2))),
+                       (4, liftM2 Sub (arbExpr (n `div` 2)), (arbExpr (n `div` 2)))]
+
+{-
+arbitrary = frequency
         [(1, liftM Lit arbitrary),
          (2, liftM2 Add arbitrary arbitrary),
          (2, liftM2 Sub arbitrary arbitrary)]
-
-
-    --sized arbExpr
-{-
-
-arbExpr 0 = liftM Lit arbitrary
-arbExpr n =
-    frequency [ (1, liftM Lit arbitrary),
-                (4, liftM2 Add (arbExpr (n `div` 2)), (arbExpr (n `div` 2))),
-                (4, liftM2 Sub (arbExpr (n `div` 2)), (arbExpr (n `div` 2)))]
 -}
 
 
