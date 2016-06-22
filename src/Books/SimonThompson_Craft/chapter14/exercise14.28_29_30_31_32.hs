@@ -1,4 +1,4 @@
-
+import Test.QuickCheck
 
 
 data Edit = Change Char
@@ -18,17 +18,21 @@ transform [] [] = []
 transform xs [] = [Kill] -- note to turn xs -> [] just kill it
 transform [] ys = map Insert ys  -- note to turn [] -> ys insert ys.
 transform (x:xs) (y:ys)
-    | a == d = Copy : transform xs ys
-    | a == e && b == d = Swap : transform cs fs
-    | otherwise = best [Delete   : transform xs (y:ys),
-                        Insert y : transform (x:xs) ys,
-                        Change y : transform xs ys]
-    where a  = x
-          b  = if (length (x:xs) >= 2) then (head xs) else ' '
-          cs = if (length (x:xs) > 2) then (tail xs) else []
-          d  = y
-          e  = if (length (y:ys) >= 2) then (head ys) else ' '
-          fs = if (length (y:ys) > 2) then (tail ys) else []
+    | x == y = Copy : transform xs ys
+    | length (x:xs) <= 2 && length (y:ys) <= 2 =
+        if (a == e && b == d) then (Swap : transform cs fs) else bestChoice
+        where a = x; b = head xs; cs = tail xs
+              d = y; e = head ys; fs = tail ys
+    | otherwise = bestChoice
+    where bestChoice = best [Delete   : transform xs (y:ys),
+                             Insert y : transform (x:xs) ys,
+                             Change y : transform xs ys]
+{-    where a  = Just x
+          b  = if (length (x:xs) >= 2) then Just (head xs) else Nothing
+          cs = if (length (x:xs) > 2) then Just (tail xs) else Nothing
+          d  = Just y
+          e  = if (length (y:ys) >= 2) then Just (head ys) else Nothing
+          fs = if (length (y:ys) > 2) then Just (tail ys) else Nothing-}
 {-
 transform [x] [y]
     | x == y = Copy : []
@@ -91,7 +95,25 @@ transform' (x:xs) (y:ys)
 
 
 
--- Testing -- exercise 30 
+-- Testing -- exercise 30
 
 -- NOTE: Uses for transform function.
 -- NOTE: how the transform function works.
+
+
+
+
+-- HELP TODO
+-- NOTE properties of transform:
+-- PROP 1: cost if its operations should be no larger than cost of building target
+-- string letter by letter and then killing oridinal string (cost of length ys +1)
+propTransformLength :: String -> String -> Property
+propTransformLength xs ys = length (xs ++ ys) <= 15 ==> -- constrained < 15 for efficiency
+    cost (transform xs ys) <= length ys + 1
+
+-- HELP TODO
+-- NOTE
+-- PROP 2: sequence of edits resulting should indeed take the string xs to ys
+-- when it is applied
+propTransform xs ys = length (xs ++ ys) <= 15 ==>
+    edit (transform xs ys) xs == ys

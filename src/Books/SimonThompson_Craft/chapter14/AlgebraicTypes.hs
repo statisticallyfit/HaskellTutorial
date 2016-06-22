@@ -373,19 +373,6 @@ cost = length . filter (/= Copy)
 
 
 
--- HELP HELP HELP TODO why do these properties fail?
-
--- NOTE properties of transform:
--- PROP 1: cost if its operations should be no larger than cost of building target
--- string letter by letter and then killing oridinal string (cost of length ys +1)
-propTransformLength :: String -> String -> Property
-propTransformLength xs ys = length (xs ++ ys) <= 15 ==> -- constrained < 15 for efficiency
-    cost (transform xs ys) <= length ys + 1
-
--- PROP 2: sequence of edits resulting should indeed take the string xs to ys
--- when it is applied
-propTransform xs ys = length (xs ++ ys) <= 15 ==>
-    edit (transform xs ys) xs == ys
 
 -- note builds the new string from the old string using the operations in the list.
 -- test edit [Insert 'c', Change 'h', Copy, Insert 'p', Copy, Kill] "fish" == chips
