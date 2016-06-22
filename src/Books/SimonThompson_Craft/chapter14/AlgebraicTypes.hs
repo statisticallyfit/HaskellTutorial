@@ -1,31 +1,36 @@
 import Prelude hiding (either)
 import Test.QuickCheck
 import Test.QuickCheck.Property
+import Control.Monad
 
 -- 14.2 RECURSIVE ALGEBRAIC TYPES ----------------------------------------------------
 
 -- recursive types examples
 
 
-data NTree = NilT | NodeNTree Integer NTree NTree deriving (Eq, Show)
+data NTree = NilT | NodeT Integer NTree NTree deriving (Eq, Show)
 
 tree1, tree2 :: NTree
-tree1 = NodeNTree 10 NilT NilT
-tree2 = NodeNTree 17 (NodeNTree 14 NilT NilT) (NodeNTree 20 NilT NilT)
-tree3 = NodeNTree 3 (NodeNTree 4 NilT NilT) NilT
+tree1 = NodeT 10 NilT NilT
+tree2 = NodeT 17 (NodeT 14 NilT NilT) (NodeT 20 NilT NilT)
+tree3 = NodeT 3 (NodeT 4 NilT NilT) NilT
 
-sumTree :: NTree -> Integer
-sumTree NilT = 0
-sumTree (NodeNTree n t1 t2) = n + sumTree t1 + sumTree t2
+sumNTree :: NTree -> Integer
+sumNTree NilT = 0
+sumNTree (NodeT n t1 t2) = n + sumNTree t1 + sumNTree t2
+
+sizeNTree :: NTree -> Integer
+sizeNTree NilT = 0
+sizeNTree (NodeT n t1 t2) = 1 + sizeNTree t1 + sizeNTree t2
 
 depthNTree :: NTree -> Integer
 depthNTree NilT = 0
-depthNTree (NodeNTree n t1 t2) = 1 + max (depthNTree t1) (depthNTree t2)
+depthNTree (NodeT n t1 t2) = 1 + max (depthNTree t1) (depthNTree t2)
 
 -- note num times a number p occurs in tree
 occurs :: NTree -> Integer -> Integer
 occurs NilT p = 0
-occurs (NodeNTree n t1 t2) p
+occurs (NodeT n t1 t2) p
     | n == p    = 1 + occurs t1 p + occurs t2 p
     | otherwise = occurs t1 p + occurs t2 p
 
@@ -130,11 +135,11 @@ data Expr = Lit Integer
 
 
 -- Mutual recursive types ----------------------------------------------------------
-type Name = String
+type Name' = String
 type Address = String
 
-data Person = Adult Name Address Bio
-            | Child Name
+data Person = Adult Name' Address Bio
+            | Child Name'
             deriving (Eq, Show)
 
 data Bio    = Parent String [Person]
@@ -385,3 +390,410 @@ edit (Copy : rest) (x:xs) = x : edit rest xs
 edit (Delete : rest) (x:xs) = edit rest xs
 edit (Kill : rest) xs = []
 
+
+
+
+
+
+
+
+
+
+
+
+-- 14.6 ALGEBRAIC TYPES AND TYPE CLASSES -------------------------------------------
+
+{-data Vector = Vec Float Float deriving (Eq, Show)
+data Point = Point Float Float deriving (Eq, Show)
+data Figure = Line Point Point | Circle Point Float deriving (Eq, Show)
+
+class Movable a where
+    move      :: Vector -> a -> a
+    reflectX  :: a -> a
+    reflectY  :: a -> a
+    rotate180 :: a -> a
+    rotate180 = reflectX . reflectY
+
+instance Movable Point where
+    move (Vec v1 v2) (Point x y) = Point (x + v1) (y + v2)
+    reflectX (Point x y) = Point x (-y)
+    reflectY (Point x y) = Point (-x) y
+    rotate180 (Point x y) = Point (-x) (-y) -- more efficient to override with this def.
+
+instance Movable Figure where
+    move v (Line p1 p2) = Line (move v p1) (move v p2)
+    move v (Circle p r) = Circle (move v p) r
+
+    reflectX (Line p1 p2) = Line (reflectX p1) (reflectX p2)
+    reflectX (Circle p r) = Circle (reflectX p) r
+
+    reflectY (Line p1 p2) = Line (reflectY p1) (reflectY p2)
+    reflectY (Circle p r) = Circle (reflectY p) r
+
+
+instance Movable a => Movable [a] where
+    move v = map (move v) -- list of points/circles/lines
+    reflectX = map reflectX -- list here
+    reflectY = map reflectY -- list here-}
+
+
+
+
+
+
+
+-- NOTE need to write arbitrary instancs if I use my own data type.
+-- Look: https://www.stackage.org/lts-6.4/hoogle?q=Test.QuickCheck
+instance Arbitrary Point where
+    arbitrary = do
+        x <- arbitrary
+        y <- arbitrary
+        return (Point x y)
+
+instance Arbitrary Vector where
+    arbitrary = do
+        x <- arbitrary
+        y <- arbitrary
+        return (Vec x y)
+{-
+HELP HELP HELP -- to test Movable [a] instance
+TODO do we need Arbitrary Figure?
+instance Arbitrary Figure where
+    arbitrary =
+        frequency [ (1, liftM2 Line arbitrary arbitrary),
+                    (2, liftM2 Point arbitrary arbitrary)]
+-}
+
+
+    {-oneof
+        [return $ Line arbitrary arbitrary,
+         return $ Point arbitrary arbitrary]-}
+
+
+propMove :: Vector -> Point -> Bool
+propMove (Vec vx vy) (Point px py) =
+    move (Vec vx vy) (Point px py) == Point (vx + px) (vy + py)
+
+------------------------------------------------------------------------------------
+swapPoint :: Point -> Point
+swapPoint (Point x y) = Point y x
+
+
+-- swap . swap == id
+propSwapPoint :: Point -> Bool
+propSwapPoint point = (swapPoint . swapPoint) point == point
+
+------------------------------------------------------------------------------------
+
+-- reflectX . reflectX = id
+propReflectX :: Point -> Bool
+propReflectX point = (reflectX . reflectX) point == point
+
+propReflectY :: Point -> Bool
+propReflectY point = (reflectY . reflectY) point == point
+
+propRotate :: Point -> Bool
+propRotate point = (rotate180 . rotate180) point == point
+
+
+point1 = Point 3 5
+vector1 = Vec 15 2
+point = Point 1 2
+line = Line (Point 5 3) (Point 10 (-2))
+circle = Circle (Point 5 (-1)) 8.367
+{-
+uncover
+main = do
+    quickCheckWith stdArgs {maxSuccess = 1000} propMove
+    quickCheckWith stdArgs {maxSuccess = 500} propSwapPoint
+    quickCheckWith stdArgs {maxSuccess = 500} propReflectX
+    quickCheckWith stdArgs {maxSuccess = 500} propReflectY
+    print $ move (Vec 13 4) [line, circle]
+    -- HELP why won't it work to write point in this list? It is an instance-
+    -- of Movable... ??
+-}
+
+
+
+
+
+
+
+
+
+-- Combining Named and Movable
+
+
+data Vector = Vec Float Float deriving (Eq, Show)
+data Point = Point Float Float deriving (Eq, Show)
+data Figure = Line Point Point | Circle Point Float deriving (Eq, Show)
+
+class Movable a where
+    move      :: Vector -> a -> a
+    reflectX  :: a -> a
+    reflectY  :: a -> a
+    rotate180 :: a -> a
+    rotate180 = reflectX . reflectY
+
+instance Movable Point where
+    move (Vec v1 v2) (Point x y) = Point (x + v1) (y + v2)
+    reflectX (Point x y) = Point x (-y)
+    reflectY (Point x y) = Point (-x) y
+    rotate180 (Point x y) = Point (-x) (-y) -- more efficient to override with this def.
+
+instance Movable Figure where
+    move v (Line p1 p2) = Line (move v p1) (move v p2)
+    move v (Circle p r) = Circle (move v p) r
+
+    reflectX (Line p1 p2) = Line (reflectX p1) (reflectX p2)
+    reflectX (Circle p r) = Circle (reflectX p) r
+
+    reflectY (Line p1 p2) = Line (reflectY p1) (reflectY p2)
+    reflectY (Circle p r) = Circle (reflectY p) r
+
+
+instance Movable a => Movable [a] where
+    move v = map (move v) -- list of points/circles/lines
+    reflectX = map reflectX -- list here
+    reflectY = map reflectY -- list here
+
+----------------------------------------------------------------
+
+data Name a = Pair a String deriving (Eq, Show)
+
+class Named a where
+    lookName :: a -> String
+    putName  :: String -> a -> a
+
+instance Named (Name a) where
+    lookName (Pair obj nm) = nm
+    putName nm (Pair obj _) = Pair obj nm
+
+
+mapName :: (a -> b) -> Name a -> Name b
+mapName f (Pair obj nm) = Pair (f obj) nm
+
+-- note adding names to the movable objects.
+instance Movable a => Movable (Name a) where
+    move v = mapName (move v)  -- the name pair arg here
+    reflectX = mapName reflectX -- the name pair arg here
+    reflectY = mapName reflectY -- the name pair arg here
+
+
+
+--------------------------------------------------------------
+-- NOTE important even without these below definitions, the main tests still work.
+-- HELP how do these classes contribute? How to test them? What do they do?
+class (Movable b, Named b) => NamedMovable b
+
+instance Movable a => NamedMovable (Name a)
+
+
+
+name :: Name Int
+name = Pair 423 "four-twenty-three"
+exam1 = Pair (Point 1.1 2.3) "Dweezil"
+{-
+uncover
+main = do
+    print $ lookName name
+    print $ putName "four hundred and twenty three" name
+    print $ lookName exam1 == "Dweezil"
+    print $ move (Vec 13 7) exam1
+    print $ rotate180 exam1
+    print $ reflectX exam1-}
+
+
+
+
+
+
+
+
+
+
+
+-- 14.7 REASONING ABOUT ALGEBRAIC TYPES -------------------------------------------
+
+-- EXAMPLE PROOF 1
+{-
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Proposition: map f (collapse tr) = collapse (mapTree f tr)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+data Tree a = Nil | Node a (Tree a) (Tree a)
+
+map f [] = []
+map f (x:xs) = f x : map f xs
+
+mapTree f Nil = Nil
+mapTree f (Node x t1 t2) = Node (f x) (mapTree f t1) (mapTree f t2)
+
+collapse Nil = []
+collapse (Node x t1 t2) = collapse t1 ++ [x] ++ collapse t2
+
+
+
+^^^^^^^^^^^^^
+1. BASE CASE:
+^^^^^^^^^^^^^
+
+LEFT
+map f (collapse Nil)
+= map f []
+= []
+
+RIGHT
+collapse (mapTree f Nil)
+= collapse Nil
+= []
+
+
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2. ASSUME INDUCTION HYPOTHESIS
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+map f (collapse t1) = collapse (mapTree f t1)
+map f (collapse t2) = collapse (mapTree f t2)
+
+
+
+^^^^^^^^^^^^^
+3. INDUCTION
+^^^^^^^^^^^^^
+
+LEFT
+map f (collapse (Node x t1 t2))
+= map f (collapse t1 ++ [x] ++ collapse t2)
+= map f (collapse t1) ++ [f x] ++ map f (collapse t2)
+= collapse (mapTree f t1) ++ [f x] ++ collapse (mapTree f t2)  equals ind hypothesis
+
+
+RIGHT
+collapse (mapTree f (Node x t1 t2))
+= collapse (Node (f x) (mapTree f t1) (mapTree f t2))
+= collapse (mapTree f t1) ++ [f x] ++ collapse (mapTree f t2)
+-}
+
+
+
+
+
+
+-- EXAMPLE PROOF 2
+{-
+
+-- note if the maybe is Nothing then return default value b. Else if just, then,
+-- apply the functo inside the just and return the content.
+maybe :: b -> (a -> b) -> Maybe a -> b
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Proposition: maybe 2 abs x >= 0
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+^^^^^^^^^^^^^^^^^^^^^
+1. PROVE OVER NOTHING
+^^^^^^^^^^^^^^^^^^^^^
+
+maybe 2 abs x
+= maybe 2 abs Nothing
+= 2 >= 0
+
+
+^^^^^^^^^^^^^^^^^^
+2. PROVE OVER JUST
+^^^^^^^^^^^^^^^^^^
+
+maybe 2 abs x
+= maybe 2 abs (Just y)
+= abs y >= 0
+
+-}
+
+
+
+
+
+-- EXAMPLE PROOF 3
+
+{-
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Proposition: eval (assoc ex) = eval ex
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+assoc :: Expr -> Expr
+assoc (Add (Add e1 e2) e3) = assoc (Add e1 (Add e2 e3))
+assoc (Add e1 e2) = Add (assoc e1) (assoc e2)
+assoc (Sub e1 e2) = Sub (assoc e1) (assoc e2)
+assoc (Lit n) = Lit n
+
+
+^^^^^^^
+CASE 1    Lit
+^^^^^^^
+
+LEFT
+
+eval (assoc (Lit n))
+= eval (Lit n)
+= n
+
+
+RIGHT
+
+eval (Lit n)
+= n
+
+
+^^^^^^^
+CASE 2    Add: prove: eval (assoc (Add e1 e2)) = eval (Add e1 e2)
+^^^^^^^
+
+assoc.2
+eval (assoc (Add e1 e2)) = eval (Add e1 e2)
+
+assoc.1
+eval (assoc (Add (Add f1 f2) e2)))
+= eval (assoc (Add f1 (Add f2 e2)))
+note since f1 contains fewer Adds now
+= eval (Add f1 (Add f2 e2))
+= eval (Add (Add f1 f2) e2)
+
+
+
+^^^^^^^
+CASE 3    Sub
+^^^^^^^
+
+-}
+
+-- data Expr = Lit Integer | Add Expr Expr | Sub Expr Expr
+instance Arbitrary Expr where
+    arbitrary = frequency
+        [(1, liftM Lit arbitrary),
+         (2, liftM2 Add arbitrary arbitrary),
+         (2, liftM2 Sub arbitrary arbitrary)]
+
+
+    --sized arbExpr
+{-
+
+arbExpr 0 = liftM Lit arbitrary
+arbExpr n =
+    frequency [ (1, liftM Lit arbitrary),
+                (4, liftM2 Add (arbExpr (n `div` 2)), (arbExpr (n `div` 2))),
+                (4, liftM2 Sub (arbExpr (n `div` 2)), (arbExpr (n `div` 2)))]
+-}
+
+
+propAssoc :: Expr -> Bool
+propAssoc expr = eval expr == eval (assoc expr)
+
+propDepth :: NTree -> Bool
+propDepth t = sizeNTree t < 2^(depthNTree t)
+
+propCollapse :: Eq b => (a -> b) -> Tree a -> Bool
+propCollapse f t = map f (collapse t) == collapse (mapTree f t)
