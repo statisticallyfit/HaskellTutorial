@@ -132,8 +132,28 @@ convert hcode (Node n t1 t2) = (convert (hcode ++ [L]) t1)
 
 -- data Tree = Leaf Char Int | Node Int Tree Tree
 
+-- note gets width of left side and right side
+
+node    = "    2     "  -- 1 node = 4 spaces front ++ 5 behind spaces
+arms    = "  /   \\  "  -- 1 arm = 2 front spaces ++ 3 between spaces ++ 2 behind spaces
+letters = " n:4  m:5 "  -- 1 leaf = 1 front space ++ 2 between spaces + 1 behind space
+test = node ++ "\n" ++ arms ++ "\n" ++ letters ++ "\n"
+
+
+test2 = "   _4_ \n " ++
+        " |   | \n" ++
+        "g:2  m:4\n"
+
+
+t1 = Node 12 (Leaf 'a' 4) (Leaf 'm' 3)
+{-
+
 showTree :: Tree -> String
-showTree t = ""
+showTree (Leaf c n) = [c] ++ ":" ++ show n
+showTree (Node n t1 t2) =
+    where top = "    " ++ show n ++ "\n"
+-}
+
 
 showTable :: Table -> String
 showTable t = ""
