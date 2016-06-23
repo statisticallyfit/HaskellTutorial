@@ -1,36 +1,9 @@
 
--- Combining all the files Types.hs, Coding.hs...
-
--- NOTE Huffman code is built so that most frequent letters have the shortest sequences
--- of code bits and the less frequent have more expensive code bits.
- -- Therefore the best tree is one where the most frequent letters in your code would
- -- be at the top nodes so they have the shortest sequence in code.
-
-
-{-
-NOTE how to find the tree with optimal code for the text:
-
-1. find frequencies of individual letters : tuple resulting is (letter, freq)
-
-2. each tuple is turned into a tree. So ('b', 1) ==> Leaf 'b' 1
-These are sorted in frequency order
-
-3. amalgamate together trees by combining the two trees of lowest frequency. Insert
-into proper sorted order. Repeat until one tree is left.
-
--}
-
-
 -- leaf carries letter and its frequency
 data Tree = Leaf Char Int | Node Int Tree Tree deriving (Eq, Show)
-
 data Bit = L | R deriving (Eq, Show)
-
 type HuffmanCode = [Bit]
-
 type Table = [(Char, HuffmanCode)] -- when huffman tree is converted to table
-
-
 
 
 -- Coding.hs --------------------------------------------------------------------------------
@@ -46,8 +19,6 @@ lookupTable ((ch,n):tb) c
     | ch == c = n
     | otherwise = lookupTable tb c
 
-
-
 -- note to decode a sequence of bits we use a tree
 decodeMessage :: Tree -> HuffmanCode -> String
 decodeMessage tree = decodeByTree tree
@@ -57,14 +28,11 @@ decodeMessage tree = decodeByTree tree
             decodeByTree (Node n t1 t2) (R:rest) = decodeByTree t2 rest
             decodeByTree t [] = []
 
-
 -- Frequency.hs -------------------------------------------------------------------------------
-
 
 frequency :: [Char] -> [(Char, Int)]
 frequency = mergeSort freqMerge . mergeSort alphaMerge . map start -- string arg here
     where start ch = (ch, 1)
-
 
 -------------------------------------------------
 mergeSort :: ([a] -> [a] -> [a]) -> [a] -> [a]
@@ -74,7 +42,6 @@ mergeSort merge xs
     where first = take half xs
           second = drop half xs
           half = (length xs) `div` 2
-
 
 -- note sorting on chars
 -- input: all ints are equal to 1
@@ -87,7 +54,6 @@ alphaMerge ((p,n):xs) ((q,m):ys)
     | p < q     = (p, n) : alphaMerge xs ((q,m):ys)
     | otherwise = (q, m) : alphaMerge ((p,n):xs) ys
 
-
 -- note sorting on freqs
 freqMerge :: [(Char, Int)] -> [(Char, Int)] -> [(Char, Int)]
 freqMerge xs [] = xs
@@ -97,15 +63,10 @@ freqMerge ((p,n):xs) ((q,m):ys)
     | otherwise = (q,m) : freqMerge ((p,n):xs) ys
 
 
-
-
-
 -- MakeTree.hs --------------------------------------------------------------------------------
-
 
 makeTree :: [(Char, Int)] -> Tree
 makeTree = makeCodes . toTreeList
-
 
 -- note converts each char-num pair into a tree
 {-
@@ -117,17 +78,14 @@ Now we map that single function over the list of (Char,Int) tuples.
 toTreeList :: [(Char,Int)] -> [Tree]
 toTreeList = map (uncurry Leaf)
 
-
 -- note amalgamates trees successiviely into a single tree.
 makeCodes :: [Tree] -> Tree
 makeCodes [t] = t
 makeCodes ts = makeCodes (amalgamate ts)
 
-
 -- note pair first two trees and plug them back in tree list in sorted order.
 amalgamate :: [Tree] -> [Tree]
 amalgamate (t1:t2:ts) = insTree (pair t1 t2) ts
-
 
 insTree :: Tree -> [Tree] -> [Tree]
 insTree tree [] = [tree]
@@ -146,8 +104,6 @@ value (Leaf _ n) = n
 value (Node n _ _) = n
 
 
-
-
 -- MakeCode.hs ----------------------------------------------------------------------------------
 
 -- combining frequency calculation and tree converstion
@@ -155,10 +111,7 @@ codes :: [Char] -> Tree
 codes = makeTree . frequency
 
 
-
-
 -- CodeTable.hs --------------------------------------------------------------------------------
-
 
 -- note converts a huffman tree into table
 codeTable :: Tree -> Table
@@ -172,18 +125,15 @@ convert hcode (Node n t1 t2) = (convert (hcode ++ [L]) t1)
 
 
 
-text1 = "amalgamating"
-freqs1 = frequency text1
-treeList1 = toTreeList freqs1
-tree1 = makeCodes treeList1
-
-text2 = "banananation"
-freqs2 = frequency text2
-treeList2 = toTreeList freqs2
-tree2 = makeCodes treeList2
 
 
-text3 = "anabananaananas"
-freqs3 = frequency text3
-treeList3 = toTreeList freqs3
-tree3 = makeCodes treeList3
+
+-- exercise 13 --------------------------------------------------------------------------------
+
+-- data Tree = Leaf Char Int | Node Int Tree Tree
+
+showTree :: Tree -> String
+showTree t = ""
+
+showTable :: Table -> String
+showTable t = ""
