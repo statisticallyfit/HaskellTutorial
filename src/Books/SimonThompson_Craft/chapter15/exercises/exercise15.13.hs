@@ -136,7 +136,7 @@ convert hcode (Node n t1 t2) = (convert (hcode ++ [L]) t1)
 
 node    = "    2     "  -- 1 node = 4 spaces front ++ 5 behind spaces
 arms    = "  /   \\  "  -- 1 arm = 2 front spaces ++ 3 between spaces ++ 2 behind spaces
-letters = " n:4  m:5 "  -- 1 leaf = 1 front space ++ 2 between spaces + 1 behind space
+letters = " a:4  m:3 "  -- 1 leaf = 1 front space ++ 2 between spaces + 1 behind space
 test = node ++ "\n" ++ arms ++ "\n" ++ letters ++ "\n"
 
 
@@ -146,6 +146,28 @@ test2 = "   _4_ \n " ++
 
 
 t1 = Node 12 (Leaf 'a' 4) (Leaf 'm' 3)
+t2 = Node 12 (Leaf 'a' 4) (Node 8 (Leaf 't' 1) (Leaf 'm' 5))
+
+
+
+-- note cumulative count of spaces starting from bottom middle of node and ending at
+-- rightmost leaf.
+rightWidth :: Tree -> Int
+rightWidth (Leaf _ _) = 3 -- means 3 right pads starting from rightmost leaf.
+rightWidth (Node _ _ t2) = 3 + rightWidth t2 -- because 3 spaces from mid bottom 2 until
+                                             -- right arm (inclusive)
+
+-- note cumulative count of num spaces starting from bottom middle of node (mutually
+ -- exclusive of rightWidth) and ending to leftmost leaf. Including pad separating
+ -- tree and left screen edge.
+leftWidth :: Tree -> Int
+leftWidth (Leaf _ _) = 2 -- means add 2 spaces left beyond left arm
+leftWidth (Node _ t1 _) = 2 + leftWidth t1 -- means 1 space under node,1 for left arm.
+
+
+width :: Tree -> Int
+width t = rightWidth t + leftWidth t
+
 {-
 
 showTree :: Tree -> String
