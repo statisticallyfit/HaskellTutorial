@@ -1,24 +1,4 @@
-
--- Combining all the files Types.hs, Coding.hs...
-
--- NOTE Huffman code is built so that most frequent letters have the shortest sequences
--- of code bits and the less frequent have more expensive code bits.
- -- Therefore the best tree is one where the most frequent letters in your code would
- -- be at the top nodes so they have the shortest sequence in code.
-
-
-{-
-NOTE how to find the tree with optimal code for the text:
-
-1. find frequencies of individual letters : tuple resulting is (letter, freq)
-
-2. each tuple is turned into a tree. So ('b', 1) ==> Leaf 'b' 1
-These are sorted in frequency order
-
-3. amalgamate together trees by combining the two trees of lowest frequency. Insert
-into proper sorted order. Repeat until one tree is left.
-
--}
+import Test.QuickCheck hiding (frequency)
 
 
 -- leaf carries letter and its frequency
@@ -126,6 +106,7 @@ makeCodes ts = makeCodes (amalgamate ts)
 
 -- note pair first two trees and plug them back in tree list in sorted order.
 amalgamate :: [Tree] -> [Tree]
+--amalgamate [t] = [t] -- note my add, not needed since in makeCodes [t] = t
 amalgamate (t1:t2:ts) = insTree (pair t1 t2) ts
 
 
@@ -144,7 +125,6 @@ pair t1 t2 = Node (v1 + v2) t1 t2
 value :: Tree -> Int
 value (Leaf _ n) = n
 value (Node n _ _) = n
-
 
 
 
@@ -172,19 +152,18 @@ convert hcode (Node n t1 t2) = (convert (hcode ++ [L]) t1)
 
 
 
-text1 = "amalgamating"
-freqs1 = frequency text1
-treeList1 = toTreeList freqs1
-tree1 = makeCodes treeList1
+
+
+
+text1 = "banananationwinner"
+tree1 = codes text1
 table1 = codeTable tree1
-
-text2 = "banananation"
-freqs2 = frequency text2
-treeList2 = toTreeList freqs2
-tree2 = makeCodes treeList2
+hcode1 = codeMessage table1 text1
 
 
-text3 = "anabananaananas"
-freqs3 = frequency text3
-treeList3 = toTreeList freqs3
-tree3 = makeCodes treeList3
+-- HELP TODO - why is amalgamate failing?
+-- first coding then decoding should result in same string
+propCodeDecodeID :: String -> Bool
+propCodeDecodeID string = (decodeMessage tree (codeMessage table string)) == string
+    where tree = codes string
+          table = codeTable tree

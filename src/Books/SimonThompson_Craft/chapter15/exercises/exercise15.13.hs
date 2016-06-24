@@ -132,42 +132,94 @@ convert hcode (Node n t1 t2) = (convert (hcode ++ [L]) t1)
 
 -- data Tree = Leaf Char Int | Node Int Tree Tree
 
--- note gets width of left side and right side
-
-node    = "    2     "  -- 1 node = 4 spaces front ++ 5 behind spaces
-arms    = "  /   \\  "  -- 1 arm = 2 front spaces ++ 3 between spaces ++ 2 behind spaces
-letters = " a:4  m:3 "  -- 1 leaf = 1 front space ++ 2 between spaces + 1 behind space
-test = node ++ "\n" ++ arms ++ "\n" ++ letters ++ "\n"
-
-
-test2 = "   _4_ \n " ++
-        " |   | \n" ++
-        "g:2  m:4\n"
-
-
-t1 = Node 12 (Leaf 'a' 4) (Leaf 'm' 3)
-t2 = Node 12 (Leaf 'a' 4) (Node 8 (Leaf 't' 1) (Leaf 'm' 5))
-
-
-
--- note cumulative count of spaces starting from bottom middle of node and ending at
--- rightmost leaf.
-rightWidth :: Tree -> Int
-rightWidth (Leaf _ _) = 3 -- means 3 right pads starting from rightmost leaf.
-rightWidth (Node _ _ t2) = 3 + rightWidth t2 -- because 3 spaces from mid bottom 2 until
-                                             -- right arm (inclusive)
+depth :: Tree -> Int
+depth (Leaf _ _) = 1
+depth (Node _ t1 t2) = 1 + maximum [depth t1, depth t2]
 
 -- note cumulative count of num spaces starting from bottom middle of node (mutually
  -- exclusive of rightWidth) and ending to leftmost leaf. Including pad separating
  -- tree and left screen edge.
-leftWidth :: Tree -> Int
-leftWidth (Leaf _ _) = 2 -- means add 2 spaces left beyond left arm
-leftWidth (Node _ t1 _) = 2 + leftWidth t1 -- means 1 space under node,1 for left arm.
+indent :: Tree -> Int
+indent (Leaf _ _) = 2 -- means add 2 spaces left beyond left arm
+indent (Node _ t1 _) = 2 + indent t1 -- means 1 space under node,1 for left arm.
 
 
-width :: Tree -> Int
-width t = rightWidth t + leftWidth t
+-- NOTE has 2 rows of nodes ==> 3 spaces between all leaves
+row1'    = "      ____(2)____      "
+row2'    = "     |           |     "
+row3'    = "   _(4)_       _(5)_  "
+row4'    = "  |     |     |     | "
+row5'    = " n:6   m:5   m:4   j:8"
+test2 = row1' ++ "\n" ++ row2' ++ "\n" ++ row3' ++ "\n" ++
+        row4' ++ "\n" ++ row5' ++ "\n"
 
+
+row1'' = "   _(2)_  "
+row2'' = "  |     | "
+row3'' = " n:4   m:8"
+test3 = row1'' ++ "\n" ++ row2'' ++ "\n" ++ row3'' ++ "\n"
+
+
+r1'    = "         _________2________           "
+r2'    = "        |                  |          "
+r3'    = "    ____4____          ____5____     "
+r4'    = "   |         |        |         |    "
+r5'    = "  _6_       _9_      _3_       _1_  "
+r6'    = " |   |     |   |    |   |     |   | "
+r7'    = "n:4 m:8   m:2 g:9  h:2 k:5   b:3 y:2"
+test4 = r1' ++ "\n" ++ r2' ++ "\n" ++ r3' ++ "\n" ++
+        r4' ++ "\n" ++ r5' ++ "\n" ++ r6' ++ "\n" ++ r7' ++ "\n"
+
+
+-- NOTE has 3 rows of ndoes ==> 3 spaces between all leaves
+r1    = "           __________(2)__________           "
+r2    = "          |                       |          "
+r3    = "     ____(4)____             ____(5)____     "
+r4    = "    |           |           |           |    "
+r5    = "  _(6)_       _(9)_       _(3)_       _(1)_  "
+r6    = " |     |     |     |     |     |     |     | "
+r7    = "n:4   m:8   m:2   g:9   h:2   k:5   b:3   y:2"
+
+test5 = r1 ++ "\n" ++ r2 ++ "\n" ++ r3 ++ "\n" ++
+        r4 ++ "\n" ++ r5 ++ "\n" ++ r6 ++ "\n" ++ r7 ++ "\n"
+
+
+
+-- NOTE has 4 rows of nodes ==> 3 spaces between all leaves
+                               -- 22 dashes                  -- 21 dashes
+rr1 = "                       ______________________(12)_____________________                        "
+rr2 = "                      |                                               |                       "
+rr3 = "           __________(4)__________                         __________(1)__________            "
+rr4 = "          |                       |                       |                       |           "
+rr5 = "     ____(6)____             ____(9)____             ____(1)____             ____(1)____      "
+rr6 = "    |           |           |           |           |           |           |           |     "
+rr7 = "  _(9)_       _(8)_       _(2)_       _(2)_       _(1)_       _(1)_       _(1)_       _(1)_   "
+rr8 = " |     |     |     |     |     |     |     |     |     |     |     |     |     |     |     |  "
+rr9 = "n:9   m:3   h:1   i:1   j:1   m:1   k:9   o:1   n:9   m:3   h:1   i:1   j:1   m:1   k:9   o:1 "
+
+test6 = rr1 ++ "\n" ++ rr2 ++ "\n" ++ rr3 ++ "\n" ++ rr4 ++ "\n" ++ rr5
+        ++ "\n" ++ rr6 ++ "\n" ++ rr7 ++ "\n" ++ rr8 ++ "\n" ++ rr9 ++ "\n"
+
+
+
+
+
+
+
+
+t1 = Node 12 (Leaf 'a' 4) (Leaf 'm' 3)
+t2 = Node 12 (Leaf 'a' 4) (Node 8 (Leaf 't' 1) (Leaf 'm' 5))
+t3 = Node 12 (Leaf 'a' 4) (Node 8 (Node 4 (Leaf 'g' 2) (Leaf 'm' 2)  )
+                                  (Node 4 (Node 2 (Leaf 'n' 1) (Leaf 't' 1))
+                                          (Leaf 'k' 10) ))
+
+
+
+
+-- NOTE if the node has more than 1 digit, take 1 dash from right, then another dash from left
+-- until the amount is correct.
+-- NOTE if leaf (n) has more than 1 digit, take 1 space from right then one from left until
+-- amount is correct.
 {-
 
 showTree :: Tree -> String
@@ -177,5 +229,80 @@ showTree (Node n t1 t2) =
 -}
 
 
+
+
+
+
+
+-- note 9 lines under letter + 1 for space before Code title
 showTable :: Table -> String
-showTable t = ""
+showTable table = "\n" ++ title ++ "\n" ++ linesUnderTitle ++ "\n" ++ content ++ "\n"
+    where maxCodeLen = maximum $ map (\(l,cs) -> length cs) table
+          showTuple (l, cs) = " " ++ show l ++ "    | " ++ concatMap (\bit -> show bit) cs ++ "\n"
+          title = " Letter | Code"
+          linesUnderTitle = replicate (10 + maxCodeLen) '-'
+          content = concatMap showTuple table
+
+printTable :: Table -> IO()
+printTable table = putStr $ showTable table
+
+
+
+text1 = "amalgamating"
+freqs1 = frequency text1
+treeList1 = toTreeList freqs1
+tree1 = makeCodes treeList1
+table1 = codeTable tree1
+
+text2 = "banananation"
+freqs2 = frequency text2
+treeList2 = toTreeList freqs2
+tree2 = makeCodes treeList2
+table2 = codeTable tree2
+
+
+text3 = "anabananaananas"
+freqs3 = frequency text3
+treeList3 = toTreeList freqs3
+tree3 = makeCodes treeList3
+table3 = codeTable tree3
+
+
+
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------------
+
+{-
+
+--NOTE trying another view (tree is flipped)
+vvv2 = [" |-- n:3", "(2)", " |-- m:5"]
+
+vvv1 = [" |", " |", " |", " |", " |", " |", " |", " |", " |", "(2)",
+        " |", " |", " |", " |", " |", " |", " |", " |", " |"]
+
+
+type Picture = [[Char]]
+
+flipV :: Picture -> Picture
+flipV pic = [reverse line | line <- pic]
+
+
+-- note: rotate clockwise 90 degrees
+rotate :: Picture -> Picture
+rotate pic = flipV [ [xs !! i | xs <- pic] | i <- [0 .. rowLength - 1]]
+             where rowLength = length (pic !! 0)
+
+-- note rotate counterclockwise 90 degrees
+rotateCounter :: Picture -> Picture
+rotateCounter pic = rotate $ rotate $ rotate pic
+
+draw :: Picture -> IO()
+draw pic = putStr $ concatMap (++"\n") pic
+
+-}
