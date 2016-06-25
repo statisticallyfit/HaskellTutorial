@@ -21,20 +21,6 @@ type Var = Char -- HELP what is Var supposed to be?
 newtype Store = Store [(Integer, Var)] -- deriving (Eq, Show)
 
 
-init :: [(Integer, Var)]
-init = []
-
--- note it is a lookup function and returns integer next to its var given.
-val :: [(Integer, Var)] -> Var -> Integer
-val [] v = 0
-val ((n,w):rest) v
-    | v == w = n
-    | otherwise = val rest v
-
-upd :: [(Integer, Var)] -> Var -> Integer -> [(Integer, Var)]
-upd sto v n = (n,v) : sto
-
----------------------------------------------------------------------
 initial :: Store
 initial = Store []
 
@@ -108,3 +94,51 @@ propUpdate2 c1 c2 n sto = value (update sto c2 n) c1 == value sto c1 || c1 == c2
 -- note this fails when c1 == c2
 --propUpdate2 c1 c2 n sto = value (update sto c2 n) c1 == value sto c1
 
+
+
+
+
+
+
+
+
+
+
+
+-- 16.3 QUEUES ------------------------------------------------------------------------
+
+data Queue a = Queue [a] deriving (Eq, Show)
+
+empty :: Queue a
+empty = Queue []
+
+isEmpty :: Queue a -> Bool
+isEmpty (Queue []) = True
+isEmpty _          = False
+
+-- note add to the end (like lineup)
+add :: a -> Queue a -> Queue a
+add x (Queue xs) = Queue (xs ++ [x])
+
+-- note remove from front (like lineup getting customers)
+remove :: Queue a -> (a, Queue a)
+remove q@(Queue xs)
+    | not (isEmpty q) = (head xs, Queue (tail xs))
+    | otherwise = error "remove from front"
+
+
+-- note add to front
+add' x (Queue xs) = Queue (x:xs)
+
+-- note remove from last
+remove' q@(Queue xs)
+    | not (isEmpty q) = (last xs, Queue (init xs))
+    | otherwise = error "remove' from last"
+
+
+
+q1 :: Queue Integer
+q1 = Queue [1,2,3,4,5,6,7,8,9,10]
+
+q2 :: Queue String
+q2 = Queue ["let's", "go", "fly", "a", "kite", "up", "to", "the", "highest", "height"]
