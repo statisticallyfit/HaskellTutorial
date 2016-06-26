@@ -315,32 +315,7 @@ data Edit = Change Char | Copy | Delete | Insert Char | Kill
 
 
 
-{-
--- EXAMPLE PROBLEM 2 - Simulation - get input of customer arrivals (queues) and
-give output their departures (decide how many bank clerks need to be working at
-certain times of the day).
-
-1. type of input message: Inmess.
-At a given time
-    => no one arrives (No)
-    => someone arrives (Yes (arrival time of customer) (time to serve them))
-
-    => data InputMsg = No | Yes Arrival Service
-       type Arrival = Integer
-       type Service = Integer
-
-2.outmess - type of output messages.At a given time, either
-    =>  no one leaves (None)
-    => or a person is discharged (Discharge) which takes the time the customer
-    waited and time of their arrival and time it took to serve them.
-
-    data OutputMsg = None | Discharge Arrival Wait Service
-    type Wait = Integer
--}
-
-
-
--- BACK TO EXAMPLE PROBLEM 1
+-- EXAMPLE PROBLEM 1
 
 data Edit = Change Char
           | Copy
