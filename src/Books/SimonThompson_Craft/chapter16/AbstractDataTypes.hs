@@ -127,6 +127,16 @@ remove q@(Queue xs)
     | otherwise = error "remove from front"
 
 
+
+q1 :: Queue Integer
+q1 = Queue [1,2,3,4,5,6,7,8,9,10]
+
+q2 :: Queue String
+q2 = Queue ["let's", "go", "fly", "a", "kite", "up", "to", "the", "highest", "height"]
+
+
+----------------------------------------------------------------------------------------
+
 -- note add to front
 add' x (Queue xs) = Queue (x:xs)
 
@@ -137,8 +147,32 @@ remove' q@(Queue xs)
 
 
 
-q1 :: Queue Integer
-q1 = Queue [1,2,3,4,5,6,7,8,9,10]
+-- More efficient (but same behavior (?? - not really)) -HELP --------------------------
+data QueueSplit a = QueueSplit [a] [a] deriving (Eq, Show)
 
-q2 :: Queue String
-q2 = Queue ["let's", "go", "fly", "a", "kite", "up", "to", "the", "highest", "height"]
+emptyQS :: QueueSplit a
+emptyQS = QueueSplit [] []
+
+isEmptyQS :: QueueSplit a -> Bool
+isEmptyQS (QueueSplit [] []) = True
+isEmptyQS _ = False
+
+-- note add to the head of right list
+addQS :: a -> QueueSplit a -> QueueSplit a
+addQS x (QueueSplit xs ys) = QueueSplit xs (x:ys)
+
+-- note remove from head of left list
+removeQS :: QueueSplit a -> (a, QueueSplit a)
+removeQS (QueueSplit [] []) = error "remove QS"
+removeQS (QueueSplit [] ys) = removeQS (QueueSplit (reverse ys) [])
+removeQS (QueueSplit (x:xs) ys) = (x, QueueSplit xs ys)
+
+
+
+
+qs1 :: QueueSplit Integer
+qs1 = QueueSplit [1,2,3,4,5] [6,7,8,9,10]
+
+qs2 :: QueueSplit String
+qs2 = QueueSplit ["let's", "go", "fly", "a", "kite"]
+                 ["up", "to", "the", "highest", "height"]
