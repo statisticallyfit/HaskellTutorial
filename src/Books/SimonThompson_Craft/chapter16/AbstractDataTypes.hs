@@ -233,22 +233,24 @@ Three principal operations on a server (collection of queues):
 -}
 
 
--- => no one arrives (No)
--- => someone arrives (Yes (arrival time of customer) (time to serve them))
-type Arrival = Integer
-type Service = Integer
+
+type Arrival = Integer -- time it takes for customer to arrive HELP (verify)
+type Service = Integer -- service time to serve a customer
 data Inmess = No | Yes Arrival Service deriving (Eq, Show)
 
 
--- =>  no one leaves (None)
--- => or a person is discharged (Discharge) which takes the time the customer
--- waited and time of their arrival and time it took to serve them.
 type Wait = Integer
-data Outmess = None | Discharge Arrival Wait Service deriving (Eq, Show)
+data Outmess = None -- either no one leaves or a person is discharged (has been served)
+             | Discharge
+                Arrival -- time for customer to arrive
+                Wait -- time for customer to wait
+                Service -- time taken to serve customer.
+             deriving (Eq, Show)
 
--- Time = current time
+-- Time = current time HELP *(current time taken or ...?)
 -- Service = service time so far for the item being curently processed.
 -- [Inmess] = the actual queue.
+type Time = Integer
 data QueueState = QS Time Service [Inmess] deriving (Eq, Show)
 
 
@@ -272,7 +274,7 @@ queueStep (QS currTime servTimeSoFar inQ@(Yes arrTime servTime : inRest))
     | servTimeSoFar < servTime
         = (QS (currTime+1) (servTimeSoFar+1) inQ, [])
     | otherwise
-        = (QS (currTime+1) 0 inRest
+        = (QS (currTime+1) 0 inRest,
                 [Discharge arrTime waitTime servTime]) ------ this is the outmesss
     where waitTime = currTime - servTime - arrTime
 
@@ -284,4 +286,4 @@ queueLength :: QueueState -> Int
 queueLength (QS _ _ q) = length q
 
 queueEmpty :: QueueState -> Bool
-queueEmpty (QS _ _ ) = q == []
+queueEmpty (QS _ _ q) = q == []
