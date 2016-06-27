@@ -35,8 +35,8 @@
       <file leaf-file-name="AbstractDataTypes.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/AbstractDataTypes.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6618123">
-              <caret line="252" column="19" selection-start-line="252" selection-start-column="19" selection-end-line="252" selection-end-column="19" />
+            <state vertical-scroll-proportion="2.0453074">
+              <caret line="336" column="0" selection-start-line="336" selection-start-column="0" selection-end-line="336" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -758,12 +758,12 @@
       <workItem from="1466871974619" duration="2922000" />
       <workItem from="1466920673717" duration="7369000" />
       <workItem from="1466959328754" duration="2897000" />
-      <workItem from="1467007690400" duration="2925000" />
+      <workItem from="1467007690400" duration="5307000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="704355000" />
+    <option name="totallyTimeSpent" value="706737000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="849" height="782" extended-state="0" />
@@ -1177,8 +1177,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/AbstractDataTypes.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6618123">
-          <caret line="252" column="19" selection-start-line="252" selection-start-column="19" selection-end-line="252" selection-end-column="19" />
+        <state vertical-scroll-proportion="2.0453074">
+          <caret line="336" column="0" selection-start-line="336" selection-start-column="0" selection-end-line="336" selection-end-column="0" />
           <folding />
         </state>
       </provider>

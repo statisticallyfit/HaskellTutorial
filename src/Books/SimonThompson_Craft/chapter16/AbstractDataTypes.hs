@@ -212,13 +212,10 @@ At a given time
     data OutputMsg = None | Discharge Arrival Wait Service
     type Wait = Integer
 
-
 3. Two operations in a queue: add item and process quque by one-minute step.
 This gives one minute's further processing to item at head of queue.
 Two outcomes are possible: item might have its processing completed, generates an Outmess,
 or further processing is needed.
-
-
 
 4. ServerState models serving more than one quque. System receives one Inmess per minute.
 Three principal operations on a server (collection of queues):
@@ -226,57 +223,55 @@ Three principal operations on a server (collection of queues):
     2. processing step
     3. combine a server step with allocation of Inmess to shortest queue in the server.
 
-    Three other operations are necessary:
+Three other operations are necessary:
     1. make a starting server with appropriate number of empty queues.
     2. identify num queues in server
     3. identify shrotest queue in server.
 -}
 
 
+-- note the "time" variables here are times (amounts) not actual clock point in time
+-- such as 5:45 pm.
+type Arrival = Integer -- the minute at which the customer arrives.
+type Service = Integer -- time it WILL take to service a customer.
+type Wait = Integer -- amount of time it took for customer to wait to get their service.
+type Time = Integer -- the current time (incremented throughout all operations like clock)
 
-type Arrival = Integer -- time it takes for customer to arrive HELP (verify)
-type Service = Integer -- service time to serve a customer
+-- Example: No = no arrival.
+-- Example: Yes 34 12 = customer arrived at 34th minute + will need 12 min to be served.
 data Inmess = No | Yes Arrival Service deriving (Eq, Show)
 
+-- Example: None = no person has been discharged
+-- Example: Discharge 34 27 12 = person arriving at 34th minute waited 27 minutes
+-- to get their 12 minutes of service.
+data Outmess = None | Discharge Arrival Wait Service deriving (Eq, Show)
 
-type Wait = Integer
-data Outmess = None -- either no one leaves or a person is discharged (has been served)
-             | Discharge
-                Arrival -- time for customer to arrive
-                Wait -- time for customer to wait
-                Service -- time taken to serve customer.
-             deriving (Eq, Show)
-
--- Time = current time HELP *(current time taken or ...?)
--- Service = service time so far for the item being curently processed.
 -- [Inmess] = the actual queue.
-type Time = Integer
 data QueueState = QS Time Service [Inmess] deriving (Eq, Show)
+
 
 
 addMessage :: Inmess -> QueueState -> QueueState
 addMessage im (QS time serv q) = QS time serv (q ++ [im])
 
 -- note If no inmess queue to process, incr time by one  and return empty in/outmesses.
--- If serving time so far is less than required (servTime) then processing is
--- not compelte. Therefore add one to current time and to service time so far.
--- Otherwise the new state of the queue has time advanced by one, head removed, processing
--- time is set to 0. Output message is produced: waiting time = current time subtracted
--- by both service and arrival times.
--- We incrememnt currTime in both cases because it took 1 minute to conduct this
+--- > If serving time so far is less than required (servTime) then processing is
+-- not complete. Therefore add one to current time and to service time so far.
+--- > Otherwise the new state of the queue has time advanced by one, head removed,
+-- processing time is set to 0. Output message is produced:
+-- waiting time = current time subtracted by both service and arrival times.
+--- > We incrememnt currTime in both cases because it took 1 minute to conduct this
 -- queueStep operation.
--- note the "time" variables here are times (amounts) not actual clock point in time
--- such as 5:45 pm.
 -- note case of messages "No" are filtered out by server.
 queueStep :: QueueState -> (QueueState, [Outmess])
 queueStep (QS currTime servTimeSoFar []) = (QS (currTime+1) servTimeSoFar [], [])
-queueStep (QS currTime servTimeSoFar inQ@(Yes arrTime servTime : inRest))
-    | servTimeSoFar < servTime
+queueStep (QS currTime servTimeSoFar inQ@(Yes arrTime servTimeReq : inRest))
+    | servTimeSoFar < servTimeReq -- if serve time so far < serve time required ...
         = (QS (currTime+1) (servTimeSoFar+1) inQ, [])
     | otherwise
         = (QS (currTime+1) 0 inRest,
-                [Discharge arrTime waitTime servTime]) ------ this is the outmesss
-    where waitTime = currTime - servTime - arrTime
+                [Discharge arrTime waitTime servTimeReq]) ------ this is the outmesss
+    where waitTime = currTime - servTimeReq - arrTime
 
 
 queueStart :: QueueState
@@ -287,3 +282,58 @@ queueLength (QS _ _ q) = length q
 
 queueEmpty :: QueueState -> Bool
 queueEmpty (QS _ _ q) = q == []
+
+
+ins1 :: [Inmess]
+ins1 = [Yes 34 12, Yes 46 3, Yes 55 10, Yes 65 2, Yes 80 15, Yes 95 1, Yes 96 2,
+    Yes 98 4, Yes 102 5, Yes 107 3, Yes 200 10]
+
+qstate1 :: QueueState
+qstate1 = QS 0 0 ins1
+
+
+
+{-
+EXAMPLE run:
+
+*Main> queueStep qstate1
+(QS 1 1 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
+Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
+*Main> queueStep (fst it)
+(QS 2 2 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
+Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
+*Main> queueStep (fst it)
+(QS 3 3 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
+Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
+*Main> queueStep (fst it)
+(QS 4 4 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
+Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
+*Main> queueStep (fst it)
+(QS 5 5 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
+Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
+*Main> queueStep (fst it)
+(QS 6 6 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
+Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
+*Main> queueStep (fst it)
+(QS 7 7 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
+Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
+*Main> queueStep (fst it)
+(QS 8 8 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
+Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
+*Main> queueStep (fst it)
+(QS 9 9 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
+Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
+*Main> queueStep (fst it)
+(QS 10 10 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
+Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
+*Main> queueStep (fst it)
+(QS 11 11 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
+Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
+*Main> queueStep (fst it)
+(QS 12 12 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
+Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
+*Main> queueStep (fst it)
+(QS 13 0 [Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,Yes 98 4,
+Yes 102 5,Yes 107 3,Yes 200 10],[Discharge 34 (-34) 12])
+
+-}
