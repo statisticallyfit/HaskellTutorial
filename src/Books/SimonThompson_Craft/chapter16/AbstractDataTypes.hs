@@ -284,56 +284,56 @@ queueEmpty :: QueueState -> Bool
 queueEmpty (QS _ _ q) = q == []
 
 
-ins1 :: [Inmess]
-ins1 = [Yes 34 12, Yes 46 3, Yes 55 10, Yes 65 2, Yes 80 15, Yes 95 1, Yes 96 2,
-    Yes 98 4, Yes 102 5, Yes 107 3, Yes 200 10]
+ins1, ins2, ins3 :: [Inmess]
+ins1 = [Yes 46 3, Yes 55 10, Yes 65 2, Yes 80 15, Yes 95 1, Yes 96 2]
+ins2 = [Yes 10 4, Yes 14 4, Yes 18 9, Yes 27 3, Yes 30 4, Yes 34 5]
+ins3 = [Yes 1 17, Yes 18 5, Yes 23 2, Yes 25 4, Yes 29 1, Yes 30 8]
 
-qstate1 :: QueueState
+qstate1, qstate2, qstate3 :: QueueState
 qstate1 = QS 0 0 ins1
+qstate2 = QS 0 0 ins2
+qstate3 = QS 0 0 ins3
 
 
 
 {-
 EXAMPLE run:
-
 *Main> queueStep qstate1
-(QS 1 1 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
-Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
+(QS 1 1 [Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2],[])
 *Main> queueStep (fst it)
-(QS 2 2 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
-Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
+(QS 2 2 [Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2],[])
 *Main> queueStep (fst it)
-(QS 3 3 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
-Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
+(QS 3 3 [Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2],[])
 *Main> queueStep (fst it)
-(QS 4 4 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
-Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
-*Main> queueStep (fst it)
-(QS 5 5 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
-Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
-*Main> queueStep (fst it)
-(QS 6 6 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
-Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
-*Main> queueStep (fst it)
-(QS 7 7 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
-Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
-*Main> queueStep (fst it)
-(QS 8 8 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
-Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
-*Main> queueStep (fst it)
-(QS 9 9 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
-Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
-*Main> queueStep (fst it)
-(QS 10 10 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
-Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
-*Main> queueStep (fst it)
-(QS 11 11 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
-Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
-*Main> queueStep (fst it)
-(QS 12 12 [Yes 34 12,Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,
-Yes 98 4,Yes 102 5,Yes 107 3,Yes 200 10],[])
-*Main> queueStep (fst it)
-(QS 13 0 [Yes 46 3,Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2,Yes 98 4,
-Yes 102 5,Yes 107 3,Yes 200 10],[Discharge 34 (-34) 12])
+(QS 4 0 [Yes 55 10,Yes 65 2,Yes 80 15,Yes 95 1,Yes 96 2],[Discharge 46 (-46) 3])
 
 -}
+
+
+
+
+
+-- Server ------------------------------------------------------------------------------
+
+newtype ServerState = SS [QueueState] deriving (Eq, Show)
+
+
+addToQueue :: Int -> Inmess -> ServerState -> ServerState
+addToQueue n im (SS st)
+    = SS (take n st ++ [newQueueState] ++ drop (n+1) st)
+      where
+      newQueueState = addMessage im (st !! n) -- add to the nth queue counting from 0.
+
+
+-- note step of server means making a step in each of the queues server holds and
+-- concatenating together the output messages they produces.
+serverStep :: ServerState -> (ServerState, [Outmess])
+serverStep (SS []) = (SS [], [])
+serverStep (SS (q:qs)) = (SS (q':qs'), outMess ++ outMesses)
+    where
+    (q', outMess) = queueStep q
+    (SS qs', outMesses) = serverStep (SS qs)
+
+
+ss1 :: ServerState
+ss1 = SS [qstate1, qstate2, qstate3]
