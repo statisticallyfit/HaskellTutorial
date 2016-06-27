@@ -346,7 +346,7 @@ simulationStep ss im = (addNewObject im ss', outMess)
 
 
 -- note adds message to shortest queue
--- note it is here that input (No) are not passed to the queues.
+-- note it is here that inmess with type (No) are not passed to the queues.
 addNewObject :: Inmess -> ServerState -> ServerState
 addNewObject No ss = ss
 addNewObject inQ@(Yes arr wait) ss = addToQueue (shortestQueue ss) inQ ss
@@ -355,6 +355,7 @@ addNewObject inQ@(Yes arr wait) ss = addToQueue (shortestQueue ss) inQ ss
 serverStart :: ServerState
 serverStart = SS (replicate numQueues queueStart)
 
+-- note returns num of queues.
 serverSize :: ServerState -> Int
 serverSize (SS xs) = length xs
 
@@ -407,11 +408,8 @@ shortestQueue (SS q3 : [q4])
 
 
 
-
-
 ss1 :: ServerState
-ss1 = SS [qstate1, qstate3, qstate1, qstate3, qstate1, qstate2, qstate3, qstate1]
------------- 0       1          2       3          4        5       6       7
+ss1 = SS [qstate1, qstate2, qstate3]
 
 
 
