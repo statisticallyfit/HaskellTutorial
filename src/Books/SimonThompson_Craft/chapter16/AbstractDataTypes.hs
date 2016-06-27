@@ -286,7 +286,7 @@ queueEmpty (QS _ _ q) = q == []
 
 ins1, ins2, ins3 :: [Inmess]
 ins1 = [Yes 46 3, Yes 55 10, Yes 65 2, Yes 80 15, Yes 95 1, Yes 96 2]
-ins2 = [Yes 10 4, Yes 14 4, Yes 18 9, Yes 27 3, Yes 30 4, Yes 34 5]
+ins2 = [Yes 10 4, Yes 14 4, Yes 18 9, Yes 27 3, Yes 30 4]
 ins3 = [Yes 1 17, Yes 18 5, Yes 23 2, Yes 25 4, Yes 29 1, Yes 30 8]
 
 qstate1, qstate2, qstate3 :: QueueState
@@ -317,6 +317,8 @@ EXAMPLE run:
 
 newtype ServerState = SS [QueueState] deriving (Eq, Show)
 
+numQueues :: Int
+numQueues = 5
 
 addToQueue :: Int -> Inmess -> ServerState -> ServerState
 addToQueue n im (SS st)
@@ -326,7 +328,7 @@ addToQueue n im (SS st)
 
 
 -- note step of server means making a step in each of the queues server holds and
--- concatenating together the output messages they produces.
+-- concatenating together the output messages they produce.
 serverStep :: ServerState -> (ServerState, [Outmess])
 serverStep (SS []) = (SS [], [])
 serverStep (SS (q:qs)) = (SS (q':qs'), outMess ++ outMesses)
@@ -335,5 +337,81 @@ serverStep (SS (q:qs)) = (SS (q':qs'), outMess ++ outMesses)
     (SS qs', outMesses) = serverStep (SS qs)
 
 
+
+-- note do server step then add incoming message. If message indicates arrival, then
+-- add it to shortest queue.
+simulationStep :: ServerState -> Inmess -> (ServerState, [Outmess])
+simulationStep ss im = (addNewObject im ss', outMess)
+    where (ss', outMess) = serverStep ss
+
+
+-- note adds message to shortest queue
+-- note it is here that input (No) are not passed to the queues.
+addNewObject :: Inmess -> ServerState -> ServerState
+addNewObject No ss = ss
+addNewObject inQ@(Yes arr wait) ss = addToQueue (shortestQueue ss) inQ ss
+
+-- note numQueues is a constant to be defined.
+serverStart :: ServerState
+serverStart = SS (replicate numQueues queueStart)
+
+serverSize :: ServerState -> Int
+serverSize (SS xs) = length xs
+
+-- note returns index of shortest queue.
+shortestQueue :: ServerState -> Int
+shortestQueue (SS [q]) = 0
+shortestQueue (SS (q:qs))
+    | (queueLength (qs !! short)) <= queueLength q = short + 1
+    | otherwise = 0
+    where short = shortestQueue (SS qs)
+
+
+{-
+EXAMPLE evaluation goes downward until we evaluate all the "short". Then we go back up.
+
+SAY lengths of (q1,q2,q3,q4) are (3,14,5,6) respectively
+
+shortestQueue (SS [q1, q2, q3, q4]) --- > 0
+
+------------------------------------------------------
+
+shortestQueue (SS (q1 : [q2,q3,q4]))
+= queueLen ([q2,q3,q4] !! short) <= queueLen q1
+= queueLen q3 <= queueLen q1
+= 5 <= 3 = False so --- > 0
+
+=> short = shortestQueue  (SS [q2,q3,q4]) --- > 1
+
+------------------------------------------------------
+shortestQueue (SS q2 : [q3,q4])
+= queueLen ([q3,q4] !! short) <= queueLen q2
+= queueLen ([q3,q4] !! 0) <= queueLen q2
+= queueLen q3 <= queueLen q2
+= 5 <= 14 = True so --- > 0 + 1 = 1
+
+=> short = shortestQueue (SS [q3,q4]) --- > 0
+
+
+------------------------------------------------------
+shortestQueue (SS q3 : [q4])
+= queueLen ([q4] !! short) <= queueLen q3
+= queueLen (q4) <= queueLen q4
+= 6 <= 5 = False so --- > 0
+
+=> short = shortestQueue (SS [q4]) --- > 0
+
+-- note now evaluation goes upward.
+
+-}
+
+
+
+
+
 ss1 :: ServerState
-ss1 = SS [qstate1, qstate2, qstate3]
+ss1 = SS [qstate1, qstate3, qstate1, qstate3, qstate1, qstate2, qstate3, qstate1]
+------------ 0       1          2       3          4        5       6       7
+
+
+
