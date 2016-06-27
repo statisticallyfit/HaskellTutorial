@@ -1,4 +1,5 @@
 import Test.QuickCheck
+import Control.Monad
 
 {-
 NOTE building calculator for numerical expressions.
@@ -270,7 +271,7 @@ queueStep (QS currTime servTimeSoFar inQ@(Yes arrTime servTimeReq : inRest))
         = (QS (currTime+1) (servTimeSoFar+1) inQ, [])
     | otherwise
         = (QS (currTime+1) 0 inRest,
-                [Discharge arrTime waitTime servTimeReq]) ------ this is the outmesss
+                [Discharge arrTime waitTime servTimeReq]) ------ this is the outmess
     where waitTime = currTime - servTimeReq - arrTime
 
 
@@ -311,9 +312,53 @@ EXAMPLE run:
 
 
 
+-- TESTING QueueState ---------------------------------------------------------------------
+
+instance Arbitrary Inmess where
+    arbitrary = do
+        Positive arr <- arbitrary
+        Positive serv <- arbitrary
+        oneof [return No, return (Yes arr serv)]
+
+instance Arbitrary Outmess where
+    arbitrary = do
+        Positive arr <- arbitrary
+        Positive wait <- arbitrary
+        Positive serv <- arbitrary
+        oneof [return None, return (Discharge arr wait serv)]
+
+instance Arbitrary QueueState where
+    arbitrary = do
+        Positive time <- arbitrary
+        Positive service <- arbitrary
+        inmesses <- arbitrary
+        return (QS time service inmesses)
+
+---------------------------------------------------
+-- note too costly to use Property to limit all inmesses to have all yes values and
+-- no Nos. Must declare the arbitrary instance to have thsi property ingrained in it from
+-- the start, instead.
+
+-- note check that im is added last in addMessage
+propQueueState_AddMessage :: Inmess -> QueueState -> Bool
+propQueueState_AddMessage im q = last inmesses == im
+    where q'@(QS time serv inmesses) = addMessage im q
+
+-- note check that discharge is only present in outmess when service time is 0,
+-- and when servtime is not zero, there are no discharges.
+propQueueState_QueueStep :: QueueState -> Bool
+propQueueState_QueueStep q@(QS ct st ins) = servIsZeroANDOuts || servNotZeroANDNoOuts
+    where filteredIns = filter (/= No) ins
+          (QS ct' st' ins', outs) = queueStep (QS ct st filteredIns)
+          servIsZeroANDOuts = st' == 0 && (not $ null outs)
+          servNotZeroANDNoOuts = st' /= 0 && (null outs)
 
 
--- Server ------------------------------------------------------------------------------
+
+
+
+
+--- Server ------------------------------------------------------------------------------
 
 newtype ServerState = SS [QueueState] deriving (Eq, Show)
 
@@ -335,7 +380,6 @@ serverStep (SS (q:qs)) = (SS (q':qs'), outMess ++ outMesses)
     where
     (q', outMess) = queueStep q
     (SS qs', outMesses) = serverStep (SS qs)
-
 
 
 -- note do server step then add incoming message. If message indicates arrival, then
@@ -393,7 +437,6 @@ shortestQueue (SS q2 : [q3,q4])
 
 => short = shortestQueue (SS [q3,q4]) --- > 0
 
-
 ------------------------------------------------------
 shortestQueue (SS q3 : [q4])
 = queueLen ([q4] !! short) <= queueLen q3
@@ -406,10 +449,40 @@ shortestQueue (SS q3 : [q4])
 
 -}
 
-
-
 ss1 :: ServerState
 ss1 = SS [qstate1, qstate2, qstate3]
 
+
+
+
+
+
+
+
+
+--- TESTING SERVER ------------------------------------------------------------------------
+
+instance Arbitrary ServerState where
+    arbitrary = do
+        qs <- arbitrary
+        return (SS qs)
+
+------------------------------------------------------------------------------------------
+
+-- note check that AddToQueue function really adds to the nth queue (counting from 0)
+-- note how to: the nth queue in serverstate should have last element equal to (im).
+propServerState_Add :: Int -> Inmess -> ServerState -> Property
+propServerState_Add n im (SS qs) =
+    not (null qs) ==>
+    (last inmesses) == im
+    where (SS qs') = addToQueue n im (SS qs)
+          (QS _ _ inmesses) = qs' !! n
+
+-- note num of queues should be same as before
+propServerState_Add2 :: Int -> Inmess -> ServerState -> Bool
+propServerState_Add2 n im (SS qs) = length qs' == length qs
+    where (SS qs') = addToQueue n im (SS qs)
+
+------------------------------------------------------------------------------------------
 
 
