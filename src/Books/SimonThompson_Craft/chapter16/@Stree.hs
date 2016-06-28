@@ -128,9 +128,9 @@ size (Node _ n _ _) = n
 
 
 sizeRecursive :: Stree a -> Int
-size t
-    | isNil t = 0
-    | otherwise = 1 + size (leftSub t) + size (rightSub t)
+sizeRecursive t | isNil t = 0
+                | otherwise = 1 + sizeRecursive (leftSub t)
+                                + sizeRecursive (rightSub t)
 
 
 
@@ -163,7 +163,7 @@ instance Arbitrary a => Arbitrary (Stree a) where
 
 
 propIns :: Integer -> Stree Integer -> Bool
-propIns val t = size t + 1 == (size newTree)
+propIns val t = (size t + 1) == (size newTree)
     where newTree = insTree val t
 
 ------------------------------------------------------------------------------------------
