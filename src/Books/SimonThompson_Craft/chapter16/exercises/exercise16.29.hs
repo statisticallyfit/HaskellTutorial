@@ -1,5 +1,7 @@
 import Data.Maybe
 import Data.List hiding (delete)
+import Test.QuickCheck
+import Control.Monad hiding (join)
 
 {-
 Precondition to all methods: tree given MUST be a binary search tree! (in order).
@@ -58,8 +60,12 @@ minTree t
 
 -- note is auxiliary, not exported.
 -- postcondition: all elements on left are smaller than those on right.
+-- precondition: cannot take any Nil trees as t2 because pattern match from Nothing
+ -- to Just miniVal fails.
 join :: Ord a => Tree a -> Tree a -> Tree a
-join t1 t2 = Node miniVal t1 newTree
+join t1 t2
+    {-| isNil t2 = Nil
+    | otherwise-} = Node miniVal t1 newTree
     where (Just miniVal) = minTree t2
           newTree = delete miniVal t2
 
@@ -108,11 +114,14 @@ collapse :: Tree a -> [a]
 collapse Nil = []
 collapse (Node n t1 t2) = collapse t1 ++ [n] ++ collapse t2
 
-
+size :: Tree a -> Int
+size t = length (collapse t)
+{-
 size :: Tree a -> Int
 size t
     | isNil t = 0
     | otherwise = 1 + size (leftSub t) + size (rightSub t)
+-}
 
 
 occurs :: Ord a => a -> Tree a -> Bool
@@ -123,6 +132,7 @@ occurs val (Node v t1 t2)
     | otherwise = occurs val t2
 
 
+--
 
 
 
@@ -170,4 +180,34 @@ closest val t -- = if occurs val t then clos val t else Nothing
             | d1 > d2  = Just [s]
 
 
-------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- TESTING ------------------------------------------------------------------------------
+
+instance Arbitrary a => Arbitrary (Tree a) where
+    arbitrary = frequency
+        [(1, return Nil),
+         (4, liftM3 Node arbitrary arbitrary arbitrary)]
+
+-- note size before should be same as size after.
+-- HELP doesn't work because of Nil t2.
+propJoin :: Tree Int -> Tree Int -> Bool
+propJoin t1 t2 = (size t1 + size t2) == (size (join t1 t2))
+
+------------------------------------------------------------------------------------------
+
+
+
