@@ -1,4 +1,5 @@
 import Data.Maybe
+import Data.List hiding (delete)
 
 {-
 Precondition to all methods: tree given MUST be a binary search tree! (in order).
@@ -29,7 +30,7 @@ testDelete3 = Node 1 (Node 0 Nil Nil) (Node 3 (Node 2 Nil Nil) (Node 4 Nil Nil))
 t3 = Node 8 (Node 5  (Node 1 Nil Nil)  (Node 6 Nil Nil))
             (Node 20 (Node 19 Nil Nil) (Node 21 Nil Nil))
 
-
+tdup = Node 8 (Node 8 (Node 7 Nil Nil) Nil) (Node 10 (Node 9 Nil Nil) Nil)
 
 -- insTree and delete are not inverse functions.
 insTree :: Ord a => a -> Tree a -> Tree a
@@ -98,11 +99,20 @@ indexTree n t
           t2 = rightSub t
           tSize1 = size t1
 
+-- note returns index of element.
+-- precondition - val must occur in tree.
+indexOf :: Ord a => a -> Tree a -> Int
+indexOf val tree = fromJust $ elemIndex val (collapse tree)
+
+collapse :: Tree a -> [a]
+collapse Nil = []
+collapse (Node n t1 t2) = collapse t1 ++ [n] ++ collapse t2
+
+
 size :: Tree a -> Int
 size t
     | isNil t = 0
     | otherwise = 1 + size (leftSub t) + size (rightSub t)
-
 
 
 occurs :: Ord a => a -> Tree a -> Bool
@@ -116,109 +126,48 @@ occurs val (Node v t1 t2)
 
 
 
--- exercise 29 ---------------------------------------------------------
+-- exercise 29 ---------------------------------------------------------------------------
 
 -- precondition: given value must occur at least once in tree.
-{-
-predecessor :: (Ord a, Num a) => a -> Tree a -> Maybe a
+-- note betting that findIndex always returns Just not Nothig because precondition is
+-- that val must occur at least once.
+predecessor :: Ord a => a -> Tree a -> Maybe a
 predecessor val Nil = Nothing
-predecessor val (Node v t1 t2)
-    | val <= v                                        = predecessor val t1
-    | val > v && isNil t1 && isNil t2                 = Just v
-    | val > v && isNil t1 && (not (isNil t2))         = predecessor val t2
-    | val > v && (not $ isNil t1) && (not $ isNil t2) = predecessor val t1
-    | otherwise                                       = predecessor val t2
--}
+predecessor val tree
+    | not $ occurs val tree       = Nothing
+    | val == head (collapse tree) = Nothing
+    | otherwise                   = Just $ list !! n
+    where list = reverse $ collapse tree
+          n = fromJust $ findIndex (< val) list
 
--- precondition: given value must occur at least once in tree.
-predecessor :: (Ord a, Num a) => a -> Tree a -> Maybe a
-predecessor val t = if occurs val t then (pre val t) else Nothing
-    where pre val Nil = Nothing
-          pre val (Node v t1 t2)
-            | v < val = Just v
-            | otherwise = pre val t1
+-- precondition: val must occur at least once in list. Duplicates allowed.
+successor :: Ord a => a -> Tree a -> Maybe a
+successor val Nil = Nothing
+successor val tree
+    | not $ occurs val tree = Nothing
+    | val == last list      = Nothing
+    | otherwise             = Just $ list !! n
+    where list = collapse tree
+          n = fromJust $ findIndex (> val) list
 
-{-
-predecessor val t = if occurs val t then (pre val t) else Nothing
-    where pre val Nil = Nothing
-          pre val (Node v t1 t2)
-            | v < val = Just v
-            | otherwise = pre val t1
--}
-
-
-{-
-successor :: (Ord a, Num a) => a -> Tree a -> Maybe a
-successor val t = if occurs val t then (succ val t) else Nothing
-    where succ val Nil = Nothing
-          succ val (Node v t1 t2)
-            | v > val && isNil t1 && isNil t2 = Just v
-            | v > val && isNil t1 && (not $ isNil t2)
-            | otherwise = succ val t1 -- note v <= val only
--}
 
 -- note returns value in t which has smallest numerical difference from v.
 -- precondition: value val must occur in tree given.
-{-
 closest :: Integer -> Tree Integer -> Maybe [Integer]
 closest val Nil = Nothing
-closest val t = if occurs val t then clos val t else Nothing
-    where
-    clos val t
-        | length allJusts == 1 = onlyOne
-        | otherwise            = closerOne
-        where (pm, sm)  = (predecessor val t, successor val t)
-              allJusts  = filter isJust [pm, sm]
-              onlyOne   = Just [fromJust (head allJusts)]
-              vs@[p, s] = catMaybes allJusts -- both values p and s
-              [d1, d2]  = map (\v -> abs(v - val)) vs
-              closerOne
-                | d1 == d2 = Just [p, s]
-                | d1 < d2  = Just [p]
-                | d1 > d2  = Just [s]
--}
-
-{-
-
-    | bothJust pm sm = closerOne pm sm
-    | oneJust pm sm = returnJust pm sm
-    | noneJust pm sm = Nothing
-    where pm = predecessor val t
-          sm = successor val t
-          bothJust pm sm = isJust pm && isJust sm
-          oneJust pm sm = isJust pm || isJust sm
-          noneJust pm sm = isNothing pm && isNothing sm
-          closerOne pm sm =
-
-    | any isJust [pm, sm] = if length vs == 1 then (Just $ vs) else closerOne
-    | otherwise = Nothing
-    where pm = predecessor val t
-          sm = successor val t
-          vs = catMaybes [pm, sm]
-          [d1, d2] = map (\v -> abs(v - val)) vs
+closest val t -- = if occurs val t then clos val t else Nothing
+    | not $ occurs val t = Nothing
+    | length allJusts == 1 = onlyOne
+    | otherwise            = closerOne
+    where (pm, sm)  = (predecessor val t, successor val t)
+          allJusts  = filter isJust [pm, sm]
+          onlyOne   = Just [fromJust (head allJusts)]
+          vs@[p, s] = catMaybes allJusts -- both values p and s
+          [d1, d2]  = map (\v -> abs(v - val)) vs
           closerOne
-            | d1 == d2  = Just [p, s]
-            | d1 < d2   = Just [p]
-            | otherwise = Just [s]
-            where p = head vs
-                  s = tail vs
--}
+            | d1 == d2 = Just [p, s]
+            | d1 < d2  = Just [p]
+            | d1 > d2  = Just [s]
 
-
-
-
-{-
-
-closest val t = case predecessor val t of
-                    Nothing -> Nothing
-                    Just p -> case successor val t of
-                                Nothing -> Nothing
-                                Just s -> closerOne s p (smallestDiff s p val)
-       where smallestDiff s p val = (abs (val - p), abs (val - s))
-             closerOne s p (r1, r2)
-                | r1 == r2 = Just [p, s]
-                | r1 < r2 = Just [p]
-                | otherwise = Just [s]
--}
 
 ------------------------------------------------------------------------
