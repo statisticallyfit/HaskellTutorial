@@ -120,23 +120,36 @@ occurs val (Node v t1 t2)
 
 -- precondition: given value must occur at least once in tree.
 predecessor :: (Ord a, Num a) => a -> Tree a -> Maybe a
+predecessor val Nil = Nothing
+predecessor val (Node v t1 t2)
+    | val <= v                                        = predecessor val t1
+    | val > v && isNil t1 && isNil t2                 = Just v
+    | val > v && isNil t1 && (not (isNil t2))         = predecessor val t2
+    | val > v && (not $ isNil t1) && (not $ isNil t2) = predecessor val t1
+    | otherwise                                       = predecessor val t2
+
+{-
 predecessor val t = if occurs val t then (pre val t) else Nothing
     where pre val Nil = Nothing
           pre val (Node v t1 t2)
             | v < val = Just v
             | otherwise = pre val t1
+-}
 
 
+{-
 successor :: (Ord a, Num a) => a -> Tree a -> Maybe a
 successor val t = if occurs val t then (succ val t) else Nothing
     where succ val Nil = Nothing
           succ val (Node v t1 t2)
-            | v == val + 1 = Just v
-            | val < v = succ val t1
-            | otherwise = succ val t2 -- note val >= v only
+            | v > val && isNil t1 && isNil t2 = Just v
+            | v > val && isNil t1 && (not $ isNil t2)
+            | otherwise = succ val t1 -- note v <= val only
+-}
 
 -- note returns value in t which has smallest numerical difference from v.
 -- precondition: value val must occur in tree given.
+{-
 closest :: Integer -> Tree Integer -> Maybe [Integer]
 closest val Nil = Nothing
 closest val t = if occurs val t then clos val t else Nothing
@@ -153,6 +166,8 @@ closest val t = if occurs val t then clos val t else Nothing
                 | d1 == d2 = Just [p, s]
                 | d1 < d2  = Just [p]
                 | d1 > d2  = Just [s]
+-}
+
 {-
 
     | bothJust pm sm = closerOne pm sm
