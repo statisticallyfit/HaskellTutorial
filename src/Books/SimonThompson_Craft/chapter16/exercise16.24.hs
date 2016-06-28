@@ -1,3 +1,6 @@
+import Prelude hiding (round)
+import Test.QuickCheck
+
 
 data Item a = Item a deriving (Eq, Show)
 data Queue a = Queue [a] deriving (Eq, Show)
@@ -20,8 +23,8 @@ addS x (Server []) = Server [Queue [x]]
 addS x (Server qs) = Server (init qs ++ [lastQ])
     where lastQ = addQ x (last qs)
 
-
-
+serverSize :: Server a -> Int
+serverSize (Server qs) = length qs
 
 
 -- note round robin allots items to ends of each queue until item
@@ -30,16 +33,19 @@ addS x (Server qs) = Server (init qs ++ [lastQ])
 -- ends of the oncoming queues.
 roundRobin :: [Item a] -> Server a -> Server a
 roundRobin [] s = s
-roundRobin is@(Item n : its) s@(Server (q:qs)) = drop n result ++ (take n result)
-    where result = roundRobin its (Server (qs ++ [addQ n q]))
-          numQueues = length (q:qs)
-          remainder = (length is) `mod` numQueues
+roundRobin items server = Server (drop n qs ++ (take n qs))
+    where numQueues = serverSize server
+          remainder = (length items) `mod` numQueues
           n = numQueues - remainder
+          Server qs = round items server
 
 
+round :: [Item a] -> Server a -> Server a
+round [] s = s
+round (Item n : its) (Server (q:qs)) = round its (Server (qs ++ [addQ n q]))
 
 
-
+---------------------------------------------------
 q1, q2, q3, q4, q5 :: Queue Integer
 q1 = Queue [1,2,3,4,5,6,7,8,9,10]
 q2 = Queue [2,4,6]
@@ -52,3 +58,39 @@ s1 = Server [q1, q2, q3, q4, q5]
 
 items :: [Item Integer]
 items = [Item 0, Item 1, Item 2, Item 3, Item 4, Item 5, Item 6, Item 7, Item 8]
+
+
+---------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- TESTING functions ------------------------------------------------------------------
+
+instance Arbitrary QueueState where
+    arbitrary = do
+        Positive time <- arbitrary
+        Positive service <- arbitrary
+        inmesses <- arbitrary
+        return (QS time service inmesses)
+
+
+instance Arbitrary ServerState where
+    arbitrary = do
+        qs <- arbitrary
+        return (SS qs)
+
+------------------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------------------
