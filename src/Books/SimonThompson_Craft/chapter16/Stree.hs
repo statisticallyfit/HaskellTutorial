@@ -161,9 +161,10 @@ instance Arbitrary a => Arbitrary (Stree a) where
         oneof [return Nil, return (liftM4 Node x n st1 st2)]
 -}
 
-
+-- HELP not working because the tree doesn't have correct sizes since it is randomly
+-- generated. How to fix this?
 propIns :: Integer -> Stree Integer -> Bool
-propIns val t = (size t + 1) == (size newTree)
+propIns val t = (sizeRecursive t + 1) == (sizeRecursive newTree)
     where newTree = insTree val t
 
 ------------------------------------------------------------------------------------------

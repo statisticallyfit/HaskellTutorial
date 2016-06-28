@@ -8,6 +8,8 @@ NOTE tree (Node val t1 t2) is ordered if
 * and trees t1 and t2 are ordered.
 
 Going to construct functions that preserve order of our binary search tree.
+
+Precondition to all methods: tree given MUST be a binary search tree! (in order).
 -}
 
 data Tree a = Nil | Node a (Tree a) (Tree a) deriving (Eq, Show)
