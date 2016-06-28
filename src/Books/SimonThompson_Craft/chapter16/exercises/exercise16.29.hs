@@ -119,6 +119,7 @@ occurs val (Node v t1 t2)
 -- exercise 29 ---------------------------------------------------------
 
 -- precondition: given value must occur at least once in tree.
+{-
 predecessor :: (Ord a, Num a) => a -> Tree a -> Maybe a
 predecessor val Nil = Nothing
 predecessor val (Node v t1 t2)
@@ -127,6 +128,15 @@ predecessor val (Node v t1 t2)
     | val > v && isNil t1 && (not (isNil t2))         = predecessor val t2
     | val > v && (not $ isNil t1) && (not $ isNil t2) = predecessor val t1
     | otherwise                                       = predecessor val t2
+-}
+
+-- precondition: given value must occur at least once in tree.
+predecessor :: (Ord a, Num a) => a -> Tree a -> Maybe a
+predecessor val t = if occurs val t then (pre val t) else Nothing
+    where pre val Nil = Nothing
+          pre val (Node v t1 t2)
+            | v < val = Just v
+            | otherwise = pre val t1
 
 {-
 predecessor val t = if occurs val t then (pre val t) else Nothing
