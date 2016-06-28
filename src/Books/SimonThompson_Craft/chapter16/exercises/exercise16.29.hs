@@ -207,6 +207,8 @@ instance Arbitrary a => Arbitrary (Tree a) where
 propJoin :: Tree Int -> Tree Int -> Bool
 propJoin t1 t2 = (size t1 + size t2) == (size (join t1 t2))
 
+propIns :: Int -> Tree Int -> Bool
+propIns x tree = (size tree + 1) == (size (insTree x tree))
 ------------------------------------------------------------------------------------------
 
 
