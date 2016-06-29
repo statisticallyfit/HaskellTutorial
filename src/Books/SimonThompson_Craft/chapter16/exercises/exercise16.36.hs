@@ -99,12 +99,25 @@ cardinality (Set xs) = length xs
 
 
 
+
+
 --- exercise 36 ------------------------------------------------------------------------
 
--- note diff is made by unionizing then removing elements that are in intersection,
--- leaving only the difference.
+-- note returns elements of s1 which do not belong to s2.
 diff :: Ord a => Set a -> Set a -> Set a
-diff s1 s2 = Set (eliminateFrom commons alls)
+diff (Set xs) (Set ys) = Set ans
+    where occs = numOccursAll ys xs
+          ansPairs = zip xs occs
+          ansZeroes = filter (\(x, occ) -> occ == 0) ansPairs
+          ans = map fst ansZeroes
+
+
+
+--- exercise 37 ------------------------------------------------------------------------
+
+-- note returns elements which do not lie in either of the sets.
+symmetricDiff :: Ord a => Set a -> Set a -> Set a
+symmetricDiff s1 s2 = Set (eliminateFrom commons alls)
     where Set alls = union s1 s2
           Set commons = intersect s1 s2
 
@@ -119,7 +132,22 @@ eliminateFrom (x:xs) (y:ys)
     | otherwise = y : eliminateFrom (x:xs) ys
 
 
+symmetricDiff' :: Ord a => Set a -> Set a -> Set a
+symmetricDiff' s1 s2 = diff s1 s2 `union` diff s2 s1
 
+
+--- exercise 38 ------------------------------------------------------------------------
+
+-- note from graham hutton book
+subsets :: [a] -> [[a]]
+subsets [] = [[]]
+subsets (x:xs) = yss ++ map (x:) yss
+    where yss = subsets xs
+
+
+
+powerSet :: Ord a => Set a -> Set (Set a )
+powerSet (Set xs) = Set (map (Set $) (subsets xs))
 
 
 
@@ -145,7 +173,7 @@ numOccurs :: Eq a => a -> [a]-> Int
 numOccurs _ [] = 0
 numOccurs elm xs = length $ elemIndices elm xs
 
--- note returns list of num occurs of list ys in list xs
+-- note returns list of num occurs of list (elm : elems) in list xs
 -- note ys can be longer than xs since we can return 0 if element in ys doesn't exist
 -- in xs.
 -- precondition: no list has to be in order.
@@ -160,7 +188,7 @@ unique :: Ord a => [a] -> Bool
 unique xs = sum (numOccursAll xs xs) == (length xs)
 
 
-
+---------------------------------------------------------------
 -- testing unique . sorted . makeSet
 testMake :: Ord a => [a] -> Bool
 testMake xs = sorted xs' && unique xs'
@@ -171,6 +199,7 @@ testMember :: Int -> [Int] -> Bool
 testMember n xs  = elem n xs' == memSet (Set xs') n
     where (Set xs') = makeSet xs
 
+-- note for the below 3 tests, it doesn't matter if elements are duplicated or not in order.
 -- testing intersect xs ys == intersect ys xs
 testIntersectID :: Ord a => Set a -> Set a -> Bool
 testIntersectID s1 s2 = intersect s1 s2 == intersect s2 s1
@@ -179,11 +208,37 @@ testIntersectID s1 s2 = intersect s1 s2 == intersect s2 s1
 testUnionID :: Ord a => Set a -> Set a -> Bool
 testUnionID s1 s2 = union s1 s2 == union s2 s1
 
--- testing diff s1 s2 == diff s2 s1
-testDiffID :: Ord a => Set a -> Set a -> Bool
-testDiffID s1 s2 = diff s1 s2 == diff s2 s1
 
+-- testing diff s1 s2 == list1 \\ list2
+testDiffEqualsLibraryDiff :: [Int] -> [Int] -> Bool
+testDiffEqualsLibraryDiff xs ys = dSet == (ls1 \\ ls2)
+    where s1@(Set ls1) = makeSet xs
+          s2@(Set ls2) = makeSet ys
+          Set dSet = diff s1 s2
+
+-- testing symdiff s1 s2 == symdiff s2 s1
+testSymDiffID :: Ord a => Set a -> Set a -> Bool
+testSymDiffID s1 s2 = symmetricDiff s1 s2 == symmetricDiff s2 s1
+
+-- testing other symDiff
+testSymDiffEqualsSymDiffDefinedWithDiff :: [Int] -> [Int] -> Bool
+testSymDiffEqualsSymDiffDefinedWithDiff xs ys = symmetricDiff s1 s2
+                                                == symmetricDiff' s1 s2
+    where s1 = makeSet xs
+          s2 = makeSet ys
+
+-- note here it matters that elements are not duplicated and sorted.
 -- testing diff s1 s2 `intersect` intersect s1 s2 == []
-
+testSymDiffIntersect :: [Int] -> [Int] -> Bool
+testSymDiffIntersect xs ys = ((symmetricDiff s1 s2) `intersect` (intersect s1 s2))
+                                == (Set [])
+    where s1 = makeSet xs
+          s2 = makeSet ys
 
 -- testing (union . intersect) == union
+testUnionIntersect :: [Int] -> [Int] -> Bool
+testUnionIntersect xs ys = (union theUnion theInter) == theUnion
+    where s1 = makeSet xs
+          s2 = makeSet ys
+          theUnion = union s1 s2
+          theInter = intersect s1 s2
