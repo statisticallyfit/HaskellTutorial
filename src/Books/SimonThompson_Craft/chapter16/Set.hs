@@ -1,5 +1,6 @@
 import Data.List hiding (union, intersect)
 
+
 -- note set is ordered list of nonduplicate elements
 data Set a = Set [a] deriving Show
 
