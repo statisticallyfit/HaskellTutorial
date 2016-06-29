@@ -1,4 +1,6 @@
 import Data.List hiding (union, intersect)
+import Test.QuickCheck
+
 
 -- note set is ordered list of nonduplicate elements
 data Set a = Set [a] deriving Show
@@ -102,8 +104,86 @@ cardinality (Set xs) = length xs
 -- note diff is made by unionizing then removing elements that are in intersection,
 -- leaving only the difference.
 diff :: Ord a => Set a -> Set a -> Set a
-diff s1 s2 = filter (/= ints) unis
-    where Set unis = union s1 s2
-          Set ints = intersect s1 s2
+diff s1 s2 = Set (eliminateFrom commons alls)
+    where Set alls = union s1 s2
+          Set commons = intersect s1 s2
+
+-- note eliminates all xs from list of ys.
+-- precondition: length xs <= length ys
+eliminateFrom :: Ord a => [a] -> [a] -> [a]
+eliminateFrom [] [] = []
+eliminateFrom [] ys = ys
+eliminateFrom (x:xs) (y:ys)
+    | x == y = eliminateFrom xs ys
+    | x < y = x : eliminateFrom xs (y:ys)
+    | otherwise = y : eliminateFrom (x:xs) ys
 
 
+
+
+
+
+
+
+
+
+--- TESTING ------------------------------------------------------------------------------
+
+instance Arbitrary a => Arbitrary (Set a) where
+    arbitrary = do
+        xs <- arbitrary
+        return (Set xs)
+
+sorted :: Ord a => [a] -> Bool
+sorted [] = True
+sorted [x] = True
+sorted (x:y:xs)
+    | x <= y = sorted (y:xs)
+    | otherwise = False
+
+numOccurs :: Eq a => a -> [a]-> Int
+numOccurs _ [] = 0
+numOccurs elm xs = length $ elemIndices elm xs
+
+-- note returns list of num occurs of list ys in list xs
+-- note ys can be longer than xs since we can return 0 if element in ys doesn't exist
+-- in xs.
+-- precondition: no list has to be in order.
+-- postcondition: length numoccurs == length ys
+numOccursAll :: Eq a => [a] -> [a] -> [Int]
+numOccursAll xs [] = []
+numOccursAll xs (elm:elems) = [numOccurs elm xs] ++ numOccursAll xs elems
+
+
+-- tests if each element occurs only once.
+unique :: Ord a => [a] -> Bool
+unique xs = sum (numOccursAll xs xs) == (length xs)
+
+
+
+-- testing unique . sorted . makeSet
+testMake :: Ord a => [a] -> Bool
+testMake xs = sorted xs' && unique xs'
+    where Set xs' = makeSet xs
+
+-- testing memSet == elem
+testMember :: Int -> [Int] -> Bool
+testMember n xs  = elem n xs' == memSet (Set xs') n
+    where (Set xs') = makeSet xs
+
+-- testing intersect xs ys == intersect ys xs
+testIntersectID :: Ord a => Set a -> Set a -> Bool
+testIntersectID s1 s2 = intersect s1 s2 == intersect s2 s1
+
+-- testing union xs ys == union ys xs
+testUnionID :: Ord a => Set a -> Set a -> Bool
+testUnionID s1 s2 = union s1 s2 == union s2 s1
+
+-- testing diff s1 s2 == diff s2 s1
+testDiffID :: Ord a => Set a -> Set a -> Bool
+testDiffID s1 s2 = diff s1 s2 == diff s2 s1
+
+-- testing diff s1 s2 `intersect` intersect s1 s2 == []
+
+
+-- testing (union . intersect) == union
