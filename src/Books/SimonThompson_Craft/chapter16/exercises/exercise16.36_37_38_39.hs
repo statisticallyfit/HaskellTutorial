@@ -78,8 +78,10 @@ mapSet f (Set xs) = makeSet (map f xs) -- note definition of Functor
 filterSet :: (a -> Bool) -> Set a -> Set a
 filterSet p (Set xs) = Set (filter p xs)
 
+
 foldSet :: (a -> a -> a) -> a -> Set a -> a
 foldSet f s (Set xs) = foldr f s xs -- note s == seed
+
 
 -- example: showSet show (Set [1..10]) = 1 ... all on each line.
 showSet :: (a -> String) -> Set a -> String
@@ -149,7 +151,42 @@ subsets (x:xs) = yss ++ map (x:) yss
 powerSet :: Ord a => Set a -> Set (Set a )
 powerSet (Set xs) = Set (map (Set $) (subsets xs))
 
+-- HELP to implement powerSet using just the Set API.
+{-
+foldr            :: (a -> b -> b) -> b -> [a] -> b
+foldr f s []     = s
+foldr f s (x:xs) = f x (foldr f s xs)
+-}
+{-
+foldSet :: (a -> b -> b) -> b -> Set a -> b
+foldSet f s (Set xs) = foldr f s xs -- note s == seed
 
+
+--nonEmpties (Set []) = Set []
+nonEmpties (Set (x:xs)) = foldSet f seed (nonEmpties (Set xs))
+    where f ys r = ys : (x : ys) : r
+          seed = Set []
+-}
+
+
+
+--- exercise 39 ------------------------------------------------------------------------
+
+-- when given one set just return it
+-- when given set of many sets, then get union of them.
+
+setUnion :: Ord a => Set (Set a) -> Set a
+setUnion (Set [s]) = s
+setUnion (Set (s1 : s2 : ss)) = setUnion (Set (uniSet : ss))
+    where uniSet = union s1 s2
+
+setUnionFold :: Ord a => Set (Set a) -> Set a
+setUnionFold (Set ss) = foldSet union (Set []) (Set ss)
+
+
+setInter :: Ord a => Set (Set a) -> Set a
+setInter (Set ss) = foldSet intersect seed (Set ss)
+    where seed = setUnion (Set ss)
 
 
 
@@ -242,3 +279,10 @@ testUnionIntersect xs ys = (union theUnion theInter) == theUnion
           s2 = makeSet ys
           theUnion = union s1 s2
           theInter = intersect s1 s2
+
+-- testing setIntersect. THe result must be present in each list.
+-- HELP how to generate all those random lists?
+-- testSetIntersect :: [Int] -> [Int]
+
+-- testing setUnion. Each individual list must be contained in the result list.
+-- help same problem as above.
