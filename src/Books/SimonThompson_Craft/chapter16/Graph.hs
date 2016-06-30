@@ -84,7 +84,7 @@ NOTE overall goal: searching in graphs
 
 -- note overall: use trans closure to find nodes below a node and in search functions,
 -- we find the order in which nodes below ndoes occur.
--- key step for both: find all descendants of a node which has not been yet visited.
+
 
 -- note returns list of num occurs of list (elm : elems) in list xs
 -- note ys can be longer than xs since we can return 0 if element in ys doesn't exist
@@ -104,8 +104,21 @@ diff (Set xs) (Set ys) = Set ans
           ans = map fst ansZeroes
 
 ------------------------------------------------------------
+-- key step for both searches: for a given node, find all its descendants which have
+-- not yet been visited.
+-- note finds set of descendants of v in rel which are not in the set (set).
 newDescs :: Ord a => Graph a -> Set a -> a -> Set a
-newDescs rel set val = image rel val `diff` set
+newDescs rel set member = descendantsOfMemberInRelation `diff` set
+    where descendantsOfMemberInRelation = image rel member
+
+
+flatten :: Set a -> [a]
+flatten (Set xs) = xs 
+
+findDescs :: Ord a => Graph a -> [a] -> a -> [a]
+findDescs rel xs member = flatten (newDescs rel (makeSet xs) member)
+
+
 
 {-
 
