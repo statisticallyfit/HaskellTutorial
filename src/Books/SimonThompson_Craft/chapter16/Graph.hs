@@ -119,21 +119,31 @@ findDescs rel xs member = flatten (newDescs rel (makeSet xs) member)
 
 
 -- example breadthFirst graph1 1 = [1,2,3,4]
--- note repeatedly applies findDescs until limit is reached.
--- how: Declare a function step: to map findDescs rel xs over list of members then
--- concat then remove duplicates. Apply this function to a singleton list of member
--- repeatedly until a limit is reached.
--- Note: nub is used since duplicates may occur because a node may be descendant
--- of more than one node.
+-- note finds all descendants of elements in xs which are not already in xs.
+-- Then concat and removeDups. (nub's job)
+-- Note: duplicates may occur because a node may be descendant of more than one node.
 breadthFirst :: Ord a => Graph a -> a -> [a]
 breadthFirst rel member = limit step start
     where start = [member]
           step xs = xs ++ nub (concat (map (findDescs rel xs) xs))
 
-{-
+
 -- example depthFirst graph1 1 = [1,2,4,3]
 depthFirst :: Ord a => Graph a -> a -> [a]
--}
+depthFirst rel member = depthSearch rel member []
+
+depthSearch rel member visited
+    = member : depthList rel (findDescs rel visited' member) visited'
+    where visited' = member : visited
+
+-- note finds all descendants of a list of ndoes.
+depthList :: Ord a => Graph a -> [a] -> [a] -> [a]
+depthList rel [] visited = []
+depthList rel (mem : restMem) visited
+    = next ++ depthList rel restMem (visited ++ next)
+    where next = if elem mem visited
+                 then []
+                 else depthSearch rel mem visited 
 
 
 
@@ -145,7 +155,7 @@ depthFirst :: Ord a => Graph a -> a -> [a]
 
 
 graph1 :: Graph Integer
-graph1 = Set [(1,2), (1,3), (3,2), (3,4), (4,2), (2,4)]
+graph1 = Set [(1,2), (1,3), (3,2), (3,4), (4,2), (2,4),(3,6),(3,9)]
 
 
 r1 :: Relation Integer
