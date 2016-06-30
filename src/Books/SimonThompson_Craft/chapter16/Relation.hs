@@ -62,7 +62,8 @@ adjoin set el = mapSet (addEl el) set
 transitiveClosure :: Ord a => Relation a -> Relation a
 transitiveClosure rel = limit addGen rel
         where
-        addGen rel' = rel' `union` (rel' `compose` rel)
+        --addGen rel = rel `union` (rel `compose` rel)
+        addGen rel' = rel' `union` (rel' `compose` rel) -- help todo same as above?
 
 limit :: Eq a => (a -> a) -> a -> a
 limit f x
