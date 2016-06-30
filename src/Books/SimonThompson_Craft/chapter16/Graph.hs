@@ -111,12 +111,10 @@ newDescs :: Ord a => Graph a -> Set a -> a -> Set a
 newDescs rel set member = descendantsOfMemberInRelation `diff` set
     where descendantsOfMemberInRelation = image rel member
 
-
-flatten :: Set a -> [a]
-flatten (Set xs) = xs 
-
+-- a flattened version of newDescs (no abstraction barrier)
 findDescs :: Ord a => Graph a -> [a] -> a -> [a]
 findDescs rel xs member = flatten (newDescs rel (makeSet xs) member)
+    where flatten (Set xs) = xs
 
 
 
