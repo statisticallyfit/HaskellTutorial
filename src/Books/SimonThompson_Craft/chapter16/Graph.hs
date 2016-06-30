@@ -93,8 +93,7 @@ NOTE overall goal: searching in graphs
 -- postcondition: length numoccurs == length ys
 numOccursAll :: Eq a => [a] -> [a] -> [Int]
 numOccursAll xs elements = (map (numOcc xs)) elements
-    where numOcc [] _   = 0
-          numOcc xs elm = length $ elemIndices elm xs
+    where numOcc xs elm = length $ elemIndices elm xs
 
 -- note returns elements of s1 which do not belong to s2.
 diff :: Ord a => Set a -> Set a -> Set a
