@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="eb0702c0-b7c3-41d6-bca5-72cdf359dc76" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Relation.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Relation.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
@@ -46,8 +45,8 @@
       <file leaf-file-name="Relation.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Relation.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.43042073">
-              <caret line="86" column="0" selection-start-line="86" selection-start-column="0" selection-end-line="86" selection-end-column="0" />
+            <state vertical-scroll-proportion="1.4757282">
+              <caret line="84" column="0" selection-start-line="84" selection-start-column="0" selection-end-line="84" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -897,12 +896,12 @@
       <workItem from="1467137701807" duration="89000" />
       <workItem from="1467137880845" duration="281000" />
       <workItem from="1467177986873" duration="18681000" />
-      <workItem from="1467264272714" duration="8786000" />
+      <workItem from="1467264272714" duration="13737000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="778094000" />
+    <option name="totallyTimeSpent" value="783045000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="849" height="782" extended-state="0" />
@@ -1318,8 +1317,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Relation.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.43042073">
-          <caret line="86" column="0" selection-start-line="86" selection-start-column="0" selection-end-line="86" selection-end-column="0" />
+        <state vertical-scroll-proportion="1.4757282">
+          <caret line="84" column="0" selection-start-line="84" selection-start-column="0" selection-end-line="84" selection-end-column="0" />
           <folding />
         </state>
       </provider>

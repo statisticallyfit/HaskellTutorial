@@ -1,5 +1,6 @@
 import Data.List (sort)
 import Prelude hiding (traverse)
+import Test.QuickCheck
 
 
 
@@ -12,6 +13,10 @@ type People = String
 -- HELP HELP HELP TODO is this the definition?
 isParent :: Relation People
 isParent = parentChildPairs
+
+-- example (Ben, Sue) `compose` (Sue, Joe) ==> (Ben, Joe) means (Grandparent, child)
+isGrandparent :: Relation People
+isGrandparent = isParent `compose` isParent
 
 isSibling :: Relation People
 isSibling = siblingPairs
@@ -38,12 +43,15 @@ addImage rel set = set `union` setImage rel set
 addChildren :: Set People -> Set People
 addChildren = addImage isParent
 
+-- note generates all pair combos of pairs and if the inner are equal, then returns
+-- the pair of pair's outer elements.
 compose :: Ord a => Relation a -> Relation a -> Relation a
 compose rel1 rel2
     = mapSet outer (filterSet equals (setProduct rel1 rel2))
     where
     equals ((a,b), (c,d)) = b == c
     outer  ((a,b), (c,d)) = (a,d)
+
 
 -- note foreach - yields combination of the two sets.
 setProduct :: (Ord a, Ord b) => Set a -> Set b -> Set (a,b)
@@ -79,6 +87,14 @@ limit f x
 r1 :: Relation Integer
 r1 = Set [(1,2),(2,3),(3,4)]
 
+r2 :: Relation Integer
+r2 = Set [(1,2),(1,4),(1,6),
+          (2,4),(2,5),
+          (3,1),(3,6),
+          (4,3),(4,5),(4,6),(4,7),
+          (5,7),
+          (7,6)]
+
 
 -- note first element is parent, second is child. So Ben parent, Sue child.
 parentChildPairs :: Relation String
@@ -108,6 +124,52 @@ s2 = Set ["Fitz", "Sophie", "Dex", "Keefe", "Biana", "Silveny", "Edaline", "Grad
 
 
 
+
+--- TESTING ------------------------------------------------------------------------------
+
+--- testing transitive closure: intersect (trans clos) (givenRel) == givenRel
+-- (which means givenRel is contained in transitive closure)
+testTC_GivenRelationsAreContainedInTransClosure :: [(Int,Int)] -> Bool
+testTC_GivenRelationsAreContainedInTransClosure ps
+    = givenRel == intersect tcRel givenRel
+    where givenRel = makeSet ps
+          tcRel = transitiveClosure givenRel
+
+
+--- testing transitive closure - vertices remain the same.
+testTC_VerticesDontChange :: [(Int,Int)] -> Bool
+testTC_VerticesDontChange ps = oldVertices == newVertices
+    where givenRel = makeSet ps
+          getVertices rel = (mapSet fst rel) `union` (mapSet snd rel)
+          oldVertices = getVertices givenRel
+          newVertices = getVertices (transitiveClosure givenRel)
+
+
+--- testing transitive closure - doing it twice is same as doing it once.
+testTC_TwiceIsOnce :: [(Int,Int)] -> Bool
+testTC_TwiceIsOnce ps = onceTC == twiceTC
+    where givenRel = makeSet ps
+          onceTC = transitiveClosure givenRel
+          twiceTC = transitiveClosure onceTC
+
+
+--- testing adjoin: fsts of result should equal initial set.
+testAdjoin :: [Int] -> Int -> Bool
+testAdjoin xs n = mapSet fst adj == givenSet
+    where givenSet = makeSet xs
+          adj = adjoin givenSet n
+
+
+--- testing setProduct: fsts of result should equal first list. And fsts of result with
+-- args swapped should equal second list.
+testSetProduct :: [(Int,Int)] -> [(Int,Int)] -> Bool
+testSetProduct xs ys = (mapSet fst resultNonSwap) == (mapSet snd resultSwap)
+    where s1 = makeSet xs
+          s2 = makeSet ys
+          Set p12 = setProduct s1 s2
+          Set p21 = setProduct s2 s1
+          resultNonSwap@(Set r12) = makeSet p12
+          resultSwap@(Set r21) = makeSet p21
 
 
 
