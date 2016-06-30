@@ -105,7 +105,7 @@ diff (Set xs) (Set ys) = Set ans
           ansPairs = zip xs occs
           ansZeroes = filter (\(x, occ) -> occ == 0) ansPairs
           ans = map fst ansZeroes
- 
+
 ------------------------------------------------------------
 newDescs :: Ord a => Graph a -> Set a -> a -> Set a
 newDescs rel set val = image rel val `diff` set
