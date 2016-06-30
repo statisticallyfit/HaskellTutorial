@@ -3,8 +3,18 @@ import Data.List hiding (union, intersect)
 -- relation relates several pairs - gives them a common part.
 -- example isParent or isSibling
 type Relation a = Set (a, a)
+type People = String
 
 
+-- HELP HELP HELP TODO is this the definition?
+isParent :: Relation People
+isParent = parents
+
+isSibling :: Relation People
+isSibling = siblings
+
+---------------------------------------------------
+-- note gets the snd pair element from the given first pair element using the relation.
 image :: Ord a => Relation a -> a -> Set a
 image rel val = mapSet snd (filterSet ((== val) . fst) rel)
 
@@ -19,7 +29,6 @@ addImage rel set = set `union` setImage rel set
 
 addChildren :: Set People -> Set People
 addChildren = addImage isParent
-
 
 compose :: Ord a => Relation a -> Relation a -> Relation a
 compose rel1 rel2
@@ -49,10 +58,18 @@ limit f x
 
 
 
--- help define isParent function
--- help define People type
 
 
+parents :: Relation String
+parents = Set [("Ben", "Sue"), ("Leo", "Georgette"), ("Susan", "Vincent"),
+            ("Courtney", "Nick")]
+
+siblings :: Relation String
+siblings  = Set [("Fabiana","Milano"), ("Adrianne","Kate"),
+                ("Sara","Berenice"),("David","Julian")]
+
+s1 :: Set String
+s1 = Set ["Brian", "Georgette", "Susan", "Carrie", "Kathryn", "Oona", "Max", "Doreen"]
 
 
 
