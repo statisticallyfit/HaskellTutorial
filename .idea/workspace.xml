@@ -45,8 +45,8 @@
       <file leaf-file-name="Relation.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Relation.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="1.7524272">
-              <caret line="71" column="85" selection-start-line="71" selection-start-column="85" selection-end-line="71" selection-end-column="85" />
+            <state vertical-scroll-proportion="0.7378641">
+              <caret line="75" column="58" selection-start-line="75" selection-start-column="58" selection-end-line="75" selection-end-column="58" />
               <folding />
             </state>
           </provider>
@@ -896,12 +896,12 @@
       <workItem from="1467137701807" duration="89000" />
       <workItem from="1467137880845" duration="281000" />
       <workItem from="1467177986873" duration="18681000" />
-      <workItem from="1467264272714" duration="1133000" />
+      <workItem from="1467264272714" duration="3170000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="770441000" />
+    <option name="totallyTimeSpent" value="772478000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="849" height="782" extended-state="0" />
@@ -1317,8 +1317,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Relation.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.7524272">
-          <caret line="71" column="85" selection-start-line="71" selection-start-column="85" selection-end-line="71" selection-end-column="85" />
+        <state vertical-scroll-proportion="0.7378641">
+          <caret line="75" column="58" selection-start-line="75" selection-start-column="58" selection-end-line="75" selection-end-column="58" />
           <folding />
         </state>
       </provider>

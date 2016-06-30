@@ -1,4 +1,4 @@
-import Data.List hiding (union, intersect)
+import Data.List hiding (union, intersect, isPrefixOf, isSubsequenceOf, isSuffixOf)
 
 -- relation relates several pairs - gives them a common part.
 -- example isParent or isSibling
@@ -18,11 +18,14 @@ isSibling = siblings
 image :: Ord a => Relation a -> a -> Set a
 image rel val = mapSet snd (filterSet ((== val) . fst) rel)
 
+-- note returns result of image just applied over a whole set of names. Then unions them.
 setImage :: Ord a => Relation a -> Set a -> Set a
-setImage rel = unionSet . mapSet (image rel)
+setImage rel {-set arg here-} = unionSet . mapSet (image rel) -- set arg here
 
+-- note: takes union of a set.
 unionSet :: Ord a => Set (Set a) -> Set a
 unionSet = foldSet union empty -- set of set arg here
+
 
 addImage :: Ord a => Relation a -> Set a -> Set a
 addImage rel set = set `union` setImage rel set
@@ -42,7 +45,7 @@ setProduct st1 st2 = unionSet (mapSet (adjoin st1) st2)
 
 adjoin :: (Ord a, Ord b) => Set a -> b -> Set (a,b)
 adjoin set el = mapSet (addEl el) set
-    where addEl el el' = (el', el)
+    where addEl el el' = (el', el) --swaps them and delivers them in tuple.
 
 tClosure :: Ord a => Relation a -> Relation a
 tClosure rel = limit addGen rel
@@ -61,15 +64,16 @@ limit f x
 
 
 parents :: Relation String
-parents = Set [("Ben", "Sue"), ("Leo", "Georgette"), ("Susan", "Vincent"),
-            ("Courtney", "Nick")]
+parents = Set [("Ben", "Sue"), ("Leo", "Georgette"), ("Vincent", "Susan"),
+            ("Josh", "Courtney")]
 
 siblings :: Relation String
-siblings  = Set [("Fabiana","Milano"), ("Adrianne","Kate"),
+siblings  = Set [("Fabiana","Milano"), ("Adrianne","Kate"), ("Thalia","Veronique"),
                 ("Sara","Berenice"),("David","Julian")]
 
 s1 :: Set String
-s1 = Set ["Brian", "Georgette", "Susan", "Carrie", "Kathryn", "Oona", "Max", "Doreen"]
+s1 = Set ["Gabriel", "Leo", "Vincent", "Carrie", "Kathryn", "Oona", "Joshn",
+            "Doreen", "Fabiana", "Thalia", "Julian", "Sara"]
 
 
 
