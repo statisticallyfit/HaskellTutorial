@@ -157,6 +157,9 @@ depthList rel (node : restNode) visited
 graph1 :: Graph Integer
 graph1 = Set [(1,2), (1,3), (3,2), (3,4), (4,2), (2,4),(3,6),(3,9)]
 
+graph2 :: Graph Integer
+graph2 = graph1 `union` Set [(4,3)]
+
 
 r1 :: Relation Integer
 r1 = Set [(1,2),(2,3),(3,4)]
