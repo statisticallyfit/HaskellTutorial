@@ -1,4 +1,7 @@
-import Data.List hiding (union, intersect, isPrefixOf, isSubsequenceOf, isSuffixOf)
+import Data.List (sort)
+import Prelude hiding (traverse)
+
+
 
 -- relation relates several pairs - gives them a common part.
 -- example isParent or isSibling
@@ -8,13 +11,14 @@ type People = String
 
 -- HELP HELP HELP TODO is this the definition?
 isParent :: Relation People
-isParent = parents
+isParent = parentChildPairs
 
 isSibling :: Relation People
-isSibling = siblings
+isSibling = siblingPairs
 
 ---------------------------------------------------
 -- note gets the snd pair element from the given first pair element using the relation.
+-- example if we use rel == isParent and val == "George" it returns his child "Michael".
 image :: Ord a => Relation a -> a -> Set a
 image rel val = mapSet snd (filterSet ((== val) . fst) rel)
 
@@ -26,10 +30,11 @@ setImage rel {-set arg here-} = unionSet . mapSet (image rel) -- set arg here
 unionSet :: Ord a => Set (Set a) -> Set a
 unionSet = foldSet union empty -- set of set arg here
 
-
 addImage :: Ord a => Relation a -> Set a -> Set a
 addImage rel set = set `union` setImage rel set
 
+-- note returns the snd of pairs from s1 (children) since fsts are parents of snds.
+-- Then unions them with the original set s1.
 addChildren :: Set People -> Set People
 addChildren = addImage isParent
 
@@ -40,15 +45,22 @@ compose rel1 rel2
     equals ((a,b), (c,d)) = b == c
     outer  ((a,b), (c,d)) = (a,d)
 
+-- note foreach - yields combination of the two sets.
 setProduct :: (Ord a, Ord b) => Set a -> Set b -> Set (a,b)
-setProduct st1 st2 = unionSet (mapSet (adjoin st1) st2)
+setProduct s1 s2 = unionSet (mapSet (adjoin s1) s2)
 
+-- note adds given element snd in this set for each pair.
 adjoin :: (Ord a, Ord b) => Set a -> b -> Set (a,b)
 adjoin set el = mapSet (addEl el) set
-    where addEl el el' = (el', el) --swaps them and delivers them in tuple.
+    where addEl el el' = (el', el)
 
-tClosure :: Ord a => Relation a -> Relation a
-tClosure rel = limit addGen rel
+-- note: given a digraph G(V, E) the transitive closure
+-- is a digraph G'(V', E') such that
+--- > V' = V (same set of vertices)
+--- > If (vi, v(i+1), ..., vk) is a path in G,
+--    then (vi, vk) is an edge of E'.
+transitiveClosure :: Ord a => Relation a -> Relation a
+transitiveClosure rel = limit addGen rel
         where
         addGen rel' = rel' `union` (rel' `compose` rel)
 
@@ -63,19 +75,29 @@ limit f x
 
 
 
-parents :: Relation String
-parents = Set [("Ben", "Sue"), ("Leo", "Georgette"), ("Vincent", "Susan"),
-            ("Josh", "Courtney")]
+r1 :: Relation Integer
+r1 = Set [(1,2),(2,3),(3,4)]
 
-siblings :: Relation String
-siblings  = Set [("Fabiana","Milano"), ("Adrianne","Kate"), ("Thalia","Veronique"),
+
+-- note first element is parent, second is child. So Ben parent, Sue child.
+parentChildPairs :: Relation String
+parentChildPairs = Set [("George","Michael"),("Evangeline","Wendy"), ("Gordon", "John"),
+            ("Pan","Peter")]
+
+isSib :: Relation String
+isSib = Set [("Michael","Wendy"),("Michael","John"),("Wendy", "John"),
+    ("Wendy","Michael"),("John", "Michael"),("John","Wendy")]
+
+siblingPairs :: Relation String
+siblingPairs = Set [("Fabiana","Milano"), ("Adrianne","Kate"), ("Thalia","Veronique"),
                 ("Sara","Berenice"),("David","Julian")]
 
 s1 :: Set String
-s1 = Set ["Gabriel", "Leo", "Vincent", "Carrie", "Kathryn", "Oona", "Joshn",
+s1 = Set ["Gabriel", "Evangeline", "George", "Gordon", "Kathryn", "Pan", "Josh",
             "Doreen", "Fabiana", "Thalia", "Julian", "Sara"]
 
-
+s2 :: Set String
+s2 = Set ["Fitz", "Sophie", "Dex", "Keefe", "Biana", "Silveny", "Edaline", "Grady"]
 
 
 
