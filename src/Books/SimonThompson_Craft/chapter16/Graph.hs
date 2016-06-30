@@ -108,12 +108,12 @@ diff (Set xs) (Set ys) = Set ans
 -- not yet been visited.
 -- note finds set of descendants of v in rel which are not in the set (set).
 newDescs :: Ord a => Graph a -> Set a -> a -> Set a
-newDescs rel set member = descendantsOfMemberInRelation `diff` set
-    where descendantsOfMemberInRelation = image rel member
+newDescs rel set node = descendantsOfNodeInRelation `diff` set
+    where descendantsOfNodeInRelation = image rel node
 
 -- a flattened version of newDescs (no abstraction barrier)
 findDescs :: Ord a => Graph a -> [a] -> a -> [a]
-findDescs rel xs member = flatten (newDescs rel (makeSet xs) member)
+findDescs rel xs node = flatten (newDescs rel (makeSet xs) node)
     where flatten (Set xs) = xs
 
 
@@ -123,8 +123,8 @@ findDescs rel xs member = flatten (newDescs rel (makeSet xs) member)
 -- Then concat and removeDups. (nub's job)
 -- Note: duplicates may occur because a node may be descendant of more than one node.
 breadthFirst :: Ord a => Graph a -> a -> [a]
-breadthFirst rel member = limit step start
-    where start = [member]
+breadthFirst rel node = limit step start
+    where start = [node]
           step xs = xs ++ nub (concat (map (findDescs rel xs) xs))
 
 
@@ -132,18 +132,18 @@ breadthFirst rel member = limit step start
 depthFirst :: Ord a => Graph a -> a -> [a]
 depthFirst rel member = depthSearch rel member []
 
-depthSearch rel member visited
-    = member : depthList rel (findDescs rel visited' member) visited'
-    where visited' = member : visited
+depthSearch rel node visited
+    = node : depthList rel (findDescs rel visited' node) visited'
+    where visited' = node : visited
 
 -- note finds all descendants of a list of ndoes.
 depthList :: Ord a => Graph a -> [a] -> [a] -> [a]
 depthList rel [] visited = []
-depthList rel (mem : restMem) visited
-    = next ++ depthList rel restMem (visited ++ next)
-    where next = if elem mem visited
+depthList rel (node : restNode) visited
+    = next ++ depthList rel restNode (visited ++ next)
+    where next = if elem node visited
                  then []
-                 else depthSearch rel mem visited 
+                 else depthSearch rel node visited
 
 
 
