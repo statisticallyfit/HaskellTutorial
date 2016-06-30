@@ -206,19 +206,10 @@ sorted (x:y:xs)
     | x <= y = sorted (y:xs)
     | otherwise = False
 
-numOccurs :: Eq a => a -> [a]-> Int
-numOccurs _ [] = 0
-numOccurs elm xs = length $ elemIndices elm xs
-
--- note returns list of num occurs of list (elm : elems) in list xs
--- note ys can be longer than xs since we can return 0 if element in ys doesn't exist
--- in xs.
--- precondition: no list has to be in order.
--- postcondition: length numoccurs == length ys
 numOccursAll :: Eq a => [a] -> [a] -> [Int]
-numOccursAll xs [] = []
-numOccursAll xs (elm:elems) = [numOccurs elm xs] ++ numOccursAll xs elems
-
+numOccursAll xs elements = (map (numOcc xs)) elements
+    where numOcc [] _   = 0
+          numOcc xs elm = length $ elemIndices elm xs
 
 -- tests if each element occurs only once.
 unique :: Ord a => [a] -> Bool

@@ -1,4 +1,4 @@
-import Data.List (sort)
+import Data.List (sort, elemIndices)
 import Prelude hiding (traverse)
 import Test.QuickCheck
 
@@ -85,9 +85,6 @@ NOTE overall goal: searching in graphs
 -- note overall: use trans closure to find nodes below a node and in search functions,
 -- we find the order in which nodes below ndoes occur.
 -- key step for both: find all descendants of a node which has not been yet visited.
-numOccurs :: Eq a => a -> [a]-> Int
-numOccurs _ [] = 0
-numOccurs elm xs = length $ elemIndices elm xs
 
 -- note returns list of num occurs of list (elm : elems) in list xs
 -- note ys can be longer than xs since we can return 0 if element in ys doesn't exist
@@ -95,8 +92,9 @@ numOccurs elm xs = length $ elemIndices elm xs
 -- precondition: no list has to be in order.
 -- postcondition: length numoccurs == length ys
 numOccursAll :: Eq a => [a] -> [a] -> [Int]
-numOccursAll xs [] = []
-numOccursAll xs (elm:elems) = [numOccurs elm xs] ++ numOccursAll xs elems
+numOccursAll xs elements = (map (numOcc xs)) elements
+    where numOcc [] _   = 0
+          numOcc xs elm = length $ elemIndices elm xs
 
 -- note returns elements of s1 which do not belong to s2.
 diff :: Ord a => Set a -> Set a -> Set a
@@ -110,11 +108,13 @@ diff (Set xs) (Set ys) = Set ans
 newDescs :: Ord a => Graph a -> Set a -> a -> Set a
 newDescs rel set val = image rel val `diff` set
 
+{-
 
 -- example breadthFirst graph1 1 = [1,2,3,4]
 breadthFirst :: Ord a => Graph a -> a -> [a]
 -- example depthFirst graph1 1 = [1,2,4,3]
 depthFirst :: Ord a => Graph a -> a -> [a]
+-}
 
 
 
