@@ -1,4 +1,4 @@
-import Data.List (sort, elemIndices)
+import Data.List (sort, elemIndices, nub)
 import Prelude hiding (traverse)
 import Test.QuickCheck
 
@@ -118,10 +118,19 @@ findDescs rel xs member = flatten (newDescs rel (makeSet xs) member)
 
 
 
-{-
-
 -- example breadthFirst graph1 1 = [1,2,3,4]
+-- note repeatedly applies findDescs until limit is reached.
+-- how: Declare a function step: to map findDescs rel xs over list of members then
+-- concat then remove duplicates. Apply this function to a singleton list of member
+-- repeatedly until a limit is reached.
+-- Note: nub is used since duplicates may occur because a node may be descendant
+-- of more than one node.
 breadthFirst :: Ord a => Graph a -> a -> [a]
+breadthFirst rel member = limit step start
+    where start = [member]
+          step xs = xs ++ nub (concat (map (findDescs rel xs) xs))
+
+{-
 -- example depthFirst graph1 1 = [1,2,4,3]
 depthFirst :: Ord a => Graph a -> a -> [a]
 -}
