@@ -35,6 +35,7 @@ setImage rel {-set arg here-} = unionSet . mapSet (image rel) -- set arg here
 unionSet :: Ord a => Set (Set a) -> Set a
 unionSet = foldSet union empty -- set of set arg here
 
+-- example: addImage famRel sfam = Set ["Joe","Ben", "Sue"]
 addImage :: Ord a => Relation a -> Set a -> Set a
 addImage rel set = set `union` setImage rel set
 
@@ -67,18 +68,37 @@ adjoin set el = mapSet (addEl el) set
 --- > V' = V (same set of vertices)
 --- > If (vi, v(i+1), ..., vk) is a path in G,
 --    then (vi, vk) is an edge of E'.
+-- note relation is transitive if for all (a,b) and (b,c) in the relation, (a,c)
+-- is also in the relation.
+-- This means adding length-one path generations.
 transitiveClosure :: Ord a => Relation a -> Relation a
 transitiveClosure rel = limit addGen rel
         where
         --addGen rel = rel `union` (rel `compose` rel)
         addGen rel' = rel' `union` (rel' `compose` rel) -- help todo same as above?
 
+-- note takes first element in the sequence which equals its successor.
 limit :: Eq a => (a -> a) -> a -> a
 limit f x
     | x == next = x
     | otherwise = limit f next
     where
     next = f x
+
+{-
+Example evaluation:
+
+limit (addImage famRel {Ben} ))
+=> {Ben} == {Ben, Sue} --- > False
+
+limit (addImage famRel {Ben,Sue})
+=> {Ben,Sue} == {Ben,Joe,Sue} --- > False
+
+limit (addImage famRel {Ben,Joe,Sue})
+=> {Ben,Joe,Sue} == {Ben,Joe,Sue} --- > True
+
+--- > {Ben,Joe,Sue}
+-}
 
 
 
@@ -95,6 +115,11 @@ r2 = Set [(1,2),(1,4),(1,6),
           (5,7),
           (7,6)]
 
+famRel :: Relation String
+famRel = Set [("Ben", "Sue"), ("Sue", "Joe")] -- ben is father of sue, sue is mother of joe.
+
+sfam :: Set String
+sfam = Set ["Joe","Ben"]
 
 -- note first element is parent, second is child. So Ben parent, Sue child.
 parentChildPairs :: Relation String
