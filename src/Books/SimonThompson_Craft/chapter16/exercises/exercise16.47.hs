@@ -154,15 +154,32 @@ depthList rel (node : restNode) visited
 
 --- exercoise 47 ------------------------------------------------------------------------
 
+-- note doesn't count link (1,1) since it would loop forever ??)
+{-
 onePairDistance :: Eq a => Graph a -> (a,a) -> Int
 onePairDistance (Set ps) (startEl, endEl)
     | length theEnds == 0 = 1 + minimum ( (map $ onePairDistance (tail ps)) theLinks )
     | otherwise = 2 -- since it took 2 steps.
-    where isLink (startEl,b) (c,d) = b == c
+    where isStart (a,b) = a == startEl
+          isLink (a,b) (c,d) = b == c
           isEnd (a,b) = b == endEl
-          theLinks = filter isLink ps
-          theEnds = filter isEnd theLinks
+          starts = filter isStart ps
+          links = filter isLink ps
+          ends = filter isEnd links
+-}
+{-
 
+onePairDistance :: Eq a => Graph a -> (a,a) -> Int
+onePairDistance (Set ps) (startEl, endEl)
+    | length endPairs == 0 = 1 + onePairDistance (tail ps)
+    where isStart (a,b) = a == startEl
+          isLink (a,b) = a == linker
+          startPair = head $ filter isStart ps
+          linker = snd $ startPair
+          linkPair = filter isLink ps
+          isEnd (a,b) = b == endEl
+          endPairs = filter isEnd linkPair
+-}
 
 
 
