@@ -144,7 +144,7 @@ depthList rel (node : restNode) visited
     where next = if elem node visited
                  then []
                  else depthSearch rel node visited
- 
+
 
 
 
