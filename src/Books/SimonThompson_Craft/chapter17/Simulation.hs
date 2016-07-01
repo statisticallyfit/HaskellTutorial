@@ -149,7 +149,57 @@ shortestQueue (SS (q:qs))
 
 
 
+ins1, ins2, ins3 :: [Inmess]
+ins1 = [Yes 46 3, Yes 55 10, Yes 65 2, Yes 80 15, Yes 95 1, Yes 96 2]
+ins2 = [Yes 10 4, Yes 14 4, Yes 18 9, Yes 27 3, Yes 30 4]
+ins3 = [Yes 1 17, Yes 18 5, Yes 23 2, Yes 25 4, Yes 29 1, Yes 30 8]
+
+qstate1, qstate2, qstate3 :: QueueState
+qstate1 = QS 0 0 ins1
+qstate2 = QS 0 0 ins2
+qstate3 = QS 0 0 ins3
+
+ss1 :: ServerState
+ss1 = SS [qstate1, qstate2, qstate3]
+
+
+
 
 
 --- SIMULATION ---------------------------------------------------------------------------
 
+seed = 17489
+multiplier = 25173
+increment = 13849
+modulus = 65536
+
+nextRand :: Integer -> Integer
+nextRand n = (multiplier * n + increment) `mod` modulus
+
+randomSequence :: Integer -> [Integer]
+randomSequence sd = iterate nextRand sd -- the sd == seed
+
+-- makes random numbers be in range from <= x <= to
+scaleSequence :: Integer -> Integer -> [Integer] -> [Integer]
+scaleSequence from to sequence = map scale sequence
+    where
+    scale n = n `div` denom + from
+    range = to - from +1
+    denom = modulus `div` range
+
+-- waiting times range from 1 to 6 minutes but they happen with different probabilities:
+-- note:
+{-
+WAIT TIME:   |  1  |  2   |  3   |   4  |  5   |  6
+------------------------------------------------------
+PROBABILITY: | 0.2 | 0.25 | 0.25 | 0.15 | 0.10 | 0.05
+-}
+{-
+
+randomTimes = map (makeFunction dist . fromIntegral) (randomSequence seed)
+
+doSimulation :: ServerState -> [Inmess] -> [Outmess]
+doSimulation servSt (im:messes)
+    = outmesses ++ doSimulation servStNext messes
+    where
+    (servStNext, outmesses) = simulationStep servSt im-}
