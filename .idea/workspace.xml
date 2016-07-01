@@ -2,24 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="eb0702c0-b7c3-41d6-bca5-72cdf359dc76" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Queues.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Store.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/exercises/*exercise16.4.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter17/Simulation.hs" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/AbstractDataTypes.hs" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/***exercise12.11_12.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/*exercise12.11_12.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/***exercise12.14_15.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/*exercise12.14_15.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/***exercise12.22_23_a.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/*exercise12.22_23_a.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/***exercise12.22_23_b.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter12/*exercise12.22_23_b.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter13/***exercise13.13.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter13/*exercise13.13.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter13/***exercise13.24_25.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter13/*exercise13.24_25.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter14/***exercise14.23.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter14/**exercise14.23.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter14/***exercise14.26.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter14/**exercise14.26.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter15/exercises/exercise15.13.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter15/exercises/***exercise15.13.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/exercises/***exercise16.2.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/exercises/*exercise16.2.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/exercises/***exercise16.4.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Store.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/exercises/***exercise16.5.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/exercises/*exercise16.5.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/exercises/exercise16.47.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/exercises/***exercise16.47.hs" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Graph.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Graph.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
@@ -53,8 +35,8 @@
       <file leaf-file-name="Graph.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Graph.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.77022654">
-              <caret line="163" column="53" selection-start-line="163" selection-start-column="53" selection-end-line="163" selection-end-column="53" />
+            <state vertical-scroll-proportion="0.70711976">
+              <caret line="185" column="23" selection-start-line="185" selection-start-column="23" selection-end-line="185" selection-end-column="23" />
               <folding />
             </state>
           </provider>
@@ -911,12 +893,12 @@
       <workItem from="1467137880845" duration="281000" />
       <workItem from="1467177986873" duration="18681000" />
       <workItem from="1467264272714" duration="24276000" />
-      <workItem from="1467351733366" duration="7680000" />
+      <workItem from="1467351733366" duration="8286000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="801264000" />
+    <option name="totallyTimeSpent" value="801870000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="849" height="782" extended-state="0" />
@@ -1354,8 +1336,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Graph.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.77022654">
-          <caret line="163" column="53" selection-start-line="163" selection-start-column="53" selection-end-line="163" selection-end-column="53" />
+        <state vertical-scroll-proportion="0.70711976">
+          <caret line="185" column="23" selection-start-line="185" selection-start-column="23" selection-end-line="185" selection-end-column="23" />
           <folding />
         </state>
       </provider>

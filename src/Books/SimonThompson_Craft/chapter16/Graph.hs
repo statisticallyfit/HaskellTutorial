@@ -103,7 +103,7 @@ diff (Set xs) (Set ys) = Set ans
           ansZeroes = filter (\(x, occ) -> occ == 0) ansPairs
           ans = map fst ansZeroes
 
-------------------------------------------------------------
+---   ---   ---   ---   ---   ---   ---   ---   ---   ---   ---   ---   ---   ---   ---
 -- key step for both searches: for a given node, find all its descendants which have
 -- not yet been visited.
 -- note finds set of descendants of v in rel which are not in the set (set).
@@ -111,10 +111,12 @@ newDescs :: Ord a => Graph a -> Set a -> a -> Set a
 newDescs rel set node = descendantsOfNodeInRelation `diff` set
     where descendantsOfNodeInRelation = image rel node
 
+flatten :: Set a -> [a]
+flatten (Set xs) = xs
+
 -- a flattened version of newDescs (no abstraction barrier)
 findDescs :: Ord a => Graph a -> [a] -> a -> [a]
 findDescs rel xs node = flatten (newDescs rel (makeSet xs) node)
-    where flatten (Set xs) = xs
 
 
 
@@ -152,17 +154,48 @@ depthList rel (node : restNode) visited
 
 
 
+{- ---------------------------------------------------------------------------------------
+NOTE overall goal: finding route in graph.
+-} ---------------------------------------------------------------------------------------
+
+-- Note acylcic case: no circular path from any node back to itself. Then:
+-- 1. only route from x to x is [x]
+-- 2. a route from x to y will start with a step to one of x's neighbors. Remainder
+-- is path from z to y.
+
+routes :: Ord a => Graph a -> a -> a -> [[a]]
+routes rel x y
+    | x == y = [[x]]
+    | otherwise = [x:r | z <- neighbors rel x,
+                         r <- routes rel z y]
+
+neighbors :: Ord a => Graph a -> a -> [a]
+neighbors rel x = flatten (image rel x)
 
 
+
+
+
+
+
+
+
+
+------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
 graph1 :: Graph Integer
 graph1 = Set [(1,2), (1,3), (3,2), (3,4), (4,2), (2,4),(3,6),(3,9)]
 
 graph2 :: Graph Integer
-graph2 = graph1 `union` Set [(4,3)]
+graph2 = makeSet res
+    where (Set res) = graph1 `union` Set [(4,3)]
 
 graph3 :: Graph Integer
 graph3 = Set [(1,2), (1,3), (2,4), (3,5), (3,6), (5,6)]
 
+graph4 :: Graph Integer
+graph4 = Set [(1,2),(1,3),(1,4),(1,5),(2,4),(2,5),(2,6),(3,2),(3,4),(3,6),(3,9),(4,2),
+        (5,6),(6,1),(6,8),(8,9)]
 
 
 r1 :: Relation Integer
@@ -207,8 +240,9 @@ s2 = Set ["Fitz", "Sophie", "Dex", "Keefe", "Biana", "Silveny", "Edaline", "Grad
 
 
 
-
+------------------------------------------------------------------------------------------
 --- TESTING Graph ------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
 
 
 
@@ -233,8 +267,11 @@ s2 = Set ["Fitz", "Sophie", "Dex", "Keefe", "Biana", "Silveny", "Edaline", "Grad
 
 
 
-
-
+------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------
 
 -- note set is ordered list of nonduplicate elements
