@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="eb0702c0-b7c3-41d6-bca5-72cdf359dc76" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter17/***Parser.hs" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Graph.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Graph.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
@@ -32,21 +33,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Graph.hs" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Graph.hs">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.70711976">
-              <caret line="185" column="23" selection-start-line="185" selection-start-column="23" selection-end-line="185" selection-end-column="23" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Simulation.hs" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Simulation.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter17/Simulation.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="149" column="0" selection-start-line="149" selection-start-column="0" selection-end-line="149" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.9692557">
+              <caret line="148" column="0" selection-start-line="148" selection-start-column="0" selection-end-line="148" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -893,12 +884,12 @@
       <workItem from="1467137880845" duration="281000" />
       <workItem from="1467177986873" duration="18681000" />
       <workItem from="1467264272714" duration="24276000" />
-      <workItem from="1467351733366" duration="8286000" />
+      <workItem from="1467351733366" duration="10048000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="801870000" />
+    <option name="totallyTimeSpent" value="803632000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="849" height="782" extended-state="0" />
@@ -960,13 +951,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter15/exercises/exercise15.10.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.26213592">
-          <caret line="11" column="36" selection-start-line="11" selection-start-column="36" selection-end-line="11" selection-end-column="36" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter15/Main.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.061488673">
@@ -1326,18 +1310,26 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter17/Simulation.hs">
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter17/***Parser.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="149" column="0" selection-start-line="149" selection-start-column="0" selection-end-line="149" selection-end-column="0" />
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Graph.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.70711976">
-          <caret line="185" column="23" selection-start-line="185" selection-start-column="23" selection-end-line="185" selection-end-column="23" />
+        <state vertical-scroll-proportion="0.723301">
+          <caret line="185" column="50" selection-start-line="185" selection-start-column="50" selection-end-line="185" selection-end-column="50" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter17/Simulation.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.9692557">
+          <caret line="148" column="0" selection-start-line="148" selection-start-column="0" selection-end-line="148" selection-end-column="0" />
           <folding />
         </state>
       </provider>

@@ -1,4 +1,4 @@
-import Data.List (sort, elemIndices, nub)
+import Data.List (sort, elemIndices, nub, (\\))
 import Prelude hiding (traverse)
 import Test.QuickCheck
 
@@ -171,11 +171,19 @@ routes rel x y
 
 neighbors :: Ord a => Graph a -> a -> [a]
 neighbors rel x = flatten (image rel x)
+---------------------------------------------------
 
+-- note ignores acyclic cases. So we can hand in acyclic graph.
+-- 1. look only for neighbors not on list to avoid.
+-- 2. when looking for routes from z to y, exclude visiting the avoids and node x.
+routesC :: Ord a => Graph a -> a -> a -> [a] -> [[a]]
+routesC rel x y avoid
+    | x == y = [[x]]
+    | otherwise = [ x:r | z <- neighbors rel x \\ avoid,
+                          r <- routesC rel z y (x:avoid)]
 
-
-
-
+graphEx = Set [(1,2),(1,3),(2,4),(3,5),(3,6),(5,6)]
+graphCyclic = Set [(1,2), (1,3),(2,4), (3,5),(4,2)]
 
 
 
