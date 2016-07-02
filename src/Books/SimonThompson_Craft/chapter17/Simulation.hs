@@ -240,6 +240,7 @@ doSimulation servSt (im:messes)
 --- HELP determine why in book on page 474 it has Discharge 7 2 2 while
 --- for me it has Discharge 7 0 2 for result of --- > doSimulation serverStar simuInput
 --- HELP determine why change in numQueues doesn't change outcome of doSimulation.
+-- help use roundrobin as this section says (pg 475) 
 
 
 --- TESTING Simulation ------------------------------------------------------------------
