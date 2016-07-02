@@ -224,9 +224,22 @@ randomTimes = map (makeFunction dist . fromIntegral) (randomSequence seed)
 simulationInput :: [Inmess]
 simulationInput = zipWith Yes [1..] randomTimes
 
+simulationInputNo :: [Inmess]
+simulationInputNo = take 50 simulationInput ++ noes
+    where noes = No : noes
+
 -- note run like this: doSimulation serverStart simulationInput
+-- note: key: returns the combined outmesses of the function:
+-- simulationStep serverStart anInmess, (note serverStart becomes next).
 doSimulation :: ServerState -> [Inmess] -> [Outmess]
 doSimulation servSt (im:messes)
     = outmesses ++ doSimulation servStNext messes
     where
     (servStNext, outmesses) = simulationStep servSt im
+
+--- HELP determine why in book on page 474 it has Discharge 7 2 2 while
+--- for me it has Discharge 7 0 2 for result of --- > doSimulation serverStar simuInput
+--- HELP determine why change in numQueues doesn't change outcome of doSimulation.
+
+
+--- TESTING Simulation ------------------------------------------------------------------
