@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="eb0702c0-b7c3-41d6-bca5-72cdf359dc76" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter17/Simulation.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter17/Simulation.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter17/exercises/exercise17.23.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter17/exercises/exercise17.24.hs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="HaskellTutorial.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -32,11 +34,21 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Simulation.hs" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Simulation.hs" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter17/Simulation.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.7540453">
-              <caret line="210" column="43" selection-start-line="210" selection-start-column="10" selection-end-line="210" selection-end-column="53" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="201" column="12" selection-start-line="201" selection-start-column="12" selection-end-line="201" selection-end-column="12" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="exercise17.24.hs" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter17/exercises/exercise17.24.hs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.21521036">
+              <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -55,8 +67,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter14/exercise14.42.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter14/exercise14.44_45.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter14/exercise14.46.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter14/exercise14.47.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter15/Types.hs" />
@@ -106,6 +116,8 @@
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Queues.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Graph.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter17/Simulation.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter17/exercises/exercise17.23.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter17/exercises/exercise17.24.hs" />
       </list>
     </option>
   </component>
@@ -237,6 +249,36 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="chapter17" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="exercises" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Books" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="SimonThompson_Craft" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="chapter16" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -265,9 +307,9 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
       <pane id="PackagesPane" />
       <pane id="Scratches" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -884,12 +926,12 @@
       <workItem from="1467177986873" duration="18681000" />
       <workItem from="1467264272714" duration="24276000" />
       <workItem from="1467351733366" duration="13439000" />
-      <workItem from="1467438242065" duration="1478000" />
+      <workItem from="1467438242065" duration="3552000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="808501000" />
+    <option name="totallyTimeSpent" value="810575000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="849" height="782" extended-state="0" />
@@ -951,20 +993,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter15/Main.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.061488673">
-          <caret line="2" column="16" selection-start-line="2" selection-start-column="16" selection-end-line="2" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter15/MakeTree.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.56796116">
-          <caret line="4" column="0" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter7/DefiningFunctionsOverLists.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-4.4271846">
@@ -1303,8 +1331,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter17/Simulation.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7540453">
-          <caret line="210" column="43" selection-start-line="210" selection-start-column="10" selection-end-line="210" selection-end-column="53" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="201" column="12" selection-start-line="201" selection-start-column="12" selection-end-line="201" selection-end-column="12" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter17/exercises/exercise17.23.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="2" column="16" selection-start-line="2" selection-start-column="16" selection-end-line="2" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter17/exercises/exercise17.24.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.21521036">
+          <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
           <folding />
         </state>
       </provider>
