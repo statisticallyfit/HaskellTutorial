@@ -172,6 +172,16 @@ seed = 17489
 multiplier = 25173
 increment = 13849
 modulus = 65536
+dist = [(1, 0.2), (2, 0.25), (3, 0.25), (4, 0.15), (5, 0.1), (6, 0.05)]
+
+-- waiting times range from 1 to 6 minutes but they happen with different probabilities:
+-- note:
+{-
+WAIT TIME:   |  1  |  2   |  3   |   4  |  5   |  6
+------------------------------------------------------
+PROBABILITY: | 0.2 | 0.25 | 0.25 | 0.15 | 0.10 | 0.05
+-}
+
 
 nextRand :: Integer -> Integer
 nextRand n = (multiplier * n + increment) `mod` modulus
@@ -187,26 +197,23 @@ scaleSequence from to sequence = map scale sequence
     range = to - from +1
     denom = modulus `div` range
 
--- waiting times range from 1 to 6 minutes but they happen with different probabilities:
--- note:
-{-
-WAIT TIME:   |  1  |  2   |  3   |   4  |  5   |  6
-------------------------------------------------------
-PROBABILITY: | 0.2 | 0.25 | 0.25 | 0.15 | 0.10 | 0.05
--}
-
+-- note transforms a distribution (discrete) into a transformer of infinite lists.
 makeFunction :: [(a, Float)] -> Float -> a
-makeFunction dist = makeFun dist 0.0
+makeFunction dist = makeFun dist 0.0 {-takes rand arg here below -}
 
-makeFun ((ob, p) : dist) nLast rand
-    | nNext >= rand && rand > nLast = ob
-    | otherwise = makeFun dist nNext rand
-    where nNext = p * fromIntegral modulus + nLast
+-- note b == float type
+-- note once prob * modulus + nLast is greater than rand then return time.
+ -- help todo understand better.
+makeFun :: (Num b, Ord b) => [(a, b)] -> b -> b -> a
+makeFun ((time, prob) : distRest) nLast rand
+    | nNext >= rand && rand > nLast = time
+    | otherwise = makeFun distRest nNext rand
+    where nNext = prob * fromIntegral modulus + nLast
 
-{-
+
 
 randomTimes = map (makeFunction dist . fromIntegral) (randomSequence seed)
-
+{-
 doSimulation :: ServerState -> [Inmess] -> [Outmess]
 doSimulation servSt (im:messes)
     = outmesses ++ doSimulation servStNext messes
