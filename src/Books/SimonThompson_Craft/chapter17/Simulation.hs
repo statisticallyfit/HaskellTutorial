@@ -211,11 +211,15 @@ makeFun ((time, prob) : distRest) nLast rand
     where nNext = prob * fromIntegral modulus + nLast
 
 
-
+-- NOTE: generates the waiting times based on the probability distribution given
+-- and the random sequence of numbers.
+randomTimes :: [Integer]
 randomTimes = map (makeFunction dist . fromIntegral) (randomSequence seed)
-{-
+
+
+
 doSimulation :: ServerState -> [Inmess] -> [Outmess]
 doSimulation servSt (im:messes)
     = outmesses ++ doSimulation servStNext messes
     where
-    (servStNext, outmesses) = simulationStep servSt im-}
+    (servStNext, outmesses) = simulationStep servSt im

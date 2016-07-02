@@ -17,7 +17,7 @@ testRunningSumsLastElementIsTotal xs = last (runningSums xs) == (sum xs)
 
 -- help todo understand better how this works. page 472
 -- help how do the sums get to the front of the list? in front of zipwith?
- -- note above is called networks of processes 
+ -- note above is called networks of processes
 listSums :: [Integer] -> [Integer]
 listSums iList = out
     where out = 0 : zipWith (+) iList out
