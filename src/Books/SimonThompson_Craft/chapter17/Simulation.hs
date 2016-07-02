@@ -127,8 +127,9 @@ simulationStep ss im = (addNewObject im ss', outMess)
 -- note adds message to shortest queue
 -- note it is here that inmess with type (No) are not passed to the queues.
 addNewObject :: Inmess -> ServerState -> ServerState
-addNewObject No ss = ss
-addNewObject inQ@(Yes arr wait) ss = addToQueue (shortestQueue ss) inQ ss
+addNewObject No servSt = servSt
+addNewObject inmess@(Yes arr wait) servSt
+        = addToQueue (indexOfShortestQueue servSt) inmess servSt
 
 -- note numQueues is a constant to be defined.
 serverStart :: ServerState
@@ -139,12 +140,12 @@ serverSize :: ServerState -> Int
 serverSize (SS xs) = length xs
 
 -- note returns index of shortest queue.
-shortestQueue :: ServerState -> Int
-shortestQueue (SS [q]) = 0
-shortestQueue (SS (q:qs))
+indexOfShortestQueue :: ServerState -> Int
+indexOfShortestQueue (SS [q]) = 0
+indexOfShortestQueue (SS (q:qs))
     | (queueLength (qs !! short)) <= queueLength q = short + 1
     | otherwise = 0
-    where short = shortestQueue (SS qs)
+    where short = indexOfShortestQueue (SS qs)
 
 
 
@@ -217,7 +218,13 @@ randomTimes :: [Integer]
 randomTimes = map (makeFunction dist . fromIntegral) (randomSequence seed)
 
 
+-- note creates the (in:messes) list using random times
+-- note key Yes is a function constructor that is applied to infinite list [1..] to
+-- zip it with random times.
+simulationInput :: [Inmess]
+simulationInput = zipWith Yes [1..] randomTimes
 
+-- note run like this: doSimulation serverStart simulationInput
 doSimulation :: ServerState -> [Inmess] -> [Outmess]
 doSimulation servSt (im:messes)
     = outmesses ++ doSimulation servStNext messes
