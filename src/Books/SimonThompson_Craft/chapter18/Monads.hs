@@ -24,7 +24,7 @@ sumInts s = do n <- getInt
                else sumInts (s + n)
 
 -- HELP todo understand why this doesn't just return 0 when you type in 0. Why does
--- it still return the sum ? 
+-- it still return the sum ?
 sumInts2 :: IO Int
 sumInts2 = do n <- getInt
               if n == 0
