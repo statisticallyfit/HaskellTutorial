@@ -240,7 +240,21 @@ doSimulation servSt (im:messes)
 --- HELP determine why in book on page 474 it has Discharge 7 2 2 while
 --- for me it has Discharge 7 0 2 for result of --- > doSimulation serverStar simuInput
 --- HELP determine why change in numQueues doesn't change outcome of doSimulation.
--- help use roundrobin as this section says (pg 475) 
+-- help use roundrobin as this section says (pg 475)
+
+
+totalWait :: [Outmess] -> Integer  
+totalWait {-outmesses-} = sum . map waitTime -- outmesses
+    where waitTime (Discharge _ w _) = w
+
+
+
 
 
 --- TESTING Simulation ------------------------------------------------------------------
+
+
+-- note todos
+-- 1 helps
+-- 2 experimenting
+-- 3 testing
