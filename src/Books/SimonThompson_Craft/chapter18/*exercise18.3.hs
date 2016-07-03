@@ -1,7 +1,7 @@
 import Prelude hiding (repeat)
 
 -- HELP how to test this? How to get it to stop repeating?
--- how to make condition testIO return True at some point? todo 
+-- how to make condition testIO return True at some point? todo
 repeat :: IO Bool -> IO() -> IO()
 repeat testIO oper = do test <- testIO
                         if not test
@@ -12,4 +12,4 @@ repeat testIO oper = do test <- testIO
 
 
 anIOTest :: IO Bool
-anIOTest = return (\n -> if n == 20 then True else False)
+anIOTest = return (\n -> if n == 20 then return True else return False)

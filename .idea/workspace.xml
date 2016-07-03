@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="eb0702c0-b7c3-41d6-bca5-72cdf359dc76" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter18/exercise18.3.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter18/*exercise18.4.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter18/exercise18.3.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter18/*exercise18.3.hs" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="HaskellTutorial.iws" />
@@ -43,11 +44,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="exercise18.3.hs" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter18/exercise18.3.hs">
+      <file leaf-file-name="*exercise18.4.hs" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter18/*exercise18.4.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.09223301">
-              <caret line="3" column="64" selection-start-line="3" selection-start-column="64" selection-end-line="3" selection-end-column="64" />
+            <state vertical-scroll-proportion="0.030744337">
+              <caret line="1" column="46" selection-start-line="1" selection-start-column="46" selection-end-line="1" selection-end-column="46" />
               <folding />
             </state>
           </provider>
@@ -66,9 +67,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter15/exercise15.7.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter15/MakeCode.hs" />
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter15/Main.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter15/Frequency.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter15/CodeTable.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter15/exercises/exercise15.8.hs" />
@@ -117,6 +115,9 @@
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter18/Monads.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter18/exercise18.2.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter18/exercise18.3.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter18/*exercise18.3.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter18/exercise18.4.hs" />
+        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter18/*exercise18.4.hs" />
       </list>
     </option>
   </component>
@@ -870,12 +871,12 @@
       <workItem from="1467264272714" duration="24276000" />
       <workItem from="1467351733366" duration="13439000" />
       <workItem from="1467438242065" duration="14671000" />
-      <workItem from="1467546619225" duration="10540000" />
+      <workItem from="1467546619225" duration="11095000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="832234000" />
+    <option name="totallyTimeSpent" value="832789000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -900,7 +901,7 @@
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32872504" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="GhcMod" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31789738" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31789738" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Cabal" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32916147" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32916147" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -946,13 +947,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter15/Frequency.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="57" column="0" selection-start-line="57" selection-start-column="0" selection-end-line="57" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter15/HuffmanCodes.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.26332796">
@@ -1296,6 +1290,14 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter18/*exercise18.3.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.43042073">
+          <caret line="14" column="65" selection-start-line="14" selection-start-column="65" selection-end-line="14" selection-end-column="65" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter18/Monads.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1304,10 +1306,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter18/exercise18.3.hs">
+    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter18/*exercise18.4.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.09223301">
-          <caret line="3" column="64" selection-start-line="3" selection-start-column="64" selection-end-line="3" selection-end-column="64" />
+        <state vertical-scroll-proportion="0.030744337">
+          <caret line="1" column="46" selection-start-line="1" selection-start-column="46" selection-end-line="1" selection-end-column="46" />
           <folding />
         </state>
       </provider>
