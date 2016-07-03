@@ -100,7 +100,7 @@ queueEmpty (QS _ _ q) = q == []
 newtype ServerState = SS [QueueState] deriving (Eq, Show)
 
 numQueues :: Int
-numQueues = 5
+numQueues = 3
 
 -- precondition: n < length st. If bigger, we get error from (!!) index too large.
 addToQueue :: Int -> Inmess -> ServerState -> ServerState
@@ -243,7 +243,7 @@ doSimulation servSt (im:messes)
 -- help use roundrobin as this section says (pg 475)
 
 
-totalWait :: [Outmess] -> Integer  
+totalWait :: [Outmess] -> Integer
 totalWait {-outmesses-} = sum . map waitTime -- outmesses
     where waitTime (Discharge _ w _) = w
 
