@@ -257,3 +257,16 @@ totalWait {-outmesses-} = sum . map waitTime -- outmesses
 
 prob :: Int -> [Int] -> Float
 prob num listNums = num / (sum listNums)
+
+
+occ xs n = length $ elemIndices n xs
+(map $ occ [1,1,1,3,3,3,3,4,4,4,45,5,5]) [1,3,4,45,5]
+
+
+rts = take 10000 randomTimes
+
+(map $ occ rts) [1,2,3,4,5,6]
+[1977,2437,2555,1491,1041,499]
+*Main> let prob num listNums = num `div` (sum listNums)
+*Main> let list = (map $ occ rts) [1,2,3,4,5,6]
+*Main> prob 2437 list
