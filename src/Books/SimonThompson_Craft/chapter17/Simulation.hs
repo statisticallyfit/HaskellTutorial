@@ -256,14 +256,142 @@ totalWait {-outmesses-} = sum . map waitTime -- outmesses
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+
+
+
+
+--- TESTING QueueState ------------------------------------------------------------------
+
+instance Arbitrary Inmess where
+    arbitrary = do
+        Positive arr <- arbitrary
+        Positive serv <- arbitrary
+        oneof [return No, return (Yes arr serv)]
+
+instance Arbitrary Outmess where
+    arbitrary = do
+        Positive arr <- arbitrary
+        Positive wait <- arbitrary
+        Positive serv <- arbitrary
+        oneof [return None, return (Discharge arr wait serv)]
+
+instance Arbitrary QueueState where
+    arbitrary = do
+        Positive time <- arbitrary
+        Positive service <- arbitrary
+        inmesses <- arbitrary
+        return (QS time service inmesses)
+
+------------------------------------------------------------------------------------------
+-- note too costly to use Property to limit all inmesses to have all yes values and
+-- no Nos. Must declare the arbitrary instance to have thsi property ingrained in it from
+-- the start, instead.
+
+-- note check that im is added last in addMessage
+propQ_AddMessage :: Inmess -> QueueState -> Bool
+propQ_AddMessage im q = last inmesses == im
+    where q'@(QS time serv inmesses) = addMessage im q
+
+-- note check that discharge is only present in outmess when service time is 0,
+-- and when servtime is not zero, there are no discharges.
+propQ_QueueStep :: QueueState -> Bool
+propQ_QueueStep q@(QS ct st ins) = servIsZeroANDOuts || servNotZeroANDNoOuts
+    where filteredIns = filter (/= No) ins
+          (QS ct' st' ins', outs) = queueStep (QS ct st filteredIns)
+          servIsZeroANDOuts = st' == 0 && (not $ null outs)
+          servNotZeroANDNoOuts = st' /= 0 && (null outs)
+
+
+
+
+
+
+
+
+--- TESTING SERVER ------------------------------------------------------------------------
+
+instance Arbitrary ServerState where
+    arbitrary = do
+        qs <- arbitrary
+        return (SS qs)
+
+------------------------------------------------------------------------------------------
+
+-- note check that AddToQueue function really adds to the nth queue (counting from 0)
+-- note how to: the nth queue in serverstate should have last element equal to (im).
+propS_Add :: Int -> Inmess -> ServerState -> Property
+propS_Add n im (SS qs) =
+    n >= 0 && n < (length qs) ==>
+    (last inmesses) == im
+    where (SS qs') = addToQueue n im (SS qs)
+          (QS _ _ inmesses) = qs' !! n
+
+-- note num of queues should be same as before
+propS_Add2 :: Int -> Inmess -> ServerState -> Bool
+propS_Add2 n im (SS qs) = length qs' == length qs
+    where (SS qs') = addToQueue n im (SS qs)
+
+
+-- note check that all queues satisfy prop queues once serverStep has been done.
+{-
+HELP can't get it to work because outs are clobbered together and cannot check
+serve == 0 and outs condition individually, since don't know where the outs were
+put together
+
+propS_ServerStep :: ServerState -> Bool
+propS_ServerStep (SS qs) = allServZeroANDOuts || allServNotZeroANDNoOuts
+    where deleteNos ins = filter (/= No) ins
+          qsAllYes = map (\(QS t s ins) -> (QS t s (deleteNos ins))) qs
+          result@(SS qs', outs) = serverStep (SS qsAllYes)
+          allServZeroANDOuts = and $ map (\(QS _ serv _, outs)
+                                        -> serv == 0 && (not $ null outs)) result
+          allServNotZeroANDNoOuts = and $ map (\(QS _ serv _, outs)
+                                        -> serv /= 0 && (null outs)) result
+-}
+
+
+
+
+
+
+
 --- TESTING Simulation ------------------------------------------------------------------
 
 --- testing scaleSequence: min is from and max is to.
 testScaleSequence :: Integer -> Integer -> Bool
-testScaleSequence from to = (minimum scaled == from) && (maximum scaled == to)
+testScaleSequence from to = areNothing || fromToAreMinMax
     where scaledMaybe = scaleSequence from to (randomSequence seed)
+          (Just scaled) = scaledMaybe
+          areNothing = if from <= to then True else False
+          fromToAreMinMax = (minimum scaled == from) && (maximum scaled == to)
+
+--- todo: testing makeFunction
+--- todo: testing queueStep
+--- todo: testing serverStep
 
 
+--- todo: here below was testing if distribution of waiting times created using
+-- randomTimes was poisson (since dist seems poisson, but this one below seems uniform)
+-- Why? help todo
 occ xs n = length $ elemIndices n xs
 rts = take 10000 randomTimes
 
