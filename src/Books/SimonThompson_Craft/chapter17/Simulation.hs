@@ -1,4 +1,7 @@
 import Data.List
+import Numeric
+import Test.QuickCheck
+
 
 --- Queue ---------------------------------------------------------------------------------
 
@@ -193,8 +196,11 @@ randomSequence :: Integer -> [Integer]
 randomSequence sd = iterate nextRand sd -- the sd == seed
 
 -- makes random numbers be in range from <= x <= to
-scaleSequence :: Integer -> Integer -> [Integer] -> [Integer]
-scaleSequence from to sequence = map scale sequence
+-- precondition: from > to otherwise numbers won't be completely in that range.
+scaleSequence :: Integer -> Integer -> [Integer] -> Maybe [Integer]
+scaleSequence from to sequence
+    | from > to = Just $ map scale sequence
+    | otherwise = Nothing
     where
     scale n = n `div` denom + from
     range = to - from +1
@@ -253,20 +259,20 @@ totalWait {-outmesses-} = sum . map waitTime -- outmesses
 --- TESTING Simulation ------------------------------------------------------------------
 
 --- testing scaleSequence: min is from and max is to.
-
-
-prob :: Int -> [Int] -> Float
-prob num listNums = num / (sum listNums)
+testScaleSequence :: Integer -> Integer -> Bool
+testScaleSequence from to = (minimum scaled == from) && (maximum scaled == to)
+    where scaledMaybe = scaleSequence from to (randomSequence seed)
 
 
 occ xs n = length $ elemIndices n xs
-(map $ occ [1,1,1,3,3,3,3,4,4,4,45,5,5]) [1,3,4,45,5]
-
-
 rts = take 10000 randomTimes
 
-(map $ occ rts) [1,2,3,4,5,6]
-[1977,2437,2555,1491,1041,499]
-*Main> let prob num listNums = num `div` (sum listNums)
-*Main> let list = (map $ occ rts) [1,2,3,4,5,6]
-*Main> prob 2437 list
+freqs = (map $ occ rts) [1,2,3,4,5,6]
+
+prob x = fromIntegral x / (fromIntegral $ sum rts)
+
+probabilities = map prob freqs
+
+showDecimal x = showFFloat Nothing x ""
+
+showProbs = map showDecimal probabilities
