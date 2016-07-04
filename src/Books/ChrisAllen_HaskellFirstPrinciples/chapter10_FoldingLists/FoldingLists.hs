@@ -232,7 +232,7 @@ Note these are wrong
 
 
 NOTE these are the answers
-IMPORTANT SUMMARY KEY NOTE of which arg is the accumulator in foldr/foldl. 
+IMPORTANT SUMMARY KEY NOTE of which arg is the accumulator in foldr/foldl.
 foldr (\a acc -> take 3 a ++ acc) "" pab
 "PizAppBan"
 
