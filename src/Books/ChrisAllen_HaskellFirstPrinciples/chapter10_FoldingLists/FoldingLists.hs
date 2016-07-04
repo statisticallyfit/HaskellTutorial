@@ -1,16 +1,13 @@
 import Prelude hiding (sum, length, product, concat)
 
 {-
-NOTE
+NOTE: definition of foldr: puts the accumulator at the end.
 
 foldr :: (a -> b -> b) -> b -> [a] -> b
 foldr f acc [] = acc
 foldr f acc (x:xs) = f x (foldr f acc xs)
 
-
-compare to:
-map :: (a -> b) -> [a] -> [b]
-
+example: foldr (+) 0 [1,2,3] --- > (1+(2+(3+0)))
 -}
 
 sum :: [Integer] -> Integer
@@ -75,3 +72,164 @@ f :: String -> String -> String
 f x y = concat ["(", x, "+", y, ")"]
 
 evalFoldr = foldr f "0" xs
+
+
+
+
+
+
+
+
+
+
+
+------------------------------------------------------------------------------------------
+{-
+
+NOTE definition of foldl: puts the accumulator at the beginning.
+
+foldl :: (b -> a -> b) -> b -> [a] -> b
+foldl f acc [] = acc
+foldl f acc (x:xs) = foldl f (f acc x) xs
+
+example: foldl (+) 0 [1,2,3] --- > (((0+1)+2)+3)
+-}
+
+--xs = map show [1..5]
+--f x y = concat ["(", x, "+", y, ")"]
+evalFoldl = foldl f "0" xs
+
+
+-- note see difference between scanr and scanl
+exFoldr1 = foldr (+) 0 [1..5]
+exScanr = scanr (+) 0 [1..5]
+
+exFoldl1 = foldl (+) 0 [1..5]
+exScanl = scanl (+) 0 [1..5]
+
+{-
+NOTE relationships between the scans and folds:
+
+last (scanl f z xs) = foldl f z xs
+head (scanr f z xs) = foldr f z xs
+
+
+NOTE meaning of folding:
+answer: foldr means replacing the cons (:) with the function (f) given.
+
+[1..3] == 1 : 2 : 3 : []
+
+foldr f z [1,2,3]
+1 `f` (foldr f z [2,3])
+1 `f` (2 `f` (foldr f z [3]))
+1 `f` (2 `f` (3 `f` (foldr f z [])))
+1 `f` (2 `f` (3 `f` z))
+
+
+
+Example (non-associatve function)
+
+foldr (^) 2 [1..3]
+= (1 ^ (2 ^ (3 ^ 2)))
+= (1 ^ (2 ^ 9))
+= 1 ^ 512
+= 1
+
+foldl (^) 2 [1..3]
+= ((2 ^ 1) ^ 2) ^ 3
+= (2 ^ 2) ^ 3
+= 4 ^ 3
+= 64
+
+-}
+
+xs' = map show [1..3]
+g x y = concat ["(", x, "^", y, ")"]
+evalFoldr2 = foldr g "2" xs'
+evalFoldl2 = foldl g "2" xs'
+
+
+{-
+NOTE meaning of arguments:
+
+foldr :: (a -> b -> b) -> b -> [a] -> b
+         [1]  [2]  [3]
+foldl :: (b -> a -> b) -> b -> [a] -> b
+         [4]  [5]  [6]
+
+1 => (a) is one of the list args that foldr is applied to.
+2 => (b) is the next value that will be used to get accumulated in fold.
+3 => this (b) is final result of having combined (a) and starting (b) into the fold.
+4 => start value or fold accumulated so far.
+5 => the next element in the list [a]
+6 => the final result of foldl's fold.
+-}
+
+exFoldr3 = foldr const 0 [1..5]
+exFoldr4 = foldr (flip const) 0 [1..5]
+exFoldl3 = foldl const 0 [1..5]
+exFoldl4 = foldl (flip const) 0 [1..5] -- note so now (flip const) returns second arg.
+
+
+
+
+
+{-
+
+-- note no error because const returns first not second (undefined)
+*Main> foldl const 0 ([1..5] ++ [undefined])
+0
+
+-- note error because flip const returns second which gets to be undefined.
+*Main> foldl (flip const) 0 ([1..5] ++ [undefined])
+*** Exception: Prelude.undefined
+
+-- note error because foldl must evaluate spine (the []) and undefined is part of spine
+-- here
+*Main> foldl (\_ _ -> 5) 0 ([1..5] ++ undefined)
+*** Exception: Prelude.undefined
+
+-}
+
+
+
+
+
+
+
+
+
+
+--- 10.6 HOW TO WRITE FOLD FUNCTIONS ------------------------------------------------------
+
+-- note write function that takes first three letters of each String in a list of Strings
+-- and concats that result into a final string
+
+
+{-
+NOTE foldr and foldl ---------------------------
+
+foldr :: (a -> b -> b) -> b -> [a] -> b
+foldr f acc [] = acc
+foldr f acc (x:xs) = f x (foldr f acc xs)
+
+foldl :: (b -> a -> b) -> b -> [a] -> b
+foldl f acc [] = acc
+foldl f acc (x:xs) = foldl f (f acc x) xs
+
+
+
+Note these are wrong
+*Main> let pab = ["Pizza", "Apple", "Banna"]
+*Main> foldl (\a b -> take 3 a) "" pab
+""
+*Main> foldl (\acc b -> take 3 b) "" pab
+"Ban"
+*Main> foldr (\a acc -> take 3 acc) "" pab
+""
+*Main> foldr (\a acc -> take 3 a) "" pab
+"Piz"
+
+-------------------------------------------------
+-}
+
