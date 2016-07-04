@@ -1,4 +1,7 @@
 import Prelude hiding (sum, length, product, concat)
+import Test.QuickCheck
+
+
 
 {-
 NOTE: definition of foldr: puts the accumulator at the end.
@@ -233,12 +236,47 @@ Note these are wrong
 
 NOTE these are the answers
 IMPORTANT SUMMARY KEY NOTE of which arg is the accumulator in foldr/foldl.
+
+-- key acc comes second for foldr
 foldr (\a acc -> take 3 a ++ acc) "" pab
 "PizAppBan"
 
+-- key acc comes first for foldl.
 foldl (\acc b -> take 3 b ++ acc) "" pab
 "BanAppPiz"
 
+
+example
+
+*Main> foldr g "1" xs
+"(0^(7^(3^(6^(0^1)))))"
+
+*Main> foldl g "1" xs
+"(((((1^0)^7)^3)^6)^0)"
+
 -------------------------------------------------
 -}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- 10.7 FOLDING AND EVALUATION ---------------------------------------------------------
+
+-- note help todo: do the types int and list of ints make for some superfluous testing?
+-- note made function non-associative, unlike (+) or (*).
+-- HELP why does this still fail due to negative numbs? I abs'd all of them, no? 
+testFoldrToFoldl :: Int -> [Int] -> Bool
+testFoldrToFoldl seed xs = (foldr (^) seed' xs') == (foldl (flip (^)) seed' (reverse xs'))
+    where seed' = abs seed
+          xs' = map abs xs
 
