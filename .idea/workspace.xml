@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="eb0702c0-b7c3-41d6-bca5-72cdf359dc76" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter10_FoldingLists/intermissionExercises_10.5.hs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter10_FoldingLists/FoldingLists.hs" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter10_FoldingLists/FoldingLists.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
@@ -37,8 +35,8 @@
       <file leaf-file-name="FoldingLists.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter10_FoldingLists/FoldingLists.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.8462783">
-              <caret line="231" column="0" selection-start-line="231" selection-start-column="0" selection-end-line="231" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.6925566">
+              <caret line="234" column="40" selection-start-line="234" selection-start-column="0" selection-end-line="234" selection-end-column="40" />
               <folding />
             </state>
           </provider>
@@ -862,12 +860,12 @@
       <workItem from="1467351733366" duration="13439000" />
       <workItem from="1467438242065" duration="14671000" />
       <workItem from="1467546619225" duration="11095000" />
-      <workItem from="1467628953078" duration="9330000" />
+      <workItem from="1467628953078" duration="9501000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="842119000" />
+    <option name="totallyTimeSpent" value="842290000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1294,8 +1292,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter10_FoldingLists/FoldingLists.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.8462783">
-          <caret line="231" column="0" selection-start-line="231" selection-start-column="0" selection-end-line="231" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.6925566">
+          <caret line="234" column="40" selection-start-line="234" selection-start-column="0" selection-end-line="234" selection-end-column="40" />
           <folding />
         </state>
       </provider>

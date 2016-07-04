@@ -220,7 +220,7 @@ foldl f acc (x:xs) = foldl f (f acc x) xs
 
 
 Note these are wrong
-*Main> let pab = ["Pizza", "Apple", "Banna"]
+*Main> let pab = ["Pizza", "Apple", "Banana"]
 *Main> foldl (\a b -> take 3 a) "" pab
 ""
 *Main> foldl (\acc b -> take 3 b) "" pab
@@ -229,6 +229,14 @@ Note these are wrong
 ""
 *Main> foldr (\a acc -> take 3 a) "" pab
 "Piz"
+
+
+NOTE these are the answers
+foldr (\a acc -> take 3 a ++ acc) "" pab
+"PizAppBan"
+
+foldl (\acc b -> take 3 b ++ acc) "" pab
+"BanAppPiz"
 
 -------------------------------------------------
 -}
