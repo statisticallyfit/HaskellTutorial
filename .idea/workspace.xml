@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="eb0702c0-b7c3-41d6-bca5-72cdf359dc76" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter10_FoldingLists/FoldingLists.hs" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter10_FoldingLists/FoldingLists.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter10_FoldingLists/intermissionExercises_10.6.hs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="HaskellTutorial.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -32,11 +33,21 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="FoldingLists.hs" pinned="false" current-in-tab="true">
+      <file leaf-file-name="FoldingLists.hs" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter10_FoldingLists/FoldingLists.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6925566">
-              <caret line="234" column="40" selection-start-line="234" selection-start-column="0" selection-end-line="234" selection-end-column="40" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="218" column="0" selection-start-line="218" selection-start-column="0" selection-end-line="218" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="intermissionExercises_10.6.hs" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter10_FoldingLists/intermissionExercises_10.6.hs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.5226537">
+              <caret line="17" column="16" selection-start-line="17" selection-start-column="16" selection-end-line="17" selection-end-column="16" />
               <folding />
             </state>
           </provider>
@@ -55,7 +66,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter15/exercises/exercise15.8.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter15/exercises/exercise15.9.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter15/exercises/exercise15.10.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter15/MakeTree.hs" />
@@ -106,6 +116,7 @@
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter18/*exercise18.4.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter10_FoldingLists/intermissionExercises_10.5.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter10_FoldingLists/FoldingLists.hs" />
+        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter10_FoldingLists/intermissionExercises_10.6.hs" />
       </list>
     </option>
   </component>
@@ -860,12 +871,12 @@
       <workItem from="1467351733366" duration="13439000" />
       <workItem from="1467438242065" duration="14671000" />
       <workItem from="1467546619225" duration="11095000" />
-      <workItem from="1467628953078" duration="9501000" />
+      <workItem from="1467628953078" duration="10423000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="842290000" />
+    <option name="totallyTimeSpent" value="843212000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -936,13 +947,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/exercises/exercise16.9.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="143" column="57" selection-start-line="143" selection-start-column="57" selection-end-line="143" selection-end-column="57" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/exercises/exercise16.10.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1292,8 +1296,16 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter10_FoldingLists/FoldingLists.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6925566">
-          <caret line="234" column="40" selection-start-line="234" selection-start-column="0" selection-end-line="234" selection-end-column="40" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="218" column="0" selection-start-line="218" selection-start-column="0" selection-end-line="218" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter10_FoldingLists/intermissionExercises_10.6.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.5226537">
+          <caret line="17" column="16" selection-start-line="17" selection-start-column="16" selection-end-line="17" selection-end-column="16" />
           <folding />
         </state>
       </provider>
