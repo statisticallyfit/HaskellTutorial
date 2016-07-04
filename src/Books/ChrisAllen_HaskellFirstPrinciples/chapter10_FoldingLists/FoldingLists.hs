@@ -207,7 +207,7 @@ exFoldl4 = foldl (flip const) 0 [1..5] -- note so now (flip const) returns secon
 
 
 {-
-NOTE foldr and foldl ---------------------------
+NOTE compare foldr and foldl ---------------------------
 
 foldr :: (a -> b -> b) -> b -> [a] -> b
 foldr f acc [] = acc
@@ -232,6 +232,7 @@ Note these are wrong
 
 
 NOTE these are the answers
+IMPORTANT SUMMARY KEY NOTE of which arg is the accumulator in foldr/foldl. 
 foldr (\a acc -> take 3 a ++ acc) "" pab
 "PizAppBan"
 
