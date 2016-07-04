@@ -274,9 +274,49 @@ example
 
 -- note help todo: do the types int and list of ints make for some superfluous testing?
 -- note made function non-associative, unlike (+) or (*).
--- HELP why does this still fail due to negative numbs? I abs'd all of them, no? 
+-- HELP why does this still fail due to negative numbs? I abs'd all of them, no?
 testFoldrToFoldl :: Int -> [Int] -> Bool
 testFoldrToFoldl seed xs = (foldr (^) seed' xs') == (foldl (flip (^)) seed' (reverse xs'))
     where seed' = abs seed
           xs' = map abs xs
 
+
+
+
+
+
+
+--- 10.8 SCANNING ------------------------------------------------------------------------
+
+{-
+NOTE scans keep in mind the intermediate values.
+
+--- > TYPES
+foldr :: (a -> b -> b) -> b -> [a] -> b
+scanr :: (a -> b -> b) -> b -> [a] -> [b]
+
+foldl :: (b -> a -> b) -> b -> [a] -> b
+scanl :: (b -> a -> b) -> b -> [a] -> [b]
+
+
+--- > DEFINITIONS
+scanl :: (b -> a -> b) -> b -> [a] -> [b]
+scanl f q ls =
+    q : (case ls of
+            []     -> []
+            (x:xs) -> scanl f (f q x) xs)
+
+
+
+example
+
+-- note help understand why the list is in reverse!
+scanr f "0" xs
+["(1+(2+(3+(4+(5+0)))))","(2+(3+(4+(5+0))))","(3+(4+(5+0)))","(4+(5+0))","(5+0)","0"]
+[15,14,12,9,5,0]
+
+scanl f "0" xs
+["0","(0+1)","((0+1)+2)","(((0+1)+2)+3)","((((0+1)+2)+3)+4)","(((((0+1)+2)+3)+4)+5)"]
+[0,1,3,6,10,15]
+
+-}
