@@ -162,4 +162,4 @@ data Nonfiction = Nonfiction deriving (Eq, Show)
 data BookType = FictionBook Fiction | NonfictionBook Nonfiction deriving (Eq, Show)
 
 type AuthorName = String
-data Author = Author (AuthorName, BookType) deriving (Eq, Show)
+data Author = Fiction AuthorName | Nonfiction AuthorName deriving (Eq, Show)
