@@ -114,5 +114,17 @@ squish = foldr (++) []
 
 
 --- 8
+
+lifter x = [x + 1]
+
 squishMap :: (a -> [b]) -> [a] -> [b]
 squishMap fLifter xs = squish $ myMap fLifter xs
+
+squishMapFoldr :: (a -> [b]) -> [a] -> [b]
+squishMapFoldr fLifter xs = foldr (\x acc -> (fLifter x) ++ acc) [] xs
+
+squishMapFoldl :: (a -> [b]) -> [a] -> [b]
+squishMapFoldl fLifter xs = foldl (\acc y -> acc ++ (fLifter y)) [] xs
+
+squishMapNice :: (a -> [b]) -> [a] -> [b]
+squishMapNice fLifter = foldr ((++) . fLifter) []
