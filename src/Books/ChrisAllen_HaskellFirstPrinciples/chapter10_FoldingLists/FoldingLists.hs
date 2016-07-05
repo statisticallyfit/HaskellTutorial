@@ -320,3 +320,7 @@ scanl f "0" xs
 [0,1,3,6,10,15]
 
 -}
+
+-- example
+fibs = 1 : scanl (+) 1 fibs
+fibN n = fibs !! n
