@@ -192,7 +192,7 @@ data BigFarmhouse = BigFarmhouse NumCow NumPig NumSheep
 type BigFarmhouse' = Product NumCow (Product NumPig NumSheep)
 
 
---- > example
+--- > example 3 values in sum. 
 type Name = String
 type Age = Int
 type LovesMud = Bool
@@ -205,4 +205,5 @@ data Animal = Cow CowInfo
             | Pig PigInfo
             | Sheep SheepInfo
             deriving (Eq, Show)
-
+-- alternatively
+type Animal' = Sum CowInfo (Sum PigInfo SheepInfo)
