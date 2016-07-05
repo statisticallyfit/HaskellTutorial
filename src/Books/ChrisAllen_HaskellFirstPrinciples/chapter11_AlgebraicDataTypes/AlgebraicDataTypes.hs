@@ -188,22 +188,62 @@ type Farmhouse' = Product NumCow NumPig
 
 --- > example 3 values in the product
 newtype NumSheep = NumSheep Int
+
 data BigFarmhouse = BigFarmhouse NumCow NumPig NumSheep
-type BigFarmhouse' = Product NumCow (Product NumPig NumSheep)
+type BigFarmhouse' = Product NumCow (Product NumPig NumSheep) -- alternatively
 
 
---- > example 3 values in sum. 
+--- > example 3 values in sum.
 type Name = String
 type Age = Int
 type LovesMud = Bool
-type PoundsOfWoold = Int
-
+type PoundsOfWool = Int
 data CowInfo = CowInfo Name Age deriving (Eq, Show)
 data PigInfo = PigInfo Name Age LovesMud deriving (Eq, Show)
 data SheepInfo = SheepInfo Name Age PoundsOfWool deriving (Eq, Show)
-data Animal = Cow CowInfo
-            | Pig PigInfo
-            | Sheep SheepInfo
-            deriving (Eq, Show)
--- alternatively
-type Animal' = Sum CowInfo (Sum PigInfo SheepInfo)
+
+data Animal = Cow CowInfo | Pig PigInfo | Sheep SheepInfo deriving (Eq, Show)
+type Animal' = Sum CowInfo (Sum PigInfo SheepInfo) -- alternatively
+
+
+
+
+------
+-- data Sum a b = First a | Second b deriving (Eq, Show)
+data Twitter = Twitter deriving (Eq, Show)
+data AskFm = AskFm deriving (Eq, Show)
+
+--- > note doesn't work to but AskFm in First and Twitter in Second if we declare
+-- them to take their arguments to be Twitter in First and AskFm in Second.
+socialNetwork :: Sum Twitter AskFm
+socialNetwork = First Twitter
+
+
+
+
+------
+
+-- this builder pattern doesn't work with record types --- need to define whole record
+-- type at once or not at all.
+
+data ThereYet = There Integer Float String Bool deriving (Eq, Show)
+
+-- who needs a "builder pattern"?
+nope :: Float -> String -> Bool -> ThereYet
+nope = There 10
+
+notYet :: String -> Bool -> ThereYet
+notYet = nope 25.5
+
+notQuite :: Bool -> ThereYet
+notQuite = notYet "woohoo"
+
+yusssss :: ThereYet
+yusssss = notQuite False
+
+
+
+
+--------- Deconstructing values
+
+
