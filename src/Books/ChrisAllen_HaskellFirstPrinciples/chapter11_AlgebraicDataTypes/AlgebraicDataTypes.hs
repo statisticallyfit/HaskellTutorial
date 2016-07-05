@@ -1,4 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+import Data.Int
+
 
 --- > note Trivial type constructor is nullary since it takes no arguments.
 -- Called type constants not type constructors.
@@ -105,3 +107,47 @@ testTooManyGoats = tooMany (Goats 234)
 {-
 instance TooMany Goats where
     tooMany (Goats n) = tooMany n -}
+
+
+
+
+
+--- 11.8 SUM TYPES ---------------------------------------------------------------------
+
+-- sum types mean you have one or fewer args per data constructor.
+data NumberOrBool = Numba Int8 | BoolyBool Bool
+--- cardinality == 3
+-- because cardinality Int8 = 256 (128 + 128)
+-- and because cardinality Bool = 2
+-- so 2 + 256 = 258 since | means sum type adds.
+
+
+
+--- 11.9 PRODUCT TYPES ------------------------------------------------------------------
+
+-- product types mean you have two or more args per data constructor.
+data QuantumBool = QuantumTrue
+                 | QuantumFalse
+                 | QuantumBoth deriving (Eq, Show)
+
+-- cardinality is product of the two data constructor arg cardinalities.
+-- cardinality of TwoQs == 9
+data TwoQs = MkTwoQs QuantumBool QuantumBool deriving (Eq, Show)
+-- cardinality of TwoQs is again == 9
+type TwoQs' = (QuantumBool, QuantumBool)
+
+
+
+
+
+--- Record types ------------------------
+
+data Person' = MkPerson' String Int deriving (Eq, Show)
+
+
+-- Records are product types with additional syntax to provide convenient accessors
+-- to fields within the record.
+-- example record type
+data Person = Person { name :: String, age :: Int} deriving (Eq, Show)
+
+
