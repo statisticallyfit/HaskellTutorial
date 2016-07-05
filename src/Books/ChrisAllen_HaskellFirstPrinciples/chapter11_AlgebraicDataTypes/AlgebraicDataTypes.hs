@@ -151,3 +151,9 @@ data Person' = MkPerson' String Int deriving (Eq, Show)
 data Person = Person { name :: String, age :: Int} deriving (Eq, Show)
 
 
+
+
+
+
+--- 11.10 NORMAL FORM ---------------------------------------------------------------------
+
