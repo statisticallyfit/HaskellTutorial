@@ -246,4 +246,38 @@ yusssss = notQuite False
 
 --------- Deconstructing values
 
+newtype Name = Name String deriving Show
+newtype Acres = Acres Int deriving Show
 
+data FarmerType = DairyFarmer | WheatFarmer | SoybeanFarmer deriving Show
+
+data Farmer = Farmer Name Acres FarmerType deriving Show
+
+--- note unpacks data
+isDairyFarmer :: Farmer -> Bool
+isDairyFarmer (Farmer _ _ DairyFarmer) = True
+isDairyFarmer _ = False
+
+
+--- alternate formulation with product that uses record syntax
+data FarmerRec = FarmerRec { name :: Name, acres :: Acres, farmerType :: FarmerType}
+    deriving Show
+
+isDairyFarmerRec :: FarmerRec -> Bool
+isDairyFarmerRec farmer = case farmerType farmer of
+                            DairyFarmer -> True
+                            _ -> False
+
+
+
+
+
+
+
+
+--- 11.12 FUNCTION TYPE IS EXPONENTIAL ---------------------------------------------------
+
+--- given function a -> b its inhabitants are (b ^ a)
+--- given function a -> b -> c its inhabitants are ((c ^ b) ^ a)
+
+data Quantum = Yes | No | Both deriving (Eq, Show)
