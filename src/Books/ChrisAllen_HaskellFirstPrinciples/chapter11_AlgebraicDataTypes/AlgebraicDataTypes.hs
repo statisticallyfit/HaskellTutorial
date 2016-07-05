@@ -157,3 +157,9 @@ data Person = Person { name :: String, age :: Int} deriving (Eq, Show)
 
 --- 11.10 NORMAL FORM ---------------------------------------------------------------------
 
+data Fiction = Fiction deriving (Eq, Show)
+data Nonfiction = Nonfiction deriving (Eq, Show)
+data BookType = FictionBook Fiction | NonfictionBook Nonfiction deriving (Eq, Show)
+
+type AuthorName = String
+data Author = Author (AuthorName, BookType) deriving (Eq, Show)
