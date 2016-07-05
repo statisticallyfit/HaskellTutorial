@@ -128,3 +128,48 @@ squishMapFoldl fLifter xs = foldl (\acc y -> acc ++ (fLifter y)) [] xs
 
 squishMapNice :: (a -> [b]) -> [a] -> [b]
 squishMapNice fLifter = foldr ((++) . fLifter) []
+
+
+
+
+--- 9
+squishAgain :: [[a]] -> [a]
+squishAgain = squishMap id
+
+
+
+
+--- 10
+
+-- note needs the empty list case since no first element in foldl f x xs
+myMaximumByFoldl :: (a -> a -> Ordering) -> [a] -> a
+myMaximumByFoldl _ [] = undefined
+myMaximumByFoldl comp (x:xs) = foldl f x xs
+    where f acc y
+            | comp acc y == GT = acc
+            | otherwise = y
+
+myMaximumByFoldr :: (a -> a -> Ordering) -> [a] -> a
+myMaximumByFoldr _ [] = undefined
+myMaximumByFoldr comp (y:ys) = foldr f y ys
+    where f x acc
+            | comp x acc == GT = x
+            | otherwise = acc
+
+
+
+
+--- 11
+myMinimumByFoldl :: (a -> a -> Ordering) -> [a] -> a
+myMinimumByFoldl _ [] = undefined
+myMinimumByFoldl comp (x:xs) = foldl f x xs
+    where f acc y
+            | comp acc y == LT = acc
+            | otherwise = y
+
+myMinimumByFoldr :: (a -> a -> Ordering) -> [a] -> a
+myMinimumByFoldr _ [] = undefined
+myMinimumByFoldr comp (y:ys) = foldr f y ys
+    where f x acc
+            | comp x acc == LT = x
+            | otherwise = acc
