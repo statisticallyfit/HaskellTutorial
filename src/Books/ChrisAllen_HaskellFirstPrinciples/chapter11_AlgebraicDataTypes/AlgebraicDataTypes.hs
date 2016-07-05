@@ -57,13 +57,6 @@ dog = DogueDeBordeaux 10
 
 
 
-
-
-
-
-
-
-
 --- 11.6 DATA CONSTRUCTOR AIRITIES ---------------------------------------------------------
 
 -- nullary - no args in data constructor
@@ -72,5 +65,25 @@ data Example0 = Example0
 -- unary - 1 arg  in data constructor
 data Example1 = Example1 Int
 
--- product of Int and String - 2 args in data constructor 
-data Example2 - Example2 Int String
+-- product of Int and String - 2 args in data constructor
+data Example2 = Example2 Int String
+
+
+
+
+--- 11.7 WHY DATA TYPES ARE ALGEBRAIC ---------------------------------------------------
+
+-- note cardinality of data type is number of possible values it defines.
+
+-- example
+--- > data types that contain a unary constructor always have the same cardinality
+-- as the type they contain (as many goats as there are ints)
+data Cats = Cats Int deriving (Eq, Show)
+
+-- note cardinality of newtype is same as that of type it contains
+-- newtype is special: after comile time, Goat becomes identical to Int. 
+newtype Goats = Goats Int deriving (Eq, Show)
+newtype Cows = Cows Int deriving (Eq, Show)
+
+tooManyGoats :: Int -> Bool
+tooManyGoats (Goats n) = n > 42
