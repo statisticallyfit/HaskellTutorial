@@ -1,4 +1,4 @@
-
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 --- > note Trivial type constructor is nullary since it takes no arguments.
 -- Called type constants not type constructors.
@@ -80,10 +80,28 @@ data Example2 = Example2 Int String
 -- as the type they contain (as many goats as there are ints)
 data Cats = Cats Int deriving (Eq, Show)
 
+
+
+
+
+tooManyGoats :: Goats -> Bool
+tooManyGoats (Goats n) = n > 42
+
+
+class TooMany a where
+    tooMany :: a -> Bool
+
+instance TooMany Int where
+    tooMany n = n > 42
+
 -- note cardinality of newtype is same as that of type it contains
--- newtype is special: after comile time, Goat becomes identical to Int. 
-newtype Goats = Goats Int deriving (Eq, Show)
+-- newtype is special: after comile time, Goat becomes identical to Int.
+newtype Goats = Goats Int deriving (Eq, Show, TooMany)
 newtype Cows = Cows Int deriving (Eq, Show)
 
-tooManyGoats :: Int -> Bool
-tooManyGoats (Goats n) = n > 42
+-- the pragma at top of source file is needed to derive TooMany instance automatically.
+testTooManyGoats = tooMany (Goats 234)
+
+{-
+instance TooMany Goats where
+    tooMany (Goats n) = tooMany n -}

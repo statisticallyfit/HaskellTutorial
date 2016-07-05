@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleInstances #-}
+
 
 
 --- 1
@@ -60,3 +62,48 @@ MakeInstance :: Int -> Instance
 Instance :: *
 
 -}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- 1
+
+class TooMany a where
+    tooMany :: a -> Bool
+
+instance TooMany Int where
+    tooMany n = n > 42
+
+instance TooMany (Int, String) where
+    tooMany (n,s) = tooMany n
+
+
+-- note help why do we have to state Int type? Didn't need to in AlgebraicTypes file.
+testNS = tooMany (234::Int,"hi")
+
+
+
+--- 2
+{-
+instance TooMany (Int, Int) where
+    tooMany (n1,n2) = tooMany (n1 + n2)
+
+testNN = tooMany (234:: Int, 24234::Int )
+-}
+
+
+
+--- 3
+instance (Num a, TooMany a) => TooMany (a,a) where
+    tooMany (n, t) = tooMany (n + t)
+     -- tooMany (n, (n'::Int,s::String)) = tooMany (n + n')
