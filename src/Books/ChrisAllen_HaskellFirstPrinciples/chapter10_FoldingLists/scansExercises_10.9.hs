@@ -9,15 +9,13 @@ scanl f q ls =
 
 example evaluation:
 
-fibs = 1 : scanl (+) 1 fibs
-= 1 : case fibs of
-        [] -> []
-        (1: [1]) -> scanl (+) ((+) 1 1) [1]
-               -> scanl (+) 2 [1]
-
-= 2 : case fibs of
-        [] -> []
-        (
+ 1 :: (1: scanl (+) 1 fibs)
+:1 :: (1: scanl (+) 1 fibs)
+:1+(1 :: (1: scanl (+) 1 (1: scanl (+) 1 fibs))
+:2+(1 :: (1: scanl (+) 1 (1: scanl (+) 1 fibs)))
+:3+(2 :: (1: scanl (+) 1 (1: scanl (+) 1 (1: scanl (+) 1 fibs)))
+:5+(3 :: (1: scanl (+) 1 (1: scanl (+) 1 (1: scanl (+) 1 fibs)))
+:8+(5 :: (1: scanl (+) 1 (1: scanl (+) 1 (1: scanl (+) 1 (1: scanl (+) 1 fibs))))
 -}
 
 fibs = 1 : scanl (+) 1 fibs
@@ -34,4 +32,6 @@ lessThanHundredFibs = takeWhile (< 100) fibs
 
 
 --- 3
-factorial =
+-- todo help understand better: is this factorial because next element is the accumulated
+-- product so we multiply that by next val?
+factorial = scanl (*) 1 [1..]
