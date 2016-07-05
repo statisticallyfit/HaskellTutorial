@@ -162,4 +162,47 @@ data Nonfiction = Nonfiction deriving (Eq, Show)
 data BookType = FictionBook Fiction | NonfictionBook Nonfiction deriving (Eq, Show)
 
 type AuthorName = String
-data Author = Fiction AuthorName | Nonfiction AuthorName deriving (Eq, Show)
+data Author = Fiction' AuthorName | Nonfiction' AuthorName deriving (Eq, Show)
+
+
+
+
+--- 11.11 CONSTRUCTING / DECONSTRUCTION ------------------------------------------------
+
+data GuessWhat = Chickenbutt deriving (Eq, Show)
+data Id a = MkId a deriving (Eq, Show)
+data Product a b = Product a b deriving (Eq, Show)
+data Sum a b = First a | Second b deriving (Eq, Show)
+data RecordProduct a b = RecordProduct {pfirst :: a, psecond :: b} deriving (Eq, Show)
+
+
+---------------
+
+--- > example 2 values in the product
+--- > note Farmhouse and Farmhouse' are the same.
+newtype NumCow = NumCow Int
+newtype NumPig = NumPic Int
+data Farmhouse = Farmhouse NumCow NumPig
+type Farmhouse' = Product NumCow NumPig
+
+
+--- > example 3 values in the product
+newtype NumSheep = NumSheep Int
+data BigFarmhouse = BigFarmhouse NumCow NumPig NumSheep
+type BigFarmhouse' = Product NumCow (Product NumPig NumSheep)
+
+
+--- > example
+type Name = String
+type Age = Int
+type LovesMud = Bool
+type PoundsOfWoold = Int
+
+data CowInfo = CowInfo Name Age deriving (Eq, Show)
+data PigInfo = PigInfo Name Age LovesMud deriving (Eq, Show)
+data SheepInfo = SheepInfo Name Age PoundsOfWool deriving (Eq, Show)
+data Animal = Cow CowInfo
+            | Pig PigInfo
+            | Sheep SheepInfo
+            deriving (Eq, Show)
+
