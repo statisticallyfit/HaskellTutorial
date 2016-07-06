@@ -246,12 +246,12 @@ yusssss = notQuite False
 
 --------- Deconstructing values
 
-newtype Name = Name String deriving Show
+newtype Name' = Name' String deriving Show
 newtype Acres = Acres Int deriving Show
 
 data FarmerType = DairyFarmer | WheatFarmer | SoybeanFarmer deriving Show
 
-data Farmer = Farmer Name Acres FarmerType deriving Show
+data Farmer = Farmer Name' Acres FarmerType deriving Show
 
 --- note unpacks data
 isDairyFarmer :: Farmer -> Bool
@@ -260,7 +260,7 @@ isDairyFarmer _ = False
 
 
 --- alternate formulation with product that uses record syntax
-data FarmerRec = FarmerRec { name :: Name, acres :: Acres, farmerType :: FarmerType}
+data FarmerRec = FarmerRec { name' :: Name', acres :: Acres, farmerType :: FarmerType}
     deriving Show
 
 isDairyFarmerRec :: FarmerRec -> Bool
@@ -281,3 +281,39 @@ isDairyFarmerRec farmer = case farmerType farmer of
 --- given function a -> b -> c its inhabitants are ((c ^ b) ^ a)
 
 data Quantum = Yes | No | Both deriving (Eq, Show)
+
+--- Sums are additive so that has 6 types: ---------------------------------------------
+data HasSixValues = Either Quantum Quantum
+--- cardinality of Either Q Q == 3 + 3 = 6
+quantSum1 :: Either Quantum Quantum
+quantSum1 = Right Yes
+quantSum2 = Right No
+quantSum3 = Right Both
+quantSum4 = Left Yes
+quantSum5 = Left No
+quantSum6 = Left Both
+
+--- product types are multiplicative so:
+--- 3 * 3
+data HasNineProductValues = NineVals (Quantum, Quantum) ---------------------------------
+
+quantProd1 :: (Quantum, Quantum)
+quantProd1 = (Yes, Yes)
+quantProd2 = (Yes, No)
+quantProd3 = (Yes, Both)
+quantProd4 = (No, Yes)
+quantProd5 = (No, No)
+quantProd6 = (No, Both)
+quantProd7 = (Both, Yes)
+quantProd8 = (Both, No)
+quantProd9 = (Both, Both)
+
+
+--- arithmetic of function type: ---------------------------------------------------------
+--- Q -> Q means (numQ ^ numQ) means (3 ^ 3)
+has27Implementations :: Quantum -> Quantum
+has27Implementations = undefined
+
+--- a -> b means b ^ a = 2 ^ 3 = 8
+has8Implementations :: Quantum -> Bool
+has8Implementations = undefined
