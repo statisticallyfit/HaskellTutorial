@@ -448,29 +448,61 @@ postorder' tree = flattenPost tree []
 
 --- Foldr for binary tree
 --- todo to mull over - had help on this one.
-foldTree :: (a -> b -> b) -> b -> BinaryTree a -> b
-foldTree _ acc Leaf = acc
-foldTree f acc (Node left x right) = accRight
+--- note does preorder traversal (see example foldtree)
+-- a : flattenPre left (flattenPre right accList)
+foldPreorderRight :: (a -> b -> b) -> b -> BinaryTree a -> b
+foldPreorderRight _ acc Leaf = acc
+foldPreorderRight f acc (Node left x right) = accRight
     where --- foldTree f (foldTree f (f x acc) left) right
     accNode = f x acc
-    accLeft = foldTree f accNode left
-    accRight = foldTree f accLeft right
+    accLeft = foldPreorderRight f accNode left
+    accRight = foldPreorderRight f accLeft right
 
-printSum :: Show a => a -> String -> String
-printSum x y = "(" ++ show x ++ "+" ++ y ++ ")"
+printSumPreorderRight :: Show a => a -> String -> String
+printSumPreorderRight x y = "(" ++ show x ++ "+" ++ y ++ ")"
 
+------------------
+--- note does preorder traversal backwards (see example left foldtree)
+-- a : flattenPre left (flattenPre right accList)
+foldPreorderLeft :: (b -> a -> b) -> b -> BinaryTree a -> b
+foldPreorderLeft _ acc Leaf = acc
+foldPreorderLeft f acc (Node left x right) = accRight
+    where
+    accNode = f acc x
+    accLeft = foldPreorderLeft f accNode left
+    accRight = foldPreorderLeft f accLeft right
 
+printPreorderLeft :: Show a => String -> a -> String
+printPreorderLeft x y = "(" ++ x ++ "+" ++ show y ++ ")"
 
-foldTree' :: (b -> a -> b -> b) -> b -> BinaryTree a -> b
-foldTree' _ acc Leaf = acc
-foldTree' f acc (Node left v right) = f (foldTree' f acc left) v (foldTree' f acc right)
+------------------
+-- flattenIn left (a : (flattenIn right accList))
+foldInorder :: (b -> a -> b -> b) -> b -> BinaryTree a -> b
+foldInorder _ acc Leaf = acc
+foldInorder f acc (Node left x right)
+    = f (foldInorder f acc left) x (foldInorder f acc right)
 
-printSum' :: Show a => String -> a -> String -> String
-printSum' x y z = "(" ++ x ++ "+" ++ show y ++ "+" ++ z ++ ")"
+printSumInorder :: Show a => String -> a -> String -> String
+printSumInorder x y z = "(" ++ x ++ "+" ++ show y ++ "+" ++ z ++ ")"
 
+------------------
 
-exampleFoldTree = foldTree printSum "0" t2
-exampleFoldTree' = foldTree' printSum' "0" t2
+-- help help help todo how to implement foldtree using postorder traversal?
+--- foldTree f (foldTree f (f x acc) left) right
+-- flattenPost left (flattenPost right (a : accList))
+{-
+foldPostorder f acc (Node left x right)
+    = foldPostOrder f left
+-}
+
+------------------
+-- note preorder foldr
+exampleFoldTreePRE_R = foldPreorderRight printSumPreorderRight "0" t3
+-- note preorder foldl (backwards)
+exampleFoldTreePRE_L = foldPreorderLeft printPreorderLeft "0" t3
+-- note inorder
+exampleFoldTreeIN = foldInorder printSumInorder "0" t3
+--exampleFoldTreePOST =
 
 
 --- Rewrite map using foldtree
@@ -551,7 +583,7 @@ testPostorder =
 
 
 testFold :: Int -> BinaryTree Int -> Bool
-testFold acc tree = (foldTree (+) acc tree) == (foldr (+) acc flatTree)
+testFold acc tree = (foldPreorderRight (+) acc tree) == (foldr (+) acc flatTree)
     where flatTree = collapseTree tree
 
 
