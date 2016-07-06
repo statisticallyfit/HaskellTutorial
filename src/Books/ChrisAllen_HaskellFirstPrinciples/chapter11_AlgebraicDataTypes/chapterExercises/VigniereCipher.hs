@@ -41,36 +41,44 @@ decodeCaesar factor codedText = encodeCaesar (-factor) codedText
 
 ------------
 
+type Text = String
+type Keyword = String
+
 -- Vigniere cipher
 -- 1. get keyword. Repeat it. Take amount equal to length of text. Make text all uppercase.
 -- 2. get shift of each letter in keyword with respect to 'A'. Make keywd all uppercase.
 -- 3. map the text over the shift list with shift function to get shifted result.
 
-putSpaces :: [Int] -> String -> String
+putSpaces :: [Int] -> Keyword -> Keyword
 putSpaces [] xs = xs
 putSpaces (p:ps) xs = newPart ++ " " ++ putSpaces ps' rest
     where (newPart, rest) = splitAt p xs
           ps' = map (\pos -> pos - (p + 1)) ps
 
 -- note ignores chars like \n or \t
-getSpaces :: String -> [Int]
+getSpaces :: Text -> [Int]
 getSpaces {-text-} = elemIndices ' ' {-text-}
 
 -- note ignores chars like \n or \t - leaves them in.
-removeSpaces :: String -> String
+removeSpaces :: Text -> Text
 removeSpaces {-text-} = filter (/= ' ') {-text-}
 
 
 -- note
 -- 1. remove space from text and take that length amount of key repeated.
--- 2. then put the spaces in original text at space spots.
--- 3. zip original text and spaced keyword from step 2.
-textKeyPairs :: String -> String -> [(Char, Char)]
-textKeyPairs text keyword = zip text keySpaced
-    where textNoSpace = removeSpaces text
-          keyCycled = take (length textNoSpace) (concat $ repeat keyword)
+-- 2. in new key, put spaces at same spots as in text.
+makeKeyword :: Text -> Keyword -> Keyword
+makeKeyword text keyStart = keySpaced
+    where textNoSpace = removeSpaces $ map toUpper text
+          keyCycled = take (length textNoSpace) (map toUpper $ concat $ repeat keyStart)
           keySpaced = putSpaces (getSpaces text) keyCycled
 
+-- given the keyword from above, return the shift of each letter relative to 'A'.
+ -- precondition uppercase keyword.
+getKeyShifts :: Keyword -> [Int]
+getKeyShifts key 
+
+{-
 
 -- note gets the shift difference between two letters
 -- note the chars can come in any order. So getShift 'm' 'g' == getShift 'g' 'm'
@@ -82,6 +90,7 @@ getAllShifts :: [(Char, Char)] -> [Int]
 getAllShifts pairs = map (\(t,k) -> getShift t k) pairs
 
 
+-}
 
 
 
@@ -93,6 +102,7 @@ testPutGetSpacing :: String -> Bool
 testPutGetSpacing text = (putSpaces ps textNoSpace) == text
     where ps = getSpaces text
           textNoSpace = removeSpaces text
+{-
 
 testNoShift :: Char -> Bool
 testNoShift c = getShift c c == 0
@@ -101,4 +111,4 @@ testShiftOne :: Char -> Bool
 testShiftOne c = getShift c (chr (ord c + 1)) == 1
 
 testShiftSwitch :: Char -> Char -> Bool
-testShiftSwitch c1 c2 = getShift c1 c2 == getShift c2 c1
+testShiftSwitch c1 c2 = getShift c1 c2 == getShift c2 c1-}
