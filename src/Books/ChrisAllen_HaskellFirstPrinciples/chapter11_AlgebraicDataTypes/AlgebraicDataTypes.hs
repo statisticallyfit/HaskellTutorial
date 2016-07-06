@@ -365,9 +365,10 @@ data BinaryTree a = Leaf
                   deriving (Eq, Ord, Show)
 
 t1 = Leaf
-t2 = Node (Node (Node Leaf 1 Leaf) 3 (Node Leaf 4 Leaf)) 5
+t2 = Node (Node Leaf 2 Leaf) 5 (Node Leaf 8 Leaf)
+t3 = Node (Node (Node Leaf 1 Leaf) 3 (Node Leaf 4 Leaf)) 5
           (Node (Node Leaf 7 Leaf) 13 (Node Leaf 14 (Node Leaf 17 Leaf)))
-t3 = Node (Node (Node Leaf 1 Leaf) 2 (Node Leaf 3 Leaf)) 4
+t4 = Node (Node (Node Leaf 1 Leaf) 2 (Node Leaf 3 Leaf)) 4
           (Node (Node Leaf 5 Leaf) 6 (Node Leaf 7 (Node Leaf 8 Leaf)))
 
 --- precondition tree must be in binary search order (sorted).
@@ -432,7 +433,7 @@ flattenIn (Node left a right) accList
 flattenPost :: BinaryTree a -> [a] -> [a]
 flattenPost Leaf accList = accList
 flattenPost (Node left a right) accList
-    = flattenPost left (flattenPost right : (a : accList))
+    = flattenPost left (flattenPost right (a : accList))
 
 preorder' :: BinaryTree a -> [a]
 preorder' tree = flattenPre tree []
@@ -446,9 +447,41 @@ postorder' tree = flattenPost tree []
 
 
 --- Foldr for binary tree
+--- todo to mull over - had help on this one.
 foldTree :: (a -> b -> b) -> b -> BinaryTree a -> b
-foldTree _ s Leaf = s
-foldTree f s (Node left x right) = Node (foldTree f s left) (f x) (foldTree f s right)
+foldTree _ acc Leaf = acc
+foldTree f acc (Node left x right) = accRight
+    where --- foldTree f (foldTree f (f x acc) left) right
+    accNode = f x acc
+    accLeft = foldTree f accNode left
+    accRight = foldTree f accLeft right
+
+printSum :: Show a => a -> String -> String
+printSum x y = "(" ++ show x ++ "+" ++ y ++ ")"
+
+
+
+foldTree' :: (b -> a -> b -> b) -> b -> BinaryTree a -> b
+foldTree' _ acc Leaf = acc
+foldTree' f acc (Node left v right) = f (foldTree' f acc left) v (foldTree' f acc right)
+
+printSum' :: Show a => String -> a -> String -> String
+printSum' x y z = "(" ++ x ++ "+" ++ show y ++ "+" ++ z ++ ")"
+
+
+exampleFoldTree = foldTree printSum "0" t2
+exampleFoldTree' = foldTree' printSum' "0" t2
+
+
+--- Rewrite map using foldtree
+{-
+
+mapFoldTree_1 :: (a -> b) -> BinaryTree a -> [b]
+mapFoldTree_1 f tree = foldTree ((:) . f) [] tree
+-}
+
+
+
 
 
 --- TESTING ---------------------------------------------------------------------------
@@ -513,3 +546,20 @@ testPostorder =
     if postorder testTree' == [1,3,2]
     then putStrLn "Postorder fine!"
     else putStrLn "Bad news bears."
+
+---------------------------------------------------------
+
+
+testFold :: Int -> BinaryTree Int -> Bool
+testFold acc tree = (foldTree (+) acc tree) == (foldr (+) acc flatTree)
+    where flatTree = collapseTree tree
+
+
+main = do
+    quickCheck testMap
+    quickCheck testSize
+    quickCheck testInsertOrder
+    quickCheck testInsertSize
+    quickCheck testOccurs
+    quickCheck testInorderEqualsCollapse
+    quickCheck testFold
