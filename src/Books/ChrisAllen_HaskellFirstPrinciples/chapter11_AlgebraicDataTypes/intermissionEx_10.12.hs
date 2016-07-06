@@ -6,13 +6,13 @@ data Quad = One | Two | Three | Four deriving (Eq, Show)
 -- Sum types are additive so: can take on 2 * 4 forms = 8
 eQuad :: Either Quad Quad
 eQuad = Left One
-eQuad = Left Two
+{-eQuad = Left Two
 eQuad = Left Three
 eQuad = Left Four
 eQuad = Right One
 eQuad = Right Two
 eQuad = Right Three
-eQuad = Right Four
+eQuad = Right Four-}
 
 
 
@@ -49,3 +49,4 @@ gTwo = undefined
 
 -- Function type: (4 ^ 4) ^ 2 = 65536
 fTwo :: Bool -> Quad -> Quad
+fTwo = undefined

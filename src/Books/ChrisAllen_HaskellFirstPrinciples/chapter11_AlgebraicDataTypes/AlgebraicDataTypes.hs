@@ -1,5 +1,9 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 import Data.Int
+import Test.QuickCheck
+import Control.Monad
+import Data.List
+import System.Random (Random)
 
 
 --- > note Trivial type constructor is nullary since it takes no arguments.
@@ -35,6 +39,7 @@ data DogueDeBordeaux doge = DogueDeBordeaux doge
 -- note types finding is applied to data constructors NOT type constructors.
 -- A type is fully applied if its kind is (*). If ( * -> *) or more then it is
 -- still awaiting application.
+-- note kinds become types when they are fully applied.
 
 
 
@@ -317,3 +322,126 @@ has27Implementations = undefined
 --- a -> b means b ^ a = 2 ^ 3 = 8
 has8Implementations :: Quantum -> Bool
 has8Implementations = undefined
+
+
+
+
+
+
+
+
+
+--- 11.13 HIGHER KINEDED DATA TYPES ------------------------------------------------------
+
+--- note higher kinded type means kind that has 2 or more (*):
+-- example:
+-- * -> *
+-- * -> * -> *
+
+-- :k is * -> * -> * -> * -> * (because a b c d take 4 and Silly type constructor takes 1)
+data Silly a b c d = MkSilly a b c d deriving Show
+
+{-
+*Main> :k Silly
+Silly :: * -> * -> * -> * -> *
+*Main> :k Silly Int
+Silly Int :: * -> * -> * -> *
+*Main> :k Silly Int Int
+Silly Int Int :: * -> * -> *
+*Main> :k Silly Int Int Int
+Silly Int Int Int :: * -> *
+*Main> :k Silly Int Int Int Int
+Silly Int Int Int Int :: *
+-}
+
+
+
+
+--- 11.15 BINARY TREE ------------------------------------------------------------------
+
+data BinaryTree a = Leaf
+                  | Node (BinaryTree a) a (BinaryTree a)
+                  deriving (Eq, Ord, Show)
+
+t1 = Leaf
+t2 = Node (Node (Node Leaf 1 Leaf) 3 (Node Leaf 4 Leaf)) 5
+          (Node (Node Leaf 7 Leaf) 13 (Node Leaf 14 (Node Leaf 17 Leaf)))
+
+--- precondition tree must be in binary search order (sorted).
+insertTree :: Ord a => a -> BinaryTree a -> BinaryTree a
+insertTree b Leaf = Node Leaf b Leaf
+insertTree b (Node left a right)
+    | b == a = Node left a right
+    | b < a  = Node (insertTree b left) a right
+    | b > a  = Node left a (insertTree b right)
+
+
+mapTree :: (a -> b) -> BinaryTree a -> BinaryTree b
+mapTree _ Leaf = Leaf
+mapTree f (Node left a right) = Node (mapTree f left) (f a) (mapTree f right)
+
+collapseTree :: BinaryTree a -> [a]
+collapseTree Leaf = []
+collapseTree (Node left a right) = collapseTree left ++ [a] ++ collapseTree right
+
+
+sizeTree :: BinaryTree a -> Int
+sizeTree Leaf = 0
+sizeTree (Node left _ right) = 1 + sizeTree left + sizeTree right
+
+occurs :: Eq a => a -> BinaryTree a -> Bool
+occurs _ Leaf = False
+occurs x (Node left a right)
+    | x == a = True
+    | otherwise = occurs x left || occurs x right
+
+
+--- TESTING ---------------------------------------------------------------------------
+
+
+{-instance Arbitrary a  => Arbitrary (BinaryTree a) where
+    arbitrary = sized arbBTree
+arbBTree 0 = return Leaf
+arbBTree n = frequency [(1, return Leaf),
+                        (4, liftM3 Node (arbBTree (n `div` 2))
+                                        arbitrary
+                                        (arbBTree (n `div` 2)) )]-}
+instance (Ord a, Bounded a, Random a, Num a, Arbitrary a) => Arbitrary (BinaryTree a)  where
+   arbitrary = gen 0 100 where
+      gen :: (Ord a, Num a, Random a) => a -> a -> Gen (BinaryTree a)
+      gen min max | (max - min) <= 3 = return Leaf
+      gen min max = do
+        elt <- choose (min, max)
+        frequency [ (1, return Leaf),
+                    (6, liftM3 Node (gen min (elt - 1))
+                                    (return elt)
+                                    (gen (elt + 1) max)) ]
+
+
+isSorted xs = (sort xs) == xs
+
+
+testMap :: BinaryTree Int -> Bool
+testMap tree = (collapseTree $ mapTree (+3) tree) == (map (+3) (collapseTree tree))
+
+testSize :: BinaryTree Int -> Bool
+testSize tree = sizeTree tree == (length $ collapseTree tree)
+
+--- testing that result tree is sorted.
+testInsertOrder :: Int -> BinaryTree Int -> Bool
+testInsertOrder n tree = (isSorted $ collapseTree $ insertTree n tree)
+
+
+--- testing that if element is not already inside tree, then length should be greater
+-- by 1, else they should be same size.
+testInsertSize :: Int -> BinaryTree Int -> Bool
+testInsertSize n oldTree
+    | occurs n oldTree = (sizeTree newTree) ==  (sizeTree oldTree)
+    | otherwise        = (sizeTree newTree) == (sizeTree oldTree + 1)
+    where newTree = insertTree n oldTree
+
+
+testOccurs :: Int -> BinaryTree Int -> Bool
+testOccurs n tree = (elem n (collapseTree tree)) == (occurs n tree)
+
+
