@@ -1,4 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 import Data.Int
 import Test.QuickCheck
 import Control.Monad
@@ -366,6 +367,8 @@ data BinaryTree a = Leaf
 t1 = Leaf
 t2 = Node (Node (Node Leaf 1 Leaf) 3 (Node Leaf 4 Leaf)) 5
           (Node (Node Leaf 7 Leaf) 13 (Node Leaf 14 (Node Leaf 17 Leaf)))
+t3 = Node (Node (Node Leaf 1 Leaf) 2 (Node Leaf 3 Leaf)) 4
+          (Node (Node Leaf 5 Leaf) 6 (Node Leaf 7 (Node Leaf 8 Leaf)))
 
 --- precondition tree must be in binary search order (sorted).
 insertTree :: Ord a => a -> BinaryTree a -> BinaryTree a
@@ -376,14 +379,16 @@ insertTree b (Node left a right)
     | b > a  = Node left a (insertTree b right)
 
 
+--- map tree
+
 mapTree :: (a -> b) -> BinaryTree a -> BinaryTree b
 mapTree _ Leaf = Leaf
 mapTree f (Node left a right) = Node (mapTree f left) (f a) (mapTree f right)
 
+-- others
 collapseTree :: BinaryTree a -> [a]
 collapseTree Leaf = []
 collapseTree (Node left a right) = collapseTree left ++ [a] ++ collapseTree right
-
 
 sizeTree :: BinaryTree a -> Int
 sizeTree Leaf = 0
@@ -396,16 +401,61 @@ occurs x (Node left a right)
     | otherwise = occurs x left || occurs x right
 
 
+
+--- Convert binary trees to lists
+
+preorder :: BinaryTree a -> [a]
+preorder Leaf = []
+preorder (Node left a right) = [a] ++ preorder left ++ preorder right
+
+inorder :: BinaryTree a -> [a]
+inorder Leaf = []
+inorder (Node left a right) = inorder left ++ [a] ++ inorder right
+
+postorder :: BinaryTree a -> [a]
+postorder Leaf = []
+postorder (Node left a right) = postorder left ++ postorder right ++ [a]
+
+
+
+--- alternative solution
+flattenPre :: BinaryTree a -> [a] -> [a]
+flattenPre Leaf accList = accList
+flattenPre (Node left a right) accList
+    = a : flattenPre left (flattenPre right accList)
+
+flattenIn :: BinaryTree a -> [a] -> [a]
+flattenIn Leaf accList = accList
+flattenIn (Node left a right) accList
+    = flattenIn left (a : (flattenIn right accList))
+
+flattenPost :: BinaryTree a -> [a] -> [a]
+flattenPost Leaf accList = accList
+flattenPost (Node left a right) accList
+    = flattenPost left (flattenPost right : (a : accList))
+
+preorder' :: BinaryTree a -> [a]
+preorder' tree = flattenPre tree []
+
+inorder' :: BinaryTree a -> [a]
+inorder' tree = flattenIn tree []
+
+postorder' :: BinaryTree a -> [a]
+postorder' tree = flattenPost tree []
+
+
+
+--- Foldr for binary tree
+foldTree :: (a -> b -> b) -> b -> BinaryTree a -> b
+foldTree _ s Leaf = s
+foldTree f s (Node left x right) = Node (foldTree f s left) (f x) (foldTree f s right)
+
+
 --- TESTING ---------------------------------------------------------------------------
 
 
-{-instance Arbitrary a  => Arbitrary (BinaryTree a) where
-    arbitrary = sized arbBTree
-arbBTree 0 = return Leaf
-arbBTree n = frequency [(1, return Leaf),
-                        (4, liftM3 Node (arbBTree (n `div` 2))
-                                        arbitrary
-                                        (arbBTree (n `div` 2)) )]-}
+--- generates a BST (in order)
+--- source: http://www.seas.upenn.edu/~cis552/12fa/lectures/stub/BST.html
 instance (Ord a, Bounded a, Random a, Num a, Arbitrary a) => Arbitrary (BinaryTree a)  where
    arbitrary = gen 0 100 where
       gen :: (Ord a, Num a, Random a) => a -> a -> Gen (BinaryTree a)
@@ -416,7 +466,6 @@ instance (Ord a, Bounded a, Random a, Num a, Arbitrary a) => Arbitrary (BinaryTr
                     (6, liftM3 Node (gen min (elt - 1))
                                     (return elt)
                                     (gen (elt + 1) max)) ]
-
 
 isSorted xs = (sort xs) == xs
 
@@ -440,8 +489,27 @@ testInsertSize n oldTree
     | otherwise        = (sizeTree newTree) == (sizeTree oldTree + 1)
     where newTree = insertTree n oldTree
 
-
 testOccurs :: Int -> BinaryTree Int -> Bool
 testOccurs n tree = (elem n (collapseTree tree)) == (occurs n tree)
 
+testInorderEqualsCollapse :: BinaryTree Int -> Bool
+testInorderEqualsCollapse tree = collapseTree tree == inorder tree
 
+
+---------------------------------------------------------
+testTree' :: BinaryTree Integer
+testTree' = Node (Node Leaf 1 Leaf) 2 (Node Leaf 3 Leaf)
+
+testPreorder = if preorder testTree' == [2,1,3]
+               then putStrLn "Preorder is fine!"
+               else putStrLn "Bad news bears."
+
+testInorder =
+    if inorder testTree' == [1,2,3]
+    then putStrLn "Inorder fine!"
+    else putStrLn "Bad news bears."
+
+testPostorder =
+    if postorder testTree' == [1,3,2]
+    then putStrLn "Postorder fine!"
+    else putStrLn "Bad news bears."
