@@ -78,7 +78,8 @@ getShift :: Char -> Char -> Int
 getShift a b = abs (ord a - ord b)
 
 -- gets input from textKeyPairs - gets the shift difference of each pair.
-
+getAllShifts :: [(Char, Char)] -> [Int]
+getAllShifts pairs = map (\(t,k) -> getShift t k) pairs
 
 
 
@@ -100,4 +101,4 @@ testShiftOne :: Char -> Bool
 testShiftOne c = getShift c (chr (ord c + 1)) == 1
 
 testShiftSwitch :: Char -> Char -> Bool
-testShiftSwitch c1 c2 = getShift c1 c2 == getShift c2 c1 
+testShiftSwitch c1 c2 = getShift c1 c2 == getShift c2 c1
