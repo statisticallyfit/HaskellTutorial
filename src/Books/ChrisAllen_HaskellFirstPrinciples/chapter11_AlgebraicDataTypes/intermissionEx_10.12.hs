@@ -34,4 +34,18 @@ funcQuad = undefined
 
 -- Product type: 2 * 2 * 2 = 8
 prodTBool :: (Bool, Bool, Bool)
-prodTBool = undefined 
+prodTBool = undefined
+
+
+
+--- 5
+
+-- Function type: 2 ^ 2 ^ 2 = 16
+gTwo :: Bool -> Bool -> Bool
+gTwo = undefined
+
+
+--- 6
+
+-- Function type: (4 ^ 4) ^ 2 = 65536
+fTwo :: Bool -> Quad -> Quad
