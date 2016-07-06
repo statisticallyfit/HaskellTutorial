@@ -380,7 +380,7 @@ insertTree b (Node left a right)
     | b > a  = Node left a (insertTree b right)
 
 
---- map tree
+--- map tree ------------------------------------------------------------------------------
 
 mapTree :: (a -> b) -> BinaryTree a -> BinaryTree b
 mapTree _ Leaf = Leaf
@@ -403,7 +403,7 @@ occurs x (Node left a right)
 
 
 
---- Convert binary trees to lists
+--- Convert binary trees to lists ---------------------------------------------------------
 
 preorder :: BinaryTree a -> [a]
 preorder Leaf = []
@@ -446,7 +446,7 @@ postorder' tree = flattenPost tree []
 
 
 
---- Foldr for binary tree
+--- Foldr for binary tree ---------------------------------------------------------------
 --- todo to mull over - had help on this one.
 --- note does preorder traversal (see example foldtree)
 -- a : flattenPre left (flattenPre right accList)
@@ -505,18 +505,24 @@ exampleFoldTreeIN = foldInorder printSumInorder "0" t3
 --exampleFoldTreePOST =
 
 
---- Rewrite map using foldtree
-{-
+--- Rewrite map using foldtree ------------------------------------------------------------
 
-mapFoldTree_1 :: (a -> b) -> BinaryTree a -> [b]
-mapFoldTree_1 f tree = foldTree ((:) . f) [] tree
--}
+--- idea for later: construct a binary search tree using postorder/inorder/preorder
+-- traversal.
+-- note returns mapped list in swirly preorder traversal.
+mapFoldTreeToList :: (a -> b) -> BinaryTree a -> [b]
+mapFoldTreeToList f tree = foldPreorderRight ((:) . f) [] tree
+
+-- HELP HELP HELP TODO map fold but return binary tree.
+{-mapFoldTree :: (a -> b) -> BinaryTree a -> BinaryTree b
+mapFoldTree f tree = foldPreorderRight mk Leaf tree
+    where mk a Leaf = Node Leaf (f a) Leaf
+          mk a (Node l x r) = -}
 
 
 
 
-
---- TESTING ---------------------------------------------------------------------------
+--- TESTING ------------------------------------------------------------------------------
 
 
 --- generates a BST (in order)
