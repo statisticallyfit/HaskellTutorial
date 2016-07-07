@@ -30,6 +30,9 @@ fromMaybe defaultVal (Just x) = x
 fromMaybe defaultVal Nothing = defaultVal
 
 
+fromJust :: Maybe a -> a
+fromJust (Just x) = x
+
 
 --- 4
 
@@ -44,4 +47,12 @@ maybeToList Nothing = []
 maybeToList (Just x) = [x]
 
 
+--- 6
+catMaybes :: [Maybe a] -> [a]
+catMaybes xs = concatMap filterJusts xs
+    where filterJusts = (\m -> if isJust m then [fromJust m] else [])
 
+
+--- 6
+flipMaybe :: [Maybe a] -> Maybe [a]
+flipMaybe 
