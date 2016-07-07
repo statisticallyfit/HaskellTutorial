@@ -1,4 +1,5 @@
 import Data.List hiding (isSubsequenceOf)
+import Data.Char
 import Data.Maybe
 import Test.QuickCheck
 
@@ -22,6 +23,18 @@ isSubsequenceOf sub whole
           isSubSameOrder = sortedStrict locs
 
 
+------------------------------------------------------------------------------------------
+
+{-
+
+capitalizeWordsTuple :: String -> [(String, String)]
+capitalizeWordsTuple sentence = zip words (capAll sentence)
+    where capAll s = map cap (words s)
+          cap w = toUpper (head $ take 1 w)
+-}
+
+
+
 
 
 --- TESTING ------------------------------------------------------------------------------
@@ -42,3 +55,5 @@ testSubReverse word = if (length word == 0 || length word == 1) then True else m
 testSubContainLetter :: String -> String -> Bool
 testSubContainLetter sub whole = (isSubsequenceOf sub whole) == containedLetters
     where containedLetters = and $ map ((flip elem) whole) sub
+
+------------------------------------------------------------------------------------------
