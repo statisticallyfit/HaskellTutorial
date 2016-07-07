@@ -50,12 +50,14 @@ displayPhone = putStr $ break ++ row123 ++ break ++ row456 ++ break ++
 
 
 
-
+{-
+-- what does this do????
 -- note symbol can be 'a', 'A', '9', '*', '0'
 reverseTaps :: Phone -> Symbol -> [(Digit, Presses)]
 reverseTaps p sym
     | isLetter sym =
     | isDigit sym =
+-}
 
 
 phone = Phone
@@ -72,3 +74,14 @@ phone = Phone
      ('0', "_0"),
      ('#', ".,")
     ]
+
+
+{-
+Inspiration links:
+
+https://github.com/Tclv/HaskellBook/blob/master/ch11/Phone.hs
+https://github.com/dwayne/haskell-programming/blob/master/ch11/Phone.hs
+https://github.com/vaughanj10/haskell_programming/blob/master/ch11/phone.hs
+https://github.com/juank-pa/haskell-training/blob/master/Chapter11/Exercises/DaPhone.hs
+
+-}

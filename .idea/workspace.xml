@@ -2,6 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="232bb086-1d74-43ca-8b3e-5454de511e3c" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter12_SignalingAdversity/SignalingAdversity.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter12_SignalingAdversity/chapterExercises/Maybe.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter12_SignalingAdversity/chapterExercises/Naturals.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter12_SignalingAdversity/chapterExercises/The.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter12_SignalingAdversity/chapterExercises/VowelConsonants.hs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter11_AlgebraicDataTypes/chapterExercises/Phone.hs" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter11_AlgebraicDataTypes/chapterExercises/Phone.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
@@ -25,11 +31,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Phone.hs" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter11_AlgebraicDataTypes/chapterExercises/Phone.hs">
+      <file leaf-file-name="Maybe.hs" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter12_SignalingAdversity/chapterExercises/Maybe.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.9385113">
-              <caret line="73" column="5" selection-start-line="73" selection-start-column="5" selection-end-line="73" selection-end-column="5" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -69,6 +75,10 @@
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter11_AlgebraicDataTypes/chapterExercises/AsPatterns.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter11_AlgebraicDataTypes/chapterExercises/Language.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter11_AlgebraicDataTypes/chapterExercises/Phone.hs" />
+        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter12_SignalingAdversity/SignalingAdversity.hs" />
+        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter12_SignalingAdversity/chapterExercises/ReplaceThe.hs" />
+        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter12_SignalingAdversity/chapterExercises/VowelConsonants.hs" />
+        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter12_SignalingAdversity/chapterExercises/Naturals.hs" />
       </list>
     </option>
   </component>
@@ -78,7 +88,8 @@
     <detection-done>true</detection-done>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="width" value="849" />
+    <option name="y" value="1" />
+    <option name="width" value="798" />
     <option name="height" value="782" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
@@ -186,7 +197,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="chapter11_AlgebraicDataTypes" />
+              <option name="myItemId" value="chapter12_SignalingAdversity" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -212,37 +223,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="chapter11_AlgebraicDataTypes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="intermissionExercises" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="HaskellTutorial" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="HaskellTutorial" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Books" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ChrisAllen_HaskellFirstPrinciples" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="chapter11_AlgebraicDataTypes" />
+              <option name="myItemId" value="chapter12_SignalingAdversity" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -759,15 +740,15 @@
       <updated>1467699993753</updated>
       <workItem from="1467699997709" duration="24944000" />
       <workItem from="1467783486452" duration="29139000" />
-      <workItem from="1467869844647" duration="15364000" />
+      <workItem from="1467869844647" duration="21256000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="69447000" />
+    <option name="totallyTimeSpent" value="75339000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="849" height="782" extended-state="0" />
+    <frame x="0" y="1" width="798" height="782" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -780,7 +761,7 @@
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32923076" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="GhcMod" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24906133" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2486631" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Cabal" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="SBT Execute" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -961,10 +942,50 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter12_SignalingAdversity/SignalingAdversity.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.8300971">
+          <caret line="33" column="12" selection-start-line="33" selection-start-column="12" selection-end-line="33" selection-end-column="12" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter11_AlgebraicDataTypes/chapterExercises/Phone.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.9385113">
-          <caret line="73" column="5" selection-start-line="73" selection-start-column="5" selection-end-line="73" selection-end-column="5" />
+        <state vertical-scroll-proportion="0.44660193">
+          <caret line="74" column="16" selection-start-line="74" selection-start-column="16" selection-end-line="74" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter12_SignalingAdversity/chapterExercises/VowelConsonants.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.122977346">
+          <caret line="4" column="0" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter12_SignalingAdversity/chapterExercises/The.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.09223301">
+          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter12_SignalingAdversity/chapterExercises/Naturals.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.46116504">
+          <caret line="15" column="36" selection-start-line="15" selection-start-column="36" selection-end-line="15" selection-end-column="36" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter12_SignalingAdversity/chapterExercises/Maybe.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
