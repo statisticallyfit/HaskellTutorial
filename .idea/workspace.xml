@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="232bb086-1d74-43ca-8b3e-5454de511e3c" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter12_SignalingAdversity/chapterExercises/Unfolds.hs" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter12_SignalingAdversity/chapterExercises/Unfolds.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
@@ -28,8 +29,8 @@
       <file leaf-file-name="Unfolds.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter12_SignalingAdversity/chapterExercises/Unfolds.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.815534">
-              <caret line="72" column="11" selection-start-line="72" selection-start-column="11" selection-end-line="72" selection-end-column="11" />
+            <state vertical-scroll-proportion="0.7847896">
+              <caret line="72" column="64" selection-start-line="72" selection-start-column="64" selection-end-line="72" selection-end-column="64" />
               <folding />
             </state>
           </provider>
@@ -737,12 +738,12 @@
       <updated>1467699993753</updated>
       <workItem from="1467699997709" duration="24944000" />
       <workItem from="1467783486452" duration="29139000" />
-      <workItem from="1467869844647" duration="26798000" />
+      <workItem from="1467869844647" duration="27056000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="80881000" />
+    <option name="totallyTimeSpent" value="81139000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="1" width="798" height="782" extended-state="0" />
@@ -997,8 +998,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter12_SignalingAdversity/chapterExercises/Unfolds.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.815534">
-          <caret line="72" column="11" selection-start-line="72" selection-start-column="11" selection-end-line="72" selection-end-column="11" />
+        <state vertical-scroll-proportion="0.7847896">
+          <caret line="72" column="64" selection-start-line="72" selection-start-column="64" selection-end-line="72" selection-end-column="64" />
           <folding />
         </state>
       </provider>

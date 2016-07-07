@@ -70,4 +70,4 @@ data BinaryTree a = Leaf | Node (BinaryTree a) a (BinaryTree a)
 
 --- 1
 unfoldTree :: (a -> Maybe (a,b,a)) -> a -> BinaryTree b
-unfoldTree 
+unfoldTree f s = Node (unfoldTree f (f s)) s (unfoldTree f (f s))
