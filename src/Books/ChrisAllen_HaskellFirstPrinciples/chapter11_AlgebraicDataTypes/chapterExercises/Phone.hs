@@ -13,7 +13,12 @@ more presses than digits in button get you back around to letters on button.
 type Digit = Char
 type Symbol = Char
 type Presses = Int -- >= 1
-data Button = Button Digit Symbol deriving (Eq, Show)
+data Operation = Number    -- 1,2,3,4,5,6,7,8,9,0
+               | Character -- a,b,c,...z and A,B,C,...Z (only if capitalized)
+               | Spacebar  -- ' '
+               | Capitalize -- the next one after capitalize will be default lowercase.
+               deriving (Eq, Show)
+data Button = Button Operation Symbol deriving (Eq, Show)
 data Phone = PhonePad [Button] deriving (Eq, Show)
 
 
@@ -34,19 +39,36 @@ text =
 
 
 
-phone :: IO()
-phone = putStr $ break ++ row123 ++ break ++ row456 ++ break ++
+displayPhone :: IO()
+displayPhone = putStr $ break ++ row123 ++ break ++ row456 ++ break ++
                    row789 ++ break ++ rowOp ++ break
     where break  = "-------------------------------------\n"
           row123 = "|   1       |   2 ABC   |   3 DEF   |\n"
           row456 = "|   4 GHI   |   5 JKL   |   6 MNO   |\n"
           row789 = "|   7 PQRS  |   8 TUV   |   9 WXYZ  |\n"
-          rowOp  = "|    * ^    |   0 + _   |    # .,   |\n"
+          rowOp  = "|   * ^     |   0 + _   |   # .,    |\n"
 
 
 
 
-
+-- note symbol can be 'a', 'A', '9', '*', '0'
 reverseTaps :: Phone -> Symbol -> [(Digit, Presses)]
-reverseTaps p sym =
+reverseTaps p sym
+    | isLetter sym =
+    | isDigit sym =
 
+
+phone = Phone
+    [('1', "1"),
+     ('2', "abc2"),
+     ('3', "def3"),
+     ('4', "ghi4"),
+     ('5', "jkl5"),
+     ('6', "mno6"),
+     ('7', "pqrs7"),
+     ('8', "tuv8"),
+     ('9', "wxyz9"),
+     ('*', "^"),
+     ('0', "_0"),
+     ('#', ".,")
+    ]
