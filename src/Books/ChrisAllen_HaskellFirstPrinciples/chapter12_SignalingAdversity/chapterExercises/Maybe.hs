@@ -55,4 +55,7 @@ catMaybes xs = concatMap filterJusts xs
 
 --- 6
 flipMaybe :: [Maybe a] -> Maybe [a]
-flipMaybe 
+flipMaybe ms
+    | allJust = Just $ map fromJust ms
+    | otherwise = Nothing
+    where allJust = and $ map isJust ms
