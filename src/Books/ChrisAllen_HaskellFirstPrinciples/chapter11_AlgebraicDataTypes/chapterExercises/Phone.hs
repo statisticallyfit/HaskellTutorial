@@ -19,22 +19,18 @@ data Phone = PhonePad [Button] deriving (Eq, Show)
 
 
 
-
-
-
-
 text :: [String]
 text =
     ["The night sky is littered with stars.",
-     "Sparkling water",
-     "Swallows descend from their nightly perches and race in the grey dawn",
-     "Mountains tower, their craggy faces rough and weather-hewn",
-     "Twittering birds",
-     "Soaring eagles",
-     "Morning dew settles on lilac bushes, and fog rises off the lake in golden splendor",
-     "Volcanic ash",
+     "Sparkling water.",
+     "Swallows descend from their nightly perches and race in the grey dawn.",
+     "Mountains tower, their craggy faces rough and weather-hewn.",
+     "Twittering birds.",
+     "Soaring eagles.",
+     "Morning dew settles on lilac bushes, and fog rises off the lake in golden splendor.",
+     "Volcanic ash.",
      "Wind scours, molds, and shapes, leaving traced frozen lava in its wake.",
-     "Glowing crystals"]
+     "Glowing crystals."]
 
 
 
@@ -46,3 +42,11 @@ phone = putStr $ break ++ row123 ++ break ++ row456 ++ break ++
           row456 = "|   4 GHI   |   5 JKL   |   6 MNO   |\n"
           row789 = "|   7 PQRS  |   8 TUV   |   9 WXYZ  |\n"
           rowOp  = "|    * ^    |   0 + _   |    # .,   |\n"
+
+
+
+
+
+reverseTaps :: Phone -> Symbol -> [(Digit, Presses)]
+reverseTaps p sym =
+
