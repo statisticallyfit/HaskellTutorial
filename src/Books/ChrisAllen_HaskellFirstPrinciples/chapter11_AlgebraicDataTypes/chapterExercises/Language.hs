@@ -1,37 +1,33 @@
-import Data.List hiding (isSubsequenceOf)
-import Data.Char
-import Data.Maybe
+import Data.List
+import Data.Char (toUpper, isUpper, isAlpha, isSpace, isAscii)
+import Data.Function (on)
 import Test.QuickCheck
 
 
 
--- note tests if each element is greater than the other - doesn't tolerate duplicates.
-sortedStrict :: Ord a => [a] -> Bool
-sortedStrict xs = xs == sort xs && (length xs == length (nub xs))
-
---- note tests whether the sub portion is contained in its order inside whole.
--- IT can be spread out so there are other elements from whole interspersed, but it
--- just cannot be in a different order than sub itself.
-
-isSubsequenceOf :: Eq a => [a] -> [a] -> Bool
-isSubsequenceOf sub whole
-    | isSubPresent = isSubSameOrder
-    | otherwise = False
-    where isSubPresent = and $ map ((flip elem) whole) sub
-          justLocs = map ((flip elemIndex) whole) sub
-          locs = map fromJust (justLocs)
-          isSubSameOrder = sortedStrict locs
+-- precondition expecting just one word with no spaces!
+-- If given spaces, takes first word only.
+capitalizeWord' :: String -> String
+capitalizeWord' possibleWord = cap word
+    where word = head $ words possibleWord
+          cap w = [toUpper $ head w] ++ tail w
 
 
-------------------------------------------------------------------------------------------
+capitalizeWord :: String -> String
+capitalizeWord [] = []
+capitalizeWord (x:xs)
+    | isAlpha x = toUpper x : xs
+    | otherwise = x : capitalizeWord xs
 
-{-
 
-capitalizeWordsTuple :: String -> [(String, String)]
-capitalizeWordsTuple sentence = zip words (capAll sentence)
-    where capAll s = map cap (words s)
-          cap w = toUpper (head $ take 1 w)
--}
+-- note if last sentence doesn't end in period, this function ignores it.
+-- note key: takes sentences marked by periods and capitalizes their first letter.
+-- had major help here. Understand more how the (==) `on` (== '.') part words.
+capitalizeParagraph :: String -> String
+capitalizeParagraph paragraph
+    = concatMap capitalizeWord $ groupBy ((==) `on` (=='.')) paragraph
+
+
 
 
 
@@ -39,21 +35,23 @@ capitalizeWordsTuple sentence = zip words (capAll sentence)
 
 --- TESTING ------------------------------------------------------------------------------
 
---- testing that elements are strictly sorted
-testStrictSort :: [Int] -> Bool
-testStrictSort xs = (noDups xs && sorted xs) == sortedStrict xs
-    where noDups xs = nub xs == xs
-          sorted xs = sort xs == xs
 
---- testing that reverse word is not subsequence of word itself.
-testSubReverse :: String -> Bool
-testSubReverse word = if (length word == 0 || length word == 1) then True else mainOccs
-    where mainOccs = isSubsequenceOf word (reverse word) == False
+--- testing that result first letter is indeed upper
+-- note ignore words that are not ascii like "\223" or words that are made of space.
+-- Just shuttle out a True to keep the tests working and let real tests work.
+testCapWord :: String -> Bool
+testCapWord word
+    | length word == 0 = True
+    | otherwise = toUpper firstLetter == (head $ capitalizeWord word)
+    where noFrontSpace = dropWhile (== ' ') word
+          firstLetter = head word
 
 
---- testing if is subsequence then automatically each letter of sub is inside the whole.
-testSubContainLetter :: String -> String -> Bool
-testSubContainLetter sub whole = (isSubsequenceOf sub whole) == containedLetters
-    where containedLetters = and $ map ((flip elem) whole) sub
+testCapParagraphLen :: String -> Bool
+testCapParagraphLen par = length par == (length $ capitalizeParagraph par)
 
-------------------------------------------------------------------------------------------
+
+
+main = do
+    quickCheck testCapWord
+    quickCheck testCapParagraphLen
