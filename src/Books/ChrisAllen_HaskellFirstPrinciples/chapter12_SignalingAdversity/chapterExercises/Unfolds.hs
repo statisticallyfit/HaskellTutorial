@@ -70,4 +70,24 @@ data BinaryTree a = Leaf | Node (BinaryTree a) a (BinaryTree a)
 
 --- 1
 unfoldTree :: (a -> Maybe (a,b,a)) -> a -> BinaryTree b
-unfoldTree f s = Node (unfoldTree f (f s)) s (unfoldTree f (f s))
+unfoldTree f s = case f s of
+                    Nothing -> Leaf
+                    Just (a,b,a') ->  Node (unfoldTree f a) b (unfoldTree f a')
+
+highToLow a = if a == 0 then Nothing else Just (a-1, a, a-1)
+
+--- 2
+--- had help here note todo mull over
+
+highTree :: Integer -> BinaryTree Integer
+highTree 0 = Leaf
+highTree n = unfoldTree f n
+    where f m
+            | m == 0 = Nothing
+            | otherwise = Just (m-1, m, m-1)
+
+lowTree :: Integer -> BinaryTree Integer
+lowTree n = unfoldTree f 0
+    where f m
+            | m == n = Nothing
+            | otherwise = Just (m+1, m, m+1)
