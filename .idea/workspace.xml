@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="232bb086-1d74-43ca-8b3e-5454de511e3c" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter11_AlgebraicDataTypes/chapterExercises/Phone.hs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter11_AlgebraicDataTypes/chapterExercises/Phone.hs" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter11_AlgebraicDataTypes/chapterExercises/Phone.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -28,8 +28,8 @@
       <file leaf-file-name="Phone.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter11_AlgebraicDataTypes/chapterExercises/Phone.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.3381877">
-              <caret line="11" column="19" selection-start-line="11" selection-start-column="19" selection-end-line="11" selection-end-column="19" />
+            <state vertical-scroll-proportion="0.70711976">
+              <caret line="23" column="0" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -759,12 +759,12 @@
       <updated>1467699993753</updated>
       <workItem from="1467699997709" duration="24944000" />
       <workItem from="1467783486452" duration="29139000" />
-      <workItem from="1467869844647" duration="8361000" />
+      <workItem from="1467869844647" duration="8741000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="62444000" />
+    <option name="totallyTimeSpent" value="62824000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="849" height="782" extended-state="0" />
@@ -963,8 +963,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter11_AlgebraicDataTypes/chapterExercises/Phone.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.3381877">
-          <caret line="11" column="19" selection-start-line="11" selection-start-column="19" selection-end-line="11" selection-end-column="19" />
+        <state vertical-scroll-proportion="0.70711976">
+          <caret line="23" column="0" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
           <folding />
         </state>
       </provider>
