@@ -1,4 +1,5 @@
 import Data.List
+import Data.Maybe
 
 
 ex = take 10 $ unfoldr (\b -> Just (b, b+1)) 0
@@ -33,3 +34,40 @@ mehConcat xs = go [] xs
 niceConcat :: [[a]] -> [a]
 niceConcat = foldr (++) []
 
+
+
+------------------------------------------------
+
+--- 1
+myIterate :: (a -> a) -> a -> [a]
+myIterate f s = s : myIterate f (f s)
+
+
+--- 2
+
+myUnfoldr :: (b -> Maybe (a,b)) -> b -> [a]
+myUnfoldr f b = case f b of
+                    Nothing -> []
+                    Just (x,y) -> x : myUnfoldr f y
+
+-- help todo why is this not the correct type?
+myUnfoldr' f next = next : myUnfoldr' f b
+            where (_, b) = fromJust $ f next
+
+
+--- 3
+
+betterIterate :: (a -> a) -> a -> [a]
+betterIterate f s = myUnfoldr (\b -> Just (b, f b)) s
+
+
+
+
+------------------------------------------------
+
+data BinaryTree a = Leaf | Node (BinaryTree a) a (BinaryTree a)
+    deriving (Eq, Show)
+
+--- 1
+unfoldTree :: (a -> Maybe (a,b,a)) -> a -> BinaryTree b
+unfoldTree 
