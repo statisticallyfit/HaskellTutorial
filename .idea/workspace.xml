@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="232bb086-1d74-43ca-8b3e-5454de511e3c" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter13_BuildingProjects/Hangman.hs" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter13_BuildingProjects/Hangman.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
@@ -29,8 +28,8 @@
       <file leaf-file-name="Hangman.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter13_BuildingProjects/Hangman.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.23139158">
-              <caret line="297" column="41" selection-start-line="297" selection-start-column="41" selection-end-line="297" selection-end-column="41" />
+            <state vertical-scroll-proportion="0.5080906">
+              <caret line="306" column="26" selection-start-line="306" selection-start-column="26" selection-end-line="306" selection-end-column="26" />
               <folding />
             </state>
           </provider>
@@ -688,12 +687,12 @@
       <workItem from="1467699997709" duration="24944000" />
       <workItem from="1467783486452" duration="29139000" />
       <workItem from="1467869844647" duration="32482000" />
-      <workItem from="1467954896980" duration="16149000" />
+      <workItem from="1467954896980" duration="16217000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="102714000" />
+    <option name="totallyTimeSpent" value="102782000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="1" width="798" height="782" extended-state="0" />
@@ -953,8 +952,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter13_BuildingProjects/Hangman.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.23139158">
-          <caret line="297" column="41" selection-start-line="297" selection-start-column="41" selection-end-line="297" selection-end-column="41" />
+        <state vertical-scroll-proportion="0.5080906">
+          <caret line="306" column="26" selection-start-line="306" selection-start-column="26" selection-end-line="306" selection-end-column="26" />
           <folding />
         </state>
       </provider>

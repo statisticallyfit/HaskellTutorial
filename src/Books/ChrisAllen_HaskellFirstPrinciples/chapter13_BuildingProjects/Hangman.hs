@@ -298,13 +298,13 @@ handleGuess puzzle guessChar = do
     let oldWrong = numWrongGuesses puzzle
     case (charInWord puzzle guessChar, alreadyGuessed puzzle guessChar) of
         (_, True) -> do putStrLn "ALREADY GUESSED, choose another!"
-                        putStrLn ("Current incorrect: " ++ show oldWrong ++ "\n")
+                        --putStrLn ("Current incorrect: " ++ show oldWrong ++ "\n")
                         return puzzle
         (True, _) -> do putStrLn "MATCH! Filling in ..."
-                        putStrLn ("Current incorrect: " ++ show oldWrong ++ "\n")
+                        --putStrLn ("Current incorrect: " ++ show oldWrong ++ "\n")
                         return (fillInCharacter puzzle guessChar)
         (False,_) -> do putStrLn "TRY AGAIN"
-                        putStrLn ("Current incorrect: " ++ show (oldWrong + 1) ++ "\n")
+                        --putStrLn ("Current incorrect: " ++ show (oldWrong + 1) ++ "\n")
                         return (fillInCharacter puzzle guessChar)
 
 
