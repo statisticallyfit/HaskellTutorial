@@ -10,7 +10,7 @@ import System.Random (randomRIO)
 
 
 
-type WordList = [String]
+newtype WordList = WordList [String] deriving (Eq, Show)
 
 filepath :: String
 filepath = "/datascience/projects/statisticallyfit/github/learningprogramming/" ++
@@ -32,20 +32,20 @@ maxWordLength = 9
 allWords :: IO WordList
 allWords = do
     dict <- readFile filepath
-    return (lines dict)
+    return $ WordList (lines dict)
 
 -- note filtering words by min and max length above
 gameWords :: IO WordList
 gameWords = do
-    aw <- allWords
-    return (filter gameLength aw)
+    WordList aw <- allWords
+    return $ WordList (filter gameLength aw)
     where gameLength w =
             let l = length (w :: String)
             in l > minWordLength && l < maxWordLength
 
 
 randomWord :: WordList -> IO String
-randomWord wordList = do
+randomWord (WordList wordList) = do
     randomIndex <- randomRIO(0, (length wordList - 1))
     return (wordList !! randomIndex)
 
