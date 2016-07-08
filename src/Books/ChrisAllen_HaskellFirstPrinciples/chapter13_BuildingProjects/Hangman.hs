@@ -294,25 +294,24 @@ numWrongGuesses p@(Puzzle word _ gs)
 --                2) char is in word and needs to be filled in
 --                3) char was not previously guessed and wasn't in word.
 handleGuess :: Puzzle -> Char -> IO Puzzle
-handleGuess puzzle guessChar = do
-    let oldWrong = numWrongGuesses puzzle
+handleGuess puzzle guessChar =
     case (charInWord puzzle guessChar, alreadyGuessed puzzle guessChar) of
         (_, True) -> do putStrLn "ALREADY GUESSED, choose another!"
-                        --putStrLn ("Current incorrect: " ++ show oldWrong ++ "\n")
                         return puzzle
         (True, _) -> do putStrLn "MATCH! Filling in ..."
-                        --putStrLn ("Current incorrect: " ++ show oldWrong ++ "\n")
                         return (fillInCharacter puzzle guessChar)
         (False,_) -> do putStrLn "TRY AGAIN"
-                        --putStrLn ("Current incorrect: " ++ show (oldWrong + 1) ++ "\n")
                         return (fillInCharacter puzzle guessChar)
 
 
 -- note game stops only after seven guesses (either incorrect or correct)
 gameOver :: Puzzle -> IO()
 gameOver p@(Puzzle word ds guesses) = do
-    putStrLn ("Current incorrect: " ++ show (numWrongGuesses p))
-    if (numWrongGuesses p) > 6 then -- gets 7 tries. If 7th is wrong, game over.
+    let wrongsMade = numWrongGuesses p
+    let triesAllowed = 6
+    putStrLn ("Current wrong: " ++ show wrongsMade)
+    putStrLn ("Tries left: " ++ show (triesAllowed - wrongsMade + 1))
+    if (numWrongGuesses p) > triesAllowed then -- gets 7 tries. If 7th is wrong, game over.
         do putStrLn "You lose!"
            putStrLn $ "The word was: " ++ word
            exitSuccess
