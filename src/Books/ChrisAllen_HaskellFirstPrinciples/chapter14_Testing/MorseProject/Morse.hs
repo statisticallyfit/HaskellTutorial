@@ -50,16 +50,20 @@ letterToMorse = M.fromList [
     ('7', "--..."),
     ('8', "---.."),
     ('9', "----."),
-    ('0', "-----")]
+    ('0', "-----"),
+    (' ', "|")] -- spacebar!
 
 
-
+-- switches the keys and values so that morses are the keys.
 morseToLetter :: M.Map Morse Char
 morseToLetter = M.foldWithKey (flip M.insert) M.empty letterToMorse
 
 charToMorse :: Char -> Maybe Morse
 charToMorse c = M.lookup c letterToMorse
 
+-- note sequence transforms this: [Just "....",Just ".."]
+-- into this:
+-- Just ["....",".."]
 stringToMorse :: String -> Maybe [Morse]
 stringToMorse s = sequence $ fmap charToMorse s
 
