@@ -284,7 +284,9 @@ fillInCharacter (Puzzle word discovered guesses) charToAdd =
 
 numWrongGuesses :: Puzzle -> Integer
 numWrongGuesses p@(Puzzle word _ gs)
-    = fromIntegral $ length $ filter ((flip elem) word) gs
+    = fromIntegral $ length gs - guessesInWord
+    where guessesInWord = fromIntegral $ length $ filter ((flip elem) word) gs
+
 
 
 -- note tells player what he/she guessed.
@@ -294,25 +296,23 @@ numWrongGuesses p@(Puzzle word _ gs)
 handleGuess :: Puzzle -> Char -> IO Puzzle
 handleGuess puzzle guessChar = do
     let oldWrong = numWrongGuesses puzzle
-    putStrLn ("Num wrong guesses from handleGuess: " ++ show oldWrong )
     case (charInWord puzzle guessChar, alreadyGuessed puzzle guessChar) of
         (_, True) -> do putStrLn "ALREADY GUESSED, choose another!"
-                        putStrLn ("Wrongs: " ++ show oldWrong ++ "\n")
+                        putStrLn ("Current incorrect: " ++ show oldWrong ++ "\n")
                         return puzzle
         (True, _) -> do putStrLn "MATCH! Filling in ..."
-                        putStrLn ("Wrongs: " ++ show oldWrong ++ "\n")
+                        putStrLn ("Current incorrect: " ++ show oldWrong ++ "\n")
                         return (fillInCharacter puzzle guessChar)
         (False,_) -> do putStrLn "TRY AGAIN"
-                        putStrLn ("Wrongs: " ++ show (oldWrong + 1) ++ "\n")
+                        putStrLn ("Current incorrect: " ++ show (oldWrong + 1) ++ "\n")
                         return (fillInCharacter puzzle guessChar)
 
 
 -- note game stops only after seven guesses (either incorrect or correct)
 gameOver :: Puzzle -> IO()
 gameOver p@(Puzzle word ds guesses) = do
-    -- note todo erase this print statement
-    putStrLn ("Num wrongs from game over method: " ++ show (numWrongGuesses p))
-    if (numWrongGuesses p) > 6 then -- gets 7 tries. If 8th is wrong, game over.
+    putStrLn ("Current incorrect: " ++ show (numWrongGuesses p))
+    if (numWrongGuesses p) > 6 then -- gets 7 tries. If 7th is wrong, game over.
         do putStrLn "You lose!"
            putStrLn $ "The word was: " ++ word
            exitSuccess
