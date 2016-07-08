@@ -103,24 +103,36 @@ fillInCharacter (Puzzle word discovered guesses) charToAdd =
     where zipper gc wc dc = if wc == gc then Just wc else dc
           newDiscovered = zipWith (zipper charToAdd) word discovered
 
+
+{-
+TODO HELP TODO TODO fix this program so that it ends only after 7 wrong
+guesses, not after 7 total guesses!
+
+numWrongGuesses :: Puzzle -> Integer
+numWrongGuesses p@(Puzzle word _ gs)
+    = fromIntegral $ length $ filter ((flip elem) word) gs
+-}
+
+
 -- note tells player what he/she guessed.
 -- handles cases: 1) char was guessed before
 --                2) char is in word and needs to be filled in
 --                3) char was not previously guessed and wasn't in word.
 handleGuess :: Puzzle -> Char -> IO Puzzle
-handleGuess puzzle guessChar = do
+handleGuess puzzle guessChar =
     case (charInWord puzzle guessChar, alreadyGuessed puzzle guessChar) of
-        (_, True) -> do putStrLn "ALREADY GUESSED, choose another!\n"
+        (_, True) -> do putStrLn "ALREADY GUESSED, choose another!"
                         return puzzle
-        (True, _) -> do putStrLn "MATCH! Filling in ...\n"
+        (True, _) -> do putStrLn "MATCH! Filling in ..."
                         return (fillInCharacter puzzle guessChar)
-        (False,_) -> do putStrLn "TRY AGAIN\n"
+        (False,_) -> do putStrLn "TRY AGAIN"
                         return (fillInCharacter puzzle guessChar)
+
 
 -- note game stops only after seven guesses (either incorrect or correct)
 gameOver :: Puzzle -> IO()
-gameOver (Puzzle word _ guesses) =
-    if (length guesses) > 7 then
+gameOver p@(Puzzle word ds guesses) =
+    if (length guesses) > 7 then -- gets 7 tries. If 8th is wrong, game over.
         do putStrLn "You lose!"
            putStrLn $ "The word was: " ++ word
            exitSuccess
@@ -128,15 +140,17 @@ gameOver (Puzzle word _ guesses) =
 
 -- note game is won when there are no more Nothings in the discovered pile.
 gameWin :: Puzzle -> IO()
-gameWin (Puzzle _ discovered _) =
+gameWin (Puzzle word discovered _) =
     if all isJust discovered then
         do putStrLn "You win!"
+           putStrLn ("The word was: " ++ word)
            exitSuccess
     else return ()
 
 
 runGame :: Puzzle -> IO()
 runGame puzzle = forever $ do
+    putStrLn ""
     gameOver puzzle
     gameWin puzzle
     putStrLn $ "Current puzzle is: " ++ show puzzle
@@ -144,7 +158,7 @@ runGame puzzle = forever $ do
     guess <- getLine
     case guess of
         [c] -> handleGuess puzzle c >>= runGame
-        _   -> putStrLn "BAD INPUT: Your guess must be a single character."
+        _   -> putStrLn "ERROR: Guess must be a single character."
 
 
 
