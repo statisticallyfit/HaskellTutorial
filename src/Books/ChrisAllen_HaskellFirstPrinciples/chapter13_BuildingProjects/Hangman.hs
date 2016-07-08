@@ -9,9 +9,15 @@ import System.Random (randomRIO)
 
 
 
+
 type WordList = [String]
+
+filepath :: String
+filepath = "/datascience/projects/statisticallyfit/github/learningprogramming/" ++
+           "Haskell/HaskellTutorial/src/Books/ChrisAllen_HaskellFirstPrinciples/" ++
+           "chapter13_BuildingProjects/data/dict.txt"
 
 allWords :: IO WordList
 allWords = do
-    dict <- readFile "data/dict.txt"
+    dict <- readFile filepath
     return (lines dict)
