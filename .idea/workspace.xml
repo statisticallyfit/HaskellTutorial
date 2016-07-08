@@ -28,8 +28,8 @@
       <file leaf-file-name="Hangman.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter13_BuildingProjects/Hangman.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6003236">
-              <caret line="312" column="67" selection-start-line="312" selection-start-column="67" selection-end-line="312" selection-end-column="67" />
+            <state vertical-scroll-proportion="0.27508092">
+              <caret line="207" column="76" selection-start-line="207" selection-start-column="76" selection-end-line="207" selection-end-column="76" />
               <folding />
             </state>
           </provider>
@@ -687,12 +687,12 @@
       <workItem from="1467699997709" duration="24944000" />
       <workItem from="1467783486452" duration="29139000" />
       <workItem from="1467869844647" duration="32482000" />
-      <workItem from="1467954896980" duration="16884000" />
+      <workItem from="1467954896980" duration="18141000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="103449000" />
+    <option name="totallyTimeSpent" value="104706000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="1" width="798" height="782" extended-state="0" />
@@ -952,8 +952,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter13_BuildingProjects/Hangman.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6003236">
-          <caret line="312" column="67" selection-start-line="312" selection-start-column="67" selection-end-line="312" selection-end-column="67" />
+        <state vertical-scroll-proportion="0.27508092">
+          <caret line="207" column="76" selection-start-line="207" selection-start-column="76" selection-end-line="207" selection-end-column="76" />
           <folding />
         </state>
       </provider>

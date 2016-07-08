@@ -201,7 +201,11 @@ minWordLength = 5
 maxWordLength :: Int
 maxWordLength = 9
 
+triesAllowed :: Int
+triesAllowed = 6
 
+hangman :: [String]
+hangman = ["head", "body", "left foot", "right foot", "arms", "mouth", "eyes"]
 
 
 -- note lines splits string at '\n'
@@ -282,7 +286,7 @@ fillInCharacter (Puzzle word discovered guesses) charToAdd =
 
 
 
-numWrongGuesses :: Puzzle -> Integer
+numWrongGuesses :: Puzzle -> Int
 numWrongGuesses p@(Puzzle word _ gs)
     = fromIntegral $ length gs - guessesInWord
     where guessesInWord = fromIntegral $ length $ filter ((flip elem) word) gs
@@ -308,9 +312,13 @@ handleGuess puzzle guessChar =
 gameOver :: Puzzle -> IO()
 gameOver p@(Puzzle word ds guesses) = do
     let wrongsMade = numWrongGuesses p
-    let triesAllowed = 6
+    let triesLeft = triesAllowed - wrongsMade + 1
+    let limb = if wrongsMade == 0
+               then "_"
+               else hangman !! (wrongsMade - 1)
     putStrLn ("Current wrong: " ++ show wrongsMade)
-    putStrLn ("Tries left: " ++ show (triesAllowed - wrongsMade + 1))
+    putStrLn ("Tries left: " ++ show triesLeft)
+    putStrLn ("Limb hung: " ++ limb)
     if (numWrongGuesses p) > triesAllowed then -- gets 7 tries. If 7th is wrong, game over.
         do putStrLn "You lose!"
            putStrLn $ "The word was: " ++ word
