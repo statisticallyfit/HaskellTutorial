@@ -129,10 +129,16 @@ testFillCharsAlreadyGuessed
         (currGuesses `contains` discs) `shouldBe` True
         (newGuesses `contains` discs) `shouldBe` True
 
+    it "in any case, discovered list should contain no \
+        \repeated elements" $ do
+        (length $ nub discs) == length discs `shouldBe` True
+        (length $ nub newDiscs) == length newDiscs `shouldBe` True
+
     where guess = 'a'
           word = "rabbit"
           maybeDiscs = [Just 'r',Just 'a',Nothing,Nothing,Just 'i',Nothing]
           discs = getDiscs maybeDiscs
+          newDiscs = getDiscs newMaybeDiscs
           currGuesses = "xyruiopa"
           updatedPuzzle = fillInCharacter (Puzzle word maybeDiscs currGuesses) guess
           (Puzzle _ newMaybeDiscs newGuesses) = updatedPuzzle
@@ -157,6 +163,11 @@ testFillCharsCorrectlyGuessed
         \ and old guessed lists" $ do
         (currGuesses `contains` discs) `shouldBe` True
         (newGuesses `contains` discs) `shouldBe` True
+
+    it "in any case, discovered list should contain no \
+        \repeated elements" $ do
+        (length $ nub discs) == length discs `shouldBe` True
+        (length $ nub newDiscs) == length newDiscs `shouldBe` True
 
     where guess = 'a'
           word = "rabbit"
@@ -186,6 +197,11 @@ testFillCharsWronglyGuessed
             \ and old guessed lists" $ do
             (currGuesses `contains` discs) `shouldBe` True
             (newGuesses `contains` discs) `shouldBe` True
+
+    it "in any case, discovered list should contain no \
+        \repeated elements" $ do
+        (length $ nub discs) == length discs `shouldBe` True
+        (length $ nub newDiscs) == length newDiscs `shouldBe` True
 
     where guess = 'x'
           word = "rabbit"
