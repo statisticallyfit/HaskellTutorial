@@ -173,15 +173,18 @@ propHandleGuess word =
                     False -> return $ newGuesses == guessLetter : oldGuesses))
 
 
-main = do
+
+
+runProperties = do
     word <- randomWord'
     putStr "(1) propFillInCharacters\n(1) "
     quickCheck $ forAll (makePuzzle word) propFillInCharacters
     putStr "(2) propHandleGuess\n(2) "
     quickCheck $ propHandleGuess
     putStrLn ""
-    ------------------------------
-    hspec $ do
+
+
+runTesting = hspec $ do
     testFillCharsAlreadyGuessed
     testFillCharsCorrectlyGuessed
     testFillCharsWronglyGuessed
