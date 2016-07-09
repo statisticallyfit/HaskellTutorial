@@ -116,14 +116,15 @@ testFillCharsAlreadyGuessed
     = describe "fillInCharacter already guessed case" $ do
 
     it "if 'a' in rabbit was already guessed, then new guess list \
-        \ contains two 'a's" $ do
+        \ contains two 'a's, one at the front and the other wherever \
+        \ it was guessed" $ do
         newGuesses `shouldBe` "axyruiopa"
 
     it "if 'a' in rabbit was already guessed, then new discovered list \
         \ should remain the same" $ do
         newMaybeDiscs `shouldBe` maybeDiscs
 
-    it "if 'a' in rabbit was already guessed, then discovered list should be \
+    it "in any condition, discovered list should be \
         \ present in the new and old guessed lists" $ do
         (currGuesses `contains` discs) `shouldBe` True
         (newGuesses `contains` discs) `shouldBe` True
@@ -145,14 +146,48 @@ testFillCharsCorrectlyGuessed
     = describe "fillInCharacter correct case" $ do
 
     it "if 'a' in rabbit was correctly guessed, then discovered list should \
-        \ contain one 'a' in the order of the word rabbit" $ do
+        \ contain no more than one 'a' in the order of the word rabbit" $ do
         newDiscs `shouldBe` "rai"
 
     it "if 'a' in rabbit was correctly guessed, then guessed list should \
-        \ also contain one 'a' at its front" $ do
+        \ also contain no more than one 'a' at its front" $ do
         newGuesses `shouldBe` (['a'] ++ currGuesses)
 
+    it "in any condition, discovered list should be present in the new \
+        \ and old guessed lists" $ do
+        (currGuesses `contains` discs) `shouldBe` True
+        (newGuesses `contains` discs) `shouldBe` True
+
     where guess = 'a'
+          word = "rabbit"
+          maybeDiscs = [Just 'r',Nothing,Nothing,Nothing,Just 'i',Nothing]
+          discs = getDiscs maybeDiscs
+          newDiscs = getDiscs newMaybeDiscs
+          currGuesses = "xyruiop"
+          updatedPuzzle = fillInCharacter (Puzzle word maybeDiscs currGuesses) guess
+          (Puzzle _ newMaybeDiscs newGuesses) = updatedPuzzle
+          -- local function to test containment
+          contains bucket items = and $ map ((flip elem) bucket) items
+          getDiscs ds = filter (not . isSpace) $ fmap (fromMaybe ' ') ds
+
+
+testFillCharsWronglyGuessed
+    = describe "fillInCharacter wrong case" $ do
+
+    it "if 'x' was guessed for rabbit, then discovered list should \
+        \ remain the same" $ do
+        newDiscs `shouldBe` discs
+
+    it "if 'x' was guessed for rabbit, then guessed list should \
+        \ contain an 'x' at its front, even if 'x' already is present" $ do
+        newGuesses `shouldBe` (['x'] ++ currGuesses)
+
+    it "in any condition, discovered list should be present in the new \
+            \ and old guessed lists" $ do
+            (currGuesses `contains` discs) `shouldBe` True
+            (newGuesses `contains` discs) `shouldBe` True
+
+    where guess = 'x'
           word = "rabbit"
           maybeDiscs = [Just 'r',Nothing,Nothing,Nothing,Just 'i',Nothing]
           discs = getDiscs maybeDiscs
@@ -168,9 +203,13 @@ testFillCharsCorrectlyGuessed
 
 
 
+
+
+
 main = hspec $ do
     testFillCharsAlreadyGuessed
     testFillCharsCorrectlyGuessed
+    testFillCharsWronglyGuessed
 
 
 
