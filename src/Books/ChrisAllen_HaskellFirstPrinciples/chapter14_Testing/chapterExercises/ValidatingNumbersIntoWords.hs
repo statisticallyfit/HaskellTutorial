@@ -74,6 +74,14 @@ testDigitToWord = describe "digitToWord converts a digit (0-9) into word form" $
         digitToWord 9 `shouldBe` "nine"
 
 
+testWordNumber = describe "wordNumber converts digit into word-dashed form" $ do
+    it "returns one for 1" $ do
+        wordNumber 1 `shouldBe` "one"
+    it "returns one-zero-zero for 100" $ do
+        wordNumber 100 `shouldBe` "one-zero-zero"
+    it "returns nine-zero-zero-one for 9001" $ do
+        wordNumber 9001 `shouldBe` "nine-zero-zero-one"
+
 
 
 
@@ -81,3 +89,4 @@ main :: IO()
 main = hspec $ do
     testDigits -- help fix
     testDigitToWord
+    testWordNumber

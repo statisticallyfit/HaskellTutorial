@@ -6,7 +6,7 @@ import Data.Maybe (isJust)
 import Data.List
 import System.Exit (exitSuccess)
 import System.Random (randomRIO)
-
+import Test.Hspec
 
 
 
@@ -95,9 +95,10 @@ renderPuzzleChar (Just c) = c
 renderPuzzleChar Nothing = '_'
 
 -- note inserts correctly guessed char into the string
--- uses zipper function which: if the guessChar equals the word char, then
--- return the guessChar in a Just. Otherwise, just return the discovered char
--- because it is either a Nothing or  Just (previously discovered char)
+-- uses zipper function which:
+-- 1. if the guessChar equals the word char, then return the guessChar in a Just.
+-- 2. Otherwise, just return the discovered char because it is either a Nothing
+-- or Just (previously discovered char)
 -- note gc = guessedChar = charToAdd
 --      wc = wordChar (word letters one at a time)
 --      dc = discoveredChar (discovered maybes one at a time)
@@ -106,6 +107,25 @@ fillInCharacter (Puzzle word discovered guesses) charToAdd =
     Puzzle word newDiscovered (charToAdd : guesses)
     where zipper gc wc dc = if wc == gc then Just wc else dc
           newDiscovered = zipWith (zipper charToAdd) word discovered
+-- note: if gc == wc then input a Just wc at that spot in ddiscovered list.
+-- else just return the previously discovered Just or Nothing at that spot.
+
+
+
+
+testFillInCharacter = describe "fillInCharacter fills characters in the puzzle" $ do
+    it "if 'a' is already guessed in 'rabbit' then guesses list contains" ++
+       "two 'a's but discovered list stays the same" $ do
+
+       where ds = [Just ]
+
+
+
+main = hspec $ do
+    testFillInCharacter
+
+
+
 
 
 
@@ -172,9 +192,11 @@ runGame puzzle = forever $ do
 
 
 
+{-
 
 main :: IO()
 main = do
     word <- randomWord'
     let puzzle = freshPuzzle (fmap toLower word)
     runGame puzzle
+-}
