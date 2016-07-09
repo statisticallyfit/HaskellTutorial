@@ -1,12 +1,16 @@
 module Hangman where
 
-import Control.Monad (forever)
+import Control.Monad -- (forever)
 import Data.Char -- (toLower)
 import Data.Maybe -- (isJust)
 import Data.List
 import System.Exit (exitSuccess)
 import System.Random (randomRIO)
+
 import Test.Hspec
+import Test.QuickCheck
+import Test.QuickCheck.Monadic
+
 
 
 type WordList = [String]
@@ -60,18 +64,17 @@ randomWord' = gameWords >>= randomWord
 
 
 ------------------------------------------------------------------------------------
-data Puzzle = Puzzle String [Maybe Char] [Char]
+data Puzzle = Puzzle String [Maybe Char] [Char] deriving Eq
 --                    [1]      [2]         [3]
 -- [1] = word we are trying to guess
 -- [2] = characters filled in so far
 -- [3] = all letters guessed so far
 
 
-
 instance Show Puzzle where
-    show (Puzzle _ discovered guessed) =
+    show (Puzzle _ discovered guesses) =
         (intersperse ' ' $ fmap renderPuzzleChar discovered)
-        ++ " Guessed so far: " ++ guessed
+        ++ " Guessed so far: " ++ guesses
 
 
 freshPuzzle :: String -> Puzzle
@@ -80,183 +83,67 @@ freshPuzzle word = Puzzle word noneDiscovered []
         -- or could have used: [Nothing | _ <- word]
 
 
-
 -- note checks whether guessed char is element of the word.
 charInWord :: Puzzle -> Char -> Bool
-charInWord (Puzzle word _ _) g = elem g word
+charInWord (Puzzle word _ _) guessLetter = elem guessLetter word
 
 alreadyGuessed :: Puzzle -> Char -> Bool
-alreadyGuessed (Puzzle _ _ guessed) g = elem g guessed
+alreadyGuessed (Puzzle _ _ guesses) guessLetter = elem guessLetter guesses
 
 
 renderPuzzleChar :: Maybe Char -> Char
 renderPuzzleChar (Just c) = c
 renderPuzzleChar Nothing = '_'
 
--- note inserts correctly guessed char into the string
+-- note inserts correctly guessLetter into the string
 -- uses zipper function which:
--- 1. if the guessChar equals the word char, then return the guessChar in a Just.
+-- 1. if the guessLetter equals the word char, then return the guessLetter
+ -- in a Just.
 -- 2. Otherwise, just return the discovered char because it is either a Nothing
 -- or Just (previously discovered char)
 -- note gc = guessedChar = charToAdd
 --      wc = wordChar (word letters one at a time)
 --      dc = discoveredChar (discovered maybes one at a time)
 fillInCharacter :: Puzzle -> Char -> Puzzle
-fillInCharacter (Puzzle word discovered guesses) charToAdd =
-    Puzzle word newDiscovered (charToAdd : guesses)
+fillInCharacter (Puzzle word discovered guesses) guessLetter =
+    Puzzle word newDiscovered (guessLetter : guesses)
     where zipper gc wc dc = if wc == gc then Just wc else dc
-          newDiscovered = zipWith (zipper charToAdd) word discovered
+          newDiscovered = zipWith (zipper guessLetter) word discovered
 -- note: if gc == wc then input a Just wc at that spot in ddiscovered list.
 -- else just return the previously discovered Just or Nothing at that spot.
 
 
-
-
-testFillCharsAlreadyGuessed
-    = describe "fillInCharacter already guessed case" $ do
-
-    it "if 'a' in rabbit was already guessed, then new guess list \
-        \ contains two 'a's, one at the front and the other wherever \
-        \ it was guessed" $ do
-        newGuesses `shouldBe` "axyruiopa"
-
-    it "if 'a' in rabbit was already guessed, then new discovered list \
-        \ should remain the same" $ do
-        newMaybeDiscs `shouldBe` maybeDiscs
-
-    it "in any condition, discovered list should be \
-        \ present in the new and old guessed lists" $ do
-        (currGuesses `contains` discs) `shouldBe` True
-        (newGuesses `contains` discs) `shouldBe` True
-
-    it "in any case, discovered list should contain no \
-        \repeated elements" $ do
-        (length $ nub discs) == length discs `shouldBe` True
-        (length $ nub newDiscs) == length newDiscs `shouldBe` True
-
-    where guess = 'a'
-          word = "rabbit"
-          maybeDiscs = [Just 'r',Just 'a',Nothing,Nothing,Just 'i',Nothing]
-          discs = getDiscs maybeDiscs
-          newDiscs = getDiscs newMaybeDiscs
-          currGuesses = "xyruiopa"
-          updatedPuzzle = fillInCharacter (Puzzle word maybeDiscs currGuesses) guess
-          (Puzzle _ newMaybeDiscs newGuesses) = updatedPuzzle
-          -- local function to test containment
-          contains bucket items = and $ map ((flip elem) bucket) items
-          getDiscs ds = filter (not . isSpace) $ fmap (fromMaybe ' ') ds
-
-
-
-testFillCharsCorrectlyGuessed
-    = describe "fillInCharacter correct case" $ do
-
-    it "if 'a' in rabbit was correctly guessed, then discovered list should \
-        \ contain no more than one 'a' in the order of the word rabbit" $ do
-        newDiscs `shouldBe` "rai"
-
-    it "if 'a' in rabbit was correctly guessed, then guessed list should \
-        \ also contain no more than one 'a' at its front" $ do
-        newGuesses `shouldBe` (['a'] ++ currGuesses)
-
-    it "in any condition, discovered list should be present in the new \
-        \ and old guessed lists" $ do
-        (currGuesses `contains` discs) `shouldBe` True
-        (newGuesses `contains` discs) `shouldBe` True
-
-    it "in any case, discovered list should contain no \
-        \repeated elements" $ do
-        (length $ nub discs) == length discs `shouldBe` True
-        (length $ nub newDiscs) == length newDiscs `shouldBe` True
-
-    where guess = 'a'
-          word = "rabbit"
-          maybeDiscs = [Just 'r',Nothing,Nothing,Nothing,Just 'i',Nothing]
-          discs = getDiscs maybeDiscs
-          newDiscs = getDiscs newMaybeDiscs
-          currGuesses = "xyruiop"
-          updatedPuzzle = fillInCharacter (Puzzle word maybeDiscs currGuesses) guess
-          (Puzzle _ newMaybeDiscs newGuesses) = updatedPuzzle
-          -- local function to test containment
-          contains bucket items = and $ map ((flip elem) bucket) items
-          getDiscs ds = filter (not . isSpace) $ fmap (fromMaybe ' ') ds
-
-
-testFillCharsWronglyGuessed
-    = describe "fillInCharacter wrong case" $ do
-
-    it "if 'x' was guessed for rabbit, then discovered list should \
-        \ remain the same" $ do
-        newDiscs `shouldBe` discs
-
-    it "if 'x' was guessed for rabbit, then guessed list should \
-        \ contain an 'x' at its front, even if 'x' already is present" $ do
-        newGuesses `shouldBe` (['x'] ++ currGuesses)
-
-    it "in any condition, discovered list should be present in the new \
-            \ and old guessed lists" $ do
-            (currGuesses `contains` discs) `shouldBe` True
-            (newGuesses `contains` discs) `shouldBe` True
-
-    it "in any case, discovered list should contain no \
-        \repeated elements" $ do
-        (length $ nub discs) == length discs `shouldBe` True
-        (length $ nub newDiscs) == length newDiscs `shouldBe` True
-
-    where guess = 'x'
-          word = "rabbit"
-          maybeDiscs = [Just 'r',Nothing,Nothing,Nothing,Just 'i',Nothing]
-          discs = getDiscs maybeDiscs
-          newDiscs = getDiscs newMaybeDiscs
-          currGuesses = "xyruiop"
-          updatedPuzzle = fillInCharacter (Puzzle word maybeDiscs currGuesses) guess
-          (Puzzle _ newMaybeDiscs newGuesses) = updatedPuzzle
-          -- local function to test containment
-          contains bucket items = and $ map ((flip elem) bucket) items
-          getDiscs ds = filter (not . isSpace) $ fmap (fromMaybe ' ') ds
-
-
-
-
-
-
-
-
-main = hspec $ do
-    testFillCharsAlreadyGuessed
-    testFillCharsCorrectlyGuessed
-    testFillCharsWronglyGuessed
-
-
-
-
-
-
 numWrongGuesses :: Puzzle -> Int
-numWrongGuesses p@(Puzzle word _ gs)
-    = fromIntegral $ length gs - guessesInWord
-    where guessesInWord = fromIntegral $ length $ filter ((flip elem) word) gs
+numWrongGuesses p@(Puzzle word _ guesses)
+    = fromIntegral $ length guesses - guessesInWord
+    where guessesInWord
+            = fromIntegral $ length $ filter ((flip elem) word) guesses
 
 
 
 -- note tells player what he/she guessed.
--- handles cases: 1) char was guessed before
---                2) char is in word and needs to be filled in
---                3) char was not previously guessed and wasn't in word.
+-- handles cases: 1) guessLetter was guessed before
+--                2) guessLetter is in word and needs to be filled in
+--                3) guessLetter was not previously guessed and wasn't in word.
 handleGuess :: Puzzle -> Char -> IO Puzzle
-handleGuess puzzle guessChar =
-    case (charInWord puzzle guessChar, alreadyGuessed puzzle guessChar) of
+handleGuess puzzle guessLetter = do
+    putStrLn $ "Your guess was: " ++ [guessLetter]
+    case (charInWord puzzle guessLetter, alreadyGuessed puzzle guessLetter) of
         (_, True) -> do putStrLn "ALREADY GUESSED, choose another!"
                         return puzzle
         (True, _) -> do putStrLn "MATCH! Filling in ..."
-                        return (fillInCharacter puzzle guessChar)
+                        return (fillInCharacter puzzle guessLetter)
         (False,_) -> do putStrLn "TRY AGAIN"
-                        return (fillInCharacter puzzle guessChar)
+                        return (fillInCharacter puzzle guessLetter)
+
 
 
 -- note game stops only after seven guesses (either incorrect or correct)
+-- note help todo: I put the current wrong/tries left/lumbs hung information
+-- here not in handleGuess function ebcause this func comes before handleGuesss
+-- and I want this info to be on top of printed puzzle (from handleGuess)
 gameOver :: Puzzle -> IO()
-gameOver p@(Puzzle word ds guesses) = do
+gameOver p@(Puzzle word discovered guesses) = do
     let wrongsMade = numWrongGuesses p
     let triesLeft = triesAllowed - wrongsMade + 1
     let limb = if wrongsMade == 0
@@ -288,18 +175,17 @@ runGame puzzle = forever $ do
     gameWin puzzle
     putStrLn $ "Current puzzle is: " ++ show puzzle
     putStr "Guess a letter: "
-    guess <- getLine
-    case guess of
+    guessLetter <- getLine
+    case guessLetter of
         [c] -> handleGuess puzzle c >>= runGame
         _   -> putStrLn "BAD INPUT: Your guess must be a single character."
 
 
 
-{-
-
+------------------------------------------------------------------------------------
 main :: IO()
 main = do
     word <- randomWord'
     let puzzle = freshPuzzle (fmap toLower word)
     runGame puzzle
--}
+------------------------------------------------------------------------------------
