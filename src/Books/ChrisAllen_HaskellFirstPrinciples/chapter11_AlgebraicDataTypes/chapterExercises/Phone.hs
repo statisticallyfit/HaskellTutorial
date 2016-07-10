@@ -10,12 +10,11 @@ IMPORTANT RULES:
 more presses than digits in button get you back around to letters on button.
 -}
 
-type Digit = Char
+
 type Symbol = Char
 type Presses = Int -- >= 1
 data Operation = Number    -- 1,2,3,4,5,6,7,8,9,0
-               | Character -- a,b,c,...z and A,B,C,...Z (only if capitalized)
-               | Spacebar  -- ' '
+               | Digit -- a,b,c,...z and A,B,C,...Z (only if capitalized)
                | Capitalize -- the next one after capitalize will be default lowercase.
                deriving (Eq, Show)
 data Button = Button Operation Symbol deriving (Eq, Show)
@@ -27,15 +26,11 @@ data Phone = PhonePad [Button] deriving (Eq, Show)
 text :: [String]
 text =
     ["The night sky is littered with stars.",
-     "Sparkling water.",
-     "Swallows descend from their nightly perches and race in the grey dawn.",
-     "Mountains tower, their craggy faces rough and weather-hewn.",
-     "Twittering birds.",
-     "Soaring eagles.",
-     "Morning dew settles on lilac bushes, and fog rises off the lake in golden splendor.",
-     "Volcanic ash.",
-     "Wind scours, molds, and shapes, leaving traced frozen lava in its wake.",
-     "Glowing crystals."]
+     "Swallows sing in the grey dawn.",
+     "Morning dew settles on lilac bushes",
+     "Fog on the lake rises in golden splendor.",
+     "Traced frozen lava scoured by winds.",
+     "Glowing crystal caves."]
 
 
 
@@ -60,7 +55,8 @@ reverseTaps p sym
 -}
 
 
-phone = Phone
+--phone :: Phone
+phone =
     [('1', "1"),
      ('2', "abc2"),
      ('3', "def3"),
