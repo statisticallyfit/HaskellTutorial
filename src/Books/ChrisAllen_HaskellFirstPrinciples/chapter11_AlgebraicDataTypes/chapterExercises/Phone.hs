@@ -27,8 +27,9 @@ type FingerMoveGroup = [FingerMove] -- a group of fingermoves for 1 letter/num/s
 -- Same with NumPad and EngPad. Default remains, is not switched unless stated.
 -- example: To Swtich from capital to lower press * after a capital and vice versa.
 -- example: to make uppercase letter, put Upper in list before a button letter.
-data Button = NumPad | EngPad | Uppercase | Lowercase | Spacebar
+data Button = NumPad | EngPad | Spacebar
             | Number Token
+            | CapitalLetter Token
             | Letter Token
             | Sign Token
             | Unknown -- for symbols outside space + . , ? ! #
@@ -50,8 +51,8 @@ data Phone = PhonePad [Button] deriving (Eq, Show)
 phone :: Phone
 phone = PhonePad $ concat [numbers, lowLetters, uppLetters, signs, space]
     where numbers = map (Number $) (concatMap show [0..9])
-          lowLetters = [Lowercase] ++ map (Letter $) ['a' .. 'z']
-          uppLetters = [Uppercase] ++ map (Letter $) ['A' .. 'Z']
+          lowLetters = map (Letter $) ['a' .. 'z']
+          uppLetters = map (CapitalLetter $) ['A' .. 'Z']
           signs = map (Sign $) "+.,?!#"
           space = [Spacebar]
 
@@ -98,28 +99,38 @@ The only symbols that exist are: space + . , ? ! #
 -}
 
 
-getToken :: ButtonGroup -> Token
-getToken [Lowercase, Letter n] = n
-getToken [Uppercase, Letter n] = toUpper n
-getToken [Number n] = n
-getToken [Sign n] = n
-getToken [Spacebar] = ' '
+getToken :: Button -> Maybe Token
+getToken (Number n) = Just n
+getToken (Sign n) = Just n
+getToken (Letter n) = Just n
+getToken (CapitalLetter n) = Just $ toUpper n
+getToken (Spacebar) = Just ' '
+getToken _ = Nothing
+
 
 
 -- Lowercase or Uppercase = 1 press to press '*' char
 -- letter == depends on its location
 -- spacebar == press 0 two times.
-getPresses :: ButtonGroup -> Presses
-getPresses [_, Letter n] = 2 + countKey n
-getPresses [_, Sign n] = 2 + countKey n
-getPresses [Number _] = 1
-getPresses [Spacebar] = 2 -- press 0 two times. (knowing it is LETTER FORMAT)
+getPresses :: Button -> Maybe Presses
+getPresses (Letter n) = Just $ countKey n
+getPresses (CapitalLetter n) = Just $ 1 + countKey n
+getPresses (Sign n) = Just $ countKey n
+getPresses (Number _) = Just 1
+getPresses (Spacebar) = Just 2 -- press 0 two times. (knowing it is LETTER FORMAT)
+getPresses _ = Nothing
 
+-- note only expects lowercase letters
+-- throws error if given upppercase or if given numbers.
 countKey :: Token -> Presses
 countKey tok = 1 + head (catMaybes (map (elemIndex tok) (map snd keyPad)))
 
-tokenWithPresses :: Token -> FingerMove
-tokenWithPresses tok = (fst $ head $ filter ((elem tok) . snd) keyPad, countKey tok)
+isSign :: Token -> Bool
+isSign tok = elem tok "+#.,?!"
+
+tokPress :: Token -> FingerMove
+tokPress tok = (fst $ head $ filter ((elem (toLower tok)) . snd) keyPad,
+                                      countKey (toLower tok))
 
 tokenFromPresses :: FingerMove -> Token
 tokenFromPresses (tok, presses) = alphs !! (presses - 1)
@@ -135,35 +146,43 @@ keyPad = [('1',""),('2',"abc"),('3',"def"),('4',"ghi"),('5',"jkl"),('6',"mno"),
 
 
 -- note returns just one set of puttons - not for whole sentence
-tokenToButton :: Token -> ButtonGroup
+tokenToButton :: Token -> Button
 tokenToButton tok
-    | isUpper tok = Uppercase : Letter (toLower tok) : []
-    | isLower tok = Lowercase : Letter tok : []
-    | isDigit tok = Number tok : []
-    | isSpace tok = Spacebar : []
-    | isSign tok  = Sign tok : []
-    | otherwise = Unknown : []
-    where isSign t = elem t "+#.,?!"
-
-tokenToFinger :: Token -> FingerMoveGroup
-tokenToFinger tok
-    | isUpper tok = ('*',1) : tokenWithPresses tok : []
-    | isLower tok = tokenWithPresses tok : []
-    | isDigit tok = (tok, 1) : []
-    | isSpace tok = ('0', 2) : []
-    | isSign tok  = ('*',2) : tokenWithPresses tok : []
-    | otherwise   = []
-    where isSign t = elem t "+#.,?!"
-
+    | isUpper tok = CapitalLetter (toLower tok)
+    | isLower tok = Letter tok
+    | isDigit tok = Number tok
+    | isSpace tok = Spacebar
+    | isSign tok  = Sign tok
+    | otherwise = Unknown
 
 -- note converts one letter/num/sign worth of buttons into finger moves.
 -- note expects only one single digit at a time. If it's not a single digit, then
 -- the result char is not going to be the char form of the digit.
-buttonToFingers :: ButtonGroup -> FingerMoveGroup
-buttonToFingers [Uppercase, Letter n] = ('*',1) : tokenWithPresses n : []
-buttonToFingers [Lowercase, Letter n] = tokenWithPresses n : []
-buttonToFingers [Number n] = (n, 1) : []
-buttonToFingers [Spacebar] = ('0',2) : []
+buttonToFinger :: Button -> FingerMoveGroup
+buttonToFinger (CapitalLetter n) = ('*',1) : tokPress n : []
+buttonToFinger (Letter n) = tokPress n : []
+buttonToFinger (Sign n)   = tokPress n : []
+buttonToFinger (Number n) = (n, 1) : []
+buttonToFinger (Spacebar) = ('0',2) : []
+buttonToFinger Unknown    = []
+
+--- testing test that tokenToFinger x == (buttonToFinger $ tokenToButton x)
+-- note after the capitalizing star, case returns to lowercase.
+tokenToFinger :: Token -> FingerMoveGroup
+tokenToFinger tok = buttonToFinger $ tokenToButton tok 
+{-
+tokenToFinger tok
+    | isUpper tok    = ('*', 1) : tokPress tok : []
+    | isLower tok ||
+        isSign tok   = tokPress tok : []
+    | isDigit tok    = (tok, 1) : []
+    | isSpace tok    = ('0', 2) : []
+    | otherwise      = []
+-}
+
+
+
+
 
 
 -- note
