@@ -15,15 +15,19 @@ more presses than digits in button get you back around to letters on button.
 
 
 type Symbol = Char
-type Digit = Char
+--type Digit = Char
 type Presses = Int -- >= 1
+
+-- note distinguishing between uppercase and lower case so there is no more
+-- need to check in functions if the arg Symbol in Button is lower or uppercase.
 data Operation = Number    -- 1,2,3,4,5,6,7,8,9,0
                | LowerLetter -- a,b,c,...z and
                | UpperLetter -- A,B,C,...Z (only if capitalized)
                | Sign -- ?!.,
-               | NotCategorized -- not in phone : & % @ $
+               | Unknown -- not in phone : & % @ $
                deriving (Eq, Show)
-data Button = Button Operation Symbol deriving (Eq, Show)
+data Button = SwitchFormat -- to change from letters + punct to nums and vice versa.
+            | Button Operation Symbol deriving (Eq, Show)
 data Phone = PhonePad [Button] deriving (Eq, Show)
 
 
@@ -64,18 +68,20 @@ toButton n
     | isLetter n && isUpper n = Button UpperLetter n
     | isDigit n = Button Number n
     | elem n "*^+ #,.?!" = Button Sign n
-    | otherwise = Button NotCategorized ' '
+    | otherwise = Button Unknown ' '
 
 -- note symbol can be 'a', 'A', '9', '*', '0'
 -- note called reverseTaps previously
 -- note press (*) to capitalize, and (+) to switch back and forth from nums to letters.
 -- postcondition: returns exception head if given char it doesn't know.
-toTaps :: Button -> [(Digit, Presses)]
+{-
+toTaps :: Button -> [(Symbol, Presses)]
 toTaps (Button Number n) = (n, 1)
 toTaps (Button Letter n) = (n, getTaps n)
 toTaps (Button Sign n) = classifySign n
     where getTaps n = 1 + head $ catMaybes (map (elemIndex n) keyPad)
           classifyNum n =
+-}
 
 
 
