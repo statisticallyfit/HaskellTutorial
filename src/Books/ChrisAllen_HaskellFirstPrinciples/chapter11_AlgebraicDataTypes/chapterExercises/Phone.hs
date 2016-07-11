@@ -32,7 +32,7 @@ data Button = NumPad | EngPad | Uppercase | Lowercase | Spacebar
             | Sign Token
             | Unknown -- for symbols outside space + . , ? ! #
             deriving (Eq, Show)
-
+type ButtonGroup = [Button]
 data Phone = PhonePad [Button] deriving (Eq, Show)
 
 
@@ -41,8 +41,8 @@ data Phone = PhonePad [Button] deriving (Eq, Show)
   * --> capitalize -> ('*',1)
   * -> lowercase -> ('*', 1) -- note switchcase to opposite than one before it.
   ^ -> switch format -> ('*',2)
-  0 -> spacebar -> ('0',3)
-  + -> plus sign -> ('0', 2)
+  0 -> spacebar -> ('0',2)
+  + -> plus sign -> ('0', 1) -- once it is understood we are in LetterFOrmat
   # -> questionmark -> ('#', 4)
   The only symbols that exist are: space + . , ? ! #
 -}
@@ -78,85 +78,99 @@ phonePad = putStr $ break ++ row123 ++ break ++ row456 ++ break ++
 
 
 {-
-Number format:
+Number format: ---------------------------------------------------------------------
 presses = 1 for each: 0..9
 no symbols at bottom of phone pad exist for numbers.
 
-Letter format:
+
+Letter format: ---------------------------------------------------------------------
+RULE key: whenever there is a number in front during letter format, we ignore it
+and start counting presses from second non-number element (see '+' and ' ' below)
+
 presses example 'e' = ('3', 2) which means press 3 twice.
 * --> capitalize -> ('*',1)
 ^ -> switch format -> ('*',2)
-0 -> spacebar -> ('0',3)
-+ -> plus sign -> ('0', 2)
-# -> questionmark -> ('#', 4)
+0 -> spacebar -> ('0',2)
++ -> plus sign -> ('0', 1)
+? -> questionmark -> ('#', 4)
 The only symbols that exist are: space + . , ? ! #
 -}
 
 
-getToken :: [Button] -> Token
-getToken [EngPad, Lowercase, Letter n] = n
-getToken [EngPad, Uppercase, Letter n] = toUpper n
-getToken [NumPad, Number n] = n
-getToken [EngPad, Sign n] = n
+getToken :: ButtonGroup -> Token
+getToken [Lowercase, Letter n] = n
+getToken [Uppercase, Letter n] = toUpper n
+getToken [Number n] = n
+getToken [Sign n] = n
 getToken [Spacebar] = ' '
 
 -- EngPad = 2 presses to get to '^' char
 -- Lowercase or Uppercase = 1 press to press '*' char
 -- letter == depends on its location
--- spacebar == press 0 three times.
-getPresses :: [Button] -> Presses
-getPresses [EngPad, _, Letter n] = 3 + countKey n
-getPresses [EngPad, _, Sign n] = 3 + countKey n
-getPresses [NumPad, _] = 2
-getPresses [Spacebar] = 3 -- press 0 three times.
-    where countKey n = 
-          keyPad = ["abc","def","ghi","jkl","mno","pqrs","tuv","wxyz","+.,?!#"]
+-- spacebar == press 0 two times.
+getPresses :: ButtonGroup -> Presses
+getPresses [_, Letter n] = 2 + countKey n
+getPresses [_, Sign n] = 2 + countKey n
+getPresses [Number _] = 1
+getPresses [Spacebar] = 2 -- press 0 two times. (knowing it is LETTER FORMAT)
+
+countKey k = 1 + head (catMaybes (map (elemIndex k) alphas))
+alphas = map snd keyPad
+makeTokenPress k = (fst $ head $ filter ((elem k) . snd) keyPad, countKey k)
+
+fingerToToken :: (Token, Presses) -> Token
+fingerToToken (tok, presses) = alphs !! (presses - 1)
+    where alphs = (snd $ head $ filter ((== tok) . fst) keyPad)
+
+keyPad = [('1',""),('2',"abc"),('3',"def"),('4',"ghi"),('5',"jkl"),('6',"mno"),
+         ('7',"pqrs"),('8',"tuv"),('9',"wxyz"),('*',"^"),('0',"+ "), ('#',"#.,?!")]
 
 
 -- note returns just one set of puttons - not for whole sentence
-tokenToButton :: Token -> [Button]
+tokenToButton :: Token -> ButtonGroup
 tokenToButton tok
-    | isUpper tok = EngPad : Uppercase : Letter (toLower tok) : []
-    | isLower tok = EngPad : Lowercase : Letter tok : []
-    | isDigit tok = NumPad : Number tok : []
+    | isUpper tok = Uppercase : Letter (toLower tok) : []
+    | isLower tok = Lowercase : Letter tok : []
+    | isDigit tok = Number tok : []
     | isSpace tok = Spacebar : []
-    | isSign tok  = EngPad : Sign tok : []
-    | otherwise = [Unknown]
-    where isSign t = elem t "+.,?!#"
+    | isSign tok  = Sign tok : []
+    | otherwise = Unknown : []
+    where isSign t = elem t "+#.,?!"
+
+tokenToFinger :: Token -> FingerMoves
+tokenToFinger tok
+    | isUpper tok = ('*',1) : makeTokenPress tok : []
+    | isLower tok = makeTokenPress tok : []
+    | isDigit tok = (tok, 1) : []
+    | isSpace tok = ('0', 2) : []
+    | isSign tok  = ('*',2) : makeTokenPress tok : []
+    | otherwise   = []
+    where isSign t = elem t "+#.,?!"
+
+
+-- note converts one letter/num/sign worth of buttons into finger moves.
+-- note expects only one single digit at a time. If it's not a single digit, then
+-- the result char is not going to be the char form of the digit.
+buttonToFingers :: ButtonGroup -> FingerMoves
+buttonToFingers [Uppercase, Letter n] = ('*',1) : makeTokenPress n : []
+buttonToFingers [Lowercase, Letter n] = makeTokenPress n : []
+buttonToFingers [Number n] = (n, 1) : []
+buttonToFingers [Spacebar] = ('0',2) : []
+
 
 -- note
-{-fingerToButton :: FingerMoves -> [Button]
-fingerToButton-}
+{-
+
+fingerToButton :: FingerMoves -> ButtonGroup
+fingerToButton (('*',2) : (c,1) : rest) -- note extracting digit case (where p==1)
+                    = NumPad : Number c : fingerToButton rest
+fingerToButton (('*',2) : (c,p) : rest)
+        = EngPad : Lowercase : Letter (fingerToToken (c,p)) : fingerToButton rest
+-}
+
+
 -- only expects the Token present in the phonepad: letters,nums, *+-^#,.'?!
 -- note expect list length no greater than 2.
-
-
-{-toButton :: FingerMoves -> Button
-toButton (token, presses)
-
-toButton [(token, presses)]
-    | isNumber token = Number token -- check presses == 1
-    | isLetter
-
-
-    | isLetter n && isLower n = Button LowerLetter n
-    | isLetter n && isUpper n = Button UpperLetter n
-    | isDigit n = Number n
-    | elem n "*^+ #,.?!" = Button Sign n
-    | otherwise = Button Unknown ' '
-
--- note Token can be 'a', 'A', '9', '*', '0'
--- note called reverseTaps previously
--- note press (*) to capitalize, and (+) to switch back and forth from nums to letters.
--- postcondition: returns exception head if given char it doesn't know.
-
-toTaps :: Button -> [(Token, Presses)]
-toTaps (Button Number n) = (n, 1)
-toTaps (Button Letter n) = (n, getTaps n)
-toTaps (Button Sign n) = classifySign n
-    where getTaps n = 1 + head $ catMaybes (map (elemIndex n) keyPad)
-          classifyNum n =
--}
 
 
 
