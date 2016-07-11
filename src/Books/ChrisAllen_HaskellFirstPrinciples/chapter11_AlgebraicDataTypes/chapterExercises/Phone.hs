@@ -16,7 +16,7 @@ type FingerMove = (Token, Presses)
 -- and vice versa. If before was nums, then say Switch, then switch to english.
 -- note NumPad lasts until EngPad is specified. Rest that follow are in that format.
 -- example: To Swtich from capital to lower press * after a capital and vice versa.
-data Button = NumPad | EngPad | Spacebar
+data Button = {-NumPad | EngPad-} Switch | Spacebar
             | Number Token
             | CapitalLetter Token
             | Letter Token
@@ -142,19 +142,38 @@ buttonToToken (Sign n) = n
 buttonToToken (Spacebar) = ' '
 buttonToToken Unknown = undefined
 
-
-fingerToToken :: [FingerMove] -> Token
+-- fing - button - token
+--fingerToToken :: [FingerMove] -> Token
+{-
 fingerToToken fingMoves
     | (head fingMoves) == ('*',1) = toUpper convertedToken
     | otherwise = convertedToken
     where (c,p) = last fingMoves
           alphas = (snd $ head $ filter ((== c) . fst) keyPad)
           convertedToken = alphas !! (p - 1)
+-}
+
+-- fing - button
+fingersToButtons :: [FingerMove] -> [Button]
+fingersToButtons [] = []
+fingersToButtons (('*',2) : rest) = Switch : fingersToButtons rest
+fingersToButtons ((c,1) : rest) = Number c : fingersToButtons rest
+--fingersToButtons (('*',1) : rest) = CapitalLetter tok : fingersToButtons rest
+fingersToButtons ((c,p) : rest) = Letter tok : fingersToButtons rest
+    where --(c,p) = head rest
+          alphas = (snd $ head $ filter ((== c) . fst) keyPad)
+          tok = alphas !! (p - 1)
+{-
+fingerToButton (('*',2) : ('*',1) : rest : [])
+                = EngPad : CapitalLetter tok : fingerToButton rest
+fingerToButton (('*',2) : (c,1) : rest : [])
+                = NumPad : Number c : fingerToButton rest
+fingerToButton (('*',2) : (c,p) : rest : [])
+                = EngPad : Letter tok : fingerToButton rest
+fingerToButton
 
 
-fingerToButton :: [FingerMove] -> Button
-fingerToButton fms = tokenToButton $ fingerToToken fms
-
+-}
 ---------------------------------------------------------------
 -- Now for the actual conversaion translators
 
@@ -168,12 +187,14 @@ text =
      "Glowing crystal caves.",
      "+ #,.?!123abc123..?.abc"] -- tests switching
 
+{-
 
 encodeConversation :: [String] -> [[[FingerMove]]]
 encodeConversation convo = map (map tokenToFinger) convo
 
 decodeConversation :: [[[FingerMove]]] -> [String]
 decodeConversation fmss = map (map fingerToToken) fmss
+-}
 
 
 
