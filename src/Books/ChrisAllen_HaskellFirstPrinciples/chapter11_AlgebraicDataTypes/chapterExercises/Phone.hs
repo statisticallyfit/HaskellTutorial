@@ -98,6 +98,24 @@ presses example 'e' = ('3', 2) which means press 3 twice.
 The only symbols that exist are: space + . , ? ! #
 -}
 
+-- note only expects lowercase letters
+-- throws error if given upppercase or if given numbers.
+countKey :: Token -> Presses
+countKey tok = 1 + head (catMaybes (map (elemIndex tok) (map snd keyPad)))
+
+isSign :: Token -> Bool
+isSign tok = elem tok "+#.,?!"
+
+tokPress :: Token -> FingerMove
+tokPress tok = (fst $ head $ filter ((elem (toLower tok)) . snd) keyPad,
+                                      countKey (toLower tok))
+
+keyPad :: [(Token, String)]
+keyPad = [('1',""),('2',"abc"),('3',"def"),('4',"ghi"),('5',"jkl"),('6',"mno"),
+         ('7',"pqrs"),('8',"tuv"),('9',"wxyz"),('*',"^"),('0',"+ "), ('#',"#.,?!")]
+
+
+
 
 getToken :: Button -> Maybe Token
 getToken (Number n) = Just n
@@ -106,7 +124,6 @@ getToken (Letter n) = Just n
 getToken (CapitalLetter n) = Just $ toUpper n
 getToken (Spacebar) = Just ' '
 getToken _ = Nothing
-
 
 
 -- Lowercase or Uppercase = 1 press to press '*' char
@@ -119,32 +136,6 @@ getPresses (Sign n) = Just $ countKey n
 getPresses (Number _) = Just 1
 getPresses (Spacebar) = Just 2 -- press 0 two times. (knowing it is LETTER FORMAT)
 getPresses _ = Nothing
-
--- note only expects lowercase letters
--- throws error if given upppercase or if given numbers.
-countKey :: Token -> Presses
-countKey tok = 1 + head (catMaybes (map (elemIndex tok) (map snd keyPad)))
-
-isSign :: Token -> Bool
-isSign tok = elem tok "+#.,?!"
-
-tokPress :: Token -> FingerMove
-tokPress tok = (fst $ head $ filter ((elem (toLower tok)) . snd) keyPad,
-                                      countKey (toLower tok))
-{-
-
-tokenFromPresses :: FingerMove -> Token
-tokenFromPresses (tok, presses) = alphs !! (presses - 1)
-    where alphs = (snd $ head $ filter ((== tok) . fst) keyPad)
--}
-
-keyPad :: [(Token, String)]
-keyPad = [('1',""),('2',"abc"),('3',"def"),('4',"ghi"),('5',"jkl"),('6',"mno"),
-         ('7',"pqrs"),('8',"tuv"),('9',"wxyz"),('*',"^"),('0',"+ "), ('#',"#.,?!")]
-
-
-
-
 
 
 -- note returns just one set of puttons - not for whole sentence
@@ -174,17 +165,6 @@ buttonToFinger (Spacebar) = ('0',2) : []
 buttonToFinger Unknown    = []
 
 
-
-fingerToToken :: FingerMoveGroup -> Token
-fingerToToken [('*',1), (c,p)] = toUpper $ finTok
-fingerToToken [(c,p)] = finTok
-    where finTok = alphas c !! (p - 1)
-          alphas c = (snd $ head $ filter ((== c) . fst) keyPad)
-
-fingerToButton :: FingerMoveGroup -> Button
-fingerToButton move = tokenToButton $ fingerToToken move
-
-
 buttonToToken :: Button -> Token
 buttonToToken (CapitalLetter n) = toUpper n
 buttonToToken (Letter n) = n
@@ -193,16 +173,19 @@ buttonToToken (Sign n) = n
 buttonToToken (Spacebar) = ' '
 buttonToToken Unknown = undefined
 
-{-
---- testing test that tokenToFinger x == (buttonToFinger $ tokenToButton x)
-tokenToFinger tok
-    | isUpper tok    = ('*', 1) : tokPress tok : []
-    | isLower tok ||
-        isSign tok   = tokPress tok : []
-    | isDigit tok    = (tok, 1) : []
-    | isSpace tok    = ('0', 2) : []
-    | otherwise      = []
--}
+
+fingerToToken :: FingerMoveGroup -> Token
+fingerToToken fingMoves
+    | (head fingMoves) == ('*',1) = toUpper convertedToken
+    | otherwise = convertedToken
+    where (c,p) = last fingMoves
+          alphas = (snd $ head $ filter ((== c) . fst) keyPad)
+          convertedToken = alphas !! (p - 1)
+
+
+fingerToButton :: FingerMoveGroup -> Button
+fingerToButton move = tokenToButton $ fingerToToken move
+
 
 
 
