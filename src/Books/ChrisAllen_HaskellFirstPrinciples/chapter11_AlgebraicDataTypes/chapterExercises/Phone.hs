@@ -131,10 +131,12 @@ isSign tok = elem tok "+#.,?!"
 tokPress :: Token -> FingerMove
 tokPress tok = (fst $ head $ filter ((elem (toLower tok)) . snd) keyPad,
                                       countKey (toLower tok))
+{-
 
 tokenFromPresses :: FingerMove -> Token
 tokenFromPresses (tok, presses) = alphs !! (presses - 1)
     where alphs = (snd $ head $ filter ((== tok) . fst) keyPad)
+-}
 
 keyPad :: [(Token, String)]
 keyPad = [('1',""),('2',"abc"),('3',"def"),('4',"ghi"),('5',"jkl"),('6',"mno"),
@@ -155,6 +157,11 @@ tokenToButton tok
     | isSign tok  = Sign tok
     | otherwise = Unknown
 
+
+-- note after the capitalizing star, case returns to lowercase.
+tokenToFinger :: Token -> FingerMoveGroup
+tokenToFinger tok = buttonToFinger $ tokenToButton tok
+
 -- note converts one letter/num/sign worth of buttons into finger moves.
 -- note expects only one single digit at a time. If it's not a single digit, then
 -- the result char is not going to be the char form of the digit.
@@ -166,11 +173,28 @@ buttonToFinger (Number n) = (n, 1) : []
 buttonToFinger (Spacebar) = ('0',2) : []
 buttonToFinger Unknown    = []
 
---- testing test that tokenToFinger x == (buttonToFinger $ tokenToButton x)
--- note after the capitalizing star, case returns to lowercase.
-tokenToFinger :: Token -> FingerMoveGroup
-tokenToFinger tok = buttonToFinger $ tokenToButton tok 
+
+
+fingerToToken :: FingerMoveGroup -> Token
+fingerToToken [('*',1), (c,p)] = toUpper $ finTok
+fingerToToken [(c,p)] = finTok
+    where finTok = alphas c !! (p - 1)
+          alphas c = (snd $ head $ filter ((== c) . fst) keyPad)
+
+fingerToButton :: FingerMoveGroup -> Button
+fingerToButton move = tokenToButton $ fingerToToken move
+
+
+buttonToToken :: Button -> Token
+buttonToToken (CapitalLetter n) = toUpper n
+buttonToToken (Letter n) = n
+buttonToToken (Number n) = n
+buttonToToken (Sign n) = n
+buttonToToken (Spacebar) = ' '
+buttonToToken Unknown = undefined
+
 {-
+--- testing test that tokenToFinger x == (buttonToFinger $ tokenToButton x)
 tokenToFinger tok
     | isUpper tok    = ('*', 1) : tokPress tok : []
     | isLower tok ||
@@ -184,20 +208,6 @@ tokenToFinger tok
 
 
 
-
--- note
-{-
-
-fingerToButton :: FingerMoves -> ButtonGroup
-fingerToButton (('*',2) : (c,1) : rest) -- note extracting digit case (where p==1)
-                    = NumPad : Number c : fingerToButton rest
-fingerToButton (('*',2) : (c,p) : rest)
-        = EngPad : Lowercase : Letter (tokenFromPresses (c,p)) : fingerToButton rest
--}
-
-
--- only expects the Token present in the phonepad: letters,nums, *+-^#,.'?!
--- note expect list length no greater than 2.
 
 
 
