@@ -14,20 +14,21 @@ more presses than digits in button get you back around to letters on button.
 -}
 
 
-type Symbol = Char
---type Digit = Char
+type Token = Char
 type Presses = Int -- >= 1
+type FingerMoves = [(Token, Presses)]
 
 -- note distinguishing between uppercase and lower case so there is no more
--- need to check in functions if the arg Symbol in Button is lower or uppercase.
-data Operation = Number    -- 1,2,3,4,5,6,7,8,9,0
-               | LowerLetter -- a,b,c,...z and
-               | UpperLetter -- A,B,C,...Z (only if capitalized)
-               | Sign -- ?!.,
-               | Unknown -- not in phone : & % @ $
-               deriving (Eq, Show)
-data Button = SwitchFormat -- to change from letters + punct to nums and vice versa.
-            | Button Operation Symbol deriving (Eq, Show)
+-- need to check in functions if the arg Token in Button is lower or uppercase.
+-- note SwitchFormat refers to switching from letters + punctuation to numbers
+-- and vice versa. If before was nums, then say Switch, then switch to english.
+-- example: to make uppercase letter, put Upper in list before a button letter.
+data Button = SwitchFormat | Upper | Lower | Space
+            | Button Number Token
+            | Button Letter Token
+            | Button Sign Token
+            deriving (Eq, Show)
+
 data Phone = PhonePad [Button] deriving (Eq, Show)
 
 
@@ -50,7 +51,8 @@ text =
      "Morning dew settles on lilac bushes",
      "Fog on the lake rises in golden splendor.",
      "Traced frozen lava scoured by winds.",
-     "Glowing crystal caves."]
+     "Glowing crystal caves."
+     "*^+ #,.?!123abc123..?.abc"] -- tests switching
 
 displayPhone :: IO()
 displayPhone = putStr $ break ++ row123 ++ break ++ row456 ++ break ++
@@ -59,10 +61,10 @@ displayPhone = putStr $ break ++ row123 ++ break ++ row456 ++ break ++
           row123 = "|   1       |   2 ABC   |   3 DEF   |\n"
           row456 = "|   4 GHI   |   5 JKL   |   6 MNO   |\n"
           row789 = "|   7 PQRS  |   8 TUV   |   9 WXYZ  |\n"
-          rowOp  = "|   * ^     |   + 0 _   |   # .,?!  |\n"
+          rowOp  = "|   * ^     |   0 + _   |   # .,?!  |\n"
 
--- only expects the symbols present in the phonepad: letters,nums, *+-^#,.'?!
-toButton :: Symbol -> Button
+-- only expects the Token present in the phonepad: letters,nums, *+-^#,.'?!
+toButton :: Token -> Button
 toButton n
     | isLetter n && isLower n = Button LowerLetter n
     | isLetter n && isUpper n = Button UpperLetter n
@@ -70,12 +72,12 @@ toButton n
     | elem n "*^+ #,.?!" = Button Sign n
     | otherwise = Button Unknown ' '
 
--- note symbol can be 'a', 'A', '9', '*', '0'
+-- note Token can be 'a', 'A', '9', '*', '0'
 -- note called reverseTaps previously
 -- note press (*) to capitalize, and (+) to switch back and forth from nums to letters.
 -- postcondition: returns exception head if given char it doesn't know.
 {-
-toTaps :: Button -> [(Symbol, Presses)]
+toTaps :: Button -> [(Token, Presses)]
 toTaps (Button Number n) = (n, 1)
 toTaps (Button Letter n) = (n, getTaps n)
 toTaps (Button Sign n) = classifySign n
