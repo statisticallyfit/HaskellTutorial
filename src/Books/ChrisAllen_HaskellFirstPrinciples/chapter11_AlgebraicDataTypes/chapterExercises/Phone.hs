@@ -80,8 +80,9 @@ tokPress tok = (fst $ head $ filter ((elem (toLower tok)) . snd) keyPad,
                                       countKey (toLower tok))
 
 keyPad :: [(Token, String)]
-keyPad = [('1',""),('2',"abc"),('3',"def"),('4',"ghi"),('5',"jkl"),('6',"mno"),
-         ('7',"pqrs"),('8',"tuv"),('9',"wxyz"),('*',"^"),('0',"+ "), ('#',"#.,?!")]
+keyPad = [('1',""),('2',"abc"),('3',"def"),('4',"ghi"),('5',"jkl"),
+          ('6',"mno"), ('7',"pqrs"),('8',"tuv"),('9',"wxyz"),('*',"^"),
+          ('0',"+ "), ('#',"#.,?!")]
 
 
 
@@ -118,10 +119,13 @@ tokenToButton tok
     | otherwise = Unknown
 
 
+--- NOTE GET BACK HERE TODAY, trying to separate numbers from english stuff.
+-- how? splitAt ... foldl ... ?
 detectShift acc y
-            | isLetter acc && isDigit y = Just NumPad
-            | isDigit acc && isLetter y = Just EngPad
+            | isLetter ac && isDigit y = Just NumPad
+            | isDigit ac && isLetter y = Just EngPad
             | otherwise = Nothing
+            where (Just ac) = acc
 {-
 manyTokensToButtons :: [Token] -> [Button]
 manyTokensToButtons tokens = foldl detectShift (Just $ head tokens) (tail tokens)-}
