@@ -16,7 +16,7 @@ type FingerMove = (Token, Presses)
 -- and vice versa. If before was nums, then say Switch, then switch to english.
 -- note NumPad lasts until EngPad is specified. Rest that follow are in that format.
 -- example: To Swtich from capital to lower press * after a capital and vice versa.
-data Button = {-NumPad | EngPad-} Switch | Spacebar
+data Button = NumPad | EngPad{- Switch -}| Spacebar
             | Number Token
             | CapitalLetter Token
             | Letter Token
@@ -118,6 +118,18 @@ tokenToButton tok
     | otherwise = Unknown
 
 
+detectShift acc y
+            | isLetter acc && isDigit y = Just NumPad
+            | isDigit acc && isLetter y = Just EngPad
+            | otherwise = Nothing
+{-
+manyTokensToButtons :: [Token] -> [Button]
+manyTokensToButtons tokens = foldl detectShift (Just $ head tokens) (tail tokens)-}
+{-    where detectShift acc y
+            | isLetter acc && isDigit y = Just NumPad
+            | isDigit acc && isLetter y = Just EngPad
+            | otherwise = Nothing -}
+
 -- note after the capitalizing star, case returns to lowercase.
 tokenToFinger :: Token -> [FingerMove]
 tokenToFinger tok = buttonToFinger $ tokenToButton tok
@@ -154,7 +166,7 @@ fingerToToken fingMoves
 -}
 
 -- fing - button
-fingersToButtons :: [FingerMove] -> [Button]
+{-fingersToButtons :: [FingerMove] -> [Button]
 fingersToButtons [] = []
 fingersToButtons (('*',2) : rest) = Switch : fingersToButtons rest
 fingersToButtons ((c,1) : rest) = Number c : fingersToButtons rest
@@ -162,7 +174,7 @@ fingersToButtons ((c,1) : rest) = Number c : fingersToButtons rest
 fingersToButtons ((c,p) : rest) = Letter tok : fingersToButtons rest
     where --(c,p) = head rest
           alphas = (snd $ head $ filter ((== c) . fst) keyPad)
-          tok = alphas !! (p - 1)
+          tok = alphas !! (p - 1)-}
 {-
 fingerToButton (('*',2) : ('*',1) : rest : [])
                 = EngPad : CapitalLetter tok : fingerToButton rest
