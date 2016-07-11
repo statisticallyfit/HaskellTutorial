@@ -16,7 +16,8 @@ more presses than digits in button get you back around to letters on button.
 
 type Token = Char
 type Presses = Int -- >= 1
-type FingerMoves = [(Token, Presses)]
+type FingerMove = (Token, Presses)
+type FingerMoveGroup = [FingerMove] -- a group of fingermoves for 1 letter/num/sign
 
 -- note distinguishing between uppercase and lower case so there is no more
 -- need to check in functions if the arg Token in Button is lower or uppercase.
@@ -32,7 +33,7 @@ data Button = NumPad | EngPad | Uppercase | Lowercase | Spacebar
             | Sign Token
             | Unknown -- for symbols outside space + . , ? ! #
             deriving (Eq, Show)
-type ButtonGroup = [Button]
+type ButtonGroup = [Button] -- note a group of buttons for 1 letter/num/sign
 data Phone = PhonePad [Button] deriving (Eq, Show)
 
 
@@ -104,7 +105,7 @@ getToken [Number n] = n
 getToken [Sign n] = n
 getToken [Spacebar] = ' '
 
--- EngPad = 2 presses to get to '^' char
+
 -- Lowercase or Uppercase = 1 press to press '*' char
 -- letter == depends on its location
 -- spacebar == press 0 two times.
@@ -114,16 +115,23 @@ getPresses [_, Sign n] = 2 + countKey n
 getPresses [Number _] = 1
 getPresses [Spacebar] = 2 -- press 0 two times. (knowing it is LETTER FORMAT)
 
-countKey k = 1 + head (catMaybes (map (elemIndex k) alphas))
-alphas = map snd keyPad
-makeTokenPress k = (fst $ head $ filter ((elem k) . snd) keyPad, countKey k)
+countKey :: Token -> Presses
+countKey tok = 1 + head (catMaybes (map (elemIndex tok) (map snd keyPad)))
 
-fingerToToken :: (Token, Presses) -> Token
-fingerToToken (tok, presses) = alphs !! (presses - 1)
+tokenWithPresses :: Token -> FingerMove
+tokenWithPresses tok = (fst $ head $ filter ((elem tok) . snd) keyPad, countKey tok)
+
+tokenFromPresses :: FingerMove -> Token
+tokenFromPresses (tok, presses) = alphs !! (presses - 1)
     where alphs = (snd $ head $ filter ((== tok) . fst) keyPad)
 
+keyPad :: [(Token, String)]
 keyPad = [('1',""),('2',"abc"),('3',"def"),('4',"ghi"),('5',"jkl"),('6',"mno"),
          ('7',"pqrs"),('8',"tuv"),('9',"wxyz"),('*',"^"),('0',"+ "), ('#',"#.,?!")]
+
+
+
+
 
 
 -- note returns just one set of puttons - not for whole sentence
@@ -137,13 +145,13 @@ tokenToButton tok
     | otherwise = Unknown : []
     where isSign t = elem t "+#.,?!"
 
-tokenToFinger :: Token -> FingerMoves
+tokenToFinger :: Token -> FingerMoveGroup
 tokenToFinger tok
-    | isUpper tok = ('*',1) : makeTokenPress tok : []
-    | isLower tok = makeTokenPress tok : []
+    | isUpper tok = ('*',1) : tokenWithPresses tok : []
+    | isLower tok = tokenWithPresses tok : []
     | isDigit tok = (tok, 1) : []
     | isSpace tok = ('0', 2) : []
-    | isSign tok  = ('*',2) : makeTokenPress tok : []
+    | isSign tok  = ('*',2) : tokenWithPresses tok : []
     | otherwise   = []
     where isSign t = elem t "+#.,?!"
 
@@ -151,9 +159,9 @@ tokenToFinger tok
 -- note converts one letter/num/sign worth of buttons into finger moves.
 -- note expects only one single digit at a time. If it's not a single digit, then
 -- the result char is not going to be the char form of the digit.
-buttonToFingers :: ButtonGroup -> FingerMoves
-buttonToFingers [Uppercase, Letter n] = ('*',1) : makeTokenPress n : []
-buttonToFingers [Lowercase, Letter n] = makeTokenPress n : []
+buttonToFingers :: ButtonGroup -> FingerMoveGroup
+buttonToFingers [Uppercase, Letter n] = ('*',1) : tokenWithPresses n : []
+buttonToFingers [Lowercase, Letter n] = tokenWithPresses n : []
 buttonToFingers [Number n] = (n, 1) : []
 buttonToFingers [Spacebar] = ('0',2) : []
 
@@ -165,7 +173,7 @@ fingerToButton :: FingerMoves -> ButtonGroup
 fingerToButton (('*',2) : (c,1) : rest) -- note extracting digit case (where p==1)
                     = NumPad : Number c : fingerToButton rest
 fingerToButton (('*',2) : (c,p) : rest)
-        = EngPad : Lowercase : Letter (fingerToToken (c,p)) : fingerToButton rest
+        = EngPad : Lowercase : Letter (tokenFromPresses (c,p)) : fingerToButton rest
 -}
 
 
