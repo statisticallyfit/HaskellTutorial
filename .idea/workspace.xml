@@ -28,8 +28,8 @@
       <file leaf-file-name="Phone.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter11_AlgebraicDataTypes/chapterExercises/Phone.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-0.94871795">
-              <caret line="138" column="0" selection-start-line="138" selection-start-column="0" selection-end-line="138" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.5226537">
+              <caret line="153" column="35" selection-start-line="153" selection-start-column="35" selection-end-line="153" selection-end-column="35" />
               <folding />
             </state>
           </provider>
@@ -840,12 +840,12 @@
       <workItem from="1467954896980" duration="29072000" />
       <workItem from="1468043278341" duration="17893000" />
       <workItem from="1468129412770" duration="9286000" />
-      <workItem from="1468215823015" duration="17625000" />
+      <workItem from="1468215823015" duration="19598000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="160441000" />
+    <option name="totallyTimeSpent" value="162414000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="1" width="798" height="782" extended-state="0" />
@@ -1192,8 +1192,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter11_AlgebraicDataTypes/chapterExercises/Phone.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.94871795">
-          <caret line="138" column="0" selection-start-line="138" selection-start-column="0" selection-end-line="138" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.5226537">
+          <caret line="153" column="35" selection-start-line="153" selection-start-column="35" selection-end-line="153" selection-end-column="35" />
           <folding />
         </state>
       </provider>

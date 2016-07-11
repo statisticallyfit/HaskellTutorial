@@ -5,28 +5,17 @@ import Data.List
 import Data.Maybe
 
 
-{-
-IMPORTANT RULES:
-1.(*) is capitalization of letter
-2. (0) is space bar
-3. to get a digit, push the buton as many times as digit's location. Do wraparound so
-more presses than digits in button get you back around to letters on button.
--}
-
 
 type Token = Char
 type Presses = Int -- >= 1
 type FingerMove = (Token, Presses)
-type FingerMoveGroup = [FingerMove] -- a group of fingermoves for 1 letter/num/sign
 
 -- note distinguishing between uppercase and lower case so there is no more
 -- need to check in functions if the arg Token in Button is lower or uppercase.
 -- note SwitchFormat refers to switching from letters + punctuation to numbers
 -- and vice versa. If before was nums, then say Switch, then switch to english.
--- note Lower in front means lower all the rest behind it. Same with Upper.
--- Same with NumPad and EngPad. Default remains, is not switched unless stated.
+-- note NumPad lasts until EngPad is specified. Rest that follow are in that format.
 -- example: To Swtich from capital to lower press * after a capital and vice versa.
--- example: to make uppercase letter, put Upper in list before a button letter.
 data Button = NumPad | EngPad | Spacebar
             | Number Token
             | CapitalLetter Token
@@ -34,20 +23,13 @@ data Button = NumPad | EngPad | Spacebar
             | Sign Token
             | Unknown -- for symbols outside space + . , ? ! #
             deriving (Eq, Show)
+
 type ButtonGroup = [Button] -- note a group of buttons for 1 letter/num/sign
+
 data Phone = PhonePad [Button] deriving (Eq, Show)
 
 
 
-{-
-  * --> capitalize -> ('*',1)
-  * -> lowercase -> ('*', 1) -- note switchcase to opposite than one before it.
-  ^ -> switch format -> ('*',2)
-  0 -> spacebar -> ('0',2)
-  + -> plus sign -> ('0', 1) -- once it is understood we are in LetterFOrmat
-  # -> questionmark -> ('#', 4)
-  The only symbols that exist are: space + . , ? ! #
--}
 phone :: Phone
 phone = PhonePad $ concat [numbers, lowLetters, uppLetters, signs, space]
     where numbers = map (Number $) (concatMap show [0..9])
@@ -56,18 +38,6 @@ phone = PhonePad $ concat [numbers, lowLetters, uppLetters, signs, space]
           signs = map (Sign $) "+.,?!#"
           space = [Spacebar]
 
-
-
-
-text :: [String]
-text =
-    ["The night sky is littered with stars.",
-     "Swallows sing in the grey dawn.",
-     "Morning dew settles on lilac bushes",
-     "Fog on the lake rises in golden splendor.",
-     "Traced frozen lava scoured by winds.",
-     "Glowing crystal caves.",
-     "*^+ #,.?!123abc123..?.abc"] -- tests switching
 
 phonePad :: IO()
 phonePad = putStr $ break ++ row123 ++ break ++ row456 ++ break ++
@@ -83,21 +53,20 @@ phonePad = putStr $ break ++ row123 ++ break ++ row456 ++ break ++
 Number format: ---------------------------------------------------------------------
 presses = 1 for each: 0..9
 no symbols at bottom of phone pad exist for numbers.
-
+^ -> switchformat -> ('*',2)
 
 Letter format: ---------------------------------------------------------------------
 RULE key: whenever there is a number in front during letter format, we ignore it
 and start counting presses from second non-number element (see '+' and ' ' below)
 
 presses example 'e' = ('3', 2) which means press 3 twice.
-* --> capitalize -> ('*',1)
+* --> capitalize -> ('*',1) -- note repeat if we need multiple capitalizers in row.
 ^ -> switch format -> ('*',2)
 0 -> spacebar -> ('0',2)
 + -> plus sign -> ('0', 1)
 ? -> questionmark -> ('#', 4)
 The only symbols that exist are: space + . , ? ! #
 -}
-
 -- note only expects lowercase letters
 -- throws error if given upppercase or if given numbers.
 countKey :: Token -> Presses
@@ -150,13 +119,13 @@ tokenToButton tok
 
 
 -- note after the capitalizing star, case returns to lowercase.
-tokenToFinger :: Token -> FingerMoveGroup
+tokenToFinger :: Token -> [FingerMove]
 tokenToFinger tok = buttonToFinger $ tokenToButton tok
 
 -- note converts one letter/num/sign worth of buttons into finger moves.
 -- note expects only one single digit at a time. If it's not a single digit, then
 -- the result char is not going to be the char form of the digit.
-buttonToFinger :: Button -> FingerMoveGroup
+buttonToFinger :: Button -> [FingerMove]
 buttonToFinger (CapitalLetter n) = ('*',1) : tokPress n : []
 buttonToFinger (Letter n) = tokPress n : []
 buttonToFinger (Sign n)   = tokPress n : []
@@ -174,22 +143,54 @@ buttonToToken (Spacebar) = ' '
 buttonToToken Unknown = undefined
 
 
-fingerToToken :: FingerMoveGroup -> Token
+fingerToToken :: [FingerMove] -> Token
 fingerToToken fingMoves
-    | (head fingMoves) == ('*',1) = toUpper convertedToken
+    | isCapital fingMoves = toUpper convertedToken
+    | isNum fingMoves = fst $ head fingMoves
     | otherwise = convertedToken
     where (c,p) = last fingMoves
           alphas = (snd $ head $ filter ((== c) . fst) keyPad)
           convertedToken = alphas !! (p - 1)
+          isCapital fs = head fs == ('*',1)
+          isNum fs = (snd $ head fs) == 1
 
 
-fingerToButton :: FingerMoveGroup -> Button
+fingerToButton :: [FingerMove] -> Button
 fingerToButton move = tokenToButton $ fingerToToken move
 
 
 
+---------------------------------------------------------------
+-- Now for the actual conversaion translators
+{-
+encodeSentence :: String -> [FingerMove]
+encodeSentence st
+    | containsNumbers st =
+    | otherwise = map tokenToFinger st
+    where containsNumber st = or $ map ((flip elem) st) "0123456789"
+-}
 
 
+decodeSentence :: [FingerMove] -> String
+decodeSentence = undefined
+
+
+text :: [String]
+text =
+    ["The night sky is littered with stars.",
+     "Swallows sing in the grey dawn.",
+     "Morning dew settles on lilac bushes",
+     "Fog on the lake rises in golden splendor.",
+     "Traced frozen lava scoured by winds.",
+     "Glowing crystal caves.",
+     "*^+ #,.?!123abc123..?.abc"] -- tests switching
+
+
+encodeConversation :: [String] -> [FingerMove]
+encodeConversation = undefined
+
+decodeConversation :: [FingerMove] -> [String]
+decodeConversation = undefined
 
 
 
