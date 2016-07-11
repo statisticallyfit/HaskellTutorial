@@ -145,35 +145,18 @@ buttonToToken Unknown = undefined
 
 fingerToToken :: [FingerMove] -> Token
 fingerToToken fingMoves
-    | isCapital fingMoves = toUpper convertedToken
-    | isNum fingMoves = fst $ head fingMoves
+    | (head fingMoves) == ('*',1) = toUpper convertedToken
     | otherwise = convertedToken
     where (c,p) = last fingMoves
           alphas = (snd $ head $ filter ((== c) . fst) keyPad)
           convertedToken = alphas !! (p - 1)
-          isCapital fs = head fs == ('*',1)
-          isNum fs = (snd $ head fs) == 1
 
 
 fingerToButton :: [FingerMove] -> Button
-fingerToButton move = tokenToButton $ fingerToToken move
-
-
+fingerToButton fms = tokenToButton $ fingerToToken fms
 
 ---------------------------------------------------------------
 -- Now for the actual conversaion translators
-{-
-encodeSentence :: String -> [FingerMove]
-encodeSentence st
-    | containsNumbers st =
-    | otherwise = map tokenToFinger st
-    where containsNumber st = or $ map ((flip elem) st) "0123456789"
--}
-
-
-decodeSentence :: [FingerMove] -> String
-decodeSentence = undefined
-
 
 text :: [String]
 text =
@@ -186,14 +169,11 @@ text =
      "*^+ #,.?!123abc123..?.abc"] -- tests switching
 
 
-encodeConversation :: [String] -> [FingerMove]
-encodeConversation = undefined
+encodeConversation :: [String] -> [[[FingerMove]]]
+encodeConversation convo = map (map tokenToFinger) convo
 
-decodeConversation :: [FingerMove] -> [String]
-decodeConversation = undefined
-
-
-
+decodeConversation :: [[[FingerMove]]] -> [String]
+decodeConversation fmss = map (map fingerToToken) fmss
 
 
 
