@@ -160,13 +160,13 @@ fingerToButton fms = tokenToButton $ fingerToToken fms
 
 text :: [String]
 text =
-    ["The night sky is littered with stars.",
-     "Swallows sing in the grey dawn.",
+    ["The night sky is littered with 1000s of stars.",
+     "40 Swallows sing in the grey dawn.",
      "Morning dew settles on lilac bushes",
      "Fog on the lake rises in golden splendor.",
-     "Traced frozen lava scoured by winds.",
+     "Traced frozen lava scoured by 10 winds.",
      "Glowing crystal caves.",
-     "*^+ #,.?!123abc123..?.abc"] -- tests switching
+     "+ #,.?!123abc123..?.abc"] -- tests switching
 
 
 encodeConversation :: [String] -> [[[FingerMove]]]
