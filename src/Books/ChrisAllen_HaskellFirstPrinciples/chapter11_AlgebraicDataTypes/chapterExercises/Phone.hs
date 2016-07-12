@@ -120,18 +120,6 @@ tokenToButton tok
 
 
 
-
--- postcondition: puts Engpad when we have english and NumPad when we have numbers.
-switchPad :: [Token] -> [Button]
-switchPad tokens = tail $ scanl detectShift EngPad tokens
-    where isEnglish y = isLetter y || isSign y
-          detectShift acc y
-            | isNumber y   = NumPad
-            | isEnglish y  = EngPad
-
-
-
-
 -- note after the capitalizing star, case returns to lowercase.
 tokenToFinger :: Token -> [FingerMove]
 tokenToFinger tok = buttonToFinger $ tokenToButton tok
@@ -189,7 +177,32 @@ fingerToButton
 
 -}
 ---------------------------------------------------------------
--- Now for the actual conversaion translators
+-- Now for the actual conversation translators
+
+
+-- postcondition: returns english separated from numbers.
+-- splitEnglishNums "a1b2c3d4f"   --- >    ["a","1","b","2","c","3","d","4","f"]
+-- splitEnglishNums "abc!#+.,+12!!3de!!f"   --- >    ["abc!#+.,+","12","!!","3","de!!f"]
+splitEnglishNums :: [Token] -> [[Token]]
+splitEnglishNums [] = []
+splitEnglishNums [t] = [[t]]
+splitEnglishNums ts@(fstTok : tokens)
+     = [takeRuns ts] ++ splitEnglishNums (dropRuns ts)
+    where takeRuns ts
+            | isNumber fstTok = takeWhile isNumber ts
+            | otherwise = takeWhile (not . isNumber) ts
+          dropRuns ts
+            | isNumber fstTok = dropWhile isNumber ts
+            | otherwise = dropWhile (not . isNumber) ts
+
+
+-- note converts multitude of tokens to buttons.
+buttonizer :: [Token] -> [Button]
+buttonizer tokens = concat $ map (map tokenToButton) engNums
+    where engNums = splitEnglishNums tokens
+
+
+
 
 text :: [String]
 text =
@@ -220,4 +233,19 @@ https://github.com/dwayne/haskell-programming/blob/master/ch11/Phone.hs
 https://github.com/vaughanj10/haskell_programming/blob/master/ch11/phone.hs
 https://github.com/juank-pa/haskell-training/blob/master/Chapter11/Exercises/DaPhone.hs
 
+-}
+
+
+
+
+
+--- nice scanl use:
+
+-- postcondition: puts Engpad when we have english and NumPad when we have numbers.
+{-switchPad :: [Token] -> [Button]
+switchPad tokens = tail $ scanl detectShift EngPad tokens
+    where isEnglish y = isLetter y || isSign y
+          detectShift acc y
+            | isNumber y   = NumPad
+            | isEnglish y  = EngPad
 -}
