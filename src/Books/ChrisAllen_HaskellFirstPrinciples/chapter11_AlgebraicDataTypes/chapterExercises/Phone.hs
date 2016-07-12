@@ -119,21 +119,18 @@ tokenToButton tok
     | otherwise = Unknown
 
 
---- NOTE GET BACK HERE TODAY, trying to separate numbers from english stuff.
--- how? splitAt ... foldl ... ?
+
+
+-- postcondition: puts Engpad when we have english and NumPad when we have numbers.
+switchPad :: [Token] -> [Button]
+switchPad tokens = tail $ scanl detectShift EngPad tokens
+    where isEnglish y = isLetter y || isSign y
+          detectShift acc y
+            | isNumber y   = NumPad
+            | isEnglish y  = EngPad
 
 
 
-
-manyTokensToButtons :: [Token] -> [Button]
-manyTokensToButtons tokens = tail $ scanl detectShift EngPad tokens
-    where detectShift acc y
-              | isEngPad acc && isDigit y = NumPad
-              | isNumPad acc && isLetter y = EngPad
-              | isNumPad acc && isDigit y = NumPad
-              | isEngPad acc && isLetter y = EngPad
-              where isNumPad acc = acc == NumPad
-                    isEngPad acc = acc == EngPad
 
 -- note after the capitalizing star, case returns to lowercase.
 tokenToFinger :: Token -> [FingerMove]
