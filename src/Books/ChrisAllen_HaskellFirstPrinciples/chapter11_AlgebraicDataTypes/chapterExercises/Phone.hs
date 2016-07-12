@@ -119,7 +119,6 @@ tokenToButton tok
     | otherwise = Unknown
 
 
-
 -- note after the capitalizing star, case returns to lowercase.
 tokenToFinger :: Token -> [FingerMove]
 tokenToFinger tok = buttonToFinger $ tokenToButton tok
@@ -136,13 +135,14 @@ buttonToFinger (Spacebar) = ('0',2) : []
 buttonToFinger Unknown    = []
 
 
-buttonToToken :: Button -> Token
-buttonToToken (CapitalLetter n) = toUpper n
-buttonToToken (Letter n) = n
-buttonToToken (Number n) = n
-buttonToToken (Sign n) = n
-buttonToToken (Spacebar) = ' '
-buttonToToken Unknown = undefined
+tokenizeButtons :: [Button] -> [Token]
+tokenizeButtons [] = []
+tokenizeButtons (CapitalLetter n : btns) = toUpper n : tokenizeButtons btns
+tokenizeButtons (Letter n : btns) = n : tokenizeButtons btns
+tokenizeButtons (Number n : btns) = n : tokenizeButtons btns
+tokenizeButtons (Sign n : btns) = n : tokenizeButtons btns
+tokenizeButtons (Spacebar : btns) = ' ' : tokenizeButtons btns
+tokenizeButtons (Unknown : _) = undefined
 
 -- fing - button - token
 --fingerToToken :: [FingerMove] -> Token
@@ -181,13 +181,13 @@ fingerToButton
 
 
 -- postcondition: returns english separated from numbers.
--- splitEnglishNums "a1b2c3d4f"   --- >    ["a","1","b","2","c","3","d","4","f"]
--- splitEnglishNums "abc!#+.,+12!!3de!!f"   --- >    ["abc!#+.,+","12","!!","3","de!!f"]
-splitEnglishNums :: [Token] -> [[Token]]
-splitEnglishNums [] = []
-splitEnglishNums [t] = [[t]]
-splitEnglishNums ts@(fstTok : tokens)
-     = [takeRuns ts] ++ splitEnglishNums (dropRuns ts)
+-- splitEngNums "a1b2c3d4f"   --- >    ["a","1","b","2","c","3","d","4","f"]
+-- splitEngNums "abc!#+.,+12!!3de!!f"   --- >    ["abc!#+.,+","12","!!","3","de!!f"]
+splitEngNums :: [Token] -> [[Token]]
+splitEngNums [] = []
+splitEngNums [t] = [[t]]
+splitEngNums ts@(fstTok : tokens)
+     = [takeRuns ts] ++ splitEngNums (dropRuns ts)
     where takeRuns ts
             | isNumber fstTok = takeWhile isNumber ts
             | otherwise = takeWhile (not . isNumber) ts
@@ -199,7 +199,7 @@ splitEnglishNums ts@(fstTok : tokens)
 -- note converts multitude of tokens to buttons.
 buttonizer :: [Token] -> [Button]
 buttonizer tokens = concat $ map (map tokenToButton) engNums
-    where engNums = splitEnglishNums tokens
+    where engNums = splitEngNums tokens
 
 
 
