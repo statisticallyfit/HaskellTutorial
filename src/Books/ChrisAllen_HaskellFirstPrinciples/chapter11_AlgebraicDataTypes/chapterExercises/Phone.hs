@@ -75,9 +75,13 @@ countKey tok = 1 + head (catMaybes (map (elemIndex tok) (map snd keyPad)))
 isSign :: Token -> Bool
 isSign tok = elem tok "+#.,?!"
 
-tokPress :: Token -> FingerMove
-tokPress tok = (fst $ head $ filter ((elem (toLower tok)) . snd) keyPad,
+ravel :: Token -> FingerMove
+ravel tok = (fst $ head $ filter ((elem (toLower tok)) . snd) keyPad,
                                       countKey (toLower tok))
+
+unravel :: FingerMove -> Token
+unravel (c,p) = alphas !! (p - 1)
+    where alphas = (snd $ head $ filter ((== c) . fst) keyPad)
 
 keyPad :: [(Token, String)]
 keyPad = [('1',""),('2',"abc"),('3',"def"),('4',"ghi"),('5',"jkl"),
@@ -112,7 +116,7 @@ getPresses _ = Nothing
 tokenButtonize :: [Token] -> [Button]
 tokenButtonize [] = []
 tokenButtonize ts@(fstTok : tokens)
-    | isUpper fstTok = CapitalLetter (toLower fstTok) : tokenButtonize tokens
+    | isUpper fstTok = CapitalLetter (toLower fstTok)
     | isLower fstTok = Letter fstTok : tokenButtonize tokens
     | isDigit fstTok = Number fstTok : tokenButtonize tokens
     | isSpace fstTok = Spacebar : tokenButtonize tokens
@@ -120,16 +124,17 @@ tokenButtonize ts@(fstTok : tokens)
     | otherwise = [Unknown]
 
 
-
+tokenFingerize :: [Token] -> [FingerMove]
+tokenFingerize tokens = buttonFingerize $ tokenButtonize tokens
 
 -- note converts one letter/num/sign worth of buttons into finger moves.
 -- note expects only one single digit at a time. If it's not a single digit, then
 -- the result char is not going to be the char form of the digit.
 buttonFingerize :: [Button] -> [FingerMove]
 buttonFingerize [] = []
-buttonFingerize (CapitalLetter n : btns) = ('*',1) : tokPress n : buttonFingerize btns
-buttonFingerize (Letter n : btns) = tokPress n : buttonFingerize btns
-buttonFingerize (Sign n : btns)   = tokPress n : buttonFingerize btns
+buttonFingerize (CapitalLetter n : btns) = ('*',1) : ravel n : buttonFingerize btns
+buttonFingerize (Letter n : btns) = ravel n : buttonFingerize btns
+buttonFingerize (Sign n : btns)   = ravel n : buttonFingerize btns
 buttonFingerize (Number n : btns) = (n, 1) : buttonFingerize btns
 buttonFingerize (Spacebar : btns) = ('0',2) : buttonFingerize btns
 buttonFingerize (Unknown : _)    = []
@@ -146,8 +151,20 @@ buttonTokenize (Spacebar : btns) = ' ' : buttonTokenize btns
 buttonTokenize (Unknown : _) = undefined
 
 
---fingerizeButtons :: [Button] -> [FingerMove]
---fingerizeButtons btns = concatMap buttonToFinger btns
+
+--fingersButtonize :: [FingerMove] -> [Button]
+
+
+--fingersTokenize :: [FingerMove] -> [Token]
+-- HELP it's spouting numbers in the middle of words - fix tokenButtonize with EngPad
+fingersTokenize [] = []
+fingersTokenize (('*',2):('*',1):(c,p):taps) = (toUpper $ unravel (c,p)) : fingersTokenize taps
+fingersTokenize (('*',2):(c,1):taps) = c : fingersTokenize taps
+fingersTokenize (('*',2):(c,p):taps) = unravel (c,p) : fingersTokenize taps
+fingersTokenize (('*',1):(c,p):taps) = (toUpper $ unravel (c,p)) : fingersTokenize taps
+fingersTokenize ((c,1):taps) = c : fingersTokenize taps
+fingersTokenize ((c,p):taps) = unravel (c,p) : fingersTokenize taps
+
 
 
 -- fing - button - token
