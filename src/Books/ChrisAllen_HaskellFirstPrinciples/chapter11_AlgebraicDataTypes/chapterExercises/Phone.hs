@@ -236,13 +236,8 @@ fingerButtonize taps = tokenButtonize $ fingerTokenize taps
 
 
 ---------------------------------------------------------------
--- Now for the actual conversation translators
 
-
-
-
-
-
+-- NOTE Now for the actual conversation translators
 
 
 
@@ -256,14 +251,14 @@ text =
      "Glowing crystal caves.",
      "+ #,.?!123abc123..?.abc"] -- tests switching
 
-{-
 
-encodeConversation :: [String] -> [[[FingerMove]]]
-encodeConversation convo = map (map tokenToFinger) convo
 
-decodeConversation :: [[[FingerMove]]] -> [String]
-decodeConversation fmss = map (map fingerToToken) fmss
--}
+encrypt :: [[Token]] -> [[FingerMove]]
+encrypt convo = map tokenFingerize convo
+
+decrypt :: [[FingerMove]] -> [[Token]]
+decrypt fmss = map fingerTokenize fmss
+
 
 
 
@@ -289,5 +284,5 @@ switchPad tokens = tail $ scanl detectShift EngPad tokens
     where isEnglish y = isLetter y || isSign y
           detectShift acc y
             | isNumber y   = NumPad
-            | isEnglish y  = EngPad
+            | isEnglish y  = EngPad 
 -}
