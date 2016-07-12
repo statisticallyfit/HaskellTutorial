@@ -257,25 +257,52 @@ mostPopularLetter txt = fst $ occs !! indexOfMax
 cost :: Token -> Presses
 cost token = totalTaps $ tokenFingerize [token]
 
+
 -- note gets the most popular letter throughout the whole conversation. [String]
 coolestLetter :: [[Token]] -> Char
 coolestLetter = mostPopularLetter . concat
- 
 
+
+-- note gets most oftenest word, ignores signs, numbers.
 coolestWord :: [[Token]] -> String
-coolestWord txt = txt !! indexOfMax
-    where ws = concat $ map words txt
-          wordOcc ws w = length $ elemIndices w ws
+coolestWord txt = fst $ occs !! indexOfMax
+    where isEng c = isSpace c || isLetter c
+          txt' = map (filter isEng) txt
+          ws = concat $ map words txt'
+          wordOcc ws w = (w, length $ elemIndices w ws)
           occs = (map $ wordOcc ws) ws
-          maxOcc = maximum occs
-          indexOfMax = fromJust $ findIndex (== maxOcc) occs
+          maxOcc = maximum $ map snd occs
+          indexOfMax = fromJust $ findIndex ((== maxOcc) . snd) occs
+
+
+-- note returns the first rarest word.
+rarestWord :: [[Token]] -> String
+rarestWord txt = fst $ occs !! indexOfMin
+    where isEng c = isSpace c || isLetter c
+          txt' = map (filter isEng) txt
+          ws = concat $ map words txt'
+          wordOcc ws w = (w, length $ elemIndices w ws)
+          occs = (map $ wordOcc ws) ws
+          minOcc = minimum $ map snd occs
+          indexOfMin = fromJust $ findIndex ((== minOcc) . snd) occs
+
 
 
 ---------------------------------------------------------------
 
 -- NOTE Now for the actual conversation translators
 
-
+convo :: [String]
+convo =
+    ["Wanna play 20 questions",
+    "Ya",
+    "U 1st haha",
+    "Lol ok. Have u ever tasted cotton candy lol",
+    "Lol ya",
+    "Wow ur cool haha. Ur turn",
+    "Ok. Do u think I am pretty Lol",
+    "Lol ya",
+    "Haha thanks just making sure rofl ur turn"]
 
 text :: [String]
 text =
