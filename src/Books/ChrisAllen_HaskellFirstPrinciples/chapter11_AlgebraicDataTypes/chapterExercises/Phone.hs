@@ -166,6 +166,7 @@ buttonTokenize (_ : btns) = buttonTokenize btns
 
 --fingersTokenize :: [FingerMove] -> [Token]
 -- HELP it's spouting numbers in the middle of words - fix tokenButtonize with EngPad
+{-
 fingersTokenize [] = []
 fingersTokenize (('*',2):('*',1):(c,p):taps) = (toUpper $ unravel (c,p)) : fingersTokenize taps
 fingersTokenize (('*',2):(c,1):taps) = c : fingersTokenize taps
@@ -173,13 +174,31 @@ fingersTokenize (('*',2):(c,p):taps) = unravel (c,p) : fingersTokenize taps
 fingersTokenize (('*',1):(c,p):taps) = (toUpper $ unravel (c,p)) : fingersTokenize taps
 fingersTokenize ((c,1):taps) = c : fingersTokenize taps
 fingersTokenize ((c,p):taps) = unravel (c,p) : fingersTokenize taps
+-}
 
 
 
+fingersTokenize :: [FingerMove] -> [Token]
+fingersTokenize taps = tokLabels (labelTaps taps)
+
+tokLabels :: [(Button, [FingerMove])] -> [Token]
+tokLabels [] = []
+tokLabels ((NumPad, tps) : rest) = (map fst tps) ++ tokLabels rest
+tokLabels ((EngPad, tps) : rest)
+    | noCapitals tps = (map unravel tps) ++ tokLabels rest
+    | otherwise
+    where noCapitals ts = (length $ filter (== ('*',1)) ts) == 0
 
 
-fingersButtonize :: [FingerMove] -> [Button]
-fingersButtonize [] = []
+labelTaps :: [FingerMove] -> [(Button, [FingerMove])]
+labelTaps taps = map label identifiedTaps
+    where identifiedTaps = zip (map isNumChunk (chunk taps)) (chunk taps)
+          label (b, tps)
+            | b = (NumPad, tail tps)
+            | otherwise = (EngPad, tail tps)
+
+{-
+
 fingersButtonize (('*',2):('*',1):(c,p):taps)
         = EngPad : (CapitalLetter $ unravel (c,p)) : fingersButtonize taps
 fingersButtonize (('*',2):(c,1):taps)
@@ -195,40 +214,25 @@ fingersButtonize ((c,p):taps)
     | isSign tok = EngPad : Sign tok : fingersButtonize taps
     | otherwise = EngPad : Letter tok : fingersButtonize taps
     where tok = unravel (c,p)
-
-
--- fing - button - token
---fingerToToken :: [FingerMove] -> Token
-{-
-fingerToToken fingMoves
-    | (head fingMoves) == ('*',1) = toUpper convertedToken
-    | otherwise = convertedToken
-    where (c,p) = last fingMoves
-          alphas = (snd $ head $ filter ((== c) . fst) keyPad)
-          convertedToken = alphas !! (p - 1)
 -}
 
--- fing - button
-{-fingersToButtons :: [FingerMove] -> [Button]
-fingersToButtons [] = []
-fingersToButtons (('*',2) : rest) = Switch : fingersToButtons rest
-fingersToButtons ((c,1) : rest) = Number c : fingersToButtons rest
---fingersToButtons (('*',1) : rest) = CapitalLetter tok : fingersToButtons rest
-fingersToButtons ((c,p) : rest) = Letter tok : fingersToButtons rest
-    where --(c,p) = head rest
-          alphas = (snd $ head $ filter ((== c) . fst) keyPad)
-          tok = alphas !! (p - 1)-}
-{-
-fingerToButton (('*',2) : ('*',1) : rest : [])
-                = EngPad : CapitalLetter tok : fingerToButton rest
-fingerToButton (('*',2) : (c,1) : rest : [])
-                = NumPad : Number c : fingerToButton rest
-fingerToButton (('*',2) : (c,p) : rest : [])
-                = EngPad : Letter tok : fingerToButton rest
-fingerToButton
 
+chunk :: [FingerMove] -> [[FingerMove]]
+chunk [] = []
+chunk taps
+    | head taps == switch = [switch : runs (tail taps)] ++ chunk (rest (tail taps))
+    | otherwise = [runs taps] ++ chunk (rest taps)
+    where switch = ('*',2)
+          runs ts = takeWhile (/= switch) ts
+          rest ts = dropWhile (/= switch) ts
 
--}
+isNumChunk :: [FingerMove] -> Bool
+isNumChunk [] = False
+isNumChunk taps
+    | length taps == 1 = if ((snd $ head taps) == 1) then True else False
+    | head taps == switch = isNumChunk (tail taps)
+    | otherwise = and $ map ((== 1) . snd) taps
+    where switch = ('*',2)
 ---------------------------------------------------------------
 -- Now for the actual conversation translators
 
