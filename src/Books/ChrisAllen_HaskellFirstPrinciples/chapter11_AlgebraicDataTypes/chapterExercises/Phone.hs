@@ -173,8 +173,10 @@ getPresses (Letter n) = Just $ countKey n
 getPresses (CapitalLetter n) = Just $ 1 + countKey n
 getPresses (Sign n) = Just $ countKey n
 getPresses (Number _) = Just 1
-getPresses (Spacebar) = Just 2 -- press 0 two times. (knowing it is LETTER FORMAT)
-getPresses _ = Nothing
+getPresses Spacebar = Just 2 -- press 0 two times. (knowing it is LETTER FORMAT)
+getPresses EngPad = Just 1
+getPresses NumPad = Just 1
+getPresses Unknown = Nothing
 
 
 -- note returns just one set of puttons - not for whole sentence
@@ -234,6 +236,14 @@ fingerButtonize taps = tokenButtonize $ fingerTokenize taps
 
 
 
+-- note sums the taps for each finger move
+totalTaps :: [FingerMove] -> Presses
+totalTaps = sum . catMaybes . map getPresses . fingerButtonize
+
+{-
+cost :: [FingerMove] -> Presses
+cost taps =-}
+
 
 ---------------------------------------------------------------
 
@@ -274,8 +284,6 @@ https://github.com/juank-pa/haskell-training/blob/master/Chapter11/Exercises/DaP
 
 
 
-
-
 --- nice scanl use:
 
 -- postcondition: puts Engpad when we have english and NumPad when we have numbers.
@@ -284,5 +292,5 @@ switchPad tokens = tail $ scanl detectShift EngPad tokens
     where isEnglish y = isLetter y || isSign y
           detectShift acc y
             | isNumber y   = NumPad
-            | isEnglish y  = EngPad 
+            | isEnglish y  = EngPad
 -}
