@@ -240,10 +240,24 @@ fingerButtonize taps = tokenButtonize $ fingerTokenize taps
 totalTaps :: [FingerMove] -> Presses
 totalTaps = sum . catMaybes . map getPresses . fingerButtonize
 
+-- note returns the first most popular letter (letter that occurs most often).
+-- if all letters are different or have a tie, returns first letter that has a tie.
+mostPopularLetter :: String -> Token
+mostPopularLetter txt = toLower $ txt !! indexOfMax
+    where indexOfMax = fromJust $ findIndex (== (maximum occs)) occs
+          occs = (map $ numOcc txt) alphabet
+          numOcc xs x = length $ elemIndices x xs
+          alphabet = ['a'..'z'] ++ ['A'..'Z']
+
 {-
 cost :: [FingerMove] -> Presses
 cost taps =-}
 
+coolestLetter :: [[Token]] -> Char
+coolestLetter = undefined
+
+coolestWord :: [[Token]] -> String
+coolestWord = undefined
 
 ---------------------------------------------------------------
 
