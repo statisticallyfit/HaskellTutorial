@@ -260,7 +260,7 @@ cost token = totalTaps $ tokenFingerize [token]
 -- note gets the most popular letter throughout the whole conversation. [String]
 coolestLetter :: [[Token]] -> Char
 coolestLetter = mostPopularLetter . concat
-
+ 
 
 coolestWord :: [[Token]] -> String
 coolestWord txt = txt !! indexOfMax
