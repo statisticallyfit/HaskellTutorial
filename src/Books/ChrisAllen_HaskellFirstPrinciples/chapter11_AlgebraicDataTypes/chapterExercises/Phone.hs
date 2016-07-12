@@ -69,6 +69,14 @@ The only symbols that exist are: space + . , ? ! #
 -}
 -- note only expects lowercase letters
 -- throws error if given upppercase or if given numbers.
+
+
+
+------------------------------------------------------------------------------------------
+
+-- NOTE the utility functions
+
+
 countKey :: Token -> Presses
 countKey tok = 1 + head (catMaybes (map (elemIndex tok) (map snd keyPad)))
 
@@ -89,7 +97,64 @@ keyPad = [('1',""),('2',"abc"),('3',"def"),('4',"ghi"),('5',"jkl"),
           ('0',"+ "), ('#',"#.,?!")]
 
 
+tokLabels :: [(Button, [FingerMove])] -> [Token]
+tokLabels [] = []
+tokLabels ((NumPad, tps) : rest) = (map fst tps) ++ tokLabels rest
+tokLabels ((EngPad, tps) : rest)
+    | noCapitals tps = (map unravel tps) ++ tokLabels rest
+    | otherwise = parseCapitals tps ++ tokLabels rest
+    where noCapitals ts = (length $ filter (== ('*',1)) ts) == 0
 
+
+parseCapitals :: [FingerMove] -> [Token]
+parseCapitals [] = []
+parseCapitals (('*',1) : (c,p) : rest) = (toUpper $ unravel (c,p)) : parseCapitals rest
+parseCapitals ((c,p) : rest) = (unravel (c,p)) : parseCapitals rest
+
+
+labelTaps :: [FingerMove] -> [(Button, [FingerMove])]
+labelTaps taps = map label identifiedTaps
+    where identifiedTaps = zip (map isNumChunk (chunk taps)) (chunk taps)
+          label (b, tps)
+            | b = (NumPad, tail tps)
+            | otherwise = (EngPad, tail tps)
+
+chunk :: [FingerMove] -> [[FingerMove]]
+chunk [] = []
+chunk taps
+    | head taps == switch = [switch : runs (tail taps)] ++ chunk (rest (tail taps))
+    | otherwise = [runs taps] ++ chunk (rest taps)
+    where switch = ('*',2)
+          runs ts = takeWhile (/= switch) ts
+          rest ts = dropWhile (/= switch) ts
+
+isNumChunk :: [FingerMove] -> Bool
+isNumChunk [] = False
+isNumChunk taps
+    | length taps == 1 = if ((snd $ head taps) == 1) then True else False
+    | head taps == switch = isNumChunk (tail taps)
+    | otherwise = and $ map ((== 1) . snd) taps
+    where switch = ('*',2)
+
+-- postcondition: returns english separated from numbers.
+-- splitEngNums "a1b2c3d4f"   --- >    ["a","1","b","2","c","3","d","4","f"]
+-- splitEngNums "abc!#+.,+12!!3de!!f"   --- >    ["abc!#+.,+","12","!!","3","de!!f"]
+splitEngNums :: [Token] -> [[Token]]
+splitEngNums [] = []
+splitEngNums [t] = [[t]]
+splitEngNums ts@(fstTok : tokens)
+     = [takeRuns ts] ++ splitEngNums (dropRuns ts)
+    where takeRuns ts
+            | isNumber fstTok = takeWhile isNumber ts
+            | otherwise = takeWhile (not . isNumber) ts
+          dropRuns ts
+            | isNumber fstTok = dropWhile isNumber ts
+            | otherwise = dropWhile (not . isNumber) ts
+
+
+------------------------------------------------------------------------------------------
+
+-- NOTE The communication functions
 
 getToken :: Button -> Maybe Token
 getToken (Number n) = Just n
@@ -133,8 +198,6 @@ tokenFingerize :: [Token] -> [FingerMove]
 tokenFingerize tokens = buttonFingerize $ tokenButtonize tokens
 
 
-
-
 -- note converts one letter/num/sign worth of buttons into finger moves.
 -- note expects only one single digit at a time. If it's not a single digit, then
 -- the result char is not going to be the char form of the digit.
@@ -161,96 +224,21 @@ buttonTokenize (Unknown : _) = undefined
 buttonTokenize (_ : btns) = buttonTokenize btns
 
 
---fingersButtonize :: [FingerMove] -> [Button]
+
+fingerTokenize :: [FingerMove] -> [Token]
+fingerTokenize taps = tokLabels (labelTaps taps)
 
 
---fingersTokenize :: [FingerMove] -> [Token]
--- HELP it's spouting numbers in the middle of words - fix tokenButtonize with EngPad
-{-
-fingersTokenize [] = []
-fingersTokenize (('*',2):('*',1):(c,p):taps) = (toUpper $ unravel (c,p)) : fingersTokenize taps
-fingersTokenize (('*',2):(c,1):taps) = c : fingersTokenize taps
-fingersTokenize (('*',2):(c,p):taps) = unravel (c,p) : fingersTokenize taps
-fingersTokenize (('*',1):(c,p):taps) = (toUpper $ unravel (c,p)) : fingersTokenize taps
-fingersTokenize ((c,1):taps) = c : fingersTokenize taps
-fingersTokenize ((c,p):taps) = unravel (c,p) : fingersTokenize taps
--}
+fingerButtonize :: [FingerMove] -> [Button]
+fingerButtonize taps = tokenButtonize $ fingerTokenize taps
 
 
 
-fingersTokenize :: [FingerMove] -> [Token]
-fingersTokenize taps = tokLabels (labelTaps taps)
 
-tokLabels :: [(Button, [FingerMove])] -> [Token]
-tokLabels [] = []
-tokLabels ((NumPad, tps) : rest) = (map fst tps) ++ tokLabels rest
-tokLabels ((EngPad, tps) : rest)
-    | noCapitals tps = (map unravel tps) ++ tokLabels rest
-    | otherwise
-    where noCapitals ts = (length $ filter (== ('*',1)) ts) == 0
-
-
-labelTaps :: [FingerMove] -> [(Button, [FingerMove])]
-labelTaps taps = map label identifiedTaps
-    where identifiedTaps = zip (map isNumChunk (chunk taps)) (chunk taps)
-          label (b, tps)
-            | b = (NumPad, tail tps)
-            | otherwise = (EngPad, tail tps)
-
-{-
-
-fingersButtonize (('*',2):('*',1):(c,p):taps)
-        = EngPad : (CapitalLetter $ unravel (c,p)) : fingersButtonize taps
-fingersButtonize (('*',2):(c,1):taps)
-        = NumPad : Number c : fingersButtonize taps
-fingersButtonize (('*',2):(c,p):taps)
-    | isSign tok = EngPad : Sign tok : fingersButtonize taps
-    | otherwise = EngPad : Letter tok : fingersButtonize taps
-    where tok = unravel (c,p)
-fingersButtonize (('*',1):(c,p):taps)
-        = (CapitalLetter $ unravel (c,p)) : fingersButtonize taps
-fingersButtonize ((c,1):taps) = Number c : fingersButtonize taps
-fingersButtonize ((c,p):taps)
-    | isSign tok = EngPad : Sign tok : fingersButtonize taps
-    | otherwise = EngPad : Letter tok : fingersButtonize taps
-    where tok = unravel (c,p)
--}
-
-
-chunk :: [FingerMove] -> [[FingerMove]]
-chunk [] = []
-chunk taps
-    | head taps == switch = [switch : runs (tail taps)] ++ chunk (rest (tail taps))
-    | otherwise = [runs taps] ++ chunk (rest taps)
-    where switch = ('*',2)
-          runs ts = takeWhile (/= switch) ts
-          rest ts = dropWhile (/= switch) ts
-
-isNumChunk :: [FingerMove] -> Bool
-isNumChunk [] = False
-isNumChunk taps
-    | length taps == 1 = if ((snd $ head taps) == 1) then True else False
-    | head taps == switch = isNumChunk (tail taps)
-    | otherwise = and $ map ((== 1) . snd) taps
-    where switch = ('*',2)
 ---------------------------------------------------------------
 -- Now for the actual conversation translators
 
 
--- postcondition: returns english separated from numbers.
--- splitEngNums "a1b2c3d4f"   --- >    ["a","1","b","2","c","3","d","4","f"]
--- splitEngNums "abc!#+.,+12!!3de!!f"   --- >    ["abc!#+.,+","12","!!","3","de!!f"]
-splitEngNums :: [Token] -> [[Token]]
-splitEngNums [] = []
-splitEngNums [t] = [[t]]
-splitEngNums ts@(fstTok : tokens)
-     = [takeRuns ts] ++ splitEngNums (dropRuns ts)
-    where takeRuns ts
-            | isNumber fstTok = takeWhile isNumber ts
-            | otherwise = takeWhile (not . isNumber) ts
-          dropRuns ts
-            | isNumber fstTok = dropWhile isNumber ts
-            | otherwise = dropWhile (not . isNumber) ts
 
 
 
