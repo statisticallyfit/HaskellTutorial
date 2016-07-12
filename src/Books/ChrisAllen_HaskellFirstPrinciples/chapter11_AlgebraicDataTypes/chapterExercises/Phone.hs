@@ -129,8 +129,11 @@ tokenButtonize tokens = concatMap classify engNums
             | otherwise = Unknown
 
 
---tokenFingerize :: [Token] -> [FingerMove]
---tokenFingerize tokens = buttonFingerize $ tokenButtonize tokens
+tokenFingerize :: [Token] -> [FingerMove]
+tokenFingerize tokens = buttonFingerize $ tokenButtonize tokens
+
+
+
 
 -- note converts one letter/num/sign worth of buttons into finger moves.
 -- note expects only one single digit at a time. If it's not a single digit, then
@@ -143,6 +146,7 @@ buttonFingerize (Sign n : btns)   = ravel n : buttonFingerize btns
 buttonFingerize (Number n : btns) = (n, 1) : buttonFingerize btns
 buttonFingerize (Spacebar : btns) = ('0',2) : buttonFingerize btns
 buttonFingerize (Unknown : _)    = []
+buttonFingerize (_ : btns) = ('*',2) : buttonFingerize btns
 
 
 -- note converts sentence worth of buttons into tokens.
@@ -170,6 +174,27 @@ fingersTokenize (('*',1):(c,p):taps) = (toUpper $ unravel (c,p)) : fingersTokeni
 fingersTokenize ((c,1):taps) = c : fingersTokenize taps
 fingersTokenize ((c,p):taps) = unravel (c,p) : fingersTokenize taps
 
+
+
+
+
+fingersButtonize :: [FingerMove] -> [Button]
+fingersButtonize [] = []
+fingersButtonize (('*',2):('*',1):(c,p):taps)
+        = EngPad : (CapitalLetter $ unravel (c,p)) : fingersButtonize taps
+fingersButtonize (('*',2):(c,1):taps)
+        = NumPad : Number c : fingersButtonize taps
+fingersButtonize (('*',2):(c,p):taps)
+    | isSign tok = EngPad : Sign tok : fingersButtonize taps
+    | otherwise = EngPad : Letter tok : fingersButtonize taps
+    where tok = unravel (c,p)
+fingersButtonize (('*',1):(c,p):taps)
+        = (CapitalLetter $ unravel (c,p)) : fingersButtonize taps
+fingersButtonize ((c,1):taps) = Number c : fingersButtonize taps
+fingersButtonize ((c,p):taps)
+    | isSign tok = EngPad : Sign tok : fingersButtonize taps
+    | otherwise = EngPad : Letter tok : fingersButtonize taps
+    where tok = unravel (c,p)
 
 
 -- fing - button - token
