@@ -115,17 +115,22 @@ getPresses _ = Nothing
 -- note returns just one set of puttons - not for whole sentence
 tokenButtonize :: [Token] -> [Button]
 tokenButtonize [] = []
-tokenButtonize ts@(fstTok : tokens)
-    | isUpper fstTok = CapitalLetter (toLower fstTok)
-    | isLower fstTok = Letter fstTok : tokenButtonize tokens
-    | isDigit fstTok = Number fstTok : tokenButtonize tokens
-    | isSpace fstTok = Spacebar : tokenButtonize tokens
-    | isSign fstTok  = Sign fstTok : tokenButtonize tokens
-    | otherwise = [Unknown]
+tokenButtonize tokens = concatMap classify engNums
+    where engNums = splitEngNums tokens
+          classify tokPiece
+            | isNumber $ head tokPiece = NumPad : (map tokToBtn tokPiece)
+            | otherwise = EngPad : (map tokToBtn tokPiece)
+          tokToBtn tok
+            | isUpper tok = CapitalLetter (toLower tok)
+            | isLower tok = Letter tok
+            | isDigit tok = Number tok
+            | isSpace tok = Spacebar
+            | isSign tok  = Sign tok
+            | otherwise = Unknown
 
 
-tokenFingerize :: [Token] -> [FingerMove]
-tokenFingerize tokens = buttonFingerize $ tokenButtonize tokens
+--tokenFingerize :: [Token] -> [FingerMove]
+--tokenFingerize tokens = buttonFingerize $ tokenButtonize tokens
 
 -- note converts one letter/num/sign worth of buttons into finger moves.
 -- note expects only one single digit at a time. If it's not a single digit, then
@@ -149,7 +154,7 @@ buttonTokenize (Number n : btns) = n : buttonTokenize btns
 buttonTokenize (Sign n : btns) = n : buttonTokenize btns
 buttonTokenize (Spacebar : btns) = ' ' : buttonTokenize btns
 buttonTokenize (Unknown : _) = undefined
-
+buttonTokenize (_ : btns) = buttonTokenize btns
 
 
 --fingersButtonize :: [FingerMove] -> [Button]
