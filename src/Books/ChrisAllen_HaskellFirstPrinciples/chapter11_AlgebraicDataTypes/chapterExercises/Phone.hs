@@ -109,40 +109,46 @@ getPresses _ = Nothing
 
 
 -- note returns just one set of puttons - not for whole sentence
-tokenToButton :: Token -> Button
-tokenToButton tok
-    | isUpper tok = CapitalLetter (toLower tok)
-    | isLower tok = Letter tok
-    | isDigit tok = Number tok
-    | isSpace tok = Spacebar
-    | isSign tok  = Sign tok
-    | otherwise = Unknown
+tokenButtonize :: [Token] -> [Button]
+tokenButtonize [] = []
+tokenButtonize ts@(fstTok : tokens)
+    | isUpper fstTok = CapitalLetter (toLower fstTok) : tokenButtonize tokens
+    | isLower fstTok = Letter fstTok : tokenButtonize tokens
+    | isDigit fstTok = Number fstTok : tokenButtonize tokens
+    | isSpace fstTok = Spacebar : tokenButtonize tokens
+    | isSign fstTok  = Sign fstTok : tokenButtonize tokens
+    | otherwise = [Unknown]
 
 
--- note after the capitalizing star, case returns to lowercase.
-tokenToFinger :: Token -> [FingerMove]
-tokenToFinger tok = buttonToFinger $ tokenToButton tok
+
 
 -- note converts one letter/num/sign worth of buttons into finger moves.
 -- note expects only one single digit at a time. If it's not a single digit, then
 -- the result char is not going to be the char form of the digit.
-buttonToFinger :: Button -> [FingerMove]
-buttonToFinger (CapitalLetter n) = ('*',1) : tokPress n : []
-buttonToFinger (Letter n) = tokPress n : []
-buttonToFinger (Sign n)   = tokPress n : []
-buttonToFinger (Number n) = (n, 1) : []
-buttonToFinger (Spacebar) = ('0',2) : []
-buttonToFinger Unknown    = []
+buttonFingerize :: [Button] -> [FingerMove]
+buttonFingerize [] = []
+buttonFingerize (CapitalLetter n : btns) = ('*',1) : tokPress n : buttonFingerize btns
+buttonFingerize (Letter n : btns) = tokPress n : buttonFingerize btns
+buttonFingerize (Sign n : btns)   = tokPress n : buttonFingerize btns
+buttonFingerize (Number n : btns) = (n, 1) : buttonFingerize btns
+buttonFingerize (Spacebar : btns) = ('0',2) : buttonFingerize btns
+buttonFingerize (Unknown : _)    = []
 
 
-tokenizeButtons :: [Button] -> [Token]
-tokenizeButtons [] = []
-tokenizeButtons (CapitalLetter n : btns) = toUpper n : tokenizeButtons btns
-tokenizeButtons (Letter n : btns) = n : tokenizeButtons btns
-tokenizeButtons (Number n : btns) = n : tokenizeButtons btns
-tokenizeButtons (Sign n : btns) = n : tokenizeButtons btns
-tokenizeButtons (Spacebar : btns) = ' ' : tokenizeButtons btns
-tokenizeButtons (Unknown : _) = undefined
+-- note converts sentence worth of buttons into tokens.
+buttonTokenize :: [Button] -> [Token]
+buttonTokenize [] = []
+buttonTokenize (CapitalLetter n : btns) = toUpper n : buttonTokenize btns
+buttonTokenize (Letter n : btns) = n : buttonTokenize btns
+buttonTokenize (Number n : btns) = n : buttonTokenize btns
+buttonTokenize (Sign n : btns) = n : buttonTokenize btns
+buttonTokenize (Spacebar : btns) = ' ' : buttonTokenize btns
+buttonTokenize (Unknown : _) = undefined
+
+
+--fingerizeButtons :: [Button] -> [FingerMove]
+--fingerizeButtons btns = concatMap buttonToFinger btns
+
 
 -- fing - button - token
 --fingerToToken :: [FingerMove] -> Token
@@ -196,10 +202,7 @@ splitEngNums ts@(fstTok : tokens)
             | otherwise = dropWhile (not . isNumber) ts
 
 
--- note converts multitude of tokens to buttons.
-buttonizer :: [Token] -> [Button]
-buttonizer tokens = concat $ map (map tokenToButton) engNums
-    where engNums = splitEngNums tokens
+
 
 
 
