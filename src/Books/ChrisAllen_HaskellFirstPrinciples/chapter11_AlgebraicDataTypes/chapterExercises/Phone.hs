@@ -174,8 +174,8 @@ getPresses (CapitalLetter n) = Just $ 1 + countKey n
 getPresses (Sign n) = Just $ countKey n
 getPresses (Number _) = Just 1
 getPresses Spacebar = Just 2 -- press 0 two times. (knowing it is LETTER FORMAT)
-getPresses EngPad = Just 1
-getPresses NumPad = Just 1
+getPresses EngPad = Just 2 -- since we press ('*',2)
+getPresses NumPad = Just 2
 getPresses Unknown = Nothing
 
 
@@ -239,25 +239,37 @@ fingerButtonize taps = tokenButtonize $ fingerTokenize taps
 -- note sums the taps for each finger move
 totalTaps :: [FingerMove] -> Presses
 totalTaps = sum . catMaybes . map getPresses . fingerButtonize
+-- or sum .  map snd
 
 -- note returns the first most popular letter (letter that occurs most often).
 -- if all letters are different or have a tie, returns first letter that has a tie.
+-- note ignores any non-letters.
 mostPopularLetter :: String -> Token
-mostPopularLetter txt = toLower $ txt !! indexOfMax
-    where indexOfMax = fromJust $ findIndex (== (maximum occs)) occs
-          occs = (map $ numOcc txt) alphabet
-          numOcc xs x = length $ elemIndices x xs
-          alphabet = ['a'..'z'] ++ ['A'..'Z']
+mostPopularLetter txt = fst $ occs !! indexOfMax
+    where txt' = map toLower (filter isLetter txt)
+          letterOcc xs x = (x, length $ elemIndices x xs)
+          occs = (map $ letterOcc txt') txt'
+          maxOcc = maximum $ map snd occs
+          indexOfMax = fromJust $ findIndex ((== maxOcc) . snd) occs
 
-{-
-cost :: [FingerMove] -> Presses
-cost taps =-}
 
+-- note gets num taps required to press a given token.
+cost :: Token -> Presses
+cost token = totalTaps $ tokenFingerize [token]
+
+-- note gets the most popular letter throughout the whole conversation. [String]
 coolestLetter :: [[Token]] -> Char
-coolestLetter = undefined
+coolestLetter = mostPopularLetter . concat
+
 
 coolestWord :: [[Token]] -> String
-coolestWord = undefined
+coolestWord txt = txt !! indexOfMax
+    where ws = concat $ map words txt
+          wordOcc ws w = length $ elemIndices w ws
+          occs = (map $ wordOcc ws) ws
+          maxOcc = maximum occs
+          indexOfMax = fromJust $ findIndex (== maxOcc) occs
+
 
 ---------------------------------------------------------------
 
