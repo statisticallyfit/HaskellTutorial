@@ -44,7 +44,7 @@ phone = putStr $ break ++ row123 ++ break ++ row456 ++ break ++
 -- the * tuple so that pressing * twice gives the exp ^ char.
 keyPad :: [(Token, String)]
 keyPad = [('1',"1"),('2',"abc2"),('3',"def3"),('4',"ghi4"),('5',"jkl5"),
-          ('6',"mno6"), ('7',"pqrs7"),('8',"tuv8"),('9',"wxyz9"),('0',"+ "),
+          ('6',"mno6"), ('7',"pqrs7"),('8',"tuv8"),('9',"wxyz9"),('0',"+ 0"),
           ('*'," ^"),('#',"#.,?!")]
 
 
@@ -88,6 +88,8 @@ ravel tok = (fst $ head $ filter ((elem tok') . snd) keyPad, presses tok')
 
 -- postcondition inverse of ravel - returns token from finger move - does not account for
 -- switching pads nor capitals
+-- note it is incorrect but unravel ('*',1) returns ' ' (spacebar) but that is supposed
+-- to be the result for ('0',2) only.
 unravel :: FingerMove -> Token
 unravel (c,p) = alphas !! (p - 1)
     where alphas = (snd $ head $ filter ((== c) . fst) keyPad)
@@ -98,30 +100,6 @@ unravel (c,p) = alphas !! (p - 1)
 
 -- NOTE The communication functions
 
-{-
--- note returns Nothing for EngPad and NumPad since we don't show them in Tokens.
-getToken :: Button -> Maybe Token
-getToken (Number n) = Just n
-getToken (Sign n) = Just n
-getToken (Letter n) = Just n
-getToken (CapitalLetter n) = Just $ toUpper n
-getToken (Spacebar) = Just ' '
-getToken _ = Nothing
-
-
--- Lowercase or Uppercase = 1 press to press '*' char
--- letter == depends on its location
--- spacebar == press 0 two times.
-getPresses :: Button -> Maybe Presses
-getPresses (Letter n) = Just $ presses n
-getPresses (CapitalLetter n) = Just $ 1 + presses n
-getPresses (Sign n) = Just $ presses n
-getPresses (Number _) = Just 1
-getPresses Spacebar = Just 2 -- press 0 two times. (knowing it is LETTER FORMAT)
-getPresses EngPad = Just 2 -- since we press ('*',2)
-getPresses NumPad = Just 2
-getPresses Unknown = Nothing
--}
 
 
 -- note returns sentence's worth of buttons.

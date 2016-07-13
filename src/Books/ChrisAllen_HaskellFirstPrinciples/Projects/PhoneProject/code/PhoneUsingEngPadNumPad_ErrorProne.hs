@@ -6,6 +6,11 @@ import Data.Maybe
 
 
 
+--- HELP HELP HELP this copy version is error-prone because "aaa" --> "222" when
+-- going through the finger-token wringer.
+
+
+
 type Token = Char
 type Text = [[Token]]
 type Presses = Int -- >= 1

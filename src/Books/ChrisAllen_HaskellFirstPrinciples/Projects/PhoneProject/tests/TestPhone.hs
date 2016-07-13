@@ -47,6 +47,7 @@ testIdentityTokenFinger
 
     it "finger -> token -> finger should be true" $ property $
         \fngs -> if doesOccur fngs fngsAllowed
+                    && isNotCapitalize fngs
                  then (tokenFingerize . fingerTokenize) fngs == (fngs :: [FingerMove])
                  else True
 
@@ -54,6 +55,7 @@ testIdentityTokenFinger
         \toks -> if doesOccur toks toksAllowed
                  then (fingerTokenize . tokenFingerize) toks == (toks :: [Token])
                  else True
+    where isNotCapitalize fngs = if fngs == [] then True else head fngs /= ('*',1)
 
 
 testIdentityFingerButton :: SpecWith ()
@@ -62,6 +64,7 @@ testIdentityFingerButton
 
     it "finger -> button -> finger should be true" $ property $
         \fngs -> if doesOccur fngs fngsAllowed
+                    && isNotCapitalize fngs
                  then (buttonFingerize . fingerButtonize) fngs == (fngs :: [FingerMove])
                  else True
 
@@ -70,7 +73,7 @@ testIdentityFingerButton
                   then (fingerButtonize . buttonFingerize) btns == (btns :: [Button])
                   else True --- note  just to shuttle the test along
 
-
+    where isNotCapitalize fngs = if fngs == [] then True else head fngs /= ('*',1)
 
 
 
@@ -92,15 +95,47 @@ testMostPopularLetter
 
     it "returns first letter that is most popular, despite ties" $ do
         'h' == (mostPopularLetter "hi there how are you today?")
+            `shouldBe` True
 
     it "returns most popular letter despite its position in the string" $ do
-        'a' == (mostPopularLetter "ooppaaaaa lll")
+        'a' == (mostPopularLetter "ooppaaaaa lll") `shouldBe` True
 
 
+testPresses :: SpecWith()
+testPresses
+    = describe "presses does not account for capitals" $ do
+
+    it "returns same amount for lowercase and uppercase" $ do
+        presses 'k' == presses 'K' `shouldBe` True
+
+    it "presses of a number is always greater than or equal to presses of a letter \
+        \ because numbers come after letters in keypad" $ do
+        presses '2' >= presses 's' `shouldBe` True
 
 
+testCost :: SpecWith ()
+testCost
+    = describe "cost takes into account capitals" $ do
+
+    it "returns one greater than press if given capital" $ do
+        presses 'k' + 1 == cost 'K' `shouldBe` True
+
+    it "returns same amount if given lowercase letter" $ property $
+        \token -> if isLower (token :: Token) && isAscii (token :: Token)
+                  then presses (token :: Token) == cost (token :: Token)
+                  else True -- shuttle along, ignore non-lowercase letters.
 
 
+testIdentityRavelUnravel :: SpecWith()
+testIdentityRavelUnravel
+    = describe "ravel must be inverse of unravel and vice versa" $ do
+
+    it "ravel -> unravel must be true only if token is lowercase" $ property $
+        \tok -> if doesOccur [tok] toksAllowed
+                   && checkIfLower tok
+                then (unravel . ravel) tok == (tok :: Token)
+                else True -- shuttle along, ignore non-allowed tokens like @ or %.
+    where checkIfLower t = if isLetter t then isLower t else True
 
 
 
@@ -120,11 +155,14 @@ isPad c = c == EngPad || c == NumPad
 
 
 runTests = hspec $ do
+    testIdentityRavelUnravel
     testIdentityTokenButton
-    {-testIdentityTokenFinger
+    testIdentityTokenFinger
     testIdentityFingerButton
-    testIdentityEncryptDecrypt-}
+    testIdentityEncryptDecrypt
     testMostPopularLetter
+    testPresses
+    testCost
 
 
 main = runTests
