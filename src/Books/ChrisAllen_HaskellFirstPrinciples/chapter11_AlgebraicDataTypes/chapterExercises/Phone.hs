@@ -7,6 +7,7 @@ import Data.Maybe
 
 
 type Token = Char
+type Text = [[Token]]
 type Presses = Int -- >= 1
 type FingerMove = (Token, Presses)
 
@@ -34,7 +35,7 @@ phone :: Phone
 phone = PhonePad $ concat [numbers, lowLetters, uppLetters, signs, space]
     where numbers = map (Number $) (concatMap show [0..9])
           lowLetters = map (Letter $) ['a' .. 'z']
-          uppLetters = map (CapitalLetter $) ['A' .. 'Z']
+          uppLetters = map (CapitalLetter $) ['a' .. 'z']
           signs = map (Sign $) "+.,?!#"
           space = [Spacebar]
 
@@ -47,6 +48,10 @@ phonePad = putStr $ break ++ row123 ++ break ++ row456 ++ break ++
           row456 = "|   4 GHI   |   5 JKL   |   6 MNO   |\n"
           row789 = "|   7 PQRS  |   8 TUV   |   9 WXYZ  |\n"
           rowOp  = "|   * ^     |   0 + _   |   # .,?!  |\n"
+
+-- testing what happens when you switch to numpad and try to do eng stuff.
+-- testing what happens when you press a number more times than there are
+-- letters - wraparound
 
 
 {-
@@ -253,12 +258,23 @@ mostPopularLetter txt = fst $ occs !! indexOfMax
           indexOfMax = fromJust $ findIndex ((== maxOcc) . snd) occs
 
 
--- note gets num taps required to press a given token.
+-- note returns cost a particular token, without taking into account the switching
+-- to EngPad at the beginning.
 cost :: Token -> Presses
-cost token = totalTaps $ tokenFingerize [token]
+cost token = (totalTaps $ tokenFingerize [token]) - 2 -- minussing taps for EngPad
+
+-- note returns cost of a particular token, not account for switching to EngPad once.
+-- It is num times the token appears in the text times its cost for one press.
+costIn :: Token -> Text -> Presses
+costIn tkn txt = cost tkn * appears tkn txt
 
 
--- note gets the most popular letter throughout the whole conversation. [String]
+-- note returns number of occurrences of tkn in txt.
+appears :: Token -> Text -> Int
+appears tkn txt = length $ elemIndices tkn (concat txt)
+
+
+-- note gets the most popular letter throughout the whole conversation.
 coolestLetter :: [[Token]] -> Char
 coolestLetter = mostPopularLetter . concat
 
@@ -292,7 +308,7 @@ rarestWord txt = fst $ occs !! indexOfMin
 
 -- NOTE Now for the actual conversation translators
 
-convo :: [String]
+convo :: Text
 convo =
     ["Wanna play 20 questions",
     "Ya",
@@ -304,7 +320,7 @@ convo =
     "Lol ya",
     "Haha thanks just making sure rofl ur turn"]
 
-text :: [String]
+text :: Text
 text =
     ["The night sky is littered with 1000s of stars.",
      "40 Swallows sing in the grey dawn.",
@@ -314,6 +330,12 @@ text =
      "Glowing crystal caves.",
      "+ #,.?!123abc123..?.abc"] -- tests switching
 
+
+hmgbd :: Text
+hmgbd = ["Hummingbirds swoop down from their perches",
+         "and hummingbirds race to the spring",
+         "Hummingbirds feed on seeds,",
+         "hummingbirds sing"]
 
 
 encrypt :: [[Token]] -> [[FingerMove]]
