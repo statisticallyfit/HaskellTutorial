@@ -1,4 +1,6 @@
-import Test.QuickCheck
+module CaesarCipher where
+
+
 import Data.Char
 
 
@@ -34,14 +36,3 @@ encode factor originalText = map (shift factor) originalText
 
 decode :: Int -> String -> String
 decode factor codedText = encode (-factor) codedText
-
-
-
-
---- TESTING ------------------------------------------------------------------------------
-
---- help why does it keep giving up?
-testIdentityCode :: Int -> String -> Property
-testIdentityCode factor text =
-    goodInput ==> (decode factor $ encode factor text) == text
-    where goodInput = (length text /= 0) && (and $ map isAscii text)
