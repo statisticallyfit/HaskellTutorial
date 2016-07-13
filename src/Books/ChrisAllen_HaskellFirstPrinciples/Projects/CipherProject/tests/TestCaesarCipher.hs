@@ -1,13 +1,10 @@
-module TestCiphers where
+module TestCaesarCipher where
 
 import Data.Char
 import CaesarCipher
 
 import Test.QuickCheck
 import Test.Hspec
-
-
-
 
 
 
