@@ -237,6 +237,7 @@ buttonTokenize (_ : btns) = buttonTokenize btns
 
 
 fingerTokenize :: [FingerMove] -> [Token]
+fingerTokenize [('1',1)] = "1"
 fingerTokenize taps = tokLabels (labelTaps taps)
 
 
