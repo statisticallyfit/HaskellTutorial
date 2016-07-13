@@ -31,17 +31,8 @@ data Phone = PhonePad [Button] deriving (Eq, Show)
 
 
 
-phone :: Phone
-phone = PhonePad $ concat [numbers, lowLetters, uppLetters, signs, space]
-    where numbers = map (Number $) (concatMap show [0..9])
-          lowLetters = map (Letter $) ['a' .. 'z']
-          uppLetters = map (CapitalLetter $) ['a' .. 'z']
-          signs = map (Sign $) "+.,?!#"
-          space = [Spacebar]
-
-
-phonePad :: IO()
-phonePad = putStr $ break ++ row123 ++ break ++ row456 ++ break ++
+phone :: IO()
+phone = putStr $ break ++ row123 ++ break ++ row456 ++ break ++
                    row789 ++ break ++ rowOp ++ break
     where break  = "-------------------------------------\n"
           row123 = "|   1       |   2 ABC   |   3 DEF   |\n"
@@ -49,9 +40,12 @@ phonePad = putStr $ break ++ row123 ++ break ++ row456 ++ break ++
           row789 = "|   7 PQRS  |   8 TUV   |   9 WXYZ  |\n"
           rowOp  = "|   * ^     |   0 + _   |   # .,?!  |\n"
 
--- testing what happens when you switch to numpad and try to do eng stuff.
--- testing what happens when you press a number more times than there are
--- letters - wraparound
+keyPad :: [(Token, String)]
+keyPad = [('1',""),('2',"abc"),('3',"def"),('4',"ghi"),('5',"jkl"),
+          ('6',"mno"), ('7',"pqrs"),('8',"tuv"),('9',"wxyz"),('*',"^"),
+          ('0',"+ "), ('#',"#.,?!")]
+
+
 
 
 {-
@@ -81,27 +75,29 @@ The only symbols that exist are: space + . , ? ! #
 
 -- NOTE the utility functions
 
-
-countKey :: Token -> Presses
-countKey tok = 1 + head (catMaybes (map (elemIndex tok) (map snd keyPad)))
+-- postcondition returns simple count of presses - does not consider switching pads
+-- nor capitals.
+presses :: Token -> Presses
+presses tok = 1 + head (catMaybes (map (elemIndex (toLower tok)) (map snd keyPad)))
 
 isSign :: Token -> Bool
 isSign tok = elem tok "+#.,?!"
 
+-- postcondition returns finger equivalent of token - does not count switching
+-- pads nor capitals.
 ravel :: Token -> FingerMove
-ravel tok = (fst $ head $ filter ((elem (toLower tok)) . snd) keyPad,
-                                      countKey (toLower tok))
+ravel tok = (fst $ head $ filter ((elem tok') . snd) keyPad, presses tok')
+    where tok' = toLower tok
 
+-- postcondition inverse of ravel - returns token from finger move - does not account for
+-- switching pads nor capitals
 unravel :: FingerMove -> Token
 unravel (c,p) = alphas !! (p - 1)
     where alphas = (snd $ head $ filter ((== c) . fst) keyPad)
 
-keyPad :: [(Token, String)]
-keyPad = [('1',""),('2',"abc"),('3',"def"),('4',"ghi"),('5',"jkl"),
-          ('6',"mno"), ('7',"pqrs"),('8',"tuv"),('9',"wxyz"),('*',"^"),
-          ('0',"+ "), ('#',"#.,?!")]
-
-
+-- postcondition converts the signals of NumPad and EngPad paired with fingermoves
+-- into tokens.
+-- Takes into account capitals and signs and numbers.
 tokLabels :: [(Button, [FingerMove])] -> [Token]
 tokLabels [] = []
 tokLabels ((NumPad, tps) : rest) = (map fst tps) ++ tokLabels rest
@@ -110,13 +106,14 @@ tokLabels ((EngPad, tps) : rest)
     | otherwise = parseCapitals tps ++ tokLabels rest
     where noCapitals ts = (length $ filter (== ('*',1)) ts) == 0
 
-
+-- postcondition used by tokLabels to recognize capitals in fingermoves.
 parseCapitals :: [FingerMove] -> [Token]
 parseCapitals [] = []
 parseCapitals (('*',1) : (c,p) : rest) = (toUpper $ unravel (c,p)) : parseCapitals rest
 parseCapitals ((c,p) : rest) = (unravel (c,p)) : parseCapitals rest
 
-
+-- postcondition creates arg to tokLabels by recognizing switching of pads and
+-- replacing the ('*',2) finger move with NumPad or EngPad.
 labelTaps :: [FingerMove] -> [(Button, [FingerMove])]
 labelTaps taps = map label identifiedTaps
     where identifiedTaps = zip (map isNumChunk (chunk taps)) (chunk taps)
@@ -124,6 +121,8 @@ labelTaps taps = map label identifiedTaps
             | b = (NumPad, tail tps)
             | otherwise = (EngPad, tail tps)
 
+-- postcondition separates finger moves into runs of numbers or english
+-- (letters and/or signs)
 chunk :: [FingerMove] -> [[FingerMove]]
 chunk [] = []
 chunk taps
@@ -133,6 +132,7 @@ chunk taps
           runs ts = takeWhile (/= switch) ts
           rest ts = dropWhile (/= switch) ts
 
+-- postcondition recognizes a number chunk - sees whether all the Presses part equal 1
 isNumChunk :: [FingerMove] -> Bool
 isNumChunk [] = False
 isNumChunk taps
@@ -141,7 +141,8 @@ isNumChunk taps
     | otherwise = and $ map ((== 1) . snd) taps
     where switch = ('*',2)
 
--- postcondition: returns english separated from numbers.
+
+-- postcondition returns english separated from numbers.
 -- splitEngNums "a1b2c3d4f"   --- >    ["a","1","b","2","c","3","d","4","f"]
 -- splitEngNums "abc!#+.,+12!!3de!!f"   --- >    ["abc!#+.,+","12","!!","3","de!!f"]
 splitEngNums :: [Token] -> [[Token]]
@@ -161,6 +162,8 @@ splitEngNums ts@(fstTok : tokens)
 
 -- NOTE The communication functions
 
+
+-- note returns Nothing for EngPad and NumPad since we don't show them in Tokens.
 getToken :: Button -> Maybe Token
 getToken (Number n) = Just n
 getToken (Sign n) = Just n
@@ -174,9 +177,9 @@ getToken _ = Nothing
 -- letter == depends on its location
 -- spacebar == press 0 two times.
 getPresses :: Button -> Maybe Presses
-getPresses (Letter n) = Just $ countKey n
-getPresses (CapitalLetter n) = Just $ 1 + countKey n
-getPresses (Sign n) = Just $ countKey n
+getPresses (Letter n) = Just $ presses n
+getPresses (CapitalLetter n) = Just $ 1 + presses n
+getPresses (Sign n) = Just $ presses n
 getPresses (Number _) = Just 1
 getPresses Spacebar = Just 2 -- press 0 two times. (knowing it is LETTER FORMAT)
 getPresses EngPad = Just 2 -- since we press ('*',2)
@@ -220,6 +223,7 @@ buttonFingerize (_ : btns) = ('*',2) : buttonFingerize btns
 
 
 -- note converts sentence worth of buttons into tokens.
+--- testing that buttonTokenize == catMaybes . map getToken buttons
 buttonTokenize :: [Button] -> [Token]
 buttonTokenize [] = []
 buttonTokenize (CapitalLetter n : btns) = toUpper n : buttonTokenize btns
@@ -369,3 +373,11 @@ switchPad tokens = tail $ scanl detectShift EngPad tokens
             | isNumber y   = NumPad
             | isEnglish y  = EngPad
 -}
+
+{-phone :: Phone
+phone = PhonePad $ concat [numbers, lowLetters, uppLetters, signs, space]
+    where numbers = map (Number $) (concatMap show [0..9])
+          lowLetters = map (Letter $) ['a' .. 'z']
+          uppLetters = map (CapitalLetter $) ['a' .. 'z']
+          signs = map (Sign $) "+.,?!#"
+          space = [Spacebar]-}
