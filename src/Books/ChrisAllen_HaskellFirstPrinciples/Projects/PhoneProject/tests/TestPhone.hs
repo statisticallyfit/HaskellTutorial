@@ -88,7 +88,6 @@ testIdentityEncryptDecrypt
 
 
 
-
 testMostPopularLetter :: SpecWith()
 testMostPopularLetter
     = describe "returns most popular letter" $ do
@@ -135,7 +134,17 @@ testIdentityRavelUnravel
                    && checkIfLower tok
                 then (unravel . ravel) tok == (tok :: Token)
                 else True -- shuttle along, ignore non-allowed tokens like @ or %.
+
+    it "unravel -> ravel must be true" $ property $ do
+        \fng -> if doesOccur [fng] fngsAllowed
+                   && isNotCapitalize fng
+                then (ravel . unravel) fng == (fng :: FingerMove)
+                else True -- shuttle along
+
     where checkIfLower t = if isLetter t then isLower t else True
+          isNotCapitalize fng = fng /= ('*',1)
+
+
 
 
 
@@ -165,6 +174,7 @@ runTests = hspec $ do
     testCost
 
 
+main :: IO()
 main = runTests
 
 

@@ -177,8 +177,7 @@ mostPopularLetter txt = fst $ occs !! indexOfMax
 cost :: Token -> Presses
 cost token = if isUpper token then 1 + presses token else presses token
 
--- note returns cost of a particular token, not account for switching to EngPad once.
--- It is num times the token appears in the text times its cost for one press.
+-- note returns  num times the token appears in the text times its cost for one press.
 costIn :: Token -> Text -> Presses
 costIn tkn txt = cost tkn * appears tkn txt
 
