@@ -187,7 +187,7 @@ getPresses NumPad = Just 2
 getPresses Unknown = Nothing
 
 
--- note returns just one set of puttons - not for whole sentence
+-- note returns sentence's worth of buttons.
 tokenButtonize :: [Token] -> [Button]
 tokenButtonize [] = []
 tokenButtonize tokens = concatMap classify engNums

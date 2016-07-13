@@ -27,44 +27,31 @@ testIdentityTokenButton
       (buttonTokenize $ tokenButtonize "+ #,.?!123abc123..?.a") == "+ #,.?!123abc123..?.a"
 
     it "token -> button -> token should be true" $ property $
-      \toks -> if preconditionMet toks tokensAllowed
+      \toks -> if doesOccur toks toksAllowed
                then (buttonTokenize . tokenButtonize) toks == (toks :: [Token])
                else True --- note  just to shuttle the test along
-
-    it "button -> token -> button should be true" $ property $
-      \btns -> if preconditionMet btns buttonsAllowed
-               then (tokenButtonize . buttonTokenize) btns == (btns :: [Button])
-               else True --- shuttle along
-
 
 
 testIdentityTokenFinger :: SpecWith()
 testIdentityTokenFinger
     = describe "fingerTokenize and tokenFingerize should be inverses of each other" $ do
 
-    it "token -> finger -> token should be true" $ property $
-      \toks -> if preconditionMet toks tokensAllowed
-               then (fingerTokenize . tokenFingerize) toks == (toks :: [Token])
-               else True -- shuttle along
-
     it "finger -> token -> finger should be true" $ property $
-      \fings -> if preconditionMet fings fingersAllowed
-                then (tokenFingerize . fingerTokenize) fings == (fings :: [FingerMove])
-                else True
+      \fngs -> if doesOccur fngs fngsAllowed
+               then (tokenFingerize . fingerTokenize) fngs == (fngs :: [FingerMove])
+               else True
+
 
 testIdentityFingerButton :: SpecWith ()
 testIdentityFingerButton
     = describe "fingerButtonize and buttonFingerize should be inverses of each other" $ do
 
     it "finger -> button -> finger should be true" $ property $
-      \fings -> if preconditionMet fings fingersAllowed
-                then (buttonFingerize . fingerButtonize) fings == (fings :: [FingerMove])
-                else True
-
-    it "button -> finger -> button should be true" $ property $
-      \btns -> if preconditionMet btns buttonsAllowed
-               then (fingerButtonize . buttonFingerize) btns == (btns :: [Button])
+      \fngs -> if doesOccur fngs fngsAllowed
+               then (buttonFingerize . fingerButtonize) fngs == (fngs :: [FingerMove])
                else True
+
+
 
 {-
 testIdentityEncryptDecrypt :: SpecWith()
@@ -72,19 +59,19 @@ testIdentityEncryptDecrypt
     = describe "encrypt and decrypt should be inverses of each other" $ do
 
     it "encrypt -> decrypt should be true" $ property $
-      \tokList -> if preconditionMet tokList [tokensAllowed]-}
+      \tokList -> if preconditionMet tokList [toksAllowed]-}
 
 
 --- testing helper functions / variables
 
 instance Arbitrary Button where
-    arbitrary = elements (buttonsAllowed)
+    arbitrary = elements (btnsAllowed)
 
-preconditionMet items bucket = and $ map ((flip elem) bucket) items
-tokensAllowed = (concatMap show [0..9]) ++ ['a'..'z'] ++ ['A'..'Z'] ++ "+#.,?!"
-fingersAllowed = nub $ tokenFingerize tokensAllowed
-buttonsAllowed = tokenButtonize tokensAllowed
-
+doesOccur items bucket = and $ map ((flip elem) bucket) items
+toksAllowed = (concatMap show [0..9]) ++ ['a'..'z'] ++ ['A'..'Z'] ++ "+#.,?!"
+fngsAllowed = nub $ tokenFingerize toksAllowed
+btnsAllowed = tokenButtonize toksAllowed
+isPad c = c == EngPad || c == NumPad
 
 
 
