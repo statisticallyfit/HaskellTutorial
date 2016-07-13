@@ -66,7 +66,13 @@ testIdentityFingerButton
                then (fingerButtonize . buttonFingerize) btns == (btns :: [Button])
                else True
 
+{-
+testIdentityEncryptDecrypt :: SpecWith()
+testIdentityEncryptDecrypt
+    = describe "encrypt and decrypt should be inverses of each other" $ do
 
+    it "encrypt -> decrypt should be true" $ property $
+      \tokList -> if preconditionMet tokList [tokensAllowed]-}
 
 
 --- testing helper functions / variables
@@ -74,7 +80,7 @@ testIdentityFingerButton
 instance Arbitrary Button where
     arbitrary = elements (buttonsAllowed)
 
-preconditionMet items bucket = and $ map ((flip elem) items) bucket
+preconditionMet items bucket = and $ map ((flip elem) bucket) items
 tokensAllowed = (concatMap show [0..9]) ++ ['a'..'z'] ++ ['A'..'Z'] ++ "+#.,?!"
 fingersAllowed = nub $ tokenFingerize tokensAllowed
 buttonsAllowed = tokenButtonize tokensAllowed
