@@ -16,44 +16,44 @@ import Test.QuickCheck
 -- cannot and should not be removed to maintain logicality of program.
 
 
+
 -- note need to tap the stuff under "it" two spaces to the right or else error!
 testIdentityTokenButton :: SpecWith()
 testIdentityTokenButton
     = describe "tokenButtonize and buttonTokenize should be inverses" $ do
 
     it "can tell difference from capitals and lowercase" $ do
-      (buttonTokenize $ tokenButtonize "HI 123 tHEre") == "HI 123 tHEre"
+        (buttonTokenize $ tokenButtonize "HI 123 tHEre") == "HI 123 tHEre"
 
     it "can tell difference from english and numbers" $ do
-      (buttonTokenize $ tokenButtonize "+ #,.?!123abc123..?.a") == "+ #,.?!123abc123..?.a"
+        (buttonTokenize $ tokenButtonize "+ #,.?!13ac123..?.a") == "+ #,.?!13ac123..?.a"
 
     it "token -> button -> token should be true" $ property $
-      \toks -> if doesOccur toks toksAllowed
-               then (buttonTokenize . tokenButtonize) toks == (toks :: [Token])
-               else True --- note  just to shuttle the test along
+        \toks -> if doesOccur toks toksAllowed
+                 then (buttonTokenize . tokenButtonize) toks == (toks :: [Token])
+                 else True --- note  just to shuttle the test along
+
+    it "button -> token -> button should be true" $ property $
+        \btns -> if doesOccur btns btnsAllowed
+                 then (tokenButtonize . buttonTokenize) btns == (btns :: [Button])
+                 else True --- note  just to shuttle the test along
 
 
--- note important key: we say length > 2 for both since we cannot distinguish if
--- ('*',2), ('2',1) should be "a" or "2" so we need more finger moves after
--- first ('*',2) fingermove to get more context.
--- note also cases like "aaa" -> "222" when going through case 2 here so we must
--- avoid this situation. 
+
+
 testIdentityTokenFinger :: SpecWith()
 testIdentityTokenFinger
     = describe "fingerTokenize and tokenFingerize should be inverses" $ do
 
     it "finger -> token -> finger should be true" $ property $
-      \fngs -> if doesOccur fngs fngsAllowed
-                  && rightLength fngs
-               then (tokenFingerize . fingerTokenize) fngs == (fngs :: [FingerMove])
-               else True
+        \fngs -> if doesOccur fngs fngsAllowed
+                 then (tokenFingerize . fingerTokenize) fngs == (fngs :: [FingerMove])
+                 else True
 
     it "token -> finger -> token should be true" $ property $
-      \toks -> if doesOccur toks toksAllowed
-                  && rightLength toks
-               then (fingerTokenize . tokenFingerize) toks == (toks :: [Token])
-               else True
-    where rightLength s = length s > 2
+        \toks -> if doesOccur toks toksAllowed
+                 then (fingerTokenize . tokenFingerize) toks == (toks :: [Token])
+                 else True
 
 
 testIdentityFingerButton :: SpecWith ()
@@ -61,11 +61,15 @@ testIdentityFingerButton
     = describe "fingerButtonize and buttonFingerize should be inverses" $ do
 
     it "finger -> button -> finger should be true" $ property $
-      \fngs -> if doesOccur fngs fngsAllowed
-                  && rightLength fngs
-               then (buttonFingerize . fingerButtonize) fngs == (fngs :: [FingerMove])
-               else True
-    where rightLength s = length s > 2
+        \fngs -> if doesOccur fngs fngsAllowed
+                 then (buttonFingerize . fingerButtonize) fngs == (fngs :: [FingerMove])
+                 else True
+
+    it "button -> finger -> button should be true" $ property $
+         \btns -> if doesOccur btns btnsAllowed
+                  then (fingerButtonize . buttonFingerize) btns == (btns :: [Button])
+                  else True --- note  just to shuttle the test along
+
 
 
 
@@ -75,18 +79,32 @@ testIdentityEncryptDecrypt
     = describe "encrypt and decrypt should be inverses" $ do
 
     it "decrypt -> encrypt should be true" $ property $
-      \fngList -> if doesOccur (concat fngList) fngsAllowed
-                     && rightLengths fngList
-                  then (encrypt . decrypt) fngList == (fngList :: [[FingerMove]])
-                  else True
-    where rightLengths fngList = (filter ((> 2) . length) fngList) == fngList
+        \fngList -> if doesOccur (concat fngList) fngsAllowed
+                    then (encrypt . decrypt) fngList == (fngList :: [[FingerMove]])
+                    else True
+
+
+
+
+testMostPopularLetter :: SpecWith()
+testMostPopularLetter
+    = describe "returns most popular letter" $ do
+
+    it "returns first letter that is most popular, despite ties" $ do
+        'h' == (mostPopularLetter "hi there how are you today?")
+
+    it "returns most popular letter despite its position in the string" $ do
+        'a' == (mostPopularLetter "ooppaaaaa lll")
 
 
 
 
 
 
---- testing helper functions / variables
+
+
+
+--- testing helper functions / variables ------------------------------------------------
 
 instance Arbitrary Button where
     arbitrary = elements (btnsAllowed)
@@ -103,9 +121,13 @@ isPad c = c == EngPad || c == NumPad
 
 runTests = hspec $ do
     testIdentityTokenButton
-    testIdentityTokenFinger
+    {-testIdentityTokenFinger
     testIdentityFingerButton
-    testIdentityEncryptDecrypt
+    testIdentityEncryptDecrypt-}
+    testMostPopularLetter
 
 
 main = runTests
+
+
+

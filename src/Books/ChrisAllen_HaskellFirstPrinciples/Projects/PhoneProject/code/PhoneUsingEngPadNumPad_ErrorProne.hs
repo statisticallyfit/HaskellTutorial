@@ -22,6 +22,7 @@ data Button = NumPad | EngPad{- Switch -}| Spacebar
             | CapitalLetter Token
             | Letter Token
             | Sign Token
+            | Unknown -- for symbols outside space + . , ? ! #
             deriving (Eq, Show)
 
 type ButtonGroup = [Button] -- note a group of buttons for 1 letter/num/sign
@@ -39,32 +40,32 @@ phone = putStr $ break ++ row123 ++ break ++ row456 ++ break ++
           row789 = "|   7 PQRS  |   8 TUV   |   9 WXYZ  |\n"
           rowOp  = "|   * ^     |   0 + _   |   # .,?!  |\n"
 
--- note do not switch order of (0,+) tuple and the (*, ^) tuple because we need
--- to find spacebar in the 0 tuple and not in the * tuple. Made spacebar next to ^ in
--- the * tuple so that pressing * twice gives the exp ^ char.
 keyPad :: [(Token, String)]
-keyPad = [('1',"1"),('2',"abc2"),('3',"def3"),('4',"ghi4"),('5',"jkl5"),
-          ('6',"mno6"), ('7',"pqrs7"),('8',"tuv8"),('9',"wxyz9"),('0',"+ "),
-          ('*'," ^"),('#',"#.,?!")]
-
+keyPad = [('1',""),('2',"abc"),('3',"def"),('4',"ghi"),('5',"jkl"),
+          ('6',"mno"), ('7',"pqrs"),('8',"tuv"),('9',"wxyz"),('*',"^"),
+          ('0',"+ "), ('#',"#.,?!")]
 
 
 
 
 {-
-RULE key: ------------------------------------------------------------------------------
-Whenever there is a number in front during letter format, we ignore it
+Number format: ---------------------------------------------------------------------
+presses = 1 for each: 0..9
+no symbols at bottom of phone pad exist for numbers.
+^ -> switchformat -> ('*',2)
+Letter format: ---------------------------------------------------------------------
+RULE key: whenever there is a number in front during letter format, we ignore it
 and start counting presses from second non-number element (see '+' and ' ' below)
-
 presses example 'e' = ('3', 2) which means press 3 twice.
 * --> capitalize -> ('*',1) -- note repeat if we need multiple capitalizers in row.
-^ -> exponent char -> ('*',2)
+^ -> switch format -> ('*',2)
 0 -> spacebar -> ('0',2)
 + -> plus sign -> ('0', 1)
 ? -> questionmark -> ('#', 4)
-The only symbols that exist are: space + . , ? ! # ^
-because * is taken for capitalization.
+The only symbols that exist are: space + . , ? ! #
 -}
+-- note only expects lowercase letters
+-- throws error if given upppercase or if given numbers.
 
 
 
@@ -92,13 +93,74 @@ unravel :: FingerMove -> Token
 unravel (c,p) = alphas !! (p - 1)
     where alphas = (snd $ head $ filter ((== c) . fst) keyPad)
 
+-- postcondition converts the signals of NumPad and EngPad paired with fingermoves
+-- into tokens.
+-- Takes into account capitals and signs and numbers.
+tokLabels :: [(Button, [FingerMove])] -> [Token]
+tokLabels [] = []
+tokLabels ((NumPad, tps) : rest) = (map fst tps) ++ tokLabels rest
+tokLabels ((EngPad, tps) : rest)
+    | noCapitals tps = (map unravel tps) ++ tokLabels rest
+    | otherwise = parseCapitals tps ++ tokLabels rest
+    where noCapitals ts = (length $ filter (== ('*',1)) ts) == 0
+
+-- postcondition used by tokLabels to recognize capitals in fingermoves.
+parseCapitals :: [FingerMove] -> [Token]
+parseCapitals [] = []
+parseCapitals (('*',1) : (c,p) : rest) = (toUpper $ unravel (c,p)) : parseCapitals rest
+parseCapitals ((c,p) : rest) = (unravel (c,p)) : parseCapitals rest
+
+-- postcondition creates arg to tokLabels by recognizing switching of pads and
+-- replacing the ('*',2) finger move with NumPad or EngPad.
+labelTaps :: [FingerMove] -> [(Button, [FingerMove])]
+labelTaps taps = map label identifiedTaps
+    where identifiedTaps = zip (map isNumChunk (chunk taps)) (chunk taps)
+          label (b, tps)
+            | b = (NumPad, tail tps)
+            | otherwise = (EngPad, tail tps)
+
+-- postcondition separates finger moves into runs of numbers or english
+-- (letters and/or signs)
+chunk :: [FingerMove] -> [[FingerMove]]
+chunk [] = []
+chunk taps
+    | head taps == switch = [switch : runs (tail taps)] ++ chunk (rest (tail taps))
+    | otherwise = [runs taps] ++ chunk (rest taps)
+    where switch = ('*',2)
+          runs ts = takeWhile (/= switch) ts
+          rest ts = dropWhile (/= switch) ts
+
+-- postcondition recognizes a number chunk - sees whether all the Presses part equal 1
+isNumChunk :: [FingerMove] -> Bool
+isNumChunk [] = False
+isNumChunk taps
+    | length taps == 1 = if ((snd $ head taps) == 1) then True else False
+    | head taps == switch = isNumChunk (tail taps)
+    | otherwise = and $ map ((== 1) . snd) taps
+    where switch = ('*',2)
+
+
+-- postcondition returns english separated from numbers.
+-- splitEngNums "a1b2c3d4f"   --- >    ["a","1","b","2","c","3","d","4","f"]
+-- splitEngNums "abc!#+.,+12!!3de!!f"   --- >    ["abc!#+.,+","12","!!","3","de!!f"]
+splitEngNums :: [Token] -> [[Token]]
+splitEngNums [] = []
+splitEngNums [t] = [[t]]
+splitEngNums ts@(fstTok : tokens)
+     = [takeRuns ts] ++ splitEngNums (dropRuns ts)
+    where takeRuns ts
+            | isNumber fstTok = takeWhile isNumber ts
+            | otherwise = takeWhile (not . isNumber) ts
+          dropRuns ts
+            | isNumber fstTok = dropWhile isNumber ts
+            | otherwise = dropWhile (not . isNumber) ts
 
 
 ------------------------------------------------------------------------------------------
 
 -- NOTE The communication functions
 
-{-
+
 -- note returns Nothing for EngPad and NumPad since we don't show them in Tokens.
 getToken :: Button -> Maybe Token
 getToken (Number n) = Just n
@@ -121,47 +183,27 @@ getPresses Spacebar = Just 2 -- press 0 two times. (knowing it is LETTER FORMAT)
 getPresses EngPad = Just 2 -- since we press ('*',2)
 getPresses NumPad = Just 2
 getPresses Unknown = Nothing
--}
 
 
 -- note returns sentence's worth of buttons.
-fingerButtonize :: [FingerMove] -> [Button]
-fingerButtonize [] = []
-fingerButtonize (('*',1) : (c,p) : fngs)
-    = (CapitalLetter $ unravel (c,p)) : fingerButtonize fngs
-fingerButtonize ((c,p) : fngs)
-    | isSign sym = Sign sym : fingerButtonize fngs
-    | isLetter sym = Letter sym : fingerButtonize fngs
-    | isNumber sym = Number sym : fingerButtonize fngs
-    | isSpace sym = Spacebar : fingerButtonize fngs
-    where sym = unravel (c,p)
-
-
-fingerTokenize :: [FingerMove] -> [Token]
-fingerTokenize = buttonTokenize . fingerButtonize
-
-
 tokenButtonize :: [Token] -> [Button]
 tokenButtonize [] = []
-tokenButtonize (tok : tokens)
-    | isUpper tok = CapitalLetter (toLower tok) : tokenButtonize tokens
-    | isLower tok = Letter tok : tokenButtonize tokens
-    | isNumber tok = Number tok : tokenButtonize tokens
-    | isSpace tok = Spacebar : tokenButtonize tokens
-    | isSign tok = Sign tok : tokenButtonize tokens
+tokenButtonize tokens = concatMap classify engNums
+    where engNums = splitEngNums tokens
+          classify tokPiece
+            | isNumber $ head tokPiece = NumPad : (map tokToBtn tokPiece)
+            | otherwise = EngPad : (map tokToBtn tokPiece)
+          tokToBtn tok
+            | isUpper tok = CapitalLetter (toLower tok)
+            | isLower tok = Letter tok
+            | isDigit tok = Number tok
+            | isSpace tok = Spacebar
+            | isSign tok  = Sign tok
+            | otherwise = Unknown
 
 
 tokenFingerize :: [Token] -> [FingerMove]
-tokenFingerize = buttonFingerize . tokenButtonize
-
-
-buttonTokenize :: [Button] -> [Token]
-buttonTokenize [] = []
-buttonTokenize (CapitalLetter n : buttons) = (toUpper n) : buttonTokenize buttons
-buttonTokenize (Letter n : buttons) = n : buttonTokenize buttons
-buttonTokenize (Number n : buttons) = n : buttonTokenize buttons
-buttonTokenize (Spacebar : buttons) = ' ' : buttonTokenize buttons
-buttonTokenize (Sign n : buttons) = n : buttonTokenize buttons
+tokenFingerize tokens = buttonFingerize $ tokenButtonize tokens
 
 
 -- note converts one letter/num/sign worth of buttons into finger moves.
@@ -172,15 +214,40 @@ buttonFingerize [] = []
 buttonFingerize (CapitalLetter n : btns) = ('*',1) : ravel n : buttonFingerize btns
 buttonFingerize (Letter n : btns) = ravel n : buttonFingerize btns
 buttonFingerize (Sign n : btns)   = ravel n : buttonFingerize btns
-buttonFingerize (Number n : btns) = (n, presses n) : buttonFingerize btns
+buttonFingerize (Number n : btns) = (n, 1) : buttonFingerize btns
 buttonFingerize (Spacebar : btns) = ('0',2) : buttonFingerize btns
+buttonFingerize (Unknown : _)    = []
+buttonFingerize (_ : btns) = ('*',2) : buttonFingerize btns
+
+
+-- note converts sentence worth of buttons into tokens.
+--- testing that buttonTokenize == catMaybes . map getToken buttons
+buttonTokenize :: [Button] -> [Token]
+buttonTokenize [] = []
+buttonTokenize (CapitalLetter n : btns) = toUpper n : buttonTokenize btns
+buttonTokenize (Letter n : btns) = n : buttonTokenize btns
+buttonTokenize (Number n : btns) = n : buttonTokenize btns
+buttonTokenize (Sign n : btns) = n : buttonTokenize btns
+buttonTokenize (Spacebar : btns) = ' ' : buttonTokenize btns
+buttonTokenize (Unknown : _) = undefined
+buttonTokenize (_ : btns) = buttonTokenize btns
 
 
 
+fingerTokenize :: [FingerMove] -> [Token]
+fingerTokenize [('1',1)] = "1"
+fingerTokenize taps = tokLabels (labelTaps taps)
+
+
+fingerButtonize :: [FingerMove] -> [Button]
+fingerButtonize taps = tokenButtonize $ fingerTokenize taps
 
 
 
----------------------------------------------------------------------------------------
+-- note sums the taps for each finger move
+totalTaps :: [FingerMove] -> Presses
+totalTaps = sum . catMaybes . map getPresses . fingerButtonize
+-- or sum .  map snd
 
 -- note returns the first most popular letter (letter that occurs most often).
 -- if all letters are different or have a tie, returns first letter that has a tie.
@@ -194,10 +261,10 @@ mostPopularLetter txt = fst $ occs !! indexOfMax
           indexOfMax = fromJust $ findIndex ((== maxOcc) . snd) occs
 
 
-
--- note returns cost of a particular token (num presses).
+-- note returns cost a particular token, without taking into account the switching
+-- to EngPad at the beginning.
 cost :: Token -> Presses
-cost token = if isUpper token then 1 + presses token else presses token
+cost token = (totalTaps $ tokenFingerize [token]) - 2 -- minussing taps for EngPad
 
 -- note returns cost of a particular token, not account for switching to EngPad once.
 -- It is num times the token appears in the text times its cost for one press.
@@ -211,12 +278,12 @@ appears tkn txt = length $ elemIndices tkn (concat txt)
 
 
 -- note gets the most popular letter throughout the whole conversation.
-coolestLetter :: Text -> Char
+coolestLetter :: [[Token]] -> Char
 coolestLetter = mostPopularLetter . concat
 
 
 -- note gets most oftenest word, ignores signs, numbers.
-coolestWord :: Text -> String
+coolestWord :: [[Token]] -> String
 coolestWord txt = fst $ occs !! indexOfMax
     where isEng c = isSpace c || isLetter c
           txt' = map (filter isEng) txt
@@ -228,7 +295,7 @@ coolestWord txt = fst $ occs !! indexOfMax
 
 
 -- note returns the first rarest word.
-rarestWord :: Text -> String
+rarestWord :: [[Token]] -> String
 rarestWord txt = fst $ occs !! indexOfMin
     where isEng c = isSpace c || isLetter c
           txt' = map (filter isEng) txt
@@ -237,7 +304,6 @@ rarestWord txt = fst $ occs !! indexOfMin
           occs = (map $ wordOcc ws) ws
           minOcc = minimum $ map snd occs
           indexOfMin = fromJust $ findIndex ((== minOcc) . snd) occs
-
 
 
 
@@ -284,15 +350,12 @@ decrypt fmss = map fingerTokenize fmss
 
 
 
-
 {-
 Inspiration links:
-
 https://github.com/Tclv/HaskellBook/blob/master/ch11/Phone.hs
 https://github.com/dwayne/haskell-programming/blob/master/ch11/Phone.hs
 https://github.com/vaughanj10/haskell_programming/blob/master/ch11/phone.hs
 https://github.com/juank-pa/haskell-training/blob/master/Chapter11/Exercises/DaPhone.hs
-
 -}
 
 
