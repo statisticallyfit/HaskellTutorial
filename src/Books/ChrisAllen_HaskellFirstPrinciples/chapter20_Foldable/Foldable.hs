@@ -122,3 +122,48 @@ len4 = fmap length Just [1,2,3]
 len5 = length Nothing
 len6 = fmap length [Just 1, Just 2, Just 3]
 len7 = fmap length [Just 1, Just 2, Nothing]
+
+
+
+
+-- note: cannot map over the Left arg because it is the left type argument part of
+-- the structure. Right is not part of the structure. (Left is swallowed to satisfy
+-- * -> * of Foldable)
+-- elem :: Eq a => a -> t a -> Bool
+e1 = elem 2 (Just 3)
+e2 = elem True (Left False)
+e3 = elem True (Left True) -- see? Left type is part of structure, cannot be mapped over.
+e4 = elem True (Right False)
+e5 = elem True (Right True)
+e6 = elem False (Right False)
+e7 = fmap (elem 3) [Right 1, Right 2, Right 3]
+
+
+
+--- note: Left, Nothing, and fst of tuple are empty for these functions.
+-- maximum :: forall a . Ord a => t a -> a
+-- minimum :: forall a . Ord a => t a -> a
+m1 = maximum [10, 12, 33, 5]
+m2 = fmap maximum [Just 2, Just 10, Just 4]
+m3 = fmap maximum (Just [3,7,10,2])
+m4 = minimum "julie"
+m5 = fmap minimum (Just "julie")
+m6 = fmap minimum [Just 'j', Just 'u', Just 'l']
+m7 = minimum (Right [99,88,100,1])
+--m7 = fmap minimum [Just 4, Just 3, Nothing] -- error
+--m8 = minimum (Left 3) -- error
+
+
+
+
+-- note
+-- sum :: (Foldable t, Num a) => t a -> a
+-- product :: (Foldable t, Num a) => t a -> a
+s1 = sum (7,5)
+s2 = fmap sum [(7,5), (3,4)]
+s3 = fmap sum (Just [1,2,3,4,5])
+p1 = product Nothing
+p2 = fmap product (Just [])
+p3 = fmap product (Right [1,2,3])
+
+
