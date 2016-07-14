@@ -70,7 +70,7 @@ instance Foldable Option where
 
     foldMap _ None = mempty
     foldMap f (Some x) = f x
- 
+
 
 op1 = foldr (+) 1 None
 op2 = foldr (-) 2 (Some (-10)) --- >  (-10) - 2
