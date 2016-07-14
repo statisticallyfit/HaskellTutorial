@@ -37,8 +37,9 @@ m1 = minimumFoldMap [6,5,12,5,5,5,435] == 5
 m2 = minimumFoldMap "julie" == 'e'
 m3 = fmap minimumFoldMap  (Just "julie") == (Just 'e')
 m4 = fmap minimumFoldMap [Just 'j', Just 'u', Just 'l'] == "jul"
-m5 = fmap minimumFoldMap [Just 4, Just 3, Nothing] -- exception at Nothing
+--m5 = fmap minimumFoldMap [Just 4, Just 3, Nothing] -- exception at Nothing
 m6 = fmap minimumFoldMap [Just 4, Just 5, Just 10] == [4,5,10]
 --m6 = minimumFoldMap (Left 3)
 
 
+allTrue = and $ fmap getAll $ fmap All [m1, m2, m3, m4, m6]
