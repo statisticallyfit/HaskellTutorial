@@ -14,6 +14,9 @@ class Foldable (t :: * -> *) where
     foldMap :: Monoid m => (a -> m) -> t a -> m
 -}
 
+
+-- help is fold a foldr or foldl? ???
+-- TODO TODO TODO
 sumFold = fold [1,2,3,4,5 :: Sum Integer]
 prodFold = fold [1,2,3,4,5 :: Product Integer]
 

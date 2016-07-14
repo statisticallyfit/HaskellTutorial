@@ -17,8 +17,11 @@ instance Foldable Option where
 
 
 -- help how to do foldr and foldl way?
-{-elemFoldr :: (Foldable t, Eq a) => a -> t a -> Bool
-elemFoldr x xs = foldr (== x) [] xs-}
+elemFoldr :: (Foldable t, Eq a) => a -> t a -> Bool
+elemFoldr x xs = foldr (\n acc -> n == x || acc) False xs
+
+elemFoldl :: (Foldable t, Eq a) => a -> t a -> Bool
+elemFoldl x xs = foldl (\acc y -> acc || y == x) False xs
 
 -- note maps a function (e == x) then applies Any to the list of bools.
 elemFoldMap:: (Foldable t, Eq a) => a -> t a -> Bool
