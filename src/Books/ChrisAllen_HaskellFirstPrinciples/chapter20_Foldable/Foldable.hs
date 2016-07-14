@@ -31,6 +31,26 @@ ex2 = foldMap (*5) [1,2,3 :: Sum Integer] -- 5 + 10 + 15 == 30
 
 
 -- note if what you are folding over has 1 value then declaring Monoid instance won't
--- change final behavior
-ex3 = foldMap (*5) (Just 100) :: Product Integer -- 500 
+-- change final behavior because there is nothing to mappend to the one value.
+ex3 = foldMap (*5) (Just 100) :: Product Integer -- 500
 ex4 = foldMap (*5) (Just 5) :: Sum Integer -- 25
+
+
+
+
+
+
+--- 20.3 DEMONSTRATING FOLDABLE INSTANCES ------------------------------------------------
+
+data Identity a = Identity a deriving (Eq, Show)
+
+-- note only need to write foldr OR foldMap -- won't work just with foldl declared.
+instance Foldable Identity where
+    foldr f z (Identity x) = f x z
+    foldl f z (Identity x) = f z x
+    foldMap f (Identity x) = f x -- note no mappending needed, since just 1 value.
+
+
+id1 = foldr (-) 5 (Identity (-8)) --- >  -8 - 5   = -13
+id2 = foldl (-) 5 (Identity (-8)) --- >  5 - (-8) = 13
+id3 = foldMap (*5) (Identity 100) :: Product Integer
