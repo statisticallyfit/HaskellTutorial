@@ -15,18 +15,7 @@ instance Foldable Option where
     foldMap _ None = mempty
     foldMap f (Some x) = f x
 -}
-{-
 
-sumFold = fold [1,2,3,4,5 :: Sum Integer]
-prodFold = fold [1,2,3,4,5 :: Product Integer]
-
-sumFoldMap  = foldMap Sum [1,2,3,4,5]
-prodFoldMap = foldMap Product [1,2,3,4,5]
-allFoldMap  = foldMap All [True, False, True]
-anyFoldMap  = foldMap Any [True, False, True]
-firstFoldMap = foldMap First [Just 1, Nothing, Just 5] -- these get the last Just n
-lastFoldMap = foldMap Last [Just 1, Nothing, Just 5]
--}
 
 
 sumFoldr :: (Foldable t, Num a) => t a -> a
@@ -36,6 +25,14 @@ sumFoldr xs = foldr (+) 0 xs
 sumFoldl :: (Foldable t, Num a) => t a -> a
 sumFoldl xs = foldl (+) 0 xs
 
-sumFoldMap :: (Foldable t, Num a) => t a -> Sum a
-sumFoldMap xs = foldMap Sum xs
+sumFoldMap :: (Foldable t, Num a) => t a -> a
+sumFoldMap = getSum . foldMap Sum
 
+
+
+main :: IO()
+main = do
+    print $ sumFoldMap [1,2,3] == 6
+    print $ sumFoldMap (Just 3) == 3
+    print $ sumFoldMap Nothing == 0
+    print $ fmap sumFoldMap (Just [1,2,3]) == Just 6
