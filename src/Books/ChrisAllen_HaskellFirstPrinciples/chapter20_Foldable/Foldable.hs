@@ -19,6 +19,7 @@ class Foldable (t :: * -> *) where
 -- TODO TODO TODO
 sumFold = fold [1,2,3,4,5 :: Sum Integer]
 prodFold = fold [1,2,3,4,5 :: Product Integer]
+strFold = fold ["hi", " there"]
 
 sumFoldMap  = foldMap Sum [1,2,3,4,5]
 prodFoldMap = foldMap Product [1,2,3,4,5]

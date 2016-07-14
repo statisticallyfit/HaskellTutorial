@@ -15,7 +15,14 @@ instance Ord a => Monoid (Max a) where
         | otherwise = Max (Just y)
 
 
+-- help how to declare these two for the general foldable? not only lists?
+maximumFoldr :: Ord a => {-(Foldable t, Ord a) => t a-}[a] -> a
+maximumFoldr [] = undefined
+maximumFoldr (x:xs) = foldr (\a acc -> if a > acc then a else acc) x xs
 
+maximumFoldl :: Ord a => [a] -> a
+maximumFoldl [] = undefined
+maximumFoldl (x:xs) = foldl (\acc b -> if b > acc then b else acc) x xs
 
 maximumFoldMap :: (Foldable t, Ord a) => t a -> a
 maximumFoldMap xs = fromJust $ getMax $ foldMap (\x -> Max {getMax = Just x}) xs

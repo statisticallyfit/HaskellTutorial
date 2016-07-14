@@ -26,7 +26,14 @@ instance Ord a => Monoid (Min a) where
         | x <= y = Min (Just x)
         | otherwise = Min (Just y)
 
+-- help how to declare these two for the general foldable? not only lists?
+minimumFoldr :: Ord a => {-(Foldable t, Ord a) => t a-}[a] -> a
+minimumFoldr [] = undefined
+minimumFoldr (x:xs) = foldr (\a acc -> if a < acc then a else acc) x xs
 
+minimumFoldl :: Ord a => [a] -> a
+minimumFoldl [] = undefined
+minimumFoldl (x:xs) = foldl (\acc b -> if b < acc then b else acc) x xs
 
 minimumFoldMap :: (Foldable t, Ord a) => t a -> a
 minimumFoldMap xs = fromJust $ getMin $ foldMap (\x -> Min {getMin = Just x}) xs
