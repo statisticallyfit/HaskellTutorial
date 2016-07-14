@@ -16,7 +16,7 @@ instance Foldable Option where
 -}
 
 
-newtype Min a = Min {getMin :: Maybe a}
+newtype Min a = Min {getMin :: Maybe a} deriving (Eq, Show)
 
 instance Ord a => Monoid (Min a) where
     mempty = Min Nothing
