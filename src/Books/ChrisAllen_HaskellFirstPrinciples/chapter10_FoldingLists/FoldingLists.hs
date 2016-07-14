@@ -1,3 +1,5 @@
+module FoldingLists where
+
 import Prelude hiding (sum, length, product, concat)
 import Test.QuickCheck
 

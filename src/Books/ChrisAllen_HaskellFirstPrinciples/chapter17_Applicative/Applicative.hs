@@ -1,3 +1,5 @@
+module Applicative where
+
 import Control.Applicative
 import Data.Monoid -- for Sum
 

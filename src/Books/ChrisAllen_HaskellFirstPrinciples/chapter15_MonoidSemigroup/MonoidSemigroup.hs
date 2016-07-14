@@ -1,3 +1,5 @@
+module MonoidSemigroup where
+
 import Data.Monoid -- need for Sum and Product to work
 import Test.QuickCheck
 import Control.Monad

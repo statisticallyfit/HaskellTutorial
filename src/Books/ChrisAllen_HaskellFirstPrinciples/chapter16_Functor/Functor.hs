@@ -1,3 +1,5 @@
+module Functor where
+
 import Test.QuickCheck
 import Test.QuickCheck.Function -- for Fun type in functorCompose'
 

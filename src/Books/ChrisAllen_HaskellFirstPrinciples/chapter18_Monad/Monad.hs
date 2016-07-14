@@ -1,3 +1,5 @@
+module Monad where
+
 import Control.Applicative ((*>))
 import Control.Monad (join, (>=>), fmap)
 
