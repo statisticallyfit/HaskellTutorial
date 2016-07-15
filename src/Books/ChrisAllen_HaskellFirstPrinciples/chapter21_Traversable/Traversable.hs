@@ -197,7 +197,7 @@ instance Foldable (Choice a) where
     foldl f z (Correct y) = f z y
 
 instance Traversable (Choice a) where
-    traverse _ (Wrong x)   = pure (Wrong x)
+    traverse _ (Wrong x)   = pure (Wrong x) -- note same effect as below.
     traverse f (Correct y) = Correct <$> f y
 
 

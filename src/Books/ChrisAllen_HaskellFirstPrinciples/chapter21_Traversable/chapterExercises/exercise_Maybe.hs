@@ -4,43 +4,44 @@ import Test.QuickCheck.Classes
 
 
 
-data Option a b = None a | Some b deriving (Eq, Show)
+data Option a = None | Some a deriving (Eq, Show)
 
 
-instance Functor (Option a) where
-    fmap _ (None x) = None x
-    fmap f (Some y) = Some (f y)
+instance Functor Option where
+    fmap _ None     = None
+    fmap f (Some x) = Some (f x)
 
-instance Foldable (Option a) where
-    foldMap _ (None x) = mempty
-    foldMap f (Some y) = f y
+instance Foldable Option where
+    foldMap _ None     = mempty
+    foldMap f (Some x) = f x
 
-    foldr _ z (None x) = z
-    foldr f z (Some y) = f y z
+    foldr _ z None     = z
+    foldr f z (Some x) = f x z
 
-    foldl _ z (None x) = z
-    foldl f z (Some y) = f z y
+    foldl _ z None     = z
+    foldl f z (Some x) = f z x
 
-instance Traversable (Option a) where
+instance Traversable Option where
     -- traverse :: (Applicative f, Traversable t) => (a -> f b) -> t a -> f (t b)
-    traverse _ (None x) = None x
-    traverse f (Some y) = Some <$> f y
+    traverse _ None     = pure (None)
+    traverse f (Some x) = Some <$> f x
 
 ------------------------------------------------------
 
 -- note both arbitrary and eqprop have kind * so they need to take both a and b from
 -- Constant
 
-instance (Arbitrary a, Arbitrary b) => Arbitrary (Option a b) where
+instance (Arbitrary a) => Arbitrary (Option a) where
     arbitrary = do
         x <- arbitrary
-        y <- arbitrary
-        elements [None x, Some y]
+        elements [None, Some x]
 
 
-instance (Eq a, Eq b) => EqProp (Option a b) where (=-=) = eq
+instance Eq a => EqProp (Option a) where (=-=) = eq
 
 
+
+-- HELP why cant we just put Option Int why do we have to write a threeple?
 main = do
-    let trigger = undefined ::  Option Int (Int, Char, [Char])
+    let trigger = undefined ::  Option (Int, Char, [Char])
     quickBatch (traversable trigger)
