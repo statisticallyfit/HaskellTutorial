@@ -45,6 +45,8 @@ instance Foldable List where
 instance Traversable List where
     traverse _ Nil = pure Nil
     traverse f (Cons x list) = Cons <$> (f x) <*> traverse f list
+    -- note this becomes (Cons (f x)  <*> (traverse f list))
+    -- which is another version of applicative.
 
 ------------------------------------------------------------------------
 
