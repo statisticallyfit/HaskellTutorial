@@ -1,7 +1,7 @@
 import Test.QuickCheck (Arbitrary, arbitrary, elements)
 import Test.QuickCheck.Checkers
 import Test.QuickCheck.Classes
-import Data.Monoid ((<>))
+import Data.Monoid
 
 
 data List a = Nil | Cons a (List a) deriving (Eq, Show)
@@ -20,14 +20,11 @@ instance Functor List where
     fmap f (Cons x list) = Cons (f x) (fmap f list)
 
 
-
 instance Applicative List where
     pure x = Cons x Nil
     (<*>) Nil _ = Nil
     (<*>) _ Nil = Nil
     (<*>) (Cons f fs) cs@(Cons x xs) = fmap f cs <> (fs <*> cs)
-     -- Cons (f x) (fs <*> xs)
-
 -- NOTE IMPORTANT need mappend operator (<>) since result of (fmap f xs) is
 -- a list: Cons a (Cons a1 (Cons a2 ...)) and we need to mappend this
 -- to the result of (fs <*> xs)
@@ -50,15 +47,30 @@ instance Traversable List where
     traverse f (Cons x list) = Cons <$> (f x) <*> traverse f list
 
 ------------------------------------------------------------------------
-{-
+
+
+instance Arbitrary a => Arbitrary (List a) where
+    arbitrary = do
+        x <- arbitrary
+        y <- arbitrary
+        return (Cons x (Cons y Nil))
+
+instance Eq a => EqProp (List a) where (=-=) = eq
+
+
+fs = Cons (+1) (Cons (+2) (Cons (+5) Nil))
+vs = Cons 1 (Cons 2 (Cons 3 Nil))
 
 
 
 main :: IO()
 main = do
+    -- foldable
     print $ foldr (-) (-8) (Cons 1 (Cons 2 (Cons (-5) Nil)))
     print $ foldl (-) (-8) (Cons 1 (Cons 2 (Cons (-5) Nil)))
+    -- applicative
+    print $ fs <*> vs
 
     let trigger = undefined :: List (Int, Int, [Int])
     quickBatch (traversable trigger)
--}
+
