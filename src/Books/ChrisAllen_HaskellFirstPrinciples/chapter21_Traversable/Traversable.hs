@@ -2,6 +2,7 @@
 import Data.Foldable
 import Data.Monoid
 import Data.Functor.Identity
+import Data.Functor.Constant
 
 {-
 Traversable: used to traverse data structure, mapping a function inside a structure
@@ -64,7 +65,7 @@ s2 = sequenceA [Just 1, Just 2, Just 3]
 s3 = sequenceA [Just 1, Just 2, Nothing]
 s4 = fmap sum $ sequenceA [Just 1, Just 2, Just 3]
 s5 = fmap product $ sequenceA [Just 3, Just 4, Nothing]
-s6 = sequenceA (Right (Just [1,2]))
+s6 = sequenceA (Right (Just [1,2])) -- note same as Right <$> (Just [1,2])
 
 s1_ = sequence_ (Just [1,2,3])
 s2_ = sequence_ [Just 1, Just 2, Just 3]
@@ -152,4 +153,104 @@ pipelineFn'' = (traverse makeIoOnlyObj . traverse decodeFn =<<) . fetchFn
 ------------------------------------------------------------------------------------------
 -- traverse  :: (a -> f b) -> t a -> f (t b)
 ex1 = traverse (Identity . (+1)) [1, 2]
-ex2 = 
+ex2 = runIdentity ex1
+edgelordMap f t = runIdentity $ traverse (Identity . f) t
+ex3 = edgelordMap (+1) [1..5]
+
+xs = [1, 2, 3, 4, 5] :: [Sum Integer]
+ex4 = traverse (Constant . (+1)) xs
+foldMap' f t = getConstant $ traverse (Constant . f) t
+ex5 = foldMap' (+1) xs
+
+-- note reduces to monoid under traversable
+-- foldMap' :: (Traversable t, Monoid a) => (a1 -> a) -> t a1 -> a
+-- note reduces to monoid under foldable
+-- foldMap  :: (Foldable t, Monoid m)    => (a -> m ) -> t a  -> m
+
+
+
+--- 21.9 TRAVERSABLE INSTANCES ---------------------------------------------------------
+
+-- explaining Either type
+data Choice a b = Wrong a | Correct b deriving (Eq, Show) ------------------------------
+
+
+instance Functor (Choice a) where
+    fmap _ (Wrong x)   = Wrong x
+    fmap f (Correct y) = Correct (f y)
+
+instance Applicative (Choice e) where
+    pure a          = Correct a
+    Wrong b <*> _   = Wrong b
+    Correct f <*> r = fmap f r
+
+instance Foldable (Choice a) where
+    foldMap _ (Wrong _)   = mempty
+    foldMap f (Correct y) = f y
+
+    foldr _ z (Wrong _)   = z
+    foldr f z (Correct y) = f y z
+
+    foldl _ z (Wrong _)   = z
+    foldl f z (Correct y) = f z y
+
+instance Traversable (Choice a) where
+    traverse _ (Wrong x)   = pure (Wrong x)
+    traverse f (Correct y) = Correct <$> f y
+
+
+
+{-
+instance Functor ((,) a) where
+    fmap f (x,y) = (x, f y)
+
+instance Monoid a => Applicative ((,) a) where
+    pure x = (mempty, x)
+    (u, f) <*> (v, x) = (u <> v, f x)
+
+instance Foldable ((,) a) where
+    foldMap f (_, y) = f y
+    foldr f z (_, y) = f y z
+    foldl f z (_, y) = f z y
+
+
+example
+*Main> fmap (foldMap Sum) ([1,2,3], [4,5,6])
+([1,2,3],Sum {getSum = 15})
+
+
+-}
+
+
+
+
+
+
+--- 21.10 TRAVERSABLE LAWS ---------------------------------------------------------------
+
+{-
+
+1) Naturality
+
+t . traverse f = traverse (t . f)
+
+
+2) Identity
+
+traverse Identity == Identity
+
+idea travsing Identity constructor over a value will make same value as just
+putting the value in Identity
+equals which means the traversable instance cannot add or inject any structure or
+"effects"
+
+
+3) Composition
+
+traverse (Compose . fmap g . f) = Compose . fmap (traverse g) . traverse f
+
+idea we can collapse sequential traversal into single traversal by using Compose
+which combines structure.
+
+
+-}
