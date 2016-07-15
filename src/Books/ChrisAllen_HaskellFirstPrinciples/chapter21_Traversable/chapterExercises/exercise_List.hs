@@ -1,4 +1,4 @@
-import Test.QuickCheck (Arbitrary, arbitrary, elements)
+import Test.QuickCheck
 import Test.QuickCheck.Checkers
 import Test.QuickCheck.Classes
 import Data.Monoid
@@ -55,7 +55,7 @@ instance Arbitrary a => Arbitrary (List a) where
     arbitrary = do
         x <- arbitrary
         y <- arbitrary
-        return (Cons x (Cons y Nil))
+        frequency [(1, return Nil), (10, return (Cons x y))]
 
 instance Eq a => EqProp (List a) where (=-=) = eq
 
