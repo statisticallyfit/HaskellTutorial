@@ -19,8 +19,8 @@ data Three' a b = Three' a b b deriving (Eq, Show)
 
 
 instance Foldable (Three' a) where
-    {-foldr f z (Three' a b c) = (f b z) <> (f c z) --- help how to write foldr and foldl?
-    foldl f z (Three' a b c) = (f z b) <> (f z c)-}
+    foldr f z (Three' a b c) = c `f` (b `f` z)
+    foldl f z (Three' a b c) = (z `f` b) `f` c
     foldMap f (Three' a b c) = (f b) <> (f c)
 
 

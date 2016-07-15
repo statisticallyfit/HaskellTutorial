@@ -8,7 +8,6 @@ data Four a b = Four a b b b deriving (Eq, Show)
 
 
 instance Foldable (Four a) where
--- help how to write foldr and foldl?
     foldr f z (Four a b c d) = (d `f` (c `f` (b `f` z)))
     foldl f z (Four a b c d) = (((z `f` b) `f` c) `f` d)
     foldMap f (Four a b c d) = f b <> f c <> f d
