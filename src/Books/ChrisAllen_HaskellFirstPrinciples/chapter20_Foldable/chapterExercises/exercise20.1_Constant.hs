@@ -28,4 +28,8 @@ main = do
     print $ foldMap Sum (Constant 10)
     print $ fmap ({-getProduct . -}foldMap Product) [Constant 10, Constant 111]
     print $ fmap (foldr (-) 5) [Constant 1, Constant 2] -- returns seed for both
+    print $ foldMap Any (Constant 1)
+    print $ foldMap First (Constant 1)
+    print $ foldMap (\x -> Any True) (Constant 1) -- help meaning?
+
 
