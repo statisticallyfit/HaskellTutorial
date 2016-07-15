@@ -3,6 +3,8 @@ import Data.Foldable
 import Data.Monoid
 import Data.Functor.Identity
 import Data.Functor.Constant
+import Test.QuickCheck.Checkers
+import Test.QuickCheck.Classes
 
 {-
 Traversable: used to traverse data structure, mapping a function inside a structure
@@ -229,14 +231,13 @@ example
 --- 21.10 TRAVERSABLE LAWS ---------------------------------------------------------------
 
 {-
+NOTE Laws for traverse
 
 1) Naturality
-
 t . traverse f = traverse (t . f)
 
 
 2) Identity
-
 traverse Identity == Identity
 
 idea travsing Identity constructor over a value will make same value as just
@@ -246,11 +247,41 @@ equals which means the traversable instance cannot add or inject any structure o
 
 
 3) Composition
-
 traverse (Compose . fmap g . f) = Compose . fmap (traverse g) . traverse f
 
 idea we can collapse sequential traversal into single traversal by using Compose
 which combines structure.
 
 
+
+
+NOTE Laws for sequenceA
+
+1) Naturality
+t . sequenceA = sequenceA . fmap t
+
+
+2) Identity
+sequenceA . fmap Identity = Identity
+
+
+3) Composition
+sequenceA . fmap Compose = Compose . fmap sequenceA . sequenceA
+
+
 -}
+
+
+
+--- 21.11 TESTING TRAVERSABLE LAWS ------------------------------------------------------
+
+type TI = []
+
+main = do
+    let trigger = undefined :: TI (Int, Int, [Int])
+    quickBatch (traversable trigger)
+{-
+
+    traversable:
+      fmap:    +++ OK, passed 500 tests.
+      foldMap: +++ OK, passed 500 tests.-}
