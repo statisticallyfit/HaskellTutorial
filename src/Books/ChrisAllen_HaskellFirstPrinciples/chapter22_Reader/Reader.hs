@@ -7,7 +7,6 @@ m :: Integer -> Integer
 m = hurr . durr
 
 
-
 -- note called the functor of functions
 m1 :: Integer -> Integer
 m1 = fmap hurr durr -- equals (*2) ((+10) x)
@@ -22,7 +21,10 @@ m3 = liftA2 (+) hurr durr -- same as above.
 
 
 {-
-NOTE
+1) NOTE
+composition yields same result as fmapping:
+--- > fmap hurr durr 1 == 22
+--- > (hurr . durr) 1 == 22
 
 example
 ((+) . (*2)) 5 3
@@ -31,10 +33,12 @@ example
 ((+) <$> (*2)) 5 3
 13
 
-key
+key meaning
 ((+) . (*2)) == \x -> (+) (2 * x)
 
-1) note:
+
+
+2) NOTE:
 ((+) . (*2)) 5 3
 = (\x -> (+) (2 * x)) 5 3
 = (\5 -> (+) (2 * 5)) 3
@@ -42,7 +46,7 @@ key
 = 13
 
 
-2) note
+3) NOTE
 ((+) <$> (*2) <*> (+10)) 3
 = ((+) <$> (3*2) <*> (3+10))
 = ((3 * 2) + (3 + 10))
