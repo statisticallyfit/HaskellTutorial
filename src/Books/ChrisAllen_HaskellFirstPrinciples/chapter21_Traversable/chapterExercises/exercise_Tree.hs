@@ -45,7 +45,8 @@ instance Traversable Tree where
 
 
 ---------------------------------------------------------------------
-
+{-
+help why need to use liftM for leaf but don't need to use this in below form of Abritrary?
 instance Arbitrary a => Arbitrary (Tree a) where
     arbitrary = sized arbTree
 arbTree 0 = return Empty --liftM NilT arbitrary
@@ -55,3 +56,20 @@ arbTree n = frequency [(1, return Empty),
                        (4, liftM3 Node (arbTree (n `div` 2))
                                        arbitrary
                                        (arbTree (n `div` 2)) )]
+-}
+
+instance Arbitrary a => Arbitrary (Tree a) where
+    arbitrary = do
+        x <- arbitrary
+        l <- arbitrary
+        r <- arbitrary
+        frequency [(1, return Empty), (1, return (Leaf x)),
+                   (1, return (Node l x r))]
+
+instance Eq a => EqProp (Tree a) where (=-=) = eq
+
+
+main :: IO()
+main = do
+    let trigger = undefined :: Tree (Int, Int, [Int])
+    quickBatch (traversable trigger)
