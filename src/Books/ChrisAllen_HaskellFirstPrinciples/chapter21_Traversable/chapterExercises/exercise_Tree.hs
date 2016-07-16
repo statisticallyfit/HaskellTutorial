@@ -35,4 +35,4 @@ instance Foldable Tree where
     foldr f z (Node left a right) = foldr f (f a (foldr f z right)) left
 
 
-instance Traversable Tree where
+
