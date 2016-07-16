@@ -1,8 +1,8 @@
-import Test.QuickCheck (Arbitrary, arbitrary, elements)
+import Test.QuickCheck -- (Arbitrary, arbitrary, elements)
 import Test.QuickCheck.Checkers
 import Test.QuickCheck.Classes
 import Data.Monoid
-
+import Control.Monad
 
 
 data Tree a = Empty | Leaf a | Node (Tree a) a (Tree a)
@@ -36,3 +36,22 @@ instance Foldable Tree where
 
 
 
+instance Traversable Tree where
+    -- traverse :: (Applicative f, Traversable t) => (a -> f b) -> t a -> f (t b)
+    traverse _ Empty = pure Empty
+    traverse f (Leaf a) = Leaf <$> f a
+    traverse f (Node left a right)
+        = Node <$> traverse f left <*> f a <*> traverse f right
+
+
+---------------------------------------------------------------------
+
+instance Arbitrary a => Arbitrary (Tree a) where
+    arbitrary = sized arbTree
+arbTree 0 = return Empty --liftM NilT arbitrary
+arbTree 1 = liftM Leaf arbitrary
+arbTree n = frequency [(1, return Empty),
+                       (2, liftM Leaf arbitrary),
+                       (4, liftM3 Node (arbTree (n `div` 2))
+                                       arbitrary
+                                       (arbTree (n `div` 2)) )]

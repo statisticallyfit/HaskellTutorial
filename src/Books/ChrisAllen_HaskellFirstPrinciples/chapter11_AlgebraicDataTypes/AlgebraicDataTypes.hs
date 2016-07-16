@@ -450,13 +450,13 @@ postorder' tree = flattenPost tree []
 --- todo to mull over - had help on this one.
 --- note does preorder traversal (see example foldtree)
 -- a : flattenPre left (flattenPre right accList)
-foldPreorderRight :: (a -> b -> b) -> b -> BinaryTree a -> b
-foldPreorderRight _ acc Leaf = acc
-foldPreorderRight f acc (Node left x right) = accRight
+foldrPreorder :: (a -> b -> b) -> b -> BinaryTree a -> b
+foldrPreorder _ acc Leaf = acc
+foldrPreorder f acc (Node left x right) = accRight
     where --- foldTree f (foldTree f (f x acc) left) right
     accNode = f x acc
-    accLeft = foldPreorderRight f accNode left
-    accRight = foldPreorderRight f accLeft right
+    accLeft = foldrPreorder f accNode left
+    accRight = foldrPreorder f accLeft right
 
 printSumPreorderRight :: Show a => a -> String -> String
 printSumPreorderRight x y = "(" ++ show x ++ "+" ++ y ++ ")"
@@ -497,7 +497,7 @@ foldPostorder f acc (Node left x right)
 
 ------------------
 -- note preorder foldr
-exampleFoldTreePRE_R = foldPreorderRight printSumPreorderRight "0" t3
+exampleFoldTreePRE_R = foldrPreorder printSumPreorderRight "0" t3
 -- note preorder foldl (backwards)
 exampleFoldTreePRE_L = foldPreorderLeft printPreorderLeft "0" t3
 -- note inorder
@@ -511,11 +511,11 @@ exampleFoldTreeIN = foldInorder printSumInorder "0" t3
 -- traversal.
 -- note returns mapped list in swirly preorder traversal.
 mapFoldTreeToList :: (a -> b) -> BinaryTree a -> [b]
-mapFoldTreeToList f tree = foldPreorderRight ((:) . f) [] tree
+mapFoldTreeToList f tree = foldrPreorder ((:) . f) [] tree
 
 -- HELP HELP HELP TODO map fold but return binary tree.
 {-mapFoldTree :: (a -> b) -> BinaryTree a -> BinaryTree b
-mapFoldTree f tree = foldPreorderRight mk Leaf tree
+mapFoldTree f tree = foldrPreorder mk Leaf tree
     where mk a Leaf = Node Leaf (f a) Leaf
           mk a (Node l x r) = -}
 
@@ -589,7 +589,7 @@ testPostorder =
 
 
 testFold :: Int -> BinaryTree Int -> Bool
-testFold acc tree = (foldPreorderRight (+) acc tree) == (foldr (+) acc flatTree)
+testFold acc tree = (foldrPreorder (+) acc tree) == (foldr (+) acc flatTree)
     where flatTree = collapseTree tree
 
 
