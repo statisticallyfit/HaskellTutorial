@@ -39,6 +39,8 @@ tupledB = rev >>=
             \revStr ->
                 cap >>=
                     \capStr -> return (revStr, capStr)
+
+
 -- help why doesn't this work:
 {-tupledB s = rev s >>=
             \revStr ->

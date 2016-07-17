@@ -1,4 +1,7 @@
 import Control.Applicative
+-- import Control.Monad.Reader
+
+
 
 hurr = (*2)
 durr = (+10)
@@ -159,5 +162,65 @@ important note: in words, we are basically doing this:
 1. unpack r -> a out of Reader
 2. Compose f with the function we unpacked out of Reader (which is ra)
 3. put the new function made from the composition back into Reader.
+
+-}
+
+
+
+
+
+
+--- 22.6. APPLICATIVE OF FUNCTIONS ------------------------------------------------------
+
+{-
+
+pure :: a -> f a
+pure :: a -> (r -> a)
+
+(<*>) :: f (a -> b) -> f a -> f b
+(<*>) :: (r -> a -> b) -> (r -> a) -> (r -> b)
+
+-}
+
+
+newtype HumanName = HumanName String deriving (Eq, Show)
+newtype DogName = DogName String deriving (Eq, Show)
+newtype Address = Address String deriving (Eq, Show)
+
+data Person = Person { humanName :: HumanName,
+                       dogName :: DogName,
+                       address :: Address} deriving (Eq, Show)
+
+data Dog = Dog {dogsName :: DogName, dogsAddress :: Address} deriving (Eq, Show)
+
+
+pers :: Person
+pers = Person (HumanName "Sasha") (DogName "Barker") (Address "Forest Grove")
+
+chris :: Person
+chris = Person (HumanName "Chris Allen") (DogName "Papu") (Address "Austin")
+
+-- without Reader
+getDog :: Person -> Dog
+getDog p = Dog (dogName p) (address p)
+
+-- with Reader
+getDogR :: Person -> Dog
+getDogR = Dog <$> dogName <*> address
+
+getDogR' :: Person -> Dog
+getDogR' = liftA2 Dog dogName address
+{-
+equals as it was here:
+
+((+) <$> (*2) <*> (+10)) 3
+= ((+) <$> (3*2) <*> (3+10))
+= ((3 * 2) + (3 + 10))
+
+equals evaluation:
+(Dog <$> dogName <*> address) p
+= (Dog <$> dogName <*> address) (Person (HN "Sasha") (DN "Barker") (AD "Forest Grove"))
+= (Dog <$> "Barker" <*> "Forest Grove")
+= Dog (DogName "Barker") (Address "Forest Grove")
 
 -}
