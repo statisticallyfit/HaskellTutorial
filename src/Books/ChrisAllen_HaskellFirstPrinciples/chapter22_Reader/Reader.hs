@@ -89,11 +89,75 @@ hurrDurr = do
 
 instance Functor ((->) r) where
     fmap = (.)
-    
 
+    note equals: ((->) r) is (r -> ) so r is the type of the argument to the function.
+    Or can be written: (a -> b) where (r) is (a).
+    So (r), the argument for functions, is part of the structure being lifted over,
+    not the value being transformed.
+
+    (.)  ::              (b -> c) -> (a -> b) -> a -> c
+    fmap :: Functor f => (a -> b) -> f a -> f b
+    equals
+    :: (b -> c) -> (a -> b) -> a -> c
+    :: (a -> b) -> f a -> f b
+    equals
+    :: (b -> c) -> (a -> b) -> a -> c
+    :: (b -> c) -> f b -> f c
+    equals (because f is ((->) a)
+    :: (b -> c) -> (a -> b) -> a -> c
+    :: (b -> c) -> ((->) a) b -> ((->) a) c
+    equals
+    :: (b -> c) -> (a -> b) -> a -> c
+    :: (b -> c) -> (a -> b) -> a -> c
+
+
+example
 fmap (+1) (*2) 3
 = fmap (+1) (*2) $ 3
 = (fmap (+1) (*2)) 3
 = (+1) . (*2) $ 3
 = (+1) <$> (*2) $ 3
+-}
+
+
+
+
+
+
+
+
+
+--- 22.5 READER ------------------------------------------------------------------------
+
+-- Note reader is the newtype wrapper for the function type ((->) r)
+
+{-
+newtype Reader r a = Reader {runReader :: r -> a}
+
+--- > r is the type we are reading in
+--- > a is the result type of the function.
+
+
+NOTE functor instance
+
+instance Functor (Reader r) where
+    fmap :: (a -> b) -> Reader r a -> Reader r b
+    fmap f (Reader ra) = Reader $ \r -> f (ra r)
+    equals
+    fmap f (Reader ra) = Reader $ (f . ra)
+
+equals
+compose :: (b -> c) -> (a -> b) -> a -> c
+compose f g = \x -> f (g x)
+
+equals
+\r -> f (ra r)
+\x -> f (g x)
+
+
+important note: in words, we are basically doing this:
+1. unpack r -> a out of Reader
+2. Compose f with the function we unpacked out of Reader (which is ra)
+3. put the new function made from the composition back into Reader.
+
 -}
