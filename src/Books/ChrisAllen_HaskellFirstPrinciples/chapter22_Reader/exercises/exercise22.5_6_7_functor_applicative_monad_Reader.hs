@@ -40,7 +40,9 @@ instance Applicative (Reader r) where
 
 instance Monad (Reader r) where
     return x = Reader (\_ -> x)
-    (Reader f) >>= g = Reader $ \x -> runReader (g (f x)) x
+ -- (>>=) :: Reader r a -> (a -> Reader r b) -> Reader r b
+    (Reader ra) >>= aRb = Reader $ \r -> runReader (aRb (ra r)) r
+    -- (Reader f) >>= g = Reader $ \x -> runReader (g (f x)) x
 
 
 
@@ -88,8 +90,18 @@ getDogR = Reader $ liftA2 Dog dogName address
 
 
 
+--- Implementing with Reader Monad
+getDogRM :: Person -> Dog
+getDogRM = do
+    name <- dogName
+    addr <- address
+    return (Dog name addr)
+
+
 main :: IO()
 main = do
     print $ (runReader getDogR) pers
     print $ (runReader ask) "whatever you wrote"
     -- print $ (runReader asks)- help how to run this?
+    print $ getDogRM pers
+    print $ getDogRM chris

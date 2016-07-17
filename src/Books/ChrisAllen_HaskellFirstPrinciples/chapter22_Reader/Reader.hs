@@ -235,3 +235,50 @@ equals evaluation:
 
 --- 22.7 MONAD OF FUNCTIONS ------------------------------------------------------------
 
+foo :: (Functor f, Num a) => f a -> f a
+foo r = fmap (+1) r
+
+bar :: Foldable f => t -> f a -> (t, Int)
+bar r t = (r, length t)
+
+-- note increments values inside the structure and tells us length of the value.
+froot :: Num a => [a] -> ([a], Int)
+froot r = (map (+1) r, length r)
+
+barOne :: Foldable t => t a -> (t a, Int)
+barOne r = (r, length r)
+
+barPlus r = (foo r, length r)
+
+frooty :: Num a => [a] -> ([a], Int)
+frooty r = bar (foo r) r
+
+frooty' :: Num a => [a] -> ([a], Int)
+frooty' = \r -> bar (foo r) r
+
+-- note abstracting frooty
+-- note equals bind monad type: ---> now this is the monad of functions ... help
+-- (>>=) :: Monad m =>   m a   -> (a -> (m b))    ->   m b
+-- fooBind ::         (r -> a) -> (a -> (r -> b)) -> (r -> b)
+-- equals the (-> r) is equivalent to the Monad (m) in the type of (>>=)
+fooBind :: (r -> a) -> (a -> r -> b) -> r -> b
+fooBind m k = \r -> k (m r) r
+
+
+
+
+
+--- The Monad Instance ------------------
+
+-- (>>=) :: Monad m =>   m a -> (a -> m b)      ->   m b
+-- (>>=) ::        (->) r a  -> (a -> (->) r b) -> (->) r b
+-- (>>=) ::         (r -> a) -> (a -> r -> b)   -> r -> b
+
+-- return :: Monad m => a ->      m a
+-- return ::            a -> (->) r a
+-- return ::            a ->   r -> a
+
+-- NOTE comparing bind with applicative:
+-- (<*>) :: (->) r (a -> b) -> (->) r a        -> (->) r b
+-- (>>=) :: (->) r a        -> (a -> (->) r b) -> (->) r b
+
