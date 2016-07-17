@@ -224,3 +224,14 @@ equals evaluation:
 = Dog (DogName "Barker") (Address "Forest Grove")
 
 -}
+
+
+
+
+
+
+
+
+
+--- 22.7 MONAD OF FUNCTIONS ------------------------------------------------------------
+
