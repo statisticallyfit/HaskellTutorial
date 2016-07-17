@@ -8,18 +8,23 @@ rev :: [Char] -> [Char]
 rev xs = reverse xs
 
 
+-- NOTE: the functor of functions ------------------------------------------------------
 composed :: [Char] -> [Char]
 composed = rev . cap
 
 fmapped :: [Char] -> [Char]
 fmapped = fmap rev cap
+---------------------------------------------------------------------------------------
 
-
-
+-- NOTE: the applicative of functions
 tupledA :: [Char] -> ([Char], [Char])
 tupledA str = ((,) <$> rev <*> cap) str
+---------------------------------------------------------------------------------------
 
--- help help help todo: why doesn't it work to give argument right in here?
+-- NOTE the monad of functions
+
+
+-- help todo: why doesn't it work to give argument right in here?
 -- help where is the Monad? How is tuple a monad... ?
 tupledD :: [Char] -> ([Char], [Char])
 tupledD = do
@@ -34,13 +39,13 @@ tupledB = rev >>=
             \revStr ->
                 cap >>=
                     \capStr -> return (revStr, capStr)
--- help help why doesn't this work:
+-- help why doesn't this work:
 {-tupledB s = rev s >>=
             \revStr ->
                 cap s >>=
                     \capStr -> return (revStr, capStr)
 -}
-
+---------------------------------------------------------------------------------------
 
 
 main = do

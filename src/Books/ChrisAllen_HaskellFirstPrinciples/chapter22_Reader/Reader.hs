@@ -75,3 +75,25 @@ hurrDurr = do
     a <- hurr -- argument gets applied to hurr resulting in integer (a)
     b <- durr -- arg applied to durr, resulting in integer (a).
     return (a + b) -- integers are added.
+
+
+
+
+
+
+
+--- 22.4 FUNCTOR OF FUNCTIONS ------------------------------------------------------------
+{-
+
+-- Note there is an instance of (->) for Functor:
+
+instance Functor ((->) r) where
+    fmap = (.)
+    
+
+fmap (+1) (*2) 3
+= fmap (+1) (*2) $ 3
+= (fmap (+1) (*2)) 3
+= (+1) . (*2) $ 3
+= (+1) <$> (*2) $ 3
+-}
