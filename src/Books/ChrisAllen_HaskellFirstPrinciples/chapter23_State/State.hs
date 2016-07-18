@@ -58,7 +58,7 @@ randomR :: (RandomGen g, Random a) => (a, a) -> g -> (a, g)
 
 -- note is isomorphic: means there isa way to go from the newtype to the thing it
 -- wraps and back again without losing information.
-newtype State s a = State {runState :: s -> (a,s)}
+-- newtype State s a = State {runState :: s -> (a,s)}
 
 -- State :: (s -> (a,s)) -> State s a
 -- runState :: State s a -> s -> (a,s)
@@ -68,3 +68,39 @@ newtype State s a = State {runState :: s -> (a,s)}
 -- random :: (Random a) =>       StdGen -> (a, StdGen)
 -- equals State:                 s      -> (a, s)
 
+
+
+
+
+--- 23.6 WRITE STATE FOR YOURSELF ---------------------------------------------------------
+
+
+newtype State s a = State { runState :: s -> (a,s) }
+
+
+instance Functor (State s) where
+    -- equals: sas is afunction s -> (a,s) and needs to be applied to \s arg then
+    -- f is applied on the result (a) and we return resulting state (s').
+    -- fmap :: (a -> b) -> State s a -> State s b
+    fmap f (State sas) = State $ \s -> let (a, s') = sas s
+                                       in (f a, s')
+
+
+
+instance Applicative (State s) where
+    -- pure :: a -> State s a
+    pure a = State $ \s -> (a, s)
+    -- (<*>) :: (s -> a -> b) -> (s -> a) -> (s -> b)
+    -- (<*>) :: State s (a -> b) -> State s a -> State s b
+    (State sabs) <*> (State sas) = State $ \s -> let (a, s') = sas s
+                                                     (b, s'') = sabs s' a
+                                                 in b
+
+
+main :: IO()
+main = do
+    -- note fmap state
+    print $ runState ((+1) <$> (State $ \s -> (0, s))) 0
+    -- or we can write the above as:
+    let state = fmap (+1) (State $ \s -> (0, s))
+    print $ runState state 23

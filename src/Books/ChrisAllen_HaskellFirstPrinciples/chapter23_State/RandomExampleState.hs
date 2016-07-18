@@ -34,7 +34,7 @@ rollDie' :: State StdGen Die
 rollDie' = intToDie <$> state (randomR (1, 6)) {- stdgen state arg here -}
 
 rollDieThreeTimes :: State StdGen (Die, Die, Die)
-rollDieThreeTimes = liftA3 (,,) rollDie rollDie rollDie
+rollDieThreeTimes = liftA3 (,,) rollDie rollDie rollDie {-stdgen arg is threaded through all-}
 
 
 
@@ -73,9 +73,9 @@ rollsToGetN limit g = go 0 0 g
 
 --- 2
 rollsCountLogged :: Int -> StdGen -> (Int, [Die])
-rollsCountLogged limit g = go 0 0 g []
-    where go :: Int -> Int -> StdGen -> [Die] -> (Int, [Die])
-          go sum count gen dieList
+rollsCountLogged limit g = go 0 0 [] g
+    where go :: Int -> Int -> [Die] -> StdGen -> (Int, [Die])
+          go sum count dieList gen
             | sum >= limit = (count, dieList)
             | otherwise =
                 let (die, nextGen) = randomR (1, 6) gen
@@ -100,3 +100,4 @@ main = do
     (rollsToGetTwenty . mkStdGen ) <$> randomIO
     --- exercise 1
     print $ rollsToGetN 90 (mkStdGen 0)
+    print $ rollsCountLogged 70 (mkStdGen 0)
