@@ -1,4 +1,5 @@
 import Control.Applicative
+import Control.Monad
 
 
 
@@ -22,8 +23,8 @@ asks f = Reader $ \x -> f x
 
 
 --- 3
--- help help help help todo todo todo understand these better...
--- help key note question: why do we write Reader rab? WHy not Reader r ab?
+-- NOTE key important: we write Reader r because the constructor has only one argument
+-- which is the function (r). So Reader rab means it has function of type r -> a -> b.
 
 instance Functor (Reader r) where
     fmap f (Reader ra) = Reader $ (f . ra)
@@ -35,15 +36,21 @@ instance Applicative (Reader r) where
  -- (<*>) :: (r -> a -> b) -> (r -> a) -> (r -> b)
  -- (<*>) :: Reader r (a -> b) -> Reader r a -> Reader r b
     (Reader rab) <*> (Reader ra) = Reader $ \r -> rab r (ra r)
+    -- equals answer:
 
 
 instance Monad (Reader r) where
-    return x = Reader (\_ -> x)
+    return x = Reader (\_ -> x) -- any function Reader gets should still result in x.
  -- (>>=) :: Reader r a -> (a -> Reader r b) -> Reader r b
-    (Reader ra) >>= aRb = Reader $ \r -> runReader (aRb (ra r)) r
-    -- (Reader f) >>= g = Reader $ \x -> runReader (g (f x)) x
-
-
+    (Reader ra) >>= aRb = Reader $ \r -> (runReader (aRb (ra r))) r
+    {-
+    key note process:
+    1. (ra r) to get result of type (a)
+    2. apply aRb to a ==> aRb (ra r)
+    3. result is Reader r b so runReader to be able to pass in r again:
+       runReader (aRb (ra r)) r
+    4. then wrap it in Reader: Reader $ ...
+    -}
 
 
 {-
@@ -62,8 +69,9 @@ instance Functor ((->) env) where
 -}
 
 
---- 4
 
+
+--- 4
 
 newtype HumanName = HumanName String deriving (Eq, Show)
 newtype DogName = DogName String deriving (Eq, Show)
@@ -89,12 +97,20 @@ getDogR = Reader $ liftA2 Dog dogName address
 
 
 
---- Implementing with Reader Monad
+--- Implementing with Reader Monad.
+-- help why called Reader Monad if it doesn't use Reader?
 getDogRM :: Person -> Dog
 getDogRM = do
     name <- dogName
     addr <- address
     return (Dog name addr)
+
+
+--- Using the actual Reader Monad
+getDogRM' :: Reader Person Dog
+getDogRM' = Reader $ liftM2 Dog dogName address
+
+
 
 
 main :: IO()
@@ -104,3 +120,5 @@ main = do
     -- print $ (runReader asks)- help how to run this?
     print $ getDogRM pers
     print $ getDogRM chris
+    print $ (runReader getDogRM' pers)
+    -- note: runReader to unwrap Reader then pass in person to get Dog. 

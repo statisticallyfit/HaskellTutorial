@@ -89,6 +89,8 @@ hurrDurr = do
 
 --- 22.4 FUNCTOR OF FUNCTIONS ------------------------------------------------------------
 {-
+KEY COMPARE
+
 
 -- Note there is an instance of (->) for Functor:
 
@@ -178,7 +180,7 @@ important note: in words, we are basically doing this:
 --- 22.6. APPLICATIVE OF FUNCTIONS ------------------------------------------------------
 
 {-
-
+KEY COMPARE
 pure :: a -> f a
 pure :: a -> (r -> a)
 
@@ -274,7 +276,7 @@ fooBind m k = \r -> k (m r) r
 
 
 --- The Monad Instance ------------------
-
+-- KEY COMPARE
 -- (>>=) :: Monad m =>   m a -> (a -> m b)      ->   m b
 -- (>>=) ::        (->) r a  -> (a -> (->) r b) -> (->) r b
 -- (>>=) ::         (r -> a) -> (a -> r -> b)   -> r -> b
