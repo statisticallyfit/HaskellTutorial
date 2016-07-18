@@ -2,6 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="232bb086-1d74-43ca-8b3e-5454de511e3c" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter19_ApplyingStructure/UrlShortener.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/chapterExercises/ReaderPractice.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/chapterExercises/RewriteShawty.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter23_State/State.hs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/Reader.hs" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/Reader.hs" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/exercises/exercise22.5_6_7_functor_applicative_monad_Reader.hs" afterPath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/exercises/exercise22.5_6_7_functor_applicative_monad_Reader.hs" />
     </list>
@@ -33,21 +38,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Reader.hs" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/Reader.hs">
+      <file leaf-file-name="State.hs" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter23_State/State.hs">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="278" column="3" selection-start-line="278" selection-start-column="3" selection-end-line="278" selection-end-column="3" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="exercise22.5_6_7_functor_applicative_monad_Reader.hs" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/exercises/exercise22.5_6_7_functor_applicative_monad_Reader.hs">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.8899676">
-              <caret line="123" column="72" selection-start-line="123" selection-start-column="72" selection-end-line="123" selection-end-column="72" />
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -66,9 +61,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/PhoneProject/code/Phone.hs" />
-        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/PhoneProject/tests/TestPhone.hs" />
-        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/CipherProject/code/CaesarCipher.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/CipherProject/tests/TestCiphers.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/CipherProject/tests/TestCaesarCipher.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/CipherProject/code/VigniereCipher.hs" />
@@ -115,8 +107,11 @@
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/exercises/shortExercise_cap_rev.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/exercises/exercise22.5_ask.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/exercises/exercise22.6_applicatives.hs" />
-        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/Reader.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/exercises/exercise22.5_6_7_functor_applicative_monad_Reader.hs" />
+        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/chapterExercises/ReaderPractice.hs" />
+        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/Reader.hs" />
+        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter19_ApplyingStructure/UrlShortener.hs" />
+        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/chapterExercises/RewriteShawty.hs" />
       </list>
     </option>
   </component>
@@ -140,7 +135,7 @@
     <ConfirmationsSetting value="0" id="Remove" />
   </component>
   <component name="ProjectView">
-    <navigator proportions="" version="1">
+    <navigator currentView="ProjectPane" proportions="" version="1">
       <flattenPackages />
       <showMembers />
       <showModules />
@@ -153,13 +148,103 @@
       <manualOrder />
       <foldersAlwaysOnTop value="true" />
     </navigator>
-    <panes />
+    <panes>
+      <pane id="PackagesPane" />
+      <pane id="Scratches" />
+      <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Books" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Books" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ChrisAllen_HaskellFirstPrinciples" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Books" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ChrisAllen_HaskellFirstPrinciples" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="chapter23_State" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
+    </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="aspect.path.notification.shown" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../HaskellCourse" />
-    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Haskell" />
+    <property name="settings.editor.selected.configurable" value="preferences.toDoOptions" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.0" />
@@ -692,12 +777,12 @@
       <workItem from="1468561645642" duration="28084000" />
       <workItem from="1468650003606" duration="14574000" />
       <workItem from="1468738196511" duration="10779000" />
-      <workItem from="1468821408343" duration="2309000" />
+      <workItem from="1468821408343" duration="7843000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="306109000" />
+    <option name="totallyTimeSpent" value="311643000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="851" height="782" extended-state="0" />
@@ -745,35 +830,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/Reader.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/HangmanProject/code/Hangman.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="3" column="29" selection-start-line="3" selection-start-column="29" selection-end-line="3" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/HangmanProject/data/dict.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="36" column="10" selection-start-line="36" selection-start-column="10" selection-end-line="36" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/HangmanProject/tests/TestHangman.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-13.090909">
-          <caret line="148" column="42" selection-start-line="148" selection-start-column="34" selection-end-line="148" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter14_Testing/UsingHspec.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1089,18 +1145,50 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/Reader.hs">
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/exercises/exercise22.5_6_7_functor_applicative_monad_Reader.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="278" column="3" selection-start-line="278" selection-start-column="3" selection-end-line="278" selection-end-column="3" />
+        <state vertical-scroll-proportion="0.027508091">
+          <caret line="1" column="21" selection-start-line="1" selection-start-column="21" selection-end-line="1" selection-end-column="21" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/exercises/exercise22.5_6_7_functor_applicative_monad_Reader.hs">
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/chapterExercises/ReaderPractice.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.8899676">
-          <caret line="123" column="72" selection-start-line="123" selection-start-column="72" selection-end-line="123" selection-end-column="72" />
+        <state vertical-scroll-proportion="0.027508091">
+          <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/chapterExercises/RewriteShawty.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.027508091">
+          <caret line="1" column="63" selection-start-line="1" selection-start-column="63" selection-end-line="1" selection-end-column="63" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter19_ApplyingStructure/UrlShortener.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.5226537">
+          <caret line="19" column="0" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter22_Reader/Reader.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.8074434">
+          <caret line="357" column="38" selection-start-line="357" selection-start-column="38" selection-end-line="357" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter23_State/State.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>

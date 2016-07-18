@@ -2,7 +2,6 @@ import Control.Applicative
 import Control.Monad
 
 
-
 newtype Reader r a = Reader {runReader :: r -> a}
 
 
@@ -30,21 +29,29 @@ instance Functor (Reader r) where
     fmap f (Reader ra) = Reader $ (f . ra)
 
 
+
+-- help todo how to use pure and <*> as an example?
 instance Applicative (Reader r) where
  -- pure :: a -> Reader r a
     pure a = Reader $ \r -> a
  -- (<*>) :: (r -> a -> b) -> (r -> a) -> (r -> b)
  -- (<*>) :: Reader r (a -> b) -> Reader r a -> Reader r b
     (Reader rab) <*> (Reader ra) = Reader $ \r -> rab r (ra r)
-    -- equals answer:
+    {-
+    equals process:
+    1. (ra r) to get result of type (a)
+    2. apply (rab r) to (a) like so: (rab r (ra r))
+    3. wrap in Reader.
+    -}
 
 
+-- help todo how to use return and >>= as an example?
 instance Monad (Reader r) where
     return x = Reader (\_ -> x) -- any function Reader gets should still result in x.
  -- (>>=) :: Reader r a -> (a -> Reader r b) -> Reader r b
     (Reader ra) >>= aRb = Reader $ \r -> (runReader (aRb (ra r))) r
     {-
-    key note process:
+    equals process:
     1. (ra r) to get result of type (a)
     2. apply aRb to a ==> aRb (ra r)
     3. result is Reader r b so runReader to be able to pass in r again:
@@ -121,4 +128,4 @@ main = do
     print $ getDogRM pers
     print $ getDogRM chris
     print $ (runReader getDogRM' pers)
-    -- note: runReader to unwrap Reader then pass in person to get Dog. 
+    -- note: runReader to unwrap Reader then pass in person to get Dog.

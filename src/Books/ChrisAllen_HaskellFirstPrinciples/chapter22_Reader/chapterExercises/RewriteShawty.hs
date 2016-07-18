@@ -1,0 +1,2 @@
+-- todo: come back to this when you have
+-- succeeded to install Web.Scotty in Chapter 19 UrlShortener.

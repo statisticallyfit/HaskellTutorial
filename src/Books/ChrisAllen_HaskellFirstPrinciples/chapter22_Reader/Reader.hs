@@ -1,5 +1,5 @@
 import Control.Applicative
--- import Control.Monad.Reader
+import Control.Monad.Reader
 
 
 
@@ -289,3 +289,72 @@ fooBind m k = \r -> k (m r) r
 -- (<*>) :: (->) r (a -> b) -> (->) r a        -> (->) r b
 -- (>>=) :: (->) r a        -> (a -> (->) r b) -> (->) r b
 
+
+
+
+
+
+
+
+
+
+--- 22.8 READER MONAD NOT BY ITSELF ------------------------------------------------------
+
+
+{-
+flip :: (a -> b -> c) -> (b -> a -> c)
+flip f a b = f b a
+
+const :: a -> b -> a
+const a b = a
+
+(.) :: (b -> c) -> (a -> b) -> a -> c
+f . g = \a -> f (g a)
+
+
+class Functor f where
+    fmap :: (a -> b) -> f a -> f b
+
+
+class Functor f => Applicative f where
+    pure :: a -> f a
+    (<*>) :: f (a -> b) -> f a -> f b
+
+
+class Applicative f => Monad f where
+    return :: a -> f a
+    (>>=) :: f a -> (a -> f b) -> f b
+
+------
+
+instance Functor ((->) r) where
+    fmap = (.)
+
+
+instance Applicative ((->) r) where
+    pure = const
+    f <*> a = \r -> f r (a r)
+    -- equals: (Reader rab) <*> (Reader ra) = Reader $ \r -> rab r (ra r)
+
+
+instance Monad ((->) r) where
+    return = pure
+    m >>= k = flip k <*> m
+
+    -- equals
+    instance Monad ((->) env) where
+       return = const
+       f >>= g = \x -> g (f x) x
+-}
+
+
+
+
+
+
+
+--- 22.9 CAN CHANGE WHAT COMES BELOW BUT NOT ABOVE ---------------------------------------
+
+-- help todo meaning? How to use this?
+withReaderT' :: (r' -> r) -> ReaderT r m a -> ReaderT r' m a
+withReaderT' f m = ReaderT $ runReaderT m . f
