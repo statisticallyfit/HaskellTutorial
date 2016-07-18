@@ -36,6 +36,7 @@ main = mapM_ putStrLn $ fizzBuzzList [1.. 100]
 -- main = mapM_ putStrLn $ reverse $ fizzBuzzList [1 .. 100]-}
 
 
+------------------------------------------------------------------------------------------
 
 -- note cleaning up to let DL's Foldable instance convert to list before folding.
 
@@ -45,9 +46,16 @@ fizzBuzz n | n `mod` 15 == 0 = "FizzBuzz"
            | n `mod` 3 == 0 = "Buzz"
            | otherwise = show n
 
+
+-- note
+-- execState :: State s a -> s -> s
+-- takes a State and s (state) which is DL.empty and returns new state.
+-- todo help understand better
 fizzBuzzList :: [Integer] -> DL.DList String
 fizzBuzzList list = execState (mapM_ addResult list) DL.empty
 
+-- todo help what does the () at the end mean?
+-- todo help understand better
 addResult :: Integer -> State (DL.DList String) ()
 addResult n = do
     xs <- get
