@@ -86,15 +86,36 @@ instance Functor (State s) where
                                        in (f a, s')
 
 
-
+-- help todo example how to use this?
 instance Applicative (State s) where
     -- pure :: a -> State s a
     pure a = State $ \s -> (a, s)
-    -- (<*>) :: (s -> a -> b) -> (s -> a) -> (s -> b)
-    -- (<*>) :: State s (a -> b) -> State s a -> State s b
-    (State sabs) <*> (State sas) = State $ \s -> let (a, s') = sas s
-                                                     (b, s'') = sabs s' a
-                                                 in b
+    -- (<*>) :: (s -> (a -> b, s)) -> (s -> (a,s)) -> (s -> (b,s))
+    -- (<*>) :: State s (a -> b)   -> State s a    -> State s b
+    (State sabs) <*> (State sas) = State $ \s -> let (ab, s') = sabs s
+                                                     (a, s'') = sas s'
+                                                 in (ab a, s'')
+                                                 -- help do we use (sas s)
+                                                 -- or (sas s')? And which
+                                                 -- s do we return last? is it
+                                                 -- s'' or s' or s?
+    {-let (a, s') = sas s
+         (b, s'') = sabs s' a
+     in (b, s'')-}
+
+
+
+-- help todo example how this works?
+instance Monad (State s) where
+    return = pure
+
+    -- (>>=) :: (s -> a)  -> (a -> (s -> b))  -> (s -> b)
+    -- (>>=) :: State s a -> (a -> State s b) -> State s b
+    (State sa) >>= aSb = State $ \s -> let (a, s') = sa s
+                                       in runState (aSb a) s
+                                       -- help why do we return (s)
+                                       -- here when we return s'' last before?
+
 
 
 main :: IO()
