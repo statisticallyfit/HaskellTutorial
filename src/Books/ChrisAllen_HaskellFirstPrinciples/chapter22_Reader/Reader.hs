@@ -49,6 +49,8 @@ key meaning
 = 13
 
 
+todo: what is the difference between applicative apply and applicative __ ? ask tati.
+
 3) NOTE
 ((+) <$> (*2) <*> (+10)) 3
 = ((+) <$> (3*2) <*> (3+10))
@@ -137,6 +139,9 @@ fmap (+1) (*2) 3
 {-
 newtype Reader r a = Reader {runReader :: r -> a}
 
+--- > purpose:  It should accept a value of some type e (for environment) that
+-- represents the data that we're passing in, and return a value of some other
+-- type a as its result.
 --- > r is the type we are reading in
 --- > a is the result type of the function.
 
