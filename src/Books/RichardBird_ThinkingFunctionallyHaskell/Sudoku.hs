@@ -25,15 +25,18 @@ solve = filter valid . completions
 prune :: Matrix [Digit] -> Matrix [Digit]
 prune = undefined
 
--- note the fixed choices are the singleton entries in each row.
+-- note remove the elements per digit list that already occur as singletons.
+-- ["6", "12", "3", "134", "56"] ==> ["6","12","3","14","5"]
+-- ["6", "36", "3", "134", "4"] ==>  ["6","","3","1","4"]
 pruneRow :: Row [Digit] -> Row [Digit]
-pruneRow row = map (remove fixed) row
-    where fixed = [d | [d] <- row]
+pruneRow row = map (remove singletons) row
+    where singletons = [d | [d] <- row] -- note gets just singletons
 
 
--- note removes the fixed choices from any choice that is not fixed. 
+-- note removes ds from xs so in the end, there are no more ds in xs
 remove :: [Digit] -> [Digit] -> [Digit]
 remove ds [x] = [x]
+remove ds xs = filter ({-x one by one-} `notElem` ds) xs
 
 ---------------------------------------------
 
@@ -128,3 +131,10 @@ cartesianProduct (xs : xss) = [x:ys | x <- xs, ys <- yss]
 
 --- testing map (map f) . cp = cp . map (map f) -- note suggested by id type of (cp)
 --- testing filter (all p) . cp = cp . map (filter p)
+
+--- testing filter noDups . cp = filter nodups . cp . pruneRow
+-- says that pruning a row will not throw away any list which contain no duplicates.
+
+
+--- testing remove: when you add ds back into xs, length overall is len ds + len xs and
+-- there are no duplicates in overall list.
