@@ -1,4 +1,16 @@
 
+
+{-
+NOTE terminology
+
+cell -> a single entry in the matrix
+box -> a box consisting of 9 by 9 cells.
+grid -> a grid which is 3 by 3 boxes.
+row -> goes from start to end grid (horizontally) and is 9 cells long.
+col -> goes from top to bottom of grid (vertically) and is 9 cells tall.
+
+-}
+
 -- note matrix is a list of rows. m x n matrix is a list of m rows, each length n.
 type Matrix a = [Row a]
 type Row a = [a]
@@ -41,7 +53,8 @@ remove ds xs = filter ({-x one by one-} `notElem` ds) xs
 ---------------------------------------------
 
 
--- note no duplicates in rows, cols, and boxes.
+-- note there must be no duplicates in any box, row or column!
+-- That's the mettle of the game.
 valid :: Grid -> Bool
 valid grid = all noDups (rows grid) &&
              all noDups (cols grid) &&
@@ -79,8 +92,7 @@ ungroup = concat
 completions :: Grid -> [Grid]
 completions = expand . choices
 
--- note installs the available digits for each cell
--- postcondition: result is matrix where each cell is a list of digits.
+-- postcondition: returns a Matrix where each cell is a list of digits.
 choices :: Grid -> Matrix [Digit]
 choices grid = map (map choice) grid
     -- note if a cell is blank then all digits are possible, else just the given digit.
