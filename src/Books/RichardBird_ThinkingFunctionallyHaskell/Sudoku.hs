@@ -28,6 +28,7 @@ blank :: Digit -> Bool
 blank = (== 0)
 
 
+
 -- Game plan: start with the given grid and complete it by filling in every
 -- possible choice for the blank entries. Then filter this list of filled grids
 -- for those that don't contain duplicates in any row, box, or column.
@@ -45,6 +46,11 @@ solve = concat . filter valid . expand . many prune . choices
 prune :: Matrix [Digit] -> Matrix [Digit]
 prune = pruneBy boxs . pruneBy cols . pruneBy rows
 
+
+pruneBy f = f . map pruneRow . f
+
+
+
 -- note remove the elements per digit list that already occur as singletons.
 -- ["6", "12", "3", "134", "56"] ==> ["6","12","3","14","5"]
 -- ["6", "36", "3", "134", "4"] ==>  ["6","","3","1","4"]
@@ -53,7 +59,6 @@ pruneRow row = map (remove singletons) row
     where singletons = [d | [d] <- row] -- note gets just singletons
 
 
-pruneBy f = f . map pruneRow . f
 
 -- note removes ds from xs so in the end, there are no more ds in xs
 remove :: [Digit] -> [Digit] -> [Digit]
@@ -128,7 +133,7 @@ cartesianProduct :: [[a]] -> [[a]]
 cartesianProduct [] = [[]]
 cartesianProduct (xs : xss) = [x:ys | x <- xs, ys <- yss]
     where yss = cartesianProduct xss
--- note less efficient, above version: cprod is computed just once.
+-- note less efficient is above version: cprod is computed just once.
 -- cartesianProduct (xs : xss) = [x:ys | x <- xs, ys <- cartesianProduct xss]
 
 
@@ -136,38 +141,62 @@ cartesianProduct (xs : xss) = [x:ys | x <- xs, ys <- yss]
 
 
 
-showGrid :: Grid -> String
+showGrid :: [[Int]] -> String
 showGrid grid = seperatedLines
     where seperatedLines = break ++ (intercalate break lines) ++ break
-          lines = map concat (group [showFullLine r ++ "\n" | r <- [0..8]])
+          lines = map concat (group [showFullLine r ++ "\n" | r <- [0.. (gridWidth - 1)]])
           showFullLine r = "| " ++ intercalate " | " (map (showBoxLine r) [0..2]) ++ " |"
           showBoxLine r p = intersperse ' ' $ concatMap show ((group (grid !! r)) !! p)
-          break = (replicate lineLen '-') ++ "\n"
-          lineLen = length (showFullLine 0) -- length of arbitrary line
+          break = (replicate lineLenStr '-') ++ "\n"
+          lineLenStr = length (showFullLine 0) -- length of arbitrary line
+          gridWidth = length grid
 
-printGrid :: Grid -> IO()
+printGrid :: [[Int]] -> IO()
 printGrid = putStr . showGrid
 
 
 
 
-r1 :: Row Digit
-r1 = [2, 0, 0, 0, 0, 5, 3, 9, 0]
-r2 = [8, 4, 0, 0, 0, 2, 0, 0, 0]
-r3 = [0, 5, 0, 0, 3, 1, 8, 2, 0]
-r4 = [0, 8, 0, 0, 4, 0, 2, 0, 3]
-r5 = [0, 0, 2, 1, 0, 7, 5, 0, 0]
-r6 = [6, 0, 9, 0, 2, 0, 0, 8, 0]
-r7 = [0, 9, 1, 2, 5, 0, 0, 4, 0]
-r8 = [0, 0, 0, 9, 0, 0, 0, 3, 5]
-r9 = [0, 6, 4, 3, 0, 0, 0, 0, 2]
+e1 :: Row Digit
+e1 = [2, 0, 0, 0, 0, 5, 3, 9, 0]
+e2 = [8, 4, 0, 0, 0, 2, 0, 0, 0]
+e3 = [0, 5, 0, 0, 3, 1, 8, 2, 0]
+e4 = [0, 8, 0, 0, 4, 0, 2, 0, 3]
+e5 = [0, 0, 2, 1, 0, 7, 5, 0, 0]
+e6 = [6, 0, 9, 0, 2, 0, 0, 8, 0]
+e7 = [0, 9, 1, 2, 5, 0, 0, 4, 0]
+e8 = [0, 0, 0, 9, 0, 0, 0, 3, 5]
+e9 = [0, 6, 4, 3, 0, 0, 0, 0, 2]
 
-grid :: Grid
-grid = [r1, r2, r3, r4, r5, r6, r7, r8, r9]
+easyPuzzle :: Grid
+easyPuzzle = [e1, e2, e3, e4, e5, e6, e7, e8, e9]
 
 
+h1 :: Row Digit
+h1 = [0, 0, 0, 4, 0, 0, 0, 0, 9]
+h2 = [0, 4, 0, 7, 0, 0, 1, 0, 0]
+h3 = [0, 0, 0, 0, 8, 0, 3, 2, 0]
+h4 = [0, 0, 8, 2, 0, 0, 0, 0, 6]
+h5 = [6, 0, 0, 5, 0, 8, 0, 0, 7]
+h6 = [4, 0, 0, 0, 0, 6, 8, 0, 0]
+h7 = [0, 2, 9, 0, 7, 0, 0, 0, 0]
+h8 = [0, 0, 4, 0, 0, 1, 0, 5, 0]
+h9 = [1, 0, 0, 0, 0, 9, 0, 0, 0]
+
+veryHardPuzzle :: Grid
+veryHardPuzzle = [h1, h2, h3, h4, h5, h6, h7, h8, h9]
+
+
+
+
+main :: IO()
 main = do
-    print $ solve grid
+    printGrid $ solve easyPuzzle
+    putStrLn "\n"
+    -- printGrid $ solve veryHardPuzzle -- help why does it take forever to solve?
+
+
+
 
 
 --- testing empty list result when one list in args is empty:
@@ -189,12 +218,16 @@ main = do
 
 --- testing ungroup . group = id, group . ungroup = id
 
---- testing map rows . expand = expand . rows (valid on n^2 x n^2 matrices)
---- testing map cols . expand = expand . cols (valid on n^2 x n^2 matrices)
---- testing map boxs . expand = expand . boxs (valid on n^2 x n^2 matrices)
+--- testing map rows . expand = expand . rows (valid on n^2 x n^2 matrices of choices)
+--- testing map cols . expand = expand . cols (valid on n^2 x n^2 matrices of choices)
+--- testing map boxs . expand = expand . boxs (valid on n^2 x n^2 matrices of choices)
 
 --- testing map (map f) . cp = cp . map (map f) -- note suggested by id type of (cp)
 --- testing filter (all p) . cp = cp . map (filter p)
+
+--- testing filter (p . f) = map f . filter p . map f
+--- testing filter (p . f) . map f = map f . filter p
+
 
 --- testing filter noDups . cp = filter nodups . cp . pruneRow
 -- says that pruning a row will not throw away any list which contain no duplicates.
