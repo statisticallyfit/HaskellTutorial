@@ -1,7 +1,7 @@
 module Sudoku where
 
 
-import Data.List (intercalate)
+import Data.List (intercalate, intersperse)
 
 {-
 NOTE terminology
@@ -135,10 +135,19 @@ cartesianProduct (xs : xss) = [x:ys | x <- xs, ys <- yss]
 
 
 
+
 showGrid :: Grid -> String
-showGrid grid = map (showOneLine ++ "\n") grid
-    where showOneLine r = intercalate "  |  " (map (showPart r) [0..2])
-          showPart p numericRow = intersperse ' ' $ concatMap show ((group numericRow) !! p)
+showGrid grid = seperatedLines
+    where seperatedLines = break ++ (intercalate break lines) ++ break
+          lines = map concat (group [showFullLine r ++ "\n" | r <- [0..8]])
+          showFullLine r = "| " ++ intercalate " | " (map (showBoxLine r) [0..2]) ++ " |"
+          showBoxLine r p = intersperse ' ' $ concatMap show ((group (grid !! r)) !! p)
+          break = (replicate lineLen '-') ++ "\n"
+          lineLen = length (showFullLine 0) -- length of arbitrary line
+
+printGrid :: Grid -> IO()
+printGrid = putStr . showGrid
+
 
 
 
