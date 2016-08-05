@@ -1,4 +1,7 @@
+module Sudoku where
 
+
+import Data.List (intercalate)
 
 {-
 NOTE terminology
@@ -16,26 +19,31 @@ type Matrix a = [Row a]
 type Row a = [a]
 
 type Grid = Matrix Digit
-type Digit = Char
+type Digit = Int
 
 digits :: [Digit]
-digits = ['1' .. '9']
+digits = [1 .. 9]
 
 blank :: Digit -> Bool
-blank = (== '0')
+blank = (== 0)
 
 
 -- Game plan: start with the given grid and complete it by filling in every
 -- possible choice for the blank entries. Then filter this list of filled grids
 -- for those that don't contain duplicates in any row, box, or column.
 -- note this is the game plan executor
-solve :: Grid -> [Grid]
-solve = filter valid . completions
+-- note: using many prune because after one round of pruning some choices may be
+-- resolved into singletons and another round may remove more impossible choices.
+-- note using many to repeatedly prune the matrix of choices until only singleton
+-- choices are left.
+solve :: Grid -> Grid
+solve = concat . filter valid . expand . many prune . choices
+-- filter valid . completions
 ------------------------------------------------------------------------------------------
 -- note remove any choices from a cell c that already occur as singleton entries in the
 -- row, col, and box containing c.
 prune :: Matrix [Digit] -> Matrix [Digit]
-prune = undefined
+prune = pruneBy boxs . pruneBy cols . pruneBy rows
 
 -- note remove the elements per digit list that already occur as singletons.
 -- ["6", "12", "3", "134", "56"] ==> ["6","12","3","14","5"]
@@ -45,10 +53,18 @@ pruneRow row = map (remove singletons) row
     where singletons = [d | [d] <- row] -- note gets just singletons
 
 
+pruneBy f = f . map pruneRow . f
+
 -- note removes ds from xs so in the end, there are no more ds in xs
 remove :: [Digit] -> [Digit] -> [Digit]
 remove ds [x] = [x]
 remove ds xs = filter ({-x one by one-} `notElem` ds) xs
+
+
+-- note: many prune finds a limit (if next answer is same as previous, return previous)
+many :: Eq a => (a -> a) -> a -> a
+many f x = if x == y then x else (many f y)
+    where y = f x
 
 ---------------------------------------------
 
@@ -89,8 +105,8 @@ ungroup = concat
 
 
 ---------------------------------------------
-completions :: Grid -> [Grid]
-completions = expand . choices
+{-completions :: Grid -> [Grid]
+completions = expand . choices-}
 
 -- postcondition: returns a Matrix where each cell is a list of digits.
 choices :: Grid -> Matrix [Digit]
@@ -116,6 +132,33 @@ cartesianProduct (xs : xss) = [x:ys | x <- xs, ys <- yss]
 -- cartesianProduct (xs : xss) = [x:ys | x <- xs, ys <- cartesianProduct xss]
 
 
+
+
+
+showGrid :: Grid -> String
+showGrid grid = map (showOneLine ++ "\n") grid
+    where showOneLine r = intercalate "  |  " (map (showPart r) [0..2])
+          showPart p numericRow = intersperse ' ' $ concatMap show ((group numericRow) !! p)
+
+
+
+r1 :: Row Digit
+r1 = [2, 0, 0, 0, 0, 5, 3, 9, 0]
+r2 = [8, 4, 0, 0, 0, 2, 0, 0, 0]
+r3 = [0, 5, 0, 0, 3, 1, 8, 2, 0]
+r4 = [0, 8, 0, 0, 4, 0, 2, 0, 3]
+r5 = [0, 0, 2, 1, 0, 7, 5, 0, 0]
+r6 = [6, 0, 9, 0, 2, 0, 0, 8, 0]
+r7 = [0, 9, 1, 2, 5, 0, 0, 4, 0]
+r8 = [0, 0, 0, 9, 0, 0, 0, 3, 5]
+r9 = [0, 6, 4, 3, 0, 0, 0, 0, 2]
+
+grid :: Grid
+grid = [r1, r2, r3, r4, r5, r6, r7, r8, r9]
+
+
+main = do
+    print $ solve grid
 
 
 --- testing empty list result when one list in args is empty:
