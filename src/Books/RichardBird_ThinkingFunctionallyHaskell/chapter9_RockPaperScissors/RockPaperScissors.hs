@@ -109,11 +109,51 @@ extend (s1, s2) rs = (s1 (map snd rs), s2 (map fst rs)) : rs
 copy2 :: Strategy2
 copy2 ms = Rock : ms
 
--- note stats computes running counts of three possible moves. 
+-- note stats computes running counts of three possible moves.
 smart2 :: Strategy2
 smart2 ms = Rock : map pick (stats ms)
-    where stats = tail . scanl (flip count) (0,0,0)
+    where stats = tail . scanl (flip count) (0,0,0) {-ms arg goes here-}
 
+-- note rounds2 is defined by two cyclic lists.
+rounds2 :: (Strategy2, Strategy2) -> [Round]
+rounds2 (p1, p2) = zip xs ys
+    where xs = p1 ys
+          ys = p2 xs
+
+-- note: rounds2 offers no protection against someone who cheats!
+cheat :: [Move] -> [Move]
+cheat ms = map trump ms
+    where trump Paper = Scissors
+          trump Rock = Paper
+          trump Scissors = Rock
+
+-- behaves like copy for n moves then starts to cheat
+devious :: Int -> Strategy2
+devious n ms = take n (copy2 ms) ++ cheat (drop n ms)
+
+
+
+-- version of rounds2 that prevents cheating
+rounds2' :: (Strategy2, Strategy2) -> [Round]
+rounds2' (p1, p2) = zip xs ys
+    where xs = police p1 ys
+          ys = police p2 xs
+
+
+police :: Strategy2 -> [Move] -> [Move]
+police p ms = ms'
+    where ms' = p (synch ms ms')
+
+-- note what is the correct definition for synch? 
+synch :: [Move] -> [Move] -> [Move]
+{-synch [] [] = []
+synch [x] [y] = [y]
+synch [] [y] = [y]
+synch [x] [] = []-}
+synch (x:xs) (y:ys) = (y `seq` x) : (synch xs ys)
+
+
+-- let ms = [Rock, Paper, Scissors , Rock , Paper , Scissors , Rock , Rock, Rock, Rock, Rock]
 
 ---------------------------------------
 onSeperateLines :: [Round] -> IO()
