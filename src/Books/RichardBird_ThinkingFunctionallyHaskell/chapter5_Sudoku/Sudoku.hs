@@ -192,7 +192,7 @@ veryHardPuzzle = [h1, h2, h3, h4, h5, h6, h7, h8, h9]
 main :: IO()
 main = do
     printGrid $ solve easyPuzzle
-    putStrLn "\n"
+    --putStrLn "\n"
     -- printGrid $ solve veryHardPuzzle -- help why does it take forever to solve?
 
 
