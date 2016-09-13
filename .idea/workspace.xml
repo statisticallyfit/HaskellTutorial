@@ -45,8 +45,8 @@
       <file leaf-file-name="BinomialTheorem.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Books/KeetsDoets_HaskellRoadToLogicMathsProgramming/chapter9_Polynomials/BinomialTheorem.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.54966885">
-              <caret line="81" column="20" selection-start-line="81" selection-start-column="20" selection-end-line="81" selection-end-column="20" />
+            <state vertical-scroll-proportion="0.18377483">
+              <caret line="32" column="76" selection-start-line="32" selection-start-column="76" selection-end-line="32" selection-end-column="76" />
               <folding />
             </state>
           </provider>
@@ -799,12 +799,12 @@
       <workItem from="1472035319681" duration="1051000" />
       <workItem from="1472480624991" duration="9000" />
       <workItem from="1473671775484" duration="14494000" />
-      <workItem from="1473753888715" duration="2838000" />
+      <workItem from="1473753888715" duration="3768000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="377762000" />
+    <option name="totallyTimeSpent" value="378692000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="824" height="768" extended-state="0" />
@@ -1205,8 +1205,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/KeetsDoets_HaskellRoadToLogicMathsProgramming/chapter9_Polynomials/BinomialTheorem.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.54966885">
-          <caret line="81" column="20" selection-start-line="81" selection-start-column="20" selection-end-line="81" selection-end-column="20" />
+        <state vertical-scroll-proportion="0.18377483">
+          <caret line="32" column="76" selection-start-line="32" selection-start-column="76" selection-end-line="32" selection-end-column="76" />
           <folding />
         </state>
       </provider>

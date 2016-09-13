@@ -30,6 +30,7 @@ c .* (f:fs) = c*f : c .* fs
 z :: Num a => [a]
 z = [0, 1]
 
+--- note: the lists carry polynomial coefficients, not the function values. 
 instance (Num a, Ord a) => Num [a] where
     fromInteger c = [fromInteger c]
 
