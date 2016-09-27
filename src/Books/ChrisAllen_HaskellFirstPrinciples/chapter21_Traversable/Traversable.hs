@@ -22,6 +22,8 @@ class (Functor t, Foldable t) => Traversable t where
     sequenceA :: Applicative f => t (f a) -> f (t a)
     sequenceA = traverse id
 
+    sequence $ fmap (monad/applicative instance) [arg] = traverse (monad/app instance) [arg]
+
 -}
 
 {-
