@@ -1,4 +1,3 @@
-import Data.Maybe
 import Data.List hiding (delete)
 import Test.QuickCheck
 import Control.Monad hiding (join)

@@ -29,7 +29,7 @@ t2 = Node "*"
 NOTE:
 be able to fold over tree and simplify constants but also remember order that they
 were in the tree!
-Then remember also where they go at the end! 
+Then remember also where they go at the end!
 -}
 
 -- (f . (n * ))
