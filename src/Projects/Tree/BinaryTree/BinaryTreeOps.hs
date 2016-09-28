@@ -239,6 +239,7 @@ postorder' tree = flattenPost tree []
 --- Traversals: General folding
 
 
+-- n : flattenPre left (flattenPre right accList)
 preFoldr :: (a -> b -> b) -> b -> Tree a -> b
 preFoldr _ acc Nil = acc
 preFoldr f acc (Node n left right) = accRight
@@ -259,17 +260,17 @@ preFoldl f acc (Node n left right) = accRight
 inorderFold :: (b -> a -> b -> b) -> b -> Tree a -> b
 inorderFold _ acc Nil = acc
 inorderFold f acc (Node n left right)
-    = f n (inorderFold f acc left) (inorderFold f acc right)
+    = f (inorderFold f acc left) n (inorderFold f acc right)
 
 
-printSumPreorderRight :: Show a => a -> String -> String
-printSumPreorderRight x y = "(" ++ show x ++ "+" ++ y ++ ")"
+printSumPreRight :: Show a => a -> String -> String
+printSumPreRight x y = "(" ++ show x ++ "+" ++ y ++ ")"
 
-printPreorderLeft :: Show a => String -> a -> String
-printPreorderLeft x y = "(" ++ x ++ "+" ++ show y ++ ")"
+printPreLeft :: Show a => String -> a -> String
+printPreLeft x y = "(" ++ x ++ "+" ++ show y ++ ")"
 
-printSumInorder :: Show a => String -> a -> String -> String
-printSumInorder x y z = "(" ++ x ++ "+" ++ show y ++ "+" ++ z ++ ")"
+printSumIn :: Show a => String -> a -> String -> String
+printSumIn x y z = "(" ++ x ++ "+" ++ show y ++ "+" ++ z ++ ")"
 
 ------------------
 
@@ -283,11 +284,11 @@ foldPostorder f acc (Node left x right)
 
 ------------------
 -- note preorder foldr
-exampleFoldTreePRE_R = preFoldr printSumPreorderRight "0" t3
+exampleFoldTreePRE_R = preFoldr printSumPreRight "_" t3
 -- note preorder foldl (backwards)
-exampleFoldTreePRE_L = preFoldl printPreorderLeft "0" t3
+exampleFoldTreePRE_L = preFoldl printPreLeft "_" t3
 -- note inorder
-exampleFoldTreeIN = inorderFold printSumInorder "0" t3
+exampleFoldTreeIN = inorderFold printSumIn "_" t3
 --exampleFoldTreePOST =
 
 
@@ -318,7 +319,7 @@ instance Functor Tree where
     fmap f (Node n left right) = Node (f n) (fmap f left) (fmap f right)
 
 
-
+------ preFoldr f (preFoldr f (f n acc) left) right
 instance Foldable Tree where
     foldMap _ Nil = mempty
     foldMap f (Node n left right) = (f n) <> (foldMap f left) <> (foldMap f right)

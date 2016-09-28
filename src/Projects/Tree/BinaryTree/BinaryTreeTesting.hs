@@ -1,10 +1,12 @@
+module BinaryTreeTesting where
+
 import Test.QuickCheck -- (Arbitrary, arbitrary, elements)
 import Test.QuickCheck.Checkers
 import Test.QuickCheck.Classes
 import Data.Monoid
 import Control.Monad hiding (join)
 import Data.Maybe
-import Data.List (findIndex, elemIndex)
+import Data.List (findIndex, elemIndex, sort)
 
 import BinaryTreeOps ---- then load that file with this file in cmd line ghci
 
@@ -38,42 +40,68 @@ isSorted xs = (sort xs) == xs
 
 -- note size before should be same as size after.
 -- HELP doesn't work because of Nil t2.
-propJoin :: Tree Int -> Tree Int -> Bool
-propJoin t1 t2 = (size t1 + size t2) == (size (join t1 t2))
+testJoin :: Tree Int -> Tree Int -> Bool
+testJoin t1 t2 = (size t1 + size t2) == (size (join t1 t2))
 
-propIns :: Int -> Tree Int -> Bool
-propIns x tree = (size tree + 1) == (size (insert x tree))
+testInsert :: Int -> Tree Int -> Bool
+testInsert x tree = (size tree + 1) == (size (insert x tree))
 
 
 testMap :: Tree Int -> Bool
-testMap tree = (collapseTree $ mapTree (+3) tree) == (map (+3) (collapseTree tree))
+testMap tree = (collapse $ mapTree (+3) tree) == (map (+3) (collapse tree))
 
 testSize :: Tree Int -> Bool
-testSize tree = sizeTree tree == (length $ collapseTree tree)
+testSize tree = size tree == (length $ collapse tree)
 
 --- testing that result tree is sorted.
 testInsertOrder :: Int -> Tree Int -> Bool
-testInsertOrder n tree = (isSorted $ collapseTree $ insertTree n tree)
+testInsertOrder n tree = (isSorted $ collapse $ insert n tree)
 
 
 --- testing that if element is not already inside tree, then length should be greater
 -- by 1, else they should be same size.
 testInsertSize :: Int -> Tree Int -> Bool
 testInsertSize n oldTree
-    | occurs n oldTree = (sizeTree newTree) ==  (sizeTree oldTree)
-    | otherwise        = (sizeTree newTree) == (sizeTree oldTree + 1)
-    where newTree = insertTree n oldTree
+    | occurs n oldTree = (size newTree) ==  (size oldTree)
+    | otherwise        = (size newTree) == (size oldTree + 1)
+    where newTree = insert n oldTree
 
 testOccurs :: Int -> Tree Int -> Bool
-testOccurs n tree = (elem n (collapseTree tree)) == (occurs n tree)
+testOccurs n tree = (elem n (collapse tree)) == (occurs n tree)
 
 testInorderEqualsCollapse :: Tree Int -> Bool
-testInorderEqualsCollapse tree = collapseTree tree == inorder tree
+testInorderEqualsCollapse tree = collapse tree == inorder tree
 
 
+testFold :: Int -> Tree Int -> Bool
+testFold acc tree = (preFoldr (+) acc tree) == (foldr (+) acc flatTree)
+    where flatTree = collapse tree
+
+
+testPreFoldlIsFoldl :: Int -> Tree Int -> Bool
+testPreFoldlIsFoldl acc tree = (preFoldl f acc tree) == (foldl f acc tree)
+    where f = \acc y -> acc - y
+
+main = do
+    quickCheck testMap
+    quickCheck testSize
+    quickCheck testInsertOrder
+    quickCheck testInsertSize
+    quickCheck testOccurs
+    quickCheck testInorderEqualsCollapse
+    quickCheck testFold
+    quickCheck testPreFoldlIsFoldl
+
+    let trigger = undefined :: Tree (Int, Int, [Int])
+    quickBatch (traversable trigger)
+
+
+
+
+{-
 ---------------------------------------------------------
-testTree' :: Tree Integer
-testTree' = Node (Node Leaf 1 Leaf) 2 (Node Leaf 3 Leaf)
+sampleTree :: Tree Integer
+sampleTree = Node (Node Leaf 1 Leaf) 2 (Node Leaf 3 Leaf)
 
 testPreorder = if preorder testTree' == [2,1,3]
                then putStrLn "Preorder is fine!"
@@ -88,29 +116,4 @@ testPostorder =
     if postorder testTree' == [1,3,2]
     then putStrLn "Postorder fine!"
     else putStrLn "Bad news bears."
-
----------------------------------------------------------
-
-
-testFold :: Int -> Tree Int -> Bool
-testFold acc tree = (foldrPreorder (+) acc tree) == (foldr (+) acc flatTree)
-    where flatTree = collapseTree tree
-
-
-main = do
-    quickCheck testMap
-    quickCheck testSize
-    quickCheck testInsertOrder
-    quickCheck testInsertSize
-    quickCheck testOccurs
-    quickCheck testInorderEqualsCollapse
-    quickCheck testFold
-
-{-
-
-main :: IO()
-main = do
-    let trigger = undefined :: Tree (Int, Int, [Int])
-    quickBatch (traversable trigger)
 -}
-
