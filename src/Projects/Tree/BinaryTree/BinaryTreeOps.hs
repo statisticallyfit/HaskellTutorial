@@ -38,8 +38,9 @@ t7 = Node 8 (Node 5  (Node 1 Nil Nil)  (Node 6 Nil Nil))
 
 tdup = Node 8 (Node 8 (Node 7 Nil Nil) Nil) (Node 10 (Node 9 Nil Nil) Nil)
 
-t123 = Node 2 (Node 1 Nil Nil) (Node 3 Nil Nil)
-t567 = Node 6 (Node 5 Nil Nil) (Node 7 Nil Nil)
+t123 = Node 2 (Node (-1) Nil Nil) (Node 3 Nil Nil)
+t567 = Node (-6) (Node 5 Nil Nil) (Node (-7) Nil Nil)
+t1_7 = Node (-4) t123 t567
 
 -- deleting 3 from these trees.
 testDelete1 = Node 2 (Node 1 Nil Nil) (Node 3 Nil (Node 4 Nil Nil))
@@ -254,23 +255,27 @@ postorder' tree = flattenPost tree []
 
 --- Traversals: General folding
 
+-- IMPORTANT even haskell designers say that foldr = post order and foldl = preorder!:
+-- https://hackage.haskell.org/package/suffixtree-0.2.2.1/docs/src/Data-SuffixTree.html
 
+-- note in foldl, the left has to be accumulator for the right tree.
 -- n : flattenPre left (flattenPre right accList)
--- HELP FIX This so it gives same testing as foldr 
-preFoldr :: (a -> b -> b) -> b -> Tree a -> b
-preFoldr _ acc Nil = acc
-preFoldr f acc (Node n left right) = accLeft
-    where
-    accLeft = preFoldr f accRight left
-    accRight = preFoldr f (f n acc) right
+-- foldl f (foldl f (f z n) left) right
+-- note in foldr, the right has to be accumulator for the left tree.
+-- flattenPost left (flattenPost right (n : accList))
+-- foldr f (f n (foldr f z right)) left
+foldrPost :: (a -> b -> b) -> b -> Tree a -> b
+foldrPost _ acc Nil = acc
+foldrPost f acc (Node n left right)
+    = foldrPost f (f n (foldrPost f acc right)) left
+--preFoldr f (preFoldr f (f n acc) right) left
 
+-- foldl f (foldl f (f z n) left) right
+foldlPre :: (b -> a -> b) -> b -> Tree a -> b
+foldlPre _ acc Nil = acc
+foldlPre f acc (Node n left right)
+    = foldlPre f (foldlPre f (f acc n) left) right
 
-preFoldl :: (b -> a -> b) -> b -> Tree a -> b
-preFoldl _ acc Nil = acc
-preFoldl f acc (Node n left right) = accRight
-    where
-    accRight = preFoldl f accLeft right
-    accLeft = preFoldl f (f acc n) left
 
 -- inorder left ++ [n] ++ inorder right
 -- flattenIn left (a : (flattenIn right accList))
@@ -301,10 +306,10 @@ foldPostorder f acc (Node left x right)
 
 ------------------
 -- note preorder foldr HELP these are not the same
-exampleFoldTreePRE_R = preFoldr printSumPreRight "_" t3
+exampleFoldTreePRE_R = foldrPost printSumPreRight "_" t3
 exampleFoldr = foldr printSumPreRight "_" t3
 -- note preorder foldl (backwards)
-exampleFoldTreePRE_L = preFoldl printSumPreLeft "_" t3
+exampleFoldTreePRE_L = foldlPre printSumPreLeft "_" t3
 exampleFoldl = foldl printSumPreLeft "_" t3
 -- note inorder
 exampleFoldTreeIN = inorderFold printSumIn "_" t3
@@ -317,7 +322,7 @@ exampleFoldTreeIN = inorderFold printSumIn "_" t3
 -- traversal.
 -- note returns mapped list in swirly preorder traversal.
 mapFoldTreeToList :: (a -> b) -> Tree a -> [b]
-mapFoldTreeToList f tree = preFoldr ((:) . f) [] tree
+mapFoldTreeToList f tree = foldrPost ((:) . f) [] tree
 
 -- HELP HELP HELP TODO map fold but return binary tree.
 {-mapFoldTree :: (a -> b) -> BinaryTree a -> BinaryTree b
@@ -328,7 +333,11 @@ mapFoldTree f tree = foldrPreorder mk Leaf tree
 
 
 
-
+{-
+TODO This is NEAT, very simple use to implement my folds
+http://blog.moertel.com/posts/2012-01-26-the-inner-beauty-of-tree-traversals.html
+http://www.willamette.edu/~fruehr/254/samples/Trees.hs
+-}
 
 
 ---------------------------------------------------------------------------------------
@@ -338,7 +347,7 @@ instance Functor Tree where
     fmap f (Node n left right) = Node (f n) (fmap f left) (fmap f right)
 
 
------- preFoldr f (preFoldr f (f n acc) left) right
+------ foldrPostorder f (foldrPostorder f (f n acc) left) right
 instance Foldable Tree where
     foldMap _ Nil = mempty
     foldMap f (Node n left right) = (f n) <> (foldMap f left) <> (foldMap f right)

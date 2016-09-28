@@ -70,17 +70,17 @@ testInorderEqualsCollapse tree = collapse tree == inorder tree
 
 
 testFold :: Int -> Tree Int -> Bool
-testFold acc tree = (preFoldr (+) acc tree) == (foldr (+) acc flatTree)
+testFold acc tree = (foldrPost (+) acc tree) == (foldr (+) acc flatTree)
     where flatTree = collapse tree
 
 
-testPreFoldlIsFoldl :: Int -> Tree Int -> Bool
-testPreFoldlIsFoldl acc tree = (preFoldl f acc tree) == (foldl f acc tree)
+testFoldlPreIsFoldl :: Int -> Tree Int -> Bool
+testFoldlPreIsFoldl acc tree = (foldlPre f acc tree) == (foldl f acc tree)
     where f = \acc y -> acc - y
 
 
-testPreFoldrIsFoldr :: Int -> Tree Int -> Bool
-testPreFoldrIsFoldr acc tree = (preFoldr f acc tree) == (foldr f acc tree)
+testFoldrPostIsFoldr :: Int -> Tree Int -> Bool
+testFoldrPostIsFoldr acc tree = (foldrPost f acc tree) == (foldr f acc tree)
     where f = \x acc -> x - acc
 
 
@@ -91,8 +91,8 @@ main = do
     quickCheck testOccurs
     quickCheck testInorderEqualsCollapse
     quickCheck testFold
-    quickCheckWith stdArgs {maxSuccess = 1000} testPreFoldlIsFoldl
-    quickCheckWith stdArgs {maxSuccess = 1000} testPreFoldrIsFoldr
+    quickCheckWith stdArgs {maxSuccess = 1000} testFoldlPreIsFoldl
+    quickCheckWith stdArgs {maxSuccess = 1000} testFoldrPostIsFoldr
 
     let trigger = undefined :: Tree (Int, Int, [Int])
     quickBatch (traversable trigger)
