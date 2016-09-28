@@ -6,6 +6,8 @@ import Control.Monad hiding (join)
 import Data.Maybe
 import Data.List (findIndex, elemIndex)
 
+import BinaryTreeOps ---- then load that file with this file in cmd line ghci
+
 --- TESTING ------------------------------------------------------------------------------
 
 {-

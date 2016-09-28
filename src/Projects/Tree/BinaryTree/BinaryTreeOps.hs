@@ -12,30 +12,25 @@ import Data.List (findIndex, elemIndex)
 data Tree a = Nil | Node a (Tree a) (Tree a) deriving (Eq, Show)
 
 
-t1 :: Tree Integer
+t1, t2, t3, t4, t5, t6, t7 :: Tree Integer
+
 t1 = Node 8 (Node 4 (Node 2 (Node 1 Nil Nil) (Node 3 Nil Nil))
                     (Node 6 (Node 5 Nil Nil) (Node 7 Nil Nil)))
             (Node 10 (Node 9 Nil Nil) (Node 11 Nil Nil))
 
-t2 :: Tree Integer
 t2 = Node 8 (Node 4 (Node 2 Nil (Node 3 Nil Nil))
                     (Node 6 (Node 5 Nil Nil) (Node 7 Nil Nil)))
             (Node 10 (Node 9 Nil Nil) (Node 11 Nil Nil))
-{-
 
-t3 = Leaf
-t4 = Node (Node Leaf 2 Leaf) 5 (Node Leaf 8 Leaf)
-t5 = Node (Node (Node Leaf 1 Leaf) 3 (Node Leaf 4 Leaf)) 5
-          (Node (Node Leaf 7 Leaf) 13 (Node Leaf 14 (Node Leaf 17 Leaf)))
-t6 = Node (Node (Node Leaf 1 Leaf) 2 (Node Leaf 3 Leaf)) 4
-          (Node (Node Leaf 5 Leaf) 6 (Node Leaf 7 (Node Leaf 8 Leaf)))
--}
+t3 = Node 5 (Node 3 (Node 1 Nil Nil) (Node 4 Nil Nil))
+            (Node 13 (Node 7 Nil Nil) (Node 14 Nil (Node 17 Nil Nil)))
 
+t4 = Nil
 
-t123 = Node 2 (Node 1 Nil Nil) (Node 3 Nil Nil)
-t567 = Node 6 (Node 5 Nil Nil) (Node 7 Nil Nil)
+t5 = Node 5 (Node 2 Nil Nil) (Node 8 Nil Nil)
 
-
+t6 = Node 4 (Node 2 (Node 1 Nil Nil) (Node 3 Nil Nil))
+            (Node 6 (Node 5 Nil Nil) (Node 7 Nil (Node 8 Nil Nil)))
 
 -- testing closest with different distanced nodes
 t7 = Node 8 (Node 5  (Node 1 Nil Nil)  (Node 6 Nil Nil))
@@ -43,6 +38,8 @@ t7 = Node 8 (Node 5  (Node 1 Nil Nil)  (Node 6 Nil Nil))
 
 tdup = Node 8 (Node 8 (Node 7 Nil Nil) Nil) (Node 10 (Node 9 Nil Nil) Nil)
 
+t123 = Node 2 (Node 1 Nil Nil) (Node 3 Nil Nil)
+t567 = Node 6 (Node 5 Nil Nil) (Node 7 Nil Nil)
 
 -- deleting 3 from these trees.
 testDelete1 = Node 2 (Node 1 Nil Nil) (Node 3 Nil (Node 4 Nil Nil))
@@ -189,88 +186,87 @@ closest x t -- = if occurs val t then clos val t else Nothing
 
 
 
+--- Traversals: Flattening
 
 mapTree :: (a -> b) -> Tree a -> Tree b
 mapTree _ Nil = Nil
 mapTree f (Node n left right) = Node (f n) (mapTree f left) (mapTree f right)
 
+--- These are all DFS methods (depth first search methods)
+-- node, left, right
+preorder :: Tree a -> [a]
+preorder Nil = []
+preorder (Node n left right) = [n] ++ preorder left ++ preorder right
 
-preorder :: BinaryTree a -> [a]
-preorder Leaf = []
-preorder (Node left a right) = [a] ++ preorder left ++ preorder right
+-- left, node, right
+inorder :: Tree a -> [a]
+inorder Nil = []
+inorder (Node n left right) = inorder left ++ [n] ++ inorder right
 
-inorder :: BinaryTree a -> [a]
-inorder Leaf = []
-inorder (Node left a right) = inorder left ++ [a] ++ inorder right
+-- left, right, node (think: children first)
+postorder :: Tree a -> [a]
+postorder Nil = []
+postorder (Node n left right) = postorder left ++ postorder right ++ [n]
 
-postorder :: BinaryTree a -> [a]
-postorder Leaf = []
-postorder (Node left a right) = postorder left ++ postorder right ++ [a]
-
+--- bfs flatten (and general traversal action)
+--- todo todo todo
 
 
 --- alternative solution
-flattenPre :: BinaryTree a -> [a] -> [a]
-flattenPre Leaf accList = accList
-flattenPre (Node left a right) accList
-    = a : flattenPre left (flattenPre right accList)
+flattenPre :: Tree a -> [a] -> [a]
+flattenPre Nil accList = accList
+flattenPre (Node n left right) accList = n : flattenPre left (flattenPre right accList)
 
-flattenIn :: BinaryTree a -> [a] -> [a]
-flattenIn Leaf accList = accList
-flattenIn (Node left a right) accList
-    = flattenIn left (a : (flattenIn right accList))
+flattenIn :: Tree a -> [a] -> [a]
+flattenIn Nil accList = accList
+flattenIn (Node n left right) accList = flattenIn left (n : (flattenIn right accList))
 
-flattenPost :: BinaryTree a -> [a] -> [a]
-flattenPost Leaf accList = accList
-flattenPost (Node left a right) accList
-    = flattenPost left (flattenPost right (a : accList))
+flattenPost :: Tree a -> [a] -> [a]
+flattenPost Nil accList = accList
+flattenPost (Node n left right) accList = flattenPost left (flattenPost right (n : accList))
 
-preorder' :: BinaryTree a -> [a]
+preorder' :: Tree a -> [a]
 preorder' tree = flattenPre tree []
 
-inorder' :: BinaryTree a -> [a]
+inorder' :: Tree a -> [a]
 inorder' tree = flattenIn tree []
 
-postorder' :: BinaryTree a -> [a]
+postorder' :: Tree a -> [a]
 postorder' tree = flattenPost tree []
 
 
 
---- Foldr for binary tree ---------------------------------------------------------------
---- todo to mull over - had help on this one.
---- note does preorder traversal (see example foldtree)
--- a : flattenPre left (flattenPre right accList)
-foldrPreorder :: (a -> b -> b) -> b -> BinaryTree a -> b
-foldrPreorder _ acc Leaf = acc
-foldrPreorder f acc (Node left x right) = accRight
-    where --- foldTree f (foldTree f (f x acc) left) right
-    accNode = f x acc
-    accLeft = foldrPreorder f accNode left
-    accRight = foldrPreorder f accLeft right
+--- Traversals: General folding
+
+
+preFoldr :: (a -> b -> b) -> b -> Tree a -> b
+preFoldr _ acc Nil = acc
+preFoldr f acc (Node n left right) = accRight
+    where
+    accRight = preFoldr f accLeft right
+    accLeft = preFoldr f (f n acc) left
+
+
+preFoldl :: (b -> a -> b) -> b -> Tree a -> b
+preFoldl _ acc Nil = acc
+preFoldl f acc (Node n left right) = accRight
+    where
+    accRight = preFoldl f accLeft right
+    accLeft = preFoldl f (f acc n) left
+
+-- inorder left ++ [n] ++ inorder right
+-- flattenIn left (a : (flattenIn right accList))
+inorderFold :: (b -> a -> b -> b) -> b -> Tree a -> b
+inorderFold _ acc Nil = acc
+inorderFold f acc (Node n left right)
+    = f n (inorderFold f acc left) (inorderFold f acc right)
+
 
 printSumPreorderRight :: Show a => a -> String -> String
 printSumPreorderRight x y = "(" ++ show x ++ "+" ++ y ++ ")"
 
-------------------
---- note does preorder traversal backwards (see example left foldtree)
--- a : flattenPre left (flattenPre right accList)
-foldPreorderLeft :: (b -> a -> b) -> b -> BinaryTree a -> b
-foldPreorderLeft _ acc Leaf = acc
-foldPreorderLeft f acc (Node left x right) = accRight
-    where
-    accNode = f acc x
-    accLeft = foldPreorderLeft f accNode left
-    accRight = foldPreorderLeft f accLeft right
-
 printPreorderLeft :: Show a => String -> a -> String
 printPreorderLeft x y = "(" ++ x ++ "+" ++ show y ++ ")"
-
-------------------
--- flattenIn left (a : (flattenIn right accList))
-foldInorder :: (b -> a -> b -> b) -> b -> BinaryTree a -> b
-foldInorder _ acc Leaf = acc
-foldInorder f acc (Node left x right)
-    = f (foldInorder f acc left) x (foldInorder f acc right)
 
 printSumInorder :: Show a => String -> a -> String -> String
 printSumInorder x y z = "(" ++ x ++ "+" ++ show y ++ "+" ++ z ++ ")"
@@ -287,11 +283,11 @@ foldPostorder f acc (Node left x right)
 
 ------------------
 -- note preorder foldr
-exampleFoldTreePRE_R = foldrPreorder printSumPreorderRight "0" t3
+exampleFoldTreePRE_R = preFoldr printSumPreorderRight "0" t3
 -- note preorder foldl (backwards)
-exampleFoldTreePRE_L = foldPreorderLeft printPreorderLeft "0" t3
+exampleFoldTreePRE_L = preFoldl printPreorderLeft "0" t3
 -- note inorder
-exampleFoldTreeIN = foldInorder printSumInorder "0" t3
+exampleFoldTreeIN = inorderFold printSumInorder "0" t3
 --exampleFoldTreePOST =
 
 
@@ -300,8 +296,8 @@ exampleFoldTreeIN = foldInorder printSumInorder "0" t3
 --- idea for later: construct a binary search tree using postorder/inorder/preorder
 -- traversal.
 -- note returns mapped list in swirly preorder traversal.
-mapFoldTreeToList :: (a -> b) -> BinaryTree a -> [b]
-mapFoldTreeToList f tree = foldrPreorder ((:) . f) [] tree
+mapFoldTreeToList :: (a -> b) -> Tree a -> [b]
+mapFoldTreeToList f tree = preFoldr ((:) . f) [] tree
 
 -- HELP HELP HELP TODO map fold but return binary tree.
 {-mapFoldTree :: (a -> b) -> BinaryTree a -> BinaryTree b
