@@ -78,6 +78,13 @@ testPreFoldlIsFoldl :: Int -> Tree Int -> Bool
 testPreFoldlIsFoldl acc tree = (preFoldl f acc tree) == (foldl f acc tree)
     where f = \acc y -> acc - y
 
+
+testPreFoldrIsFoldr :: Int -> Tree Int -> Bool
+testPreFoldrIsFoldr acc tree = (preFoldr f acc tree) == (foldr f acc tree)
+    where f = \x acc -> x - acc
+
+
+
 main = do
     quickCheck testMap
     quickCheck testSize
@@ -85,6 +92,7 @@ main = do
     quickCheck testInorderEqualsCollapse
     quickCheck testFold
     quickCheckWith stdArgs {maxSuccess = 1000} testPreFoldlIsFoldl
+    quickCheckWith stdArgs {maxSuccess = 1000} testPreFoldrIsFoldr
 
     let trigger = undefined :: Tree (Int, Int, [Int])
     quickBatch (traversable trigger)

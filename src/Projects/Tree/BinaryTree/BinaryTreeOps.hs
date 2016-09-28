@@ -222,6 +222,11 @@ postorder (Node n left right) = postorder left ++ postorder right ++ [n]
 --- bfs flatten (and general traversal action)
 --- todo todo todo
 
+--- todotodotodo: filter tree (leaving perhaps sparse tree or just more condensed tree Keep in mind
+-- the structure of original tree)
+
+-- todotodotodo: foldtree (pre, post, inorder) using foldr, foldl -- all the combinations!
+
 
 --- alternative solution
 flattenPre :: Tree a -> [a] -> [a]
@@ -251,12 +256,13 @@ postorder' tree = flattenPost tree []
 
 
 -- n : flattenPre left (flattenPre right accList)
+-- HELP FIX This so it gives same testing as foldr 
 preFoldr :: (a -> b -> b) -> b -> Tree a -> b
 preFoldr _ acc Nil = acc
-preFoldr f acc (Node n left right) = accRight
+preFoldr f acc (Node n left right) = accLeft
     where
-    accRight = preFoldr f accLeft right
-    accLeft = preFoldr f (f n acc) left
+    accLeft = preFoldr f accRight left
+    accRight = preFoldr f (f n acc) right
 
 
 preFoldl :: (b -> a -> b) -> b -> Tree a -> b
@@ -277,8 +283,8 @@ inorderFold f acc (Node n left right)
 printSumPreRight :: Show a => a -> String -> String
 printSumPreRight x y = "(" ++ show x ++ "+" ++ y ++ ")"
 
-printPreLeft :: Show a => String -> a -> String
-printPreLeft x y = "(" ++ x ++ "+" ++ show y ++ ")"
+printSumPreLeft :: Show a => String -> a -> String
+printSumPreLeft x y = "(" ++ x ++ "+" ++ show y ++ ")"
 
 printSumIn :: Show a => String -> a -> String -> String
 printSumIn x y z = "(" ++ x ++ "+" ++ show y ++ "+" ++ z ++ ")"
@@ -294,10 +300,12 @@ foldPostorder f acc (Node left x right)
 -}
 
 ------------------
--- note preorder foldr
+-- note preorder foldr HELP these are not the same
 exampleFoldTreePRE_R = preFoldr printSumPreRight "_" t3
+exampleFoldr = foldr printSumPreRight "_" t3
 -- note preorder foldl (backwards)
-exampleFoldTreePRE_L = preFoldl printPreLeft "_" t3
+exampleFoldTreePRE_L = preFoldl printSumPreLeft "_" t3
+exampleFoldl = foldl printSumPreLeft "_" t3
 -- note inorder
 exampleFoldTreeIN = inorderFold printSumIn "_" t3
 --exampleFoldTreePOST =
