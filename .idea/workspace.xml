@@ -2,11 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="232bb086-1d74-43ca-8b3e-5454de511e3c" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeOps.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeTesting.hs" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Projects/nnn.hs" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/Projects/BinaryTreeOps.hs" afterPath="" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/ExprTreeOps.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/ExprTreeOps.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/RoseTreeOps.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/RoseTree/RoseTreeOps.hs" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/exercises/exercise16.29.hs" afterPath="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/exercises/exercise16.29.hs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/BinaryTreeOps.hs" afterPath="$PROJECT_DIR$/src/Projects/BinaryTreeOps.hs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/ExprTreeOps.hs" afterPath="$PROJECT_DIR$/src/Projects/ExprTreeOps.hs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/RoseTreeOps.hs" afterPath="$PROJECT_DIR$/src/Projects/RoseTreeOps.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -36,11 +38,51 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="BinaryTreeOps.hs" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Projects/BinaryTreeOps.hs">
+      <file leaf-file-name="ExprTreeOps.hs" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/ExprTreeOps.hs">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="160" column="26" selection-start-line="160" selection-start-column="26" selection-end-line="160" selection-end-column="26" />
+              <caret line="22" column="20" selection-start-line="22" selection-start-column="20" selection-end-line="22" selection-end-column="20" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="RoseTreeOps.hs" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/Projects/Tree/RoseTree/RoseTreeOps.hs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.7118928">
+              <caret line="25" column="0" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BinaryTreeOps.hs" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeOps.hs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="2" column="10" selection-start-line="2" selection-start-column="10" selection-end-line="2" selection-end-column="10" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BinaryTreeTesting.hs" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeTesting.hs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="6" column="39" selection-start-line="6" selection-start-column="39" selection-end-line="6" selection-end-column="39" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AlgebraicDataTypes.hs" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter11_AlgebraicDataTypes/AlgebraicDataTypes.hs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="540" column="8" selection-start-line="540" selection-start-column="8" selection-end-line="540" selection-end-column="8" />
               <folding />
             </state>
           </provider>
@@ -51,26 +93,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="exercise_Tree.hs" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter21_Traversable/chapterExercises/exercise_Tree.hs">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="45" column="0" selection-start-line="45" selection-start-column="0" selection-end-line="45" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="AlgebraicDataTypes.hs" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter11_AlgebraicDataTypes/AlgebraicDataTypes.hs">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.24757281">
-              <caret line="368" column="37" selection-start-line="368" selection-start-column="37" selection-end-line="368" selection-end-column="37" />
               <folding />
             </state>
           </provider>
@@ -89,7 +111,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter20_Foldable/exercises/exercise20.4_min.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter20_Foldable/exercises/exercise20.10_foldMap.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter20_Foldable/chapterExercises/exercise20.1_Constant.hs" />
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter20_Foldable/chapterExercises/exercise20.2_Two.hs" />
@@ -138,8 +159,9 @@
         <option value="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter21_Traversable/Traversable.hs" />
         <option value="$PROJECT_DIR$/src/Projects/ExprTreeOps.hs" />
         <option value="$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/exercises/exercise16.29.hs" />
-        <option value="$PROJECT_DIR$/src/Projects/BinaryTreeOps.hs" />
         <option value="$PROJECT_DIR$/src/Projects/RoseTreeOps.hs" />
+        <option value="$PROJECT_DIR$/src/Projects/BinaryTreeOps.hs" />
+        <option value="$PROJECT_DIR$/src/Projects/BinaryTreeTesting.hs" />
       </list>
     </option>
   </component>
@@ -158,8 +180,8 @@
   <component name="ProjectFrameBounds">
     <option name="x" value="67" />
     <option name="y" value="52" />
-    <option name="width" value="968" />
-    <option name="height" value="752" />
+    <option name="width" value="969" />
+    <option name="height" value="731" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -235,6 +257,28 @@
               <option name="myItemId" value="src" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Projects" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Tree" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
@@ -256,11 +300,11 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/Projects/Tree/RoseTree" />
+      <recent name="$PROJECT_DIR$/src/Projects/Tree/FormulaTree" />
+      <recent name="$PROJECT_DIR$/src/Projects/Tree/BinaryTree" />
+      <recent name="$PROJECT_DIR$/src/Projects/Tree" />
       <recent name="$PROJECT_DIR$/src/Books/KeetsDoets_HaskellRoadToLogicMathsProgramming/chapter10_Corecursion" />
-      <recent name="$PROJECT_DIR$/src/Books/KeetsDoets_HaskellRoadToLogicMathsProgramming/chapter9_Polynomials" />
-      <recent name="$PROJECT_DIR$/src/Books/RichardBird_ThinkingFunctionallyHaskell/chapter5_Sudoku" />
-      <recent name="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples" />
-      <recent name="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/PhoneProject/code" />
     </key>
   </component>
   <component name="RunManager" selected="Haskell.Unnamed">
@@ -809,16 +853,16 @@
       <workItem from="1474611137545" duration="10000" />
       <workItem from="1474879145473" duration="649000" />
       <workItem from="1474986734734" duration="8567000" />
-      <workItem from="1475043491165" duration="936000" />
+      <workItem from="1475043491165" duration="4283000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="389632000" />
+    <option name="totallyTimeSpent" value="392979000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="67" y="52" width="968" height="752" extended-state="0" />
-    <editor active="true" />
+    <frame x="67" y="52" width="969" height="731" extended-state="0" />
+    <editor active="false" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -829,7 +873,7 @@
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32923076" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="GhcMod" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.37934783" sideWeight="0.49384615" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.37893593" sideWeight="0.49384615" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Cabal" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32958803" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="SBT Execute" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -870,27 +914,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter20_Foldable/chapterExercises/exercise20.3_Three.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.38511327">
-          <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter20_Foldable/chapterExercises/exercise20.4_Three'.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.36731392">
-          <caret line="22" column="31" selection-start-line="22" selection-start-column="31" selection-end-line="22" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter20_Foldable/chapterExercises/exercise20.5_Four.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.24757281">
-          <caret line="9" column="21" selection-start-line="9" selection-start-column="21" selection-end-line="9" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter20_Foldable/exercises/exercise20.10_foldMap.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1164,14 +1187,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/ExprTreeOps.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="22" column="20" selection-start-line="22" selection-start-column="20" selection-end-line="22" selection-end-column="20" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter16/Tree.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.5048544">
@@ -1188,26 +1203,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/RoseTreeOps.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.68770224">
-          <caret line="25" column="0" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/SimonThompson_Craft/chapter14/***exercise14.47.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.055016182">
           <caret line="2" column="7" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="7" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/BinaryTreeOps.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="160" column="26" selection-start-line="160" selection-start-column="26" selection-end-line="160" selection-end-column="26" />
           <folding />
         </state>
       </provider>
@@ -1222,16 +1221,56 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter21_Traversable/chapterExercises/exercise_Tree.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="45" column="0" selection-start-line="45" selection-start-column="0" selection-end-line="45" selection-end-column="0" />
+        <state vertical-scroll-proportion="-1.19598">
+          <caret line="0" column="5" selection-start-line="0" selection-start-column="5" selection-end-line="0" selection-end-column="5" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter11_AlgebraicDataTypes/AlgebraicDataTypes.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.24757281">
-          <caret line="368" column="37" selection-start-line="368" selection-start-column="37" selection-end-line="368" selection-end-column="37" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="540" column="8" selection-start-line="540" selection-start-column="8" selection-end-line="540" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeOps.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="2" column="10" selection-start-line="2" selection-start-column="10" selection-end-line="2" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeTesting.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="6" column="39" selection-start-line="6" selection-start-column="39" selection-end-line="6" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/nnn.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/ExprTreeOps.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="22" column="20" selection-start-line="22" selection-start-column="20" selection-end-line="22" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/RoseTree/RoseTreeOps.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.7118928">
+          <caret line="25" column="0" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
           <folding />
         </state>
       </provider>
