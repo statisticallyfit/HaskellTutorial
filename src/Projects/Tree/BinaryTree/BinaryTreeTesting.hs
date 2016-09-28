@@ -25,16 +25,23 @@ instance Arbitrary a => Arbitrary (Tree a) where
                    (1, return (Node l x r))]
 -}
 
+{-
 instance Arbitrary a => Arbitrary (Tree a) where
     arbitrary = frequency
         [(1, return Nil),
          (4, liftM3 Node arbitrary arbitrary arbitrary)]
+-}
 
+--- NOTE faster tree declaration
+instance Arbitrary a => Arbitrary (Tree a) where
+    arbitrary = sized arbTree
+arbTree 0 = return Nil --liftM NilT arbitrary
+arbTree n = frequency [(1, return Nil),
+                       (4, liftM3 Node arbitrary (arbTree (n `div` 2))
+                                                 (arbTree (n `div` 2)) )]
 
 instance Eq a => EqProp (Tree a) where (=-=) = eq
 
---- testing function
-isSorted xs = (sort xs) == xs
 
 
 
@@ -53,18 +60,7 @@ testMap tree = (collapse $ mapTree (+3) tree) == (map (+3) (collapse tree))
 testSize :: Tree Int -> Bool
 testSize tree = size tree == (length $ collapse tree)
 
---- testing that result tree is sorted.
-testInsertOrder :: Int -> Tree Int -> Bool
-testInsertOrder n tree = (isSorted $ collapse $ insert n tree)
-
-
---- testing that if element is not already inside tree, then length should be greater
--- by 1, else they should be same size.
-testInsertSize :: Int -> Tree Int -> Bool
-testInsertSize n oldTree
-    | occurs n oldTree = (size newTree) ==  (size oldTree)
-    | otherwise        = (size newTree) == (size oldTree + 1)
-    where newTree = insert n oldTree
+-- test inserts and deletes!
 
 testOccurs :: Int -> Tree Int -> Bool
 testOccurs n tree = (elem n (collapse tree)) == (occurs n tree)
@@ -85,12 +81,10 @@ testPreFoldlIsFoldl acc tree = (preFoldl f acc tree) == (foldl f acc tree)
 main = do
     quickCheck testMap
     quickCheck testSize
-    quickCheck testInsertOrder
-    quickCheck testInsertSize
     quickCheck testOccurs
     quickCheck testInorderEqualsCollapse
     quickCheck testFold
-    quickCheck testPreFoldlIsFoldl
+    quickCheckWith stdArgs {maxSuccess = 1000} testPreFoldlIsFoldl
 
     let trigger = undefined :: Tree (Int, Int, [Int])
     quickBatch (traversable trigger)

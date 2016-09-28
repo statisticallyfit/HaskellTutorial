@@ -71,3 +71,13 @@ instance Foldable Tree where
     foldr f z (Leaf a) = f a z
     foldr f z (Node left a right) = foldr f (f a (foldr f z right)) left
 -}
+
+
+
+-- data Expr = Lit Integer | Add Expr Expr | Sub Expr Expr
+instance Arbitrary Expr where
+    arbitrary = sized arbExpr
+arbExpr 0 = liftM Lit arbitrary
+arbExpr n = frequency [(1, liftM Lit arbitrary),
+                       (4, liftM2 Add (arbExpr (n `div` 2)) (arbExpr (n `div` 2))),
+                       (4, liftM2 Sub (arbExpr (n `div` 2)) (arbExpr (n `div` 2)))]

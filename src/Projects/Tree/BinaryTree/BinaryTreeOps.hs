@@ -70,12 +70,22 @@ treeVal (Node n _ _) = n
 
 
 -- insert and delete are not inverse functions.
+{-
+todo insert at a specific spot! for normal binary tree (non_BST)
+-}
+
+{-
+delete specific element at certain spot! (non-BST)
+-}
+
+
 insert :: Ord a => a -> Tree a -> Tree a
 insert x Nil = Node x Nil Nil
 insert x (Node n left right)
     | n == x = Node n left right
     | x > n  = Node n left (insert x right)
     | x < n  = Node n (insert x left) right
+
 
 delete :: Ord a => a -> Tree a -> Tree a
 delete x (Node n left right)
@@ -84,6 +94,7 @@ delete x (Node n left right)
     | isNil right  = left -- so in these leftover 3 tests (val == v)
     | isNil left  = right
     | otherwise = join left right
+
 
 minTree :: Ord a => Tree a -> Maybe a
 minTree t
