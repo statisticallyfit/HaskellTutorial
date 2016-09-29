@@ -274,9 +274,9 @@ foldr2 _ acc Nil = acc
 foldr2 f acc (Node n left right)
     = foldr2 f (foldr2 f (f n acc) left) right
 
-foldrRealPost _ acc Nil = acc
-foldrRealPost f acc (Node n left right)
-    = f n (foldrRealPost f (foldrRealPost f acc left) right)
+foldr3 _ acc Nil = acc
+foldr3 f acc (Node n left right)
+    = f n (foldr3 f (foldr3 f acc left) right)
 
 {-
 foldrTry _ z Nil = z
@@ -319,18 +319,24 @@ foldPostorder f acc (Node left x right)
 -}
 
 ------------------
-listFoldlPre = reverse $ foldlPre (flip(:)) [] t1_7 -- [-4,2,-1,3,-6,5,-7]
-listFoldl =    reverse $ foldl (flip (:)) [] t1_7
-listFoldrPost = foldrPost (:) [] t1_7               -- [-1,3,2,5,-7,-6,-4]
-listFoldr =     foldr (:) [] t1_7
-listFoldr2 =    foldr2 (:) [] t1_7
-listFoldrRealPost = foldrRealPost (:) [] t1_7
+t8 = Node 5
+        (Node 3 (Node 1 Nil Nil) (Node 6 Nil Nil))
+        (Node 9 (Node 8 Nil Nil) (Node 10 Nil Nil))
+
+-- note these are real preorder!
+listFoldlPre = reverse $ foldlPre (flip(:)) [] t8 -- [5,3,1,6,9,8,10]
+listFoldl =    reverse $ foldl (flip (:)) [] t8
+-- note this one below is real postorder!!!
+listFoldrPost = foldrPost (:) [] t8               -- [1,6,3,8,10,9,5]
+listFoldr =     foldr (:) [] t8
+listFoldr2 =    foldr2 (:) [] t8
+listFoldrRealPost = foldr3 (:) [] t8
 
 
 -- note preorder foldr HELP these are not the same
 exampleFoldTreePRE_R t = foldrPost printSumPreRight "_" t
 exampleFoldr t = foldr printSumPreRight "_" t
-exampleFoldrRealPost t = foldrRealPost printSumPreRight "_" t
+exampleFoldrRealPost t = foldr3 printSumPreRight "_" t
 -- note preorder foldl (backwards)
 exampleFoldTreePRE_L t = foldlPre printSumPreLeft "_" t
 exampleFoldl t = foldl printSumPreLeft "_" t
