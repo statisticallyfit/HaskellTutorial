@@ -2,14 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bc679e25-6068-417c-8b02-1d7896297961" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Projects/Tree/MoertWillam.hs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Projects/Tree/Moertel.hs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Tree/BinarySearchTree/BSTOps.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/BinarySearchTree/BSTOps.hs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Tree/BinarySearchTree/BSTTesting.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/BinarySearchTree/BSTTesting.hs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeOps.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeOps.hs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeTesting.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeTesting.hs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Tree/PrePostFoldmap.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/PrePostFoldmap.hs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Tree/MoertWillam.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/MoertWillam.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -45,8 +38,8 @@
       <file leaf-file-name="MoertWillam.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Projects/Tree/MoertWillam.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.22466215">
-              <caret line="84" column="0" selection-start-line="84" selection-start-column="0" selection-end-line="85" selection-end-column="37" />
+            <state vertical-scroll-proportion="0.40202704">
+              <caret line="47" column="46" selection-start-line="47" selection-start-column="44" selection-end-line="47" selection-end-column="46" />
               <folding />
             </state>
           </provider>
@@ -56,7 +49,7 @@
         <entry file="file://$PROJECT_DIR$/src/Projects/Tree/PrePostFoldmap.hs">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="121" column="26" selection-start-line="121" selection-start-column="26" selection-end-line="121" selection-end-column="26" />
+              <caret line="77" column="19" selection-start-line="77" selection-start-column="19" selection-end-line="77" selection-end-column="19" />
               <folding />
             </state>
           </provider>
@@ -108,7 +101,7 @@
   <component name="ProjectFrameBounds">
     <option name="x" value="67" />
     <option name="y" value="52" />
-    <option name="width" value="668" />
+    <option name="width" value="791" />
     <option name="height" value="726" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
@@ -713,15 +706,15 @@
       <updated>1475070805919</updated>
       <workItem from="1475070810457" duration="600000" />
       <workItem from="1475072869646" duration="6872000" />
-      <workItem from="1475127434870" duration="19515000" />
+      <workItem from="1475127434870" duration="23697000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="26987000" />
+    <option name="totallyTimeSpent" value="31169000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="67" y="52" width="668" height="726" extended-state="0" />
+    <frame x="67" y="52" width="791" height="726" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -801,14 +794,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/PrePostFoldmap.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="121" column="26" selection-start-line="121" selection-start-column="26" selection-end-line="121" selection-end-column="26" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Tree/Moertel.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -825,10 +810,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/PrePostFoldmap.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="77" column="19" selection-start-line="77" selection-start-column="19" selection-end-line="77" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Tree/MoertWillam.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.22466215">
-          <caret line="84" column="0" selection-start-line="84" selection-start-column="0" selection-end-line="85" selection-end-column="37" />
+        <state vertical-scroll-proportion="0.40202704">
+          <caret line="47" column="46" selection-start-line="47" selection-start-column="44" selection-end-line="47" selection-end-column="46" />
           <folding />
         </state>
       </provider>
