@@ -44,16 +44,6 @@ instance Eq a => EqProp (Tree a) where (=-=) = eq
 
 
 
-
--- note size before should be same as size after.
--- HELP doesn't work because of Nil t2.
-testJoin :: Tree Int -> Tree Int -> Bool
-testJoin t1 t2 = (size t1 + size t2) == (size (join t1 t2))
-
-testInsert :: Int -> Tree Int -> Bool
-testInsert x tree = (size tree + 1) == (size (insert x tree))
-
-
 testMap :: Tree Int -> Bool
 testMap tree = (collapse $ mapTree (+3) tree) == (map (+3) (collapse tree))
 

@@ -48,3 +48,17 @@ arbTree 0 = return Nil --liftM NilT arbitrary
 arbTree n = frequency [(1, return Nil),
                        (4, liftM3 Node arbitrary (arbTree (n `div` 2))
                                                  (arbTree (n `div` 2)) )]
+
+
+
+
+
+-- note size before should be same as size after.
+-- HELP doesn't work because of Nil t2.
+{- NOTE just for BST search tree
+testJoin :: Tree Int -> Tree Int -> Bool
+testJoin t1 t2 = (size t1 + size t2) == (size (join t1 t2))
+
+testInsert :: Int -> Tree Int -> Bool
+testInsert x tree = (size tree + 1) == (size (insert x tree))
+-}

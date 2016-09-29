@@ -9,7 +9,7 @@ import Data.Maybe
 import Data.List (findIndex, elemIndex)
 
 
-data Tree a = Nil | Node a (Tree a) (Tree a) deriving (Eq, Show)
+data Tree a = Nil | Leaf a | Node a (Tree a) (Tree a) deriving (Eq, Show)
 
 
 t1, t2, t3, t4, t5, t6, t7 :: Tree Integer
@@ -58,15 +58,16 @@ isNode Nil = False
 isNode _ = True
 
 leftSub :: Tree a -> Tree a
-leftSub Nil = error "leftSub"
 leftSub (Node _ left _) = left
+leftSub _ = error "leftSub"
 
 rightSub :: Tree a -> Tree a
-rightSub Nil = error "rightSub"
 rightSub (Node _ _ right) = right
+rightSub _ = error "rightSub"
 
 treeVal :: Tree a -> a
 treeVal Nil = error "treeVal"
+treeVal (Leaf n) = n
 treeVal (Node n _ _) = n
 
 
@@ -80,23 +81,6 @@ delete specific element at certain spot! (non-BST)
 -}
 
 
-insert :: Ord a => a -> Tree a -> Tree a
-insert x Nil = Node x Nil Nil
-insert x (Node n left right)
-    | n == x = Node n left right
-    | x > n  = Node n left (insert x right)
-    | x < n  = Node n (insert x left) right
-
-
-delete :: Ord a => a -> Tree a -> Tree a
-delete x (Node n left right)
-    | x < n   = Node n (delete x left) right
-    | x > n   = Node n left (delete x right)
-    | isNil right  = left -- so in these leftover 3 tests (val == v)
-    | isNil left  = right
-    | otherwise = join left right
-
-
 minTree :: Ord a => Tree a -> Maybe a
 minTree t
     | isNil t = Nothing
@@ -104,14 +88,6 @@ minTree t
     | otherwise = minTree left
     where left = leftSub t
           n = treeVal t
-
--- note is auxiliary, not exported.
--- postcondition: all elements on left are smaller than those on right.
-join :: Ord a => Tree a -> Tree a -> Tree a
-join left right = Node miniVal left newTree
-    where (Just miniVal) = minTree right
-          newTree = delete miniVal right
-
 
 
 -- note return nth element of search tree.
@@ -322,6 +298,14 @@ foldPostorder f acc (Node left x right)
 t8 = Node 5
         (Node 3 (Node 1 Nil Nil) (Node 6 Nil Nil))
         (Node 9 (Node 8 Nil Nil) (Node 10 Nil Nil))
+
+t15 = Node 8
+            (Node 4
+                (Node 2 (Leaf 1) (Leaf 3))
+                (Node 5 (Leaf 6) (Leaf 7)))
+            (Node 12
+                (Node 10 (Leaf 9) (Leaf 11))
+                (Node 14 (Leaf 13) (Leaf 15)))
 
 -- note these are real preorder!
 listFoldlPre = reverse $ foldlPre (flip(:)) [] t8 -- [5,3,1,6,9,8,10]
