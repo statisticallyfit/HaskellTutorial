@@ -1,4 +1,4 @@
-
+module BST where
 
 data BST a = Nil | Leaf a | Node a (BST a) (BST a)
     deriving (Eq, Show)
@@ -43,3 +43,17 @@ join left right = Node miniVal left newTree
           newTree = delete miniVal right
 
 -}
+
+insert :: Ord a => a -> Tree a -> Tree a
+insert x Nil = leaf x
+insert x tree@(Node n left right) =
+    if x < n then Node n (insert x left) right
+    else if x > n then Node n left (insert x right)
+    else tree
+
+build :: Ord a => [a] -> Tree a
+build xs = foldl (flip insert) Nil xs
+
+build' :: Ord a => [a] -> Tree a
+build' [] = Nil
+build' (x:xs) = insert x (build' xs)

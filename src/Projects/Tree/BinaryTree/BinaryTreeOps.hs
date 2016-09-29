@@ -47,6 +47,28 @@ testDelete1 = Node 2 (Node 1 Nil Nil) (Node 3 Nil (Node 4 Nil Nil))
 testDelete2 = Node 1 (Node 0 Nil Nil) (Node 3 (Node 2 Nil Nil) Nil)
 testDelete3 = Node 1 (Node 0 Nil Nil) (Node 3 (Node 2 Nil Nil) (Node 4 Nil Nil))
 
+tree7 :: Tree Int
+tree7 = Node 7
+            (Node 1
+                (Node 0 Nil Nil)
+                (Node 3
+                    (Node 2 Nil Nil)
+                    (Node 5
+                        (Node 4 Nil Nil)
+                        (Node 6 Nil Nil))))
+            (Node 9
+                (Node 8 Nil Nil)
+                (Node 10 Nil Nil))
+
+tree15 :: Tree Int
+tree15 = Node 8
+            (Node 4
+                (Node 2 (Node 1 Nil Nil) (Node 3 Nil Nil))
+                (Node 5 (Node 6 Nil Nil) (Node 7 Nil Nil)))
+            (Node 12
+                (Node 10 (Node 9 Nil Nil) (Node 11 Nil Nil))
+                (Node 14 (Node 13 Nil Nil) (Node 15 Nil Nil)))
+
 
 
 isNil :: Tree a -> Bool
@@ -182,19 +204,22 @@ mapTree f (Node n left right) = Node (f n) (mapTree f left) (mapTree f right)
 
 --- These are all DFS methods (depth first search methods)
 -- node, left, right
-preorder :: Tree a -> [a]
-preorder Nil = []
-preorder (Node n left right) = [n] ++ preorder left ++ preorder right
+collapsePre :: Tree a -> [a]
+collapsePre Nil = []
+collapsePre (Node n left right)
+    = [n] ++ collapsePre left ++ collapsePre right
 
 -- left, node, right
-inorder :: Tree a -> [a]
-inorder Nil = []
-inorder (Node n left right) = inorder left ++ [n] ++ inorder right
+collapseIn :: Tree a -> [a]
+collapseIn Nil = []
+collapseIn (Node n left right)
+    = collapseIn left ++ [n] ++ collapseIn right
 
 -- left, right, node (think: children first)
-postorder :: Tree a -> [a]
-postorder Nil = []
-postorder (Node n left right) = postorder left ++ postorder right ++ [n]
+collapsePost :: Tree a -> [a]
+collapsePost Nil = []
+collapsePost (Node n left right)
+    = collapsePost left ++ collapsePost right ++ [n]
 
 --- bfs flatten (and general traversal action)
 --- todo todo todo
@@ -218,14 +243,14 @@ flattenPost :: Tree a -> [a] -> [a]
 flattenPost Nil accList = accList
 flattenPost (Node n left right) accList = flattenPost left (flattenPost right (n : accList))
 
-preorder' :: Tree a -> [a]
-preorder' tree = flattenPre tree []
+collapsePre' :: Tree a -> [a]
+collapsePre' tree = flattenPre tree []
 
-inorder' :: Tree a -> [a]
-inorder' tree = flattenIn tree []
+collapseIn' :: Tree a -> [a]
+collapseIn' tree = flattenIn tree []
 
-postorder' :: Tree a -> [a]
-postorder' tree = flattenPost tree []
+collapsePost' :: Tree a -> [a]
+collapsePost' tree = flattenPost tree []
 
 
 
@@ -266,14 +291,31 @@ foldlPre _ acc Nil = acc
 foldlPre f acc (Node n left right)
     = foldlPre f (foldlPre f (f acc n) left) right
 
-
+------------------------------------
 -- inorder left ++ [n] ++ inorder right
 -- flattenIn left (a : (flattenIn right accList))
 foldIn :: (b -> a -> b -> b) -> b -> Tree a -> b
-foldIn _ acc Nil = acc
-foldIn f acc (Node n left right)
-    = f (foldIn f acc left) n (foldIn f acc right)
+foldIn _ z Nil = z
+foldIn f z (Node n l r)
+    = f (foldIn f z l) n (foldIn f z r)
 
+-- TODO testing that foldr list == this below way of getting the answer.
+size'   = foldIn  (\x l r -> 1 + l + r)    0
+height' = foldIn  (\x l r -> 1 + max l r)  0
+mirror  = foldIn  (flip . Node)  Nil
+map' f = foldIn  (Node . f) Nil
+
+inFoldFlat t = foldIn  (\x l r -> l ++ x : r)     [] t
+preFoldFlat t = foldIn  (\x l r -> x : l ++ r)    [] t
+postFoldFlat t = foldIn (\x l r -> l ++ r ++ [x]) [] t
+
+inFoldSub t = foldIn (\x lx rx -> (lx - x) - rx)   0 t
+preFoldSub t = foldIn (\x lx rx -> (x - lx) - rx)  0 t
+postFoldSub t = foldIn (\x lx rx -> (lx - rx) - x) 0 t
+
+-- TODO implement preOrderFold then pass in the arguments... same for postorder
+
+---------------------
 
 printSumPreRight :: Show a => a -> String -> String
 printSumPreRight x y = "(" ++ show x ++ "+" ++ y ++ ")"
@@ -286,13 +328,30 @@ printSumIn x y z = "(" ++ x ++ "+" ++ show y ++ "+" ++ z ++ ")"
 
 ------------------
 
--- help help help todo how to implement foldtree using postorder traversal?
---- foldTree f (foldTree f (f x acc) left) right
--- flattenPost left (flattenPost right (a : accList))
-{-
-foldPostorder f acc (Node left x right)
-    = foldPostOrder f left
--}
+traverseTree ::
+    (a -> (b -> b) -> (b -> b) -> b -> b)
+     -- function step, that takes type a, two b->b funcs and seed of type b, returns b type.
+            -> (t -> a)     -- function that converts type t to a (inner type of tree is t, like Tree Int)
+            -> b            -- z
+            -> Tree t       -- tree
+            -> b            -- result
+traverseTree step f z tree = go tree z
+    where
+        go Nil z = z
+        go (Node x l r) z = step (f x) (go l) (go r) z
+
+preorder   = traverseTree $ \n l r -> r . l . n
+inorder    = traverseTree $ \n l r -> r . n . l
+postorder  = traverseTree $ \n l r -> n . r . l
+
+
+testFlatPre t = collapse preorder t   -- [2,1,3]
+testFlatIn t = collapse inorder t    -- [1,2,3]
+testFlatPost t = collapse postorder t  -- [1,3,2]
+
+
+collapse' :: ((a -> [a] -> [a])   -> [t] -> b -> [c])    -> b -> [c]
+collapse' traversal = reverse . traversal (:) [] --tree arg here
 
 ------------------
 t8 = Node 5
@@ -344,6 +403,18 @@ mapFoldTree f tree = foldrPreorder mk Leaf tree
           mk a (Node l x r) = -}
 
 
+draw :: Show a => Tree a -> IO()
+draw tree = putStrLn $ drw 1 "\n" tree
+    where
+    drw count indent Nil = "Nil"
+    -- draw count indent (Node n Nil Nil) = "Leaf " ++ show n
+    drw count indent (Node n Nil Nil) = "Node " ++ show n ++ " Nil Nil"
+    drw count indent (Node n left right)
+        = "Node " ++ (show n) ++ indent' ++ drw count' indent' left
+                              ++ indent' ++ drw count' indent' right
+        where
+        indent' = indent ++ "    "
+        count' = count + 1
 
 
 {-

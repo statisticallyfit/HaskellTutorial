@@ -1,4 +1,10 @@
-module MoertelWillam where
+module MW where
+
+-- source:
+-- http://www.willamette.edu/~fruehr/254/samples/Trees.hs
+-- (more in evernote Scala Traversable Things)
+
+import Prelude hiding (subtract)
 
 data Tree a = Nil | Node a (Tree a) (Tree a)
     deriving (Eq, Show)
@@ -15,6 +21,11 @@ traverseTree step f z tree = go tree z
     where
         go Nil z = z
         go (Node x l r) z = step (f x) (go l) (go r) z
+
+preorder   = traverseTree $ \n l r -> r . l . n
+inorder    = traverseTree $ \n l r -> r . n . l
+postorder  = traverseTree $ \n l r -> n . r . l
+
 
 ------------------------------------------------------
 tree7 :: Tree Int
@@ -38,47 +49,54 @@ tree15 = Node 8
             (Node 12
                 (Node 10 (Node 9 Nil Nil) (Node 11 Nil Nil))
                 (Node 14 (Node 13 Nil Nil) (Node 15 Nil Nil)))
+------------------------------------------------------
 
-preorder   = traverseTree $ \n l r -> r . l . n
-inorder    = traverseTree $ \n l r -> r . n . l
-postorder  = traverseTree $ \n l r -> n . r . l
+collapse :: ((a -> [a] -> [a])   -> [t] -> b -> [c])    -> b -> [c]
+collapse traversal = reverse . traversal (:) [] --tree arg here
 
+subtract :: (Num a, Num b) => ((a -> a -> a) -> b -> c -> d) -> c -> d
+subtract traversal t = traversal (-) 0 t
 
-flatten :: ((a -> [a] -> [a])   -> [t] -> b -> [c])    -> b -> [c]
-flatten traversal = reverse . traversal (:) [] --tree arg here
+add :: (Num a, Num b) => ((a -> a -> a) -> b -> c -> d) -> c -> d
+add traversal t = traversal (+) 0 t
 
-minusTree traversal t = traversal (-) 0 t
-
-
+-- HELP to how use this with the preorder/inorder/postorder functions?
 printMinus :: Show a => a -> String -> String
 printMinus x y = "(" ++ show x ++ "-" ++ y ++ ")"
 
 
-testFlatPre t = flatten preorder t   -- [2,1,3]
-testFlatIn t = flatten inorder t    -- [1,2,3]
-testFlatPost t = flatten postorder t  -- [1,3,2]
+testFlatPre t = collapse preorder t   -- [2,1,3]
+testFlatIn t = collapse inorder t    -- [1,2,3]
+testFlatPost t = collapse postorder t  -- [1,3,2]
 
-testMinusPre t = minusTree preorder t
-testMinusIn t = minusTree inorder t
-testMinusPost t = minusTree postorder t
+testSubPre t = subtract preorder t
+testSubIn t = subtract inorder t
+testSubPost t = subtract postorder t
+
+testAddPre t = add preorder t
+testAddIn t = add inorder t
+testAddPost t = add postorder t
 
 ------------------------------------------------------
-
+-- NOTE this is inorder fold
+fold :: (a -> b -> b -> b) -> b -> Tree a -> b
 fold f z  Nil = z
 fold f z (Node x l r) = f x (fold f z l) (fold f z r)
 
+
+-- TODO testing that foldr list == this below way of getting the answer.
 size'   = fold  (\x l r -> 1 + l + r)    0
 height' = fold  (\x l r -> 1 + max l r)  0
 mirror  = fold  (flip . Node)  Nil
 map' f = fold  (Node . f) Nil
 
-inFold  = fold  (\x l r -> l ++ x : r)    []
-preFold = fold  (\x l r -> x : l ++ r)    []
-postFold = fold (\x l r -> l ++ r ++ [x]) []
+inFoldFlat t = fold  (\x l r -> l ++ x : r)     [] t
+preFoldFlat t = fold  (\x l r -> x : l ++ r)    [] t
+postFoldFlat t = fold (\x l r -> l ++ r ++ [x]) [] t
 
-testFoldIn t = inFold t
-testFoldPre t = preFold t
-testFoldPost t = postFold t
+inFoldSub t = fold (\x lx rx -> (lx - x) - rx)   0 t
+preFoldSub t = fold (\x lx rx -> (x - lx) - rx)  0 t
+postFoldSub t = fold (\x lx rx -> (lx - rx) - x) 0 t
 
 
 ------------------------------------------------------
@@ -100,11 +118,12 @@ build' :: Ord a => [a] -> Tree a
 build' [] = Nil
 build' (x:xs) = insert x (build' xs)
 
-sortTree :: Ord a => [a] -> [a]
-sortTree xs  = flatten inorder (build xs)
+sort :: Ord a => [a] -> [a]
+sort xs  = collapse inorder (build xs)
 
-testBuild = build [7,2,9,1,8,4,4,5,3,7,6,1,10,9]
-testBuild' = build' [7,2,9,1,8,4,4,5,3,7,6,1,10,9]
+xs = [7,2,9,1,8,4,4,5,3,7,6,1,10,9]
+testBuild = build xs
+testBuild' = build' xs
 ------------------------------------------------------
 
 -- HELP how to search just in left or right subtree?
