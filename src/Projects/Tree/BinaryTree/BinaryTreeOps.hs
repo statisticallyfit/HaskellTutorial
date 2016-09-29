@@ -267,8 +267,22 @@ postorder' tree = flattenPost tree []
 foldrPost :: (a -> b -> b) -> b -> Tree a -> b
 foldrPost _ acc Nil = acc
 foldrPost f acc (Node n left right)
-    = foldrPost f (f n (foldrPost f acc right)) left
+    = foldrPost f (foldrPost f (f n acc) right) left
 --preFoldr f (preFoldr f (f n acc) right) left
+
+foldr2 _ acc Nil = acc
+foldr2 f acc (Node n left right)
+    = foldr2 f (foldr2 f (f n acc) left) right
+
+foldrRealPost _ acc Nil = acc
+foldrRealPost f acc (Node n left right)
+    = f n (foldrRealPost f (foldrRealPost f acc left) right)
+
+{-
+foldrTry _ z Nil = z
+foldrTry f z (Node es) = foldr (\(p,t) v -> f p (foldrTry f v t)) z es
+-}
+
 
 -- foldl f (foldl f (f z n) left) right
 foldlPre :: (b -> a -> b) -> b -> Tree a -> b
@@ -279,10 +293,10 @@ foldlPre f acc (Node n left right)
 
 -- inorder left ++ [n] ++ inorder right
 -- flattenIn left (a : (flattenIn right accList))
-inorderFold :: (b -> a -> b -> b) -> b -> Tree a -> b
-inorderFold _ acc Nil = acc
-inorderFold f acc (Node n left right)
-    = f (inorderFold f acc left) n (inorderFold f acc right)
+foldIn :: (b -> a -> b -> b) -> b -> Tree a -> b
+foldIn _ acc Nil = acc
+foldIn f acc (Node n left right)
+    = f (foldIn f acc left) n (foldIn f acc right)
 
 
 printSumPreRight :: Show a => a -> String -> String
@@ -305,14 +319,23 @@ foldPostorder f acc (Node left x right)
 -}
 
 ------------------
+listFoldlPre = reverse $ foldlPre (flip(:)) [] t1_7 -- [-4,2,-1,3,-6,5,-7]
+listFoldl =    reverse $ foldl (flip (:)) [] t1_7
+listFoldrPost = foldrPost (:) [] t1_7               -- [-1,3,2,5,-7,-6,-4]
+listFoldr =     foldr (:) [] t1_7
+listFoldr2 =    foldr2 (:) [] t1_7
+listFoldrRealPost = foldrRealPost (:) [] t1_7
+
+
 -- note preorder foldr HELP these are not the same
-exampleFoldTreePRE_R = foldrPost printSumPreRight "_" t3
-exampleFoldr = foldr printSumPreRight "_" t3
+exampleFoldTreePRE_R t = foldrPost printSumPreRight "_" t
+exampleFoldr t = foldr printSumPreRight "_" t
+exampleFoldrRealPost t = foldrRealPost printSumPreRight "_" t
 -- note preorder foldl (backwards)
-exampleFoldTreePRE_L = foldlPre printSumPreLeft "_" t3
-exampleFoldl = foldl printSumPreLeft "_" t3
+exampleFoldTreePRE_L t = foldlPre printSumPreLeft "_" t
+exampleFoldl t = foldl printSumPreLeft "_" t
 -- note inorder
-exampleFoldTreeIN = inorderFold printSumIn "_" t3
+exampleFoldTreeIN t = foldIn printSumIn "_" t
 --exampleFoldTreePOST =
 
 
