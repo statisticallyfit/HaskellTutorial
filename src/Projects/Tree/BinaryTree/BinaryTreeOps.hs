@@ -135,11 +135,7 @@ size t
 -- note returns index of element.
 -- precondition - val must occur in tree.
 indexOf :: Ord a => a -> Tree a -> Int
-indexOf x tree = fromJust $ elemIndex x (collapse tree)
-
-collapse :: Tree a -> [a]
-collapse Nil = []
-collapse (Node n tree right) = collapse tree ++ [n] ++ collapse right
+indexOf x tree = fromJust $ elemIndex x (collapseIn tree)
 
 
 occurs :: Ord a => a -> Tree a -> Bool
@@ -157,9 +153,9 @@ predecessor :: Ord a => a -> Tree a -> Maybe a
 predecessor x Nil = Nothing
 predecessor x tree
     | not $ occurs x tree       = Nothing
-    | x == head (collapse tree) = Nothing
+    | x == head (collapseIn tree) = Nothing
     | otherwise                   = Just $ list !! n
-    where list = reverse $ collapse tree
+    where list = reverse $ collapseIn tree
           n = fromJust $ findIndex (< x) list
 
 
@@ -170,7 +166,7 @@ successor x tree
     | not $ occurs x tree = Nothing
     | x == last list      = Nothing
     | otherwise             = Just $ list !! n
-    where list = collapse tree
+    where list = collapseIn tree
           n = fromJust $ findIndex (> x) list
 
 
@@ -196,7 +192,15 @@ closest x t -- = if occurs val t then clos val t else Nothing
 
 
 
---- Traversals: Flattening
+--- Traversals: Flattening ------------------------------------------------------------------
+--- bfs flatten (and general traversal action)
+--- todo todo todo
+
+--- todotodotodo: filter tree (leaving perhaps sparse tree or just more condensed tree Keep in mind
+-- the structure of original tree)
+
+-- todotodotodo: foldtree (pre, post, inorder) using foldr, foldl -- all the combinations!
+
 
 mapTree :: (a -> b) -> Tree a -> Tree b
 mapTree _ Nil = Nil
@@ -221,43 +225,31 @@ collapsePost Nil = []
 collapsePost (Node n left right)
     = collapsePost left ++ collapsePost right ++ [n]
 
---- bfs flatten (and general traversal action)
---- todo todo todo
-
---- todotodotodo: filter tree (leaving perhaps sparse tree or just more condensed tree Keep in mind
--- the structure of original tree)
-
--- todotodotodo: foldtree (pre, post, inorder) using foldr, foldl -- all the combinations!
-
-
---- alternative solution
-flattenPre :: Tree a -> [a] -> [a]
-flattenPre Nil accList = accList
-flattenPre (Node n left right) accList = n : flattenPre left (flattenPre right accList)
-
-flattenIn :: Tree a -> [a] -> [a]
-flattenIn Nil accList = accList
-flattenIn (Node n left right) accList = flattenIn left (n : (flattenIn right accList))
-
-flattenPost :: Tree a -> [a] -> [a]
-flattenPost Nil accList = accList
-flattenPost (Node n left right) accList = flattenPost left (flattenPost right (n : accList))
-
+------------------------------------
 collapsePre' :: Tree a -> [a]
 collapsePre' tree = flattenPre tree []
+    where
+    flattenPre Nil accList = accList
+    flattenPre (Node n left right) accList
+        = n : flattenPre left (flattenPre right accList)
 
 collapseIn' :: Tree a -> [a]
 collapseIn' tree = flattenIn tree []
+    where
+    flattenIn Nil accList = accList
+    flattenIn (Node n left right) accList
+        = flattenIn left (n : (flattenIn right accList))
 
 collapsePost' :: Tree a -> [a]
 collapsePost' tree = flattenPost tree []
+    where
+    flattenPost Nil accList = accList
+    flattenPost (Node n left right) accList
+        = flattenPost left (flattenPost right (n : accList))
 
-
+---------------------------------------
 
 --- Traversals: General folding
-
--- IMPORTANT even haskell designers say that foldr = post order and foldl = preorder!:
--- https://hackage.haskell.org/package/suffixtree-0.2.2.1/docs/src/Data-SuffixTree.html
 
 -- note in foldl, the left has to be accumulator for the right tree.
 -- n : flattenPre left (flattenPre right accList)
@@ -265,53 +257,58 @@ collapsePost' tree = flattenPost tree []
 -- note in foldr, the right has to be accumulator for the left tree.
 -- flattenPost left (flattenPost right (n : accList))
 -- foldr f (f n (foldr f z right)) left
+
+-- note yields in order results
+foldrIn :: (a -> b -> b) -> b -> Tree a -> b
+foldrIn _ acc Nil = acc
+foldrIn f acc (Node n left right) = foldrIn f (f n (foldrIn f acc right)) left
+
+-- note yields in order results
+foldlIn :: (b -> a -> b) -> b -> Tree a -> b
+foldlIn _ acc Nil = acc
+foldlIn f acc (Node n left right) = foldlIn f (f (foldlIn f acc left) n) right
+
 foldrPost :: (a -> b -> b) -> b -> Tree a -> b
 foldrPost _ acc Nil = acc
-foldrPost f acc (Node n left right)
-    = foldrPost f (foldrPost f (f n acc) right) left
---preFoldr f (preFoldr f (f n acc) right) left
+foldrPost f acc (Node n left right) = foldrPost f (foldrPost f (f n acc) right) left
 
-foldr2 _ acc Nil = acc
-foldr2 f acc (Node n left right)
-    = foldr2 f (foldr2 f (f n acc) left) right
+foldlPost :: (b -> a -> b) -> b -> Tree a -> b
+foldlPost _ acc Nil = acc
+foldlPost f acc (Node n left right) = foldlPost f (foldlPost f (f acc n) right) left
 
-foldr3 _ acc Nil = acc
-foldr3 f acc (Node n left right)
-    = f n (foldr3 f (foldr3 f acc left) right)
-
-{-
-foldrTry _ z Nil = z
-foldrTry f z (Node es) = foldr (\(p,t) v -> f p (foldrTry f v t)) z es
--}
-
+foldrPre :: (a -> b -> b) -> b -> Tree a -> b
+foldrPre _ acc Nil = acc
+foldrPre f acc (Node n left right) = foldrPre f (foldrPre f (f n acc) left) right
 
 -- foldl f (foldl f (f z n) left) right
 foldlPre :: (b -> a -> b) -> b -> Tree a -> b
 foldlPre _ acc Nil = acc
-foldlPre f acc (Node n left right)
-    = foldlPre f (foldlPre f (f acc n) left) right
+foldlPre f acc (Node n left right) = foldlPre f (foldlPre f (f acc n) left) right
 
-------------------------------------
--- inorder left ++ [n] ++ inorder right
--- flattenIn left (a : (flattenIn right accList))
-foldIn :: (b -> a -> b -> b) -> b -> Tree a -> b
-foldIn _ z Nil = z
-foldIn f z (Node n l r)
-    = f (foldIn f z l) n (foldIn f z r)
+{-
+foldlIn :: (b -> a -> b -> b) -> b -> Tree a -> b
+foldlIn f z  Nil = z
+foldlIn f z (Node x l r) = f (foldlIn f z l) x (foldlIn f z r)-}
+
+-- this is the same as foldrIn but with more arguments.
+fold :: (a -> b -> b -> b) -> b -> Tree a -> b
+fold f z  Nil = z
+fold f z (Node x l r) = f x (fold f z l) (fold f z r)
+
 
 -- TODO testing that foldr list == this below way of getting the answer.
-size'   = foldIn  (\x l r -> 1 + l + r)    0
-height' = foldIn  (\x l r -> 1 + max l r)  0
-mirror  = foldIn  (flip . Node)  Nil
-map' f = foldIn  (Node . f) Nil
+sizeFold   = fold  (\x l r -> 1 + l + r)    0
+depthFold = fold  (\x l r -> 1 + max l r)  0
+mirror  = fold  (flip . Node)  Nil
+mapFold f = fold  (Node . f) Nil
 
-inFoldFlat t = foldIn  (\x l r -> l ++ x : r)     [] t
-preFoldFlat t = foldIn  (\x l r -> x : l ++ r)    [] t
-postFoldFlat t = foldIn (\x l r -> l ++ r ++ [x]) [] t
+inFoldFlat t = fold  (\x l r -> l ++ x : r)     [] t
+preFoldFlat t = fold  (\x l r -> x : l ++ r)    [] t
+postFoldFlat t = fold (\x l r -> l ++ r ++ [x]) [] t
 
-inFoldSub t = foldIn (\x lx rx -> (lx - x) - rx)   0 t
-preFoldSub t = foldIn (\x lx rx -> (x - lx) - rx)  0 t
-postFoldSub t = foldIn (\x lx rx -> (lx - rx) - x) 0 t
+inFoldSub t = fold (\x lx rx -> (lx - x) - rx)   0 t
+preFoldSub t = fold (\x lx rx -> (x - lx) - rx)  0 t
+postFoldSub t = fold (\x lx rx -> (lx - rx) - x) 0 t
 
 -- TODO implement preOrderFold then pass in the arguments... same for postorder
 
@@ -323,8 +320,8 @@ printSumPreRight x y = "(" ++ show x ++ "+" ++ y ++ ")"
 printSumPreLeft :: Show a => String -> a -> String
 printSumPreLeft x y = "(" ++ x ++ "+" ++ show y ++ ")"
 
-printSumIn :: Show a => String -> a -> String -> String
-printSumIn x y z = "(" ++ x ++ "+" ++ show y ++ "+" ++ z ++ ")"
+printSumIn :: Show a => a -> String -> String -> String
+printSumIn x y z = "((" ++ y ++ "-" ++ show x ++ ")" ++ "-" ++ z ++ ")"
 
 ------------------
 
@@ -340,18 +337,37 @@ traverseTree step f z tree = go tree z
         go Nil z = z
         go (Node x l r) z = step (f x) (go l) (go r) z
 
-preorder   = traverseTree $ \n l r -> r . l . n
-inorder    = traverseTree $ \n l r -> r . n . l
-postorder  = traverseTree $ \n l r -> n . r . l
+foldTree :: a -> b -> (a -> b -> c -> t) -> c -> t
+foldTree f z traversal t = traversal f z t
 
+-- HELP todo
+--printPre traversal t = traversal "+" "_" (map show t)
 
-testFlatPre t = collapse preorder t   -- [2,1,3]
-testFlatIn t = collapse inorder t    -- [1,2,3]
-testFlatPost t = collapse postorder t  -- [1,3,2]
+preorder, inorder, postorder :: (a -> b -> b) -> b -> Tree a -> b
+preorder   = traverseTree $ \n l r -> n . l . r  -- r . l . n
+inorder    = traverseTree $ \n l r -> l . n . r  -- r . n . l
+postorder  = traverseTree $ \n l r -> l . r . n  -- n . r . l
 
+------------------
+collapse :: ((a -> [a] -> [a])   -> [t] -> b -> [c])    -> b -> [c]
+collapse traversal = {-reverse . -}traversal (:) [] --tree arg here
 
-collapse' :: ((a -> [a] -> [a])   -> [t] -> b -> [c])    -> b -> [c]
-collapse' traversal = reverse . traversal (:) [] --tree arg here
+sub :: (Num a, Num b) => ((a -> a -> a) -> b -> c -> t) -> c -> t
+sub traversal t = traversal (-) 0 t
+
+add traversal t = traversal (+) 0 t
+
+flatPre = collapse preorder tree7
+flatIn = collapse inorder tree7
+flatPost = collapse postorder tree7 
+
+subPre = sub preorder tree7
+subIn = sub inorder tree7
+subPost = sub postorder tree7
+
+addPre = add preorder tree7
+addIn = add inorder tree7
+addPost = add postorder tree7
 
 ------------------
 t8 = Node 5
@@ -367,24 +383,24 @@ t15 = Node 8
                 (Node 14 (Leaf 13) (Leaf 15)))
 
 -- note these are real preorder!
-listFoldlPre = reverse $ foldlPre (flip(:)) [] t8 -- [5,3,1,6,9,8,10]
-listFoldl =    reverse $ foldl (flip (:)) [] t8
+listFoldlPre = reverse $ foldlPre (flip(:)) [] tree7 -- [5,3,1,6,9,8,10]
+listFoldl =    reverse $ foldl (flip (:)) [] tree7
 -- note this one below is real postorder!!!
-listFoldrPost = foldrPost (:) [] t8               -- [1,6,3,8,10,9,5]
-listFoldr =     foldr (:) [] t8
-listFoldr2 =    foldr2 (:) [] t8
-listFoldrRealPost = foldr3 (:) [] t8
+listFoldrPost = foldrPost (:) [] tree7                -- [1,6,3,8,10,9,5]
+listFoldr =     foldr (:) [] tree7
+--listFoldr2 =    foldr2 (:) [] tree7
+--listFoldrRealPost = foldr3 (:) [] tree7
 
 
 -- note preorder foldr HELP these are not the same
 exampleFoldTreePRE_R t = foldrPost printSumPreRight "_" t
 exampleFoldr t = foldr printSumPreRight "_" t
-exampleFoldrRealPost t = foldr3 printSumPreRight "_" t
+--exampleFoldrRealPost t = foldr3 printSumPreRight "_" t
 -- note preorder foldl (backwards)
 exampleFoldTreePRE_L t = foldlPre printSumPreLeft "_" t
 exampleFoldl t = foldl printSumPreLeft "_" t
 -- note inorder
-exampleFoldTreeIN t = foldIn printSumIn "_" t
+exampleFoldTreeIN t = fold printSumIn "_" t
 --exampleFoldTreePOST =
 
 

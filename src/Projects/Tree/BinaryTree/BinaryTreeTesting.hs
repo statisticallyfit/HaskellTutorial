@@ -45,23 +45,20 @@ instance Eq a => EqProp (Tree a) where (=-=) = eq
 
 
 testMap :: Tree Int -> Bool
-testMap tree = (collapse $ mapTree (+3) tree) == (map (+3) (collapse tree))
+testMap tree = (collapseIn $ mapTree (+3) tree) == (map (+3) (collapseIn tree))
 
 testSize :: Tree Int -> Bool
-testSize tree = size tree == (length $ collapse tree)
+testSize tree = size tree == (length $ collapseIn tree)
 
 -- test inserts and deletes!
 
 testOccurs :: Int -> Tree Int -> Bool
-testOccurs n tree = (elem n (collapse tree)) == (occurs n tree)
-
-testInorderEqualsCollapse :: Tree Int -> Bool
-testInorderEqualsCollapse tree = collapse tree == inorder tree
+testOccurs n tree = (elem n (collapseIn tree)) == (occurs n tree)
 
 
 testFold :: Int -> Tree Int -> Bool
 testFold acc tree = (foldrPost (+) acc tree) == (foldr (+) acc flatTree)
-    where flatTree = collapse tree
+    where flatTree = collapseIn tree
 
 
 testFoldlPreIsFoldl :: Int -> Tree Int -> Bool
@@ -79,7 +76,6 @@ main = do
     quickCheck testMap
     quickCheck testSize
     quickCheck testOccurs
-    quickCheck testInorderEqualsCollapse
     quickCheck testFold
     quickCheckWith stdArgs {maxSuccess = 1000} testFoldlPreIsFoldl
     quickCheckWith stdArgs {maxSuccess = 1000} testFoldrPostIsFoldr
