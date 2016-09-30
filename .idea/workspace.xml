@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="bc679e25-6068-417c-8b02-1d7896297961" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeOps.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeOps.hs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeTesting.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeTesting.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -29,8 +28,8 @@
       <file leaf-file-name="BinaryTreeOps.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeOps.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="1.1666666">
-              <caret line="387" column="40" selection-start-line="387" selection-start-column="40" selection-end-line="387" selection-end-column="40" />
+            <state vertical-scroll-proportion="-2.8888888">
+              <caret line="292" column="41" selection-start-line="292" selection-start-column="41" selection-end-line="292" selection-end-column="41" />
               <folding />
             </state>
           </provider>
@@ -721,12 +720,12 @@
       <workItem from="1475070810457" duration="600000" />
       <workItem from="1475072869646" duration="6872000" />
       <workItem from="1475127434870" duration="27110000" />
-      <workItem from="1475214205720" duration="15956000" />
+      <workItem from="1475214205720" duration="19502000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="50538000" />
+    <option name="totallyTimeSpent" value="54084000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="65" y="52" width="910" height="746" extended-state="0" />
@@ -833,8 +832,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeOps.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.1666666">
-          <caret line="387" column="40" selection-start-line="387" selection-start-column="40" selection-end-line="387" selection-end-column="40" />
+        <state vertical-scroll-proportion="-2.8888888">
+          <caret line="292" column="41" selection-start-line="292" selection-start-column="41" selection-end-line="292" selection-end-column="41" />
           <folding />
         </state>
       </provider>

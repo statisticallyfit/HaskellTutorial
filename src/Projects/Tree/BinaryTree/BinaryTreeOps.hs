@@ -270,10 +270,10 @@ foldrIn :: (a -> b -> b) -> b -> Tree a -> b
 foldrIn _ acc Nil = acc
 foldrIn f acc (Node n left right) = foldrIn f (f n (foldrIn f acc right)) left
 
--- note yields in order results
+-- note if you want forward inorder, not backwards, put right as inner and left outer.
 foldlIn :: (b -> a -> b) -> b -> Tree a -> b
 foldlIn _ acc Nil = acc
-foldlIn f acc (Node n left right) = foldlIn f (f (foldlIn f acc left) n) right
+foldlIn f acc (Node n left right) = foldlIn f (f (foldlIn f acc right) n) left
 
 foldrPost :: (a -> b -> b) -> b -> Tree a -> b
 foldrPost _ acc Nil = acc
@@ -283,10 +283,12 @@ foldlPost :: (b -> a -> b) -> b -> Tree a -> b
 foldlPost _ acc Nil = acc
 foldlPost f acc (Node n left right) = foldlPost f (foldlPost f (f acc n) right) left
 
+-- todo fix so they print in order
 foldrPre :: (a -> b -> b) -> b -> Tree a -> b
 foldrPre _ acc Nil = acc
 foldrPre f acc (Node n left right) = foldrPre f (foldrPre f (f n acc) left) right
 
+-- todo fix so it prints in order
 -- foldl f (foldl f (f z n) left) right
 foldlPre :: (b -> a -> b) -> b -> Tree a -> b
 foldlPre _ acc Nil = acc
@@ -379,11 +381,13 @@ printSubFoldIn x y z = "((" ++ y ++ "-" ++ show x ++ ")" ++ "-" ++ z ++ ")"
 -- only print these Foldl types not Foldr because left is the original direction (pre, post, in)
 printFoldlPre = foldlPre printSubFoldl "_" tree7 -- preorder printSubFoldl "_" tree7
 printFoldl = foldl printSubFoldl "_" tree7 -- this is inorder
-printFoldlPost = postorder printSubFoldr "_" tree7
+printFoldlPost = foldlPost printSubFoldl "_" tree7
+-- postorder printSubFoldr "_" tree7
 --foldlPost printSubFoldl "_" tree7
 
 --foldrPre printSubFoldr "_" tree7
-printFoldrPre = preorder printSubFoldr "_" tree7
+--preorder printSubFoldr "_" tree7
+printFoldrPre = foldrPre printSubFoldr "_" tree7
 printFoldr = foldr printSubFoldr "_" tree7 -- inorder but from the right
 printFoldrPost = foldrPost printSubFoldr "_" tree7
 
@@ -406,9 +410,11 @@ collapsePre tree7
 collapsePre' tree7
 [7,-1,0,3,-2,5,-4,6,9,-8,10]
 
+--todo make print forwards
 reverse $ foldrPre (:) [] tree7
 [7,-1,0,3,-2,5,-4,6,9,-8,10]
 
+--todo make print forwards
 reverse $ foldlPre (flip(:)) [] tree7
 [7,-1,0,3,-2,5,-4,6,9,-8,10]
 
@@ -447,7 +453,7 @@ collapseIn' tree7
 foldrIn (:) [] tree7
 [0,-1,-2,3,-4,5,6,7,-8,9,10]
 
-reverse $ foldlIn (flip(:)) [] tree7
+foldlIn (flip(:)) [] tree7
 [0,-1,-2,3,-4,5,6,7,-8,9,10]
 
 inFoldFlat tree7
@@ -456,6 +462,30 @@ inFoldFlat tree7
 flatIn
 [0,-1,-2,3,-4,5,6,7,-8,9,10]
 
+------------------
+
+-- HELP TODO: how to print these with opposite emerging brackets?
+So that HELP TODO
+foldrPost: "(0-(-2-(-4-(6-(5-(3-(-1-(-8-(10-(9-(7-_)))))))))))"
+foldlPost: "(((((((((((_-0)--2)--4)-6)-5)-3)--1)--8)--10)-9)-7)
+
+foldrPost printSubFoldr "_" tree7
+"(0-(-2-(-4-(6-(5-(3-(-1-(-8-(10-(9-(7-_)))))))))))"
+
+foldlPost printSubFoldl "_" tree7
+"(((((((((((_-7)-9)-10)--8)--1)-3)-5)-6)--4)--2)-0)"
+
+foldrPre printSubFoldr "_" tree7
+"(10-(-8-(9-(6-(-4-(5-(-2-(3-(0-(-1-(7-_)))))))))))"
+
+foldlPre printSubFoldl "_" tree7
+"(((((((((((_-7)--1)-0)-3)--2)-5)--4)-6)-9)--8)-10)"
+
+foldlIn printSubFoldl "_" tree7
+"(((((((((((_-10)-9)--8)-7)-6)-5)--4)-3)--2)--1)-0)"
+
+foldrIn printSubFoldr "_" tree7
+"(0-(-1-(-2-(3-(-4-(5-(6-(7-(-8-(9-(10-_)))))))))))"
 
 -}
 
