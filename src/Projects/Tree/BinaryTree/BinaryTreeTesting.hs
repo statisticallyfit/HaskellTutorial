@@ -71,6 +71,7 @@ testFoldrPostIsFoldr acc tree = (foldrPost f acc tree) == (foldr f acc tree)
     where f = \x acc -> x - acc
 
 
+{-
 
 main = do
     quickCheck testMap
@@ -83,6 +84,7 @@ main = do
     let trigger = undefined :: Tree (Int, Int, [Int])
     quickBatch (traversable trigger)
 
+-}
 
 
 

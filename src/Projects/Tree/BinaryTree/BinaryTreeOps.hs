@@ -47,17 +47,24 @@ testDelete1 = Node 2 (Node 1 Nil Nil) (Node 3 Nil (Node 4 Nil Nil))
 testDelete2 = Node 1 (Node 0 Nil Nil) (Node 3 (Node 2 Nil Nil) Nil)
 testDelete3 = Node 1 (Node 0 Nil Nil) (Node 3 (Node 2 Nil Nil) (Node 4 Nil Nil))
 
+
+t8 :: Tree Int
+t8 = Node 5
+        (Node 3 (Node 1 Nil Nil) (Node 6 Nil Nil))
+        (Node 9 (Node 8 Nil Nil) (Node 10 Nil Nil))
+
+
 tree7 :: Tree Int
 tree7 = Node 7
-            (Node 1
+            (Node (-1)
                 (Node 0 Nil Nil)
                 (Node 3
-                    (Node 2 Nil Nil)
+                    (Node (-2) Nil Nil)
                     (Node 5
-                        (Node 4 Nil Nil)
+                        (Node (-4) Nil Nil)
                         (Node 6 Nil Nil))))
             (Node 9
-                (Node 8 Nil Nil)
+                (Node (-8) Nil Nil)
                 (Node 10 Nil Nil))
 
 tree15 :: Tree Int
@@ -314,17 +321,6 @@ postFoldSub t = fold (\x lx rx -> (lx - rx) - x) 0 t
 
 ---------------------
 
-printSumPreRight :: Show a => a -> String -> String
-printSumPreRight x y = "(" ++ show x ++ "+" ++ y ++ ")"
-
-printSumPreLeft :: Show a => String -> a -> String
-printSumPreLeft x y = "(" ++ x ++ "+" ++ show y ++ ")"
-
-printSumIn :: Show a => a -> String -> String -> String
-printSumIn x y z = "((" ++ y ++ "-" ++ show x ++ ")" ++ "-" ++ z ++ ")"
-
-------------------
-
 traverseTree ::
     (a -> (b -> b) -> (b -> b) -> b -> b)
      -- function step, that takes type a, two b->b funcs and seed of type b, returns b type.
@@ -348,6 +344,7 @@ preorder   = traverseTree $ \n l r -> n . l . r  -- r . l . n
 inorder    = traverseTree $ \n l r -> l . n . r  -- r . n . l
 postorder  = traverseTree $ \n l r -> l . r . n  -- n . r . l
 
+
 ------------------
 collapse :: ((a -> [a] -> [a])   -> [t] -> b -> [c])    -> b -> [c]
 collapse traversal = {-reverse . -}traversal (:) [] --tree arg here
@@ -359,7 +356,7 @@ add traversal t = traversal (+) 0 t
 
 flatPre = collapse preorder tree7
 flatIn = collapse inorder tree7
-flatPost = collapse postorder tree7 
+flatPost = collapse postorder tree7
 
 subPre = sub preorder tree7
 subIn = sub inorder tree7
@@ -370,38 +367,102 @@ addIn = add inorder tree7
 addPost = add postorder tree7
 
 ------------------
-t8 = Node 5
-        (Node 3 (Node 1 Nil Nil) (Node 6 Nil Nil))
-        (Node 9 (Node 8 Nil Nil) (Node 10 Nil Nil))
+printSubFoldr :: Show a => a -> String -> String
+printSubFoldr x y = "(" ++ show x ++ "-" ++ y ++ ")"
 
-t15 = Node 8
-            (Node 4
-                (Node 2 (Leaf 1) (Leaf 3))
-                (Node 5 (Leaf 6) (Leaf 7)))
-            (Node 12
-                (Node 10 (Leaf 9) (Leaf 11))
-                (Node 14 (Leaf 13) (Leaf 15)))
+printSubFoldl :: Show a => String -> a -> String
+printSubFoldl x y = "(" ++ x ++ "-" ++ show y ++ ")"
 
--- note these are real preorder!
-listFoldlPre = reverse $ foldlPre (flip(:)) [] tree7 -- [5,3,1,6,9,8,10]
-listFoldl =    reverse $ foldl (flip (:)) [] tree7
--- note this one below is real postorder!!!
-listFoldrPost = foldrPost (:) [] tree7                -- [1,6,3,8,10,9,5]
-listFoldr =     foldr (:) [] tree7
---listFoldr2 =    foldr2 (:) [] tree7
---listFoldrRealPost = foldr3 (:) [] tree7
+printSubFoldIn :: Show a => a -> String -> String -> String
+printSubFoldIn x y z = "((" ++ y ++ "-" ++ show x ++ ")" ++ "-" ++ z ++ ")"
+
+-- only print these Foldl types not Foldr because left is the original direction (pre, post, in)
+printFoldlPre = foldlPre printSubFoldl "_" tree7 -- preorder printSubFoldl "_" tree7
+printFoldl = foldl printSubFoldl "_" tree7 -- this is inorder
+printFoldlPost = postorder printSubFoldr "_" tree7
+--foldlPost printSubFoldl "_" tree7
+
+--foldrPre printSubFoldr "_" tree7
+printFoldrPre = preorder printSubFoldr "_" tree7
+printFoldr = foldr printSubFoldr "_" tree7 -- inorder but from the right
+printFoldrPost = foldrPost printSubFoldr "_" tree7
 
 
--- note preorder foldr HELP these are not the same
-exampleFoldTreePRE_R t = foldrPost printSumPreRight "_" t
-exampleFoldr t = foldr printSumPreRight "_" t
---exampleFoldrRealPost t = foldr3 printSumPreRight "_" t
--- note preorder foldl (backwards)
-exampleFoldTreePRE_L t = foldlPre printSumPreLeft "_" t
-exampleFoldl t = foldl printSumPreLeft "_" t
--- note inorder
-exampleFoldTreeIN t = fold printSumIn "_" t
---exampleFoldTreePOST =
+main = do
+    print $ "foldlIn: " ++ show (foldlIn (-) 0 tree7)
+    print $ "foldrIn: " ++ show (foldrIn (-) 0 tree7)
+    print $ "foldlPre: " ++ show (foldlPre (-) 0 tree7)
+    print $ "foldrPre: " ++ show (foldrPre (-) 0 tree7)
+    print $ "foldlPost: " ++ show (foldlPost (-) 0 tree7)
+    print $ "foldrPost: " ++ show (foldrPost (-) 0 tree7)
+
+
+{-
+
+------
+collapsePre tree7
+[7,-1,0,3,-2,5,-4,6,9,-8,10]
+
+collapsePre' tree7
+[7,-1,0,3,-2,5,-4,6,9,-8,10]
+
+reverse $ foldrPre (:) [] tree7
+[7,-1,0,3,-2,5,-4,6,9,-8,10]
+
+reverse $ foldlPre (flip(:)) [] tree7
+[7,-1,0,3,-2,5,-4,6,9,-8,10]
+
+preFoldFlat tree7
+[7,-1,0,3,-2,5,-4,6,9,-8,10]
+
+flatPre
+[7,-1,0,3,-2,5,-4,6,9,-8,10]
+
+------
+collapsePost tree7
+[0,-2,-4,6,5,3,-1,-8,10,9,7]
+
+collapsePost' tree7
+[0,-2,-4,6,5,3,-1,-8,10,9,7]
+
+foldrPost (:) [] tree7
+[0,-2,-4,6,5,3,-1,-8,10,9,7]
+
+foldlPost (flip(:)) [] tree7
+[0,-2,-4,6,5,3,-1,-8,10,9,7]
+
+postFoldFlat tree7
+[0,-2,-4,6,5,3,-1,-8,10,9,7]
+
+flatPost
+[0,-2,-4,6,5,3,-1,-8,10,9,7]
+
+------
+collapseIn tree7
+[0,-1,-2,3,-4,5,6,7,-8,9,10]
+
+collapseIn' tree7
+[0,-1,-2,3,-4,5,6,7,-8,9,10]
+
+foldrIn (:) [] tree7
+[0,-1,-2,3,-4,5,6,7,-8,9,10]
+
+reverse $ foldlIn (flip(:)) [] tree7
+[0,-1,-2,3,-4,5,6,7,-8,9,10]
+
+inFoldFlat tree7
+[0,-1,-2,3,-4,5,6,7,-8,9,10]
+
+flatIn
+[0,-1,-2,3,-4,5,6,7,-8,9,10]
+
+
+-}
+
+
+
+
+
 
 
 --- Rewrite map using foldtree ------------------------------------------------------------
@@ -453,11 +514,13 @@ instance Foldable Tree where
     foldMap f (Node n left right) = (f n) <> (foldMap f left) <> (foldMap f right)
 
     foldl _ z Nil = z
-    foldl f z (Node n left right) = foldl f (foldl f (f z n) left) right
+    foldl f z (Node x l r) = foldl f (f (foldl f z l) x) r
+    -- bfoldl f z (Node n left right) = foldl f (foldl f (f z n) left) right
     -- foldl f z (Leaf n) = f z n
 
     foldr _ z Nil = z
-    foldr f z (Node n left right) = foldr f (f n (foldr f z right)) left
+    foldr f z (Node x l r) = foldr f (f x (foldr f z r)) l
+    -- foldr f z (Node n left right) = foldr f (f n (foldr f z right)) left
     -- foldr f z (Leaf n) = f n z
 
 

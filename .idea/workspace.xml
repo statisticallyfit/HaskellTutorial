@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bc679e25-6068-417c-8b02-1d7896297961" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeOps.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeOps.hs" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeTesting.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeTesting.hs" />
     </list>
@@ -30,8 +29,8 @@
       <file leaf-file-name="BinaryTreeOps.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeOps.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.5833333">
-              <caret line="361" column="36" selection-start-line="361" selection-start-column="36" selection-end-line="361" selection-end-column="36" />
+            <state vertical-scroll-proportion="1.1666666">
+              <caret line="387" column="40" selection-start-line="387" selection-start-column="40" selection-end-line="387" selection-end-column="40" />
               <folding />
             </state>
           </provider>
@@ -41,7 +40,7 @@
         <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeTesting.hs">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="80" column="54" selection-start-line="80" selection-start-column="54" selection-end-line="80" selection-end-column="54" />
+              <caret line="78" column="19" selection-start-line="78" selection-start-column="19" selection-end-line="78" selection-end-column="19" />
               <folding />
             </state>
           </provider>
@@ -722,12 +721,12 @@
       <workItem from="1475070810457" duration="600000" />
       <workItem from="1475072869646" duration="6872000" />
       <workItem from="1475127434870" duration="27110000" />
-      <workItem from="1475214205720" duration="8574000" />
+      <workItem from="1475214205720" duration="15956000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="43156000" />
+    <option name="totallyTimeSpent" value="50538000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="65" y="52" width="910" height="746" extended-state="0" />
@@ -816,14 +815,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeTesting.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="80" column="54" selection-start-line="80" selection-start-column="54" selection-end-line="80" selection-end-column="54" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/MoertWillamWeb.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.42647058">
@@ -832,10 +823,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeTesting.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="78" column="19" selection-start-line="78" selection-start-column="19" selection-end-line="78" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeOps.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5833333">
-          <caret line="361" column="36" selection-start-line="361" selection-start-column="36" selection-end-line="361" selection-end-column="36" />
+        <state vertical-scroll-proportion="1.1666666">
+          <caret line="387" column="40" selection-start-line="387" selection-start-column="40" selection-end-line="387" selection-end-column="40" />
           <folding />
         </state>
       </provider>
