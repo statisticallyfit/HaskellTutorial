@@ -3,11 +3,13 @@ module BinaryTreeOps where
 import Test.QuickCheck -- (Arbitrary, arbitrary, elements)
 import Test.QuickCheck.Checkers
 import Test.QuickCheck.Classes
+import Data.Functor.Identity
+import Data.Functor.Constant
 import Data.Monoid
 import Control.Monad hiding (join)
+import Data.Foldable hiding (fold)
 import Data.Maybe
 import Data.List (findIndex, elemIndex)
-
 
 data Tree a = Nil | Leaf a | Node a (Tree a) (Tree a) deriving (Eq, Show)
 
@@ -534,6 +536,30 @@ http://www.willamette.edu/~fruehr/254/samples/Trees.hs
 
 ---------------------------------------------------------------------------------------
 
+{-
+
+foldrPost :: (a -> b -> b) -> b -> Tree a -> b
+foldrPost _ acc Nil = acc
+foldrPost f acc (Node n left right) = foldrPost f (foldrPost f (f n acc) right) left
+
+foldlPost :: (b -> a -> b) -> b -> Tree a -> b
+foldlPost _ acc Nil = acc
+foldlPost f acc (Node n left right) = foldlPost f (foldlPost f (f acc n) right) left
+
+-- todo fix so they print in order
+foldrPre :: (a -> b -> b) -> b -> Tree a -> b
+foldrPre _ acc Nil = acc
+foldrPre f acc (Node n left right) = foldrPre f (foldrPre f (f n acc) left) right
+
+-- todo fix so it prints in order
+-- foldl f (foldl f (f z n) left) right
+foldlPre :: (b -> a -> b) -> b -> Tree a -> b
+foldlPre _ acc Nil = acc
+foldlPre f acc (Node n left right) = foldlPre f (foldlPre f (f acc n) left) right
+-}
+
+----
+
 instance Functor Tree where
     fmap _ Nil = Nil
     fmap f (Node n left right) = Node (f n) (fmap f left) (fmap f right)
@@ -545,16 +571,10 @@ instance Foldable Tree where
     foldMap f (Node n left right) = (f n) <> (foldMap f left) <> (foldMap f right)
 
     foldl _ z Nil = z
-    foldl f z (Node x l r) = foldl f (f (foldl f z l) x) r
-    -- bfoldl f z (Node n left right) = foldl f (foldl f (f z n) left) right
-    -- foldl f z (Leaf n) = f z n
+    foldl f z (Node x l r) = foldl f (f (foldl f z r) x) l
 
     foldr _ z Nil = z
     foldr f z (Node x l r) = foldr f (f x (foldr f z r)) l
-    -- foldr f z (Node n left right) = foldr f (f n (foldr f z right)) left
-    -- foldr f z (Leaf n) = f n z
-
-
 
 
 instance Traversable Tree where

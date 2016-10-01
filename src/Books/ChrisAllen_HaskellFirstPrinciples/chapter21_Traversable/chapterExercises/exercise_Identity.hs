@@ -9,12 +9,10 @@ newtype Identity a = Identity a deriving (Eq, Show)
 instance Functor Identity where
     fmap f (Identity x) = Identity (f x)
 
-{-
 
 instance Applicative Identity where
     pure x = Identity x
     (Identity f) <*> (Identity y) = Identity (f y)
--}
 
 
 instance Foldable Identity where

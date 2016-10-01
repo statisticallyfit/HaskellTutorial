@@ -273,8 +273,6 @@ sequenceA . fmap Compose = Compose . fmap sequenceA . sequenceA
 
 -}
 
-
-
 --- 21.11 TESTING TRAVERSABLE LAWS ------------------------------------------------------
 
 type TI = []

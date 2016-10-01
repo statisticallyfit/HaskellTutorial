@@ -1,11 +1,25 @@
 module ExprTreeOps where
 
+import Test.QuickCheck -- (Arbitrary, arbitrary, elements)
+import Test.QuickCheck.Checkers
+import Test.QuickCheck.Classes
+import Control.Monad
+
 -- data Variable = Ω | X -- | ω | Φ | χ | γ | α | β | θ
 
-
-data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr |
-    Div Expr Expr | Pow Expr Expr | Neg Expr | Num Int  {-Var Expr-} | X | Y
+data Function = Sin Expr | Cos Expr | Tan Expr
     deriving (Eq, Show)
+
+data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
+    | Pow Expr Expr | Neg Expr | Num Int  {-Var Expr-} | X | Y | F Function
+    deriving (Eq, Show)
+
+(.+), (.-), (.*), (./), (.^) :: Expr -> Expr -> Expr
+(.+) = Add
+(.-) = Sub
+(.*) = Mul
+(./) = Div
+(.^) = Pow
 
 
 data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq, Show)
@@ -25,6 +39,13 @@ t2 = Node "*"
                 (Leaf (Num 3))
                 (Leaf Y)))
 
+-- TODO how to represent the associativity of types?
+
+
+e1 :: Expr
+e1 = Num(4) .+ X .* (F (Sin X)) .* Num(3) .* (F (Cos X))
+e2 = e1 .+ Num(2) .* X .+ Num(7) .* X
+
 {-
 NOTE:
 be able to fold over tree and simplify constants but also remember order that they
@@ -32,9 +53,26 @@ were in the tree!
 Then remember also where they go at the end!
 -}
 
+
+
+
+mkTree :: Expr -> Tree Expr
+mkTree X = Leaf X
+mkTree Y = Leaf Y
+mkTree (Num n) = Leaf (Num n)
+mkTree (Neg e) = Node "_" Empty (mkTree e)
+mkTree (Add e1 e2) = Node "+" (mkTree e1) (mkTree e2)
+mkTree (Sub e1 e2) = Node "-" (mkTree e1) (mkTree e2)
+mkTree (Mul e1 e2) = Node "*" (mkTree e1) (mkTree e2)
+mkTree (Div e1 e2) = Node "/" (mkTree e1) (mkTree e2)
+
+
+
+
+
 -- (f . (n * ))
 -- example: foldLeftTree $ getConsts() $ 4xsin(x)3cos(x) => 12
-foldLeftTree :: {-(Int -> Int -> Int) ->-} Int -> Tree Expr -> Int
+--foldLeftTree :: {-(Int -> Int -> Int) ->-} Int -> Tree Expr -> Int
 --foldLeftTree s (Leaf(Num n)) = s n
 {-foldLeftTree s (Node "*" (Leaf(Num n)) right) = foldLeftTree (s * n) right
 foldLeftTree s (Node "/" (Leaf(Num n)) right) = foldLeftTree (s `div` n) right
@@ -72,12 +110,16 @@ instance Foldable Tree where
     foldr f z (Node left a right) = foldr f (f a (foldr f z right)) left
 -}
 
+{-
 
-
--- data Expr = Lit Integer | Add Expr Expr | Sub Expr Expr
 instance Arbitrary Expr where
     arbitrary = sized arbExpr
-arbExpr 0 = liftM Lit arbitrary
-arbExpr n = frequency [(1, liftM Lit arbitrary),
+arbExpr 0 = liftM Num arbitrary
+arbExpr n = frequency [(2, return X), (2, return Y),
+                       (1, liftM Num arbitrary),
+                       (4, liftM Neg arbitrary),
                        (4, liftM2 Add (arbExpr (n `div` 2)) (arbExpr (n `div` 2))),
-                       (4, liftM2 Sub (arbExpr (n `div` 2)) (arbExpr (n `div` 2)))]
+                       (4, liftM2 Sub (arbExpr (n `div` 2)) (arbExpr (n `div` 2))),
+                       (4, liftM2 Mul (arbExpr (n `div` 2)) (arbExpr (n `div` 2))),
+                       (4, liftM2 Div (arbExpr (n `div` 2)) (arbExpr (n `div` 2))),
+                       (4, liftM2 Pow (arbExpr (n `div` 2)) (arbExpr (n `div` 2)))]-}
