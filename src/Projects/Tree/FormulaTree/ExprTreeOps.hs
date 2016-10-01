@@ -4,15 +4,56 @@ import Test.QuickCheck -- (Arbitrary, arbitrary, elements)
 import Test.QuickCheck.Checkers
 import Test.QuickCheck.Classes
 import Control.Monad
+import Data.Char
 
 -- data Variable = Ω | X -- | ω | Φ | χ | γ | α | β | θ
 
-data Function = Sin Expr | Cos Expr | Tan Expr
-    deriving (Eq, Show)
+data Function
+    = Sin Expr | Cos Expr | Tan Expr |
+      Csc Expr | Sec Expr | Cot Expr |
+      Arcsin Expr | Arccos Expr | Arctan Expr |
+      Arccsc Expr | Arcsec Expr | Arccot Expr
+    deriving (Eq)
 
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
     | Pow Expr Expr | Neg Expr | Num Int  {-Var Expr-} | X | Y | F Function
-    deriving (Eq, Show)
+    deriving (Eq)
+
+data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq, Show)
+
+
+instance Show Expr where
+    show X = "x"
+    show Y = "y"
+    show (F func) = show func
+    show (Add e1 e2) = show e1 ++ " + " ++ show e2
+    show (Sub e1 e2) = show e1 ++ " - " ++ show e2
+    show (Mul e1 e2) = show e1 ++ show e2
+    show (Div e1 e2) = show e1 ++ " / " ++ show e2
+    show (Pow e1 e2) = show e1 ++ "^" ++ show e2
+    show (Neg e) = "-(" ++ show e ++ ")"
+    show (Num n) = show n
+
+instance Show Function where
+    show (Sin e) = "sin(" ++ show e ++ ")"
+    show (Cos e) = "cos(" ++ show e ++ ")"
+    show (Tan e) = "tan(" ++ show e ++ ")"
+    show (Csc e) = "csc(" ++ show e ++ ")"
+    show (Sec e) = "sec(" ++ show e ++ ")"
+    show (Cot e) = "cot(" ++ show e ++ ")"
+    show (Arcsin e) = "arcsin(" ++ show e ++ ")"
+    show (Arccos e) = "arccos(" ++ show e ++ ")"
+    show (Arctan e) = "arctan(" ++ show e ++ ")"
+    show (Arccsc e) = "arccsc(" ++ show e ++ ")"
+    show (Arcsec e) = "arcsec(" ++ show e ++ ")"
+    show (Arccot e) = "arccot(" ++ show e ++ ")"
+
+
+infixl 6 .+
+infixl 6 .-
+infixl 7 .*
+infixl 7 ./
+infixl 8 .^
 
 (.+), (.-), (.*), (./), (.^) :: Expr -> Expr -> Expr
 (.+) = Add
@@ -21,30 +62,14 @@ data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
 (./) = Div
 (.^) = Pow
 
-
-data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq, Show)
-
-
-t1, t2 :: Tree Expr
--- 4x + 3x^5
-t1 = Node "+"
-        (Node "*" (Leaf (Num 4)) (Leaf X))
-        (Node "*" (Leaf (Num 3)) (Node "^" (Leaf X) (Leaf (Num 5))))
-
-t2 = Node "*"
-        (Leaf (Num 4))
-        (Node "*"
-            (Leaf X)
-            (Node "*"
-                (Leaf (Num 3))
-                (Leaf Y)))
-
--- TODO how to represent the associativity of types?
-
+---------------------------------------------------------------------------------------------
 
 e1 :: Expr
-e1 = Num(4) .+ X .* (F (Sin X)) .* Num(3) .* (F (Cos X))
+e1 = Num(4) .* X .* (F (Sin X)) .* Num(3) .* (F (Cos X))
 e2 = e1 .+ Num(2) .* X .+ Num(7) .* X
+e3 = Num(4) .* X .+ Num(3) .* X .^ Num(5)
+e4 = Neg(F (Sin X)) .* Neg(Num(2))
+e5 = Neg (Num(4) .* X .+ Num(2) .* Y)
 
 {-
 NOTE:
@@ -54,18 +79,28 @@ Then remember also where they go at the end!
 -}
 
 
-
-
 mkTree :: Expr -> Tree Expr
 mkTree X = Leaf X
 mkTree Y = Leaf Y
 mkTree (Num n) = Leaf (Num n)
-mkTree (Neg e) = Node "_" Empty (mkTree e)
+mkTree (F func) = Leaf (F func)
+mkTree (Neg e) = Node "-" Empty (mkTree e)
 mkTree (Add e1 e2) = Node "+" (mkTree e1) (mkTree e2)
 mkTree (Sub e1 e2) = Node "-" (mkTree e1) (mkTree e2)
 mkTree (Mul e1 e2) = Node "*" (mkTree e1) (mkTree e2)
 mkTree (Div e1 e2) = Node "/" (mkTree e1) (mkTree e2)
+mkTree (Pow e1 e2) = Node "^" (mkTree e1) (mkTree e2)
 
+
+--- testing that mkTree and expr are inverses of each other.
+getExpr :: Tree Expr -> Expr
+getExpr (Leaf x) = x
+getExpr (Node "-" Empty right) = Neg (getExpr right)
+getExpr (Node "+" left right) = Add (getExpr left) (getExpr right)
+getExpr (Node "-" left right) = Sub (getExpr left) (getExpr right)
+getExpr (Node "*" left right) = Mul (getExpr left) (getExpr right)
+getExpr (Node "/" left right) = Div (getExpr left) (getExpr right)
+getExpr (Node "^" left right) = Pow (getExpr left) (getExpr right)
 
 
 
@@ -110,7 +145,7 @@ instance Foldable Tree where
     foldr f z (Node left a right) = foldr f (f a (foldr f z right)) left
 -}
 
-{-
+
 
 instance Arbitrary Expr where
     arbitrary = sized arbExpr
@@ -122,4 +157,43 @@ arbExpr n = frequency [(2, return X), (2, return Y),
                        (4, liftM2 Sub (arbExpr (n `div` 2)) (arbExpr (n `div` 2))),
                        (4, liftM2 Mul (arbExpr (n `div` 2)) (arbExpr (n `div` 2))),
                        (4, liftM2 Div (arbExpr (n `div` 2)) (arbExpr (n `div` 2))),
-                       (4, liftM2 Pow (arbExpr (n `div` 2)) (arbExpr (n `div` 2)))]-}
+                       (4, liftM2 Pow (arbExpr (n `div` 2)) (arbExpr (n `div` 2)))]
+
+
+instance Arbitrary Function where
+    arbitrary = sized arbFunc
+arbFunc n = frequency [(4, liftM Sin arbitrary),
+                       (4, liftM Cos arbitrary),
+                       (4, liftM Tan arbitrary),
+                       (4, liftM Csc arbitrary),
+                       (4, liftM Sec arbitrary),
+                       (4, liftM Cot arbitrary),
+                       (4, liftM Arcsin arbitrary),
+                       (4, liftM Arccos arbitrary),
+                       (4, liftM Arctan arbitrary),
+                       (4, liftM Arccsc arbitrary),
+                       (4, liftM Arcsec arbitrary),
+                       (4, liftM Arctan arbitrary)]
+
+
+instance Arbitrary a => Arbitrary (Tree a) where
+    arbitrary = sized arbTree
+arbTree 0 = return Empty --liftM NilT arbitrary
+arbTree n = frequency [(1, return Empty),
+                       (3, liftM Leaf arbitrary),
+                       (4, liftM3 Node arbitrary (arbTree (n `div` 2))
+                                                 (arbTree (n `div` 2)) )]
+
+
+draw :: Show a => Tree a -> IO()
+draw tree = putStrLn $ drw 1 "\n" tree
+    where
+    drw count indent Empty = "Empty"
+    drw count indent (Leaf n) = "Leaf " ++ show n
+    -- draw count indent (Node n Nil Nil) = "Leaf " ++ show n
+    drw count indent (Node n left right)
+        = "Node " ++ (show n) ++ indent' ++ drw count' indent' left
+                              ++ indent' ++ drw count' indent' right
+        where
+        indent' = indent ++ "    "
+        count' = count + 1
