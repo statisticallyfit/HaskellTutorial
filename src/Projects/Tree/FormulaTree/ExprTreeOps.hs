@@ -15,6 +15,7 @@ data Function
       Arccsc Expr | Arcsec Expr | Arccot Expr
     deriving (Eq)
 
+-- constructor color before: ADF8FA
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
     | Pow Expr Expr | Neg Expr | Num Int  {-Var Expr-} | X | Y | F Function
     deriving (Eq)
@@ -101,6 +102,54 @@ getExpr (Node "-" left right) = Sub (getExpr left) (getExpr right)
 getExpr (Node "*" left right) = Mul (getExpr left) (getExpr right)
 getExpr (Node "/" left right) = Div (getExpr left) (getExpr right)
 getExpr (Node "^" left right) = Pow (getExpr left) (getExpr right)
+
+
+
+
+-- note yields in order results
+foldrIn :: (a -> b -> b) -> b -> Tree a -> b
+foldrIn _ acc Nil = acc
+foldrIn f acc (Node n left right) = foldrIn f (f n (foldrIn f acc right)) left
+
+-- note if you want forward inorder, not backwards, put right as inner and left outer.
+foldlIn :: (b -> a -> b) -> b -> Tree a -> b
+foldlIn _ acc Nil = acc
+foldlIn f acc (Node n left right) = foldlIn f (f (foldlIn f acc right) n) left
+
+foldrPost :: (a -> b -> b) -> b -> Tree a -> b
+foldrPost _ acc Nil = acc
+foldrPost f acc (Node n left right) = foldrPost f (foldrPost f (f n acc) right) left
+
+foldlPost :: (b -> a -> b) -> b -> Tree a -> b
+foldlPost _ acc Nil = acc
+foldlPost f acc (Node n left right) = foldlPost f (foldlPost f (f acc n) right) left
+
+-- todo fix so they print in order
+foldrPre :: (a -> b -> b) -> b -> Tree a -> b
+foldrPre _ acc Nil = acc
+foldrPre f acc (Node n left right) = foldrPre f (foldrPre f (f n acc) left) right
+
+-- todo fix so it prints in order
+-- foldl f (foldl f (f z n) left) right
+foldlPre :: (b -> a -> b) -> b -> Tree a -> b
+foldlPre _ acc Nil = acc
+foldlPre f acc (Node n left right) = foldlPre f (foldlPre f (f acc n) left) right
+
+{-
+
+traverseTree :: (a -> (b -> b) -> (b -> b) -> b -> b) -> (t -> a) -> b -> Tree t -> b
+traverseTree step f z tree = go tree z
+    where
+    go Empty z = z
+    go (Leaf x) z = step (f x) (go Empty) (go Empty) z
+    go (Node x l r) z = step (f x) (go l) (go r) z
+
+
+preorder, inorder, postorder :: (a -> b -> b) -> b -> Tree a -> b
+preorder   = traverseTree $ \n l r -> n . l . r  -- r . l . n
+inorder    = traverseTree $ \n l r -> l . n . r  -- r . n . l
+postorder  = traverseTree $ \n l r -> l . r . n  -- n . r . l
+-}
 
 
 
