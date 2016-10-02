@@ -22,7 +22,7 @@ data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
     | Pow Expr Expr | Neg Expr | Num Int  {-Var Expr-} | X | Y | F Function
     deriving (Eq)
 
-data Tree a = Empty | Leaf a | Node (Tree a) String (Tree a) deriving (Eq, Show)
+data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq)
 
 a = fst . head $ readFloat "0.75" :: Rational
 
@@ -55,6 +55,7 @@ instance Show Function where
 
 
 
+
 instance Show Expr where
     show X = "x"
     show Y = "y"
@@ -84,9 +85,25 @@ instance Show Function where
 
 
 
+instance Show a => Show (Tree a) where
+    show tree = draw 1 "\n" tree
+        where
+        draw _ _ Empty = "Empty"
+        draw _ _ (Leaf n) = "Leaf " ++ show n
+        draw count indent (Node n left right)
+            = "Node " ++ (show n) ++ indent' ++ draw count' indent' left
+            ++ indent' ++ draw count' indent' right
+            where
+            indent' = indent ++ "    "
+            count' = count + 1
+
+
+
+
+
 infixl 6 .+
 infixl 6 .-
-infixl 7 .*
+infixr 7 .*  -- NOTE made this right associative so tree would lean to the left (go right down)
 infixl 7 ./
 infixl 8 .^
 
@@ -115,7 +132,7 @@ TODO get infinite decimal to fraction converter.
 -}
 
 
-{-mkTree :: Expr -> Tree Expr
+mkTree :: Expr -> Tree Expr
 mkTree X = Leaf X
 mkTree Y = Leaf Y
 mkTree (Num n) = Leaf (Num n)
@@ -125,20 +142,7 @@ mkTree (Add e1 e2) = Node "+" (mkTree e1) (mkTree e2)
 mkTree (Sub e1 e2) = Node "-" (mkTree e1) (mkTree e2)
 mkTree (Mul e1 e2) = Node "*" (mkTree e1) (mkTree e2)
 mkTree (Div e1 e2) = Node "/" (mkTree e1) (mkTree e2)
-mkTree (Pow e1 e2) = Node "^" (mkTree e1) (mkTree e2)-}
-
-
-mkTree :: Expr -> Tree Expr
-mkTree X = Leaf X
-mkTree Y = Leaf Y
-mkTree (Num n) = Leaf (Num n)
-mkTree (F func) = Leaf (F func)
-mkTree (Neg e) = Node Empty "-" (mkTree e)
-mkTree (Add e1 e2) = Node (mkTree e1) "+" (mkTree e2)
-mkTree (Sub e1 e2) = Node (mkTree e1) "-" (mkTree e2)
-mkTree (Mul e1 e2) = Node (mkTree e1) "*" (mkTree e2)
-mkTree (Div e1 e2) = Node (mkTree e1) "/" (mkTree e2)
-mkTree (Pow e1 e2) = Node (mkTree e1) "^" (mkTree e2)
+mkTree (Pow e1 e2) = Node "^" (mkTree e1) (mkTree e2)
 
 
 --- testing that mkTree and expr are inverses of each other.
@@ -153,16 +157,16 @@ getExpr (Node "^" left right) = Pow (getExpr left) (getExpr right)
 
 
 
-percolate :: Tree Expr -> Tree Expr
-percolate (Node "-" Empty (Leaf (Num m))) = Leaf (Num (-m)) -- neg
-percolate (Node "+" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n + m))  -- add
-percolate (Node "-" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n - m))
-percolate (Node "*" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n * m))
---percolate (Node "/" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n / m))
-percolate (Node "^" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n ^ m))
+percolate :: Tree Expr -> Expr
+percolate (Node "-" Empty (Leaf (Num m))) =  (Num (-m)) -- neg
+percolate (Node "+" (Leaf (Num n)) (Leaf (Num m))) =  (Num (n + m))  -- add
+percolate (Node "-" (Leaf (Num n)) (Leaf (Num m))) =  (Num (n - m))
+percolate (Node "*" (Leaf (Num n)) (Leaf (Num m))) =  (Num (n * m))
+percolate (Node "/" (Leaf (Num n)) (Leaf (Num m))) =  (Num (n `div` m)) -- TODO make fraction
+percolate (Node "^" (Leaf (Num n)) (Leaf (Num m))) =  (Num (n ^ m))
 
 -- if we found a constant, percolate the rest, if they exist...
---percolate (Node "*" (Leaf (Num num)) right) = perc (num *) right
+percolate (Node "*" (Leaf (Num num)) right) = Num (perc (num *) right)
 
 
 -- assume no constants in the right subtree, just on the left, always, assume we have
@@ -175,6 +179,8 @@ perc f (Node "*" (Leaf varOrFunc) (Leaf (Num m))) = f m
 perc f (Node "*" (Leaf varOrFunc1) (Leaf varOrFunc2)) = f 1
 perc f (Node "*" (Leaf varOrFunc) right) = perc f right
 perc f (Node "*" n1@(Node _ _ _) n2@(Node _ _ _)) = perc f n1 + perc f n2
+perc f (Node "+" (Leaf (Num n)) (Leaf (Num m))) = n + m
+perc f (Node "-" (Leaf (Num n)) (Leaf (Num m))) = n - m
 perc f (Node _ _ _) = f 1
 -- TODO make helper function to count number of "/" so we know whether to divide or multiply
 -- the constants. So if odd "/" then divide else multiply.
@@ -310,17 +316,3 @@ arbTree n = frequency [(1, return Empty),
                        (3, liftM Leaf arbitrary),
                        (4, liftM3 Node arbitrary (arbTree (n `div` 2))
                                                  (arbTree (n `div` 2)) )]
-
-
-draw :: Show a => Tree a -> IO()
-draw tree = putStrLn $ drw 1 "\n" tree
-    where
-    drw count indent Empty = "Empty"
-    drw count indent (Leaf n) = "Leaf " ++ show n
-    -- draw count indent (Node n Nil Nil) = "Leaf " ++ show n
-    drw count indent (Node n left right)
-        = "Node " ++ (show n) ++ indent' ++ drw count' indent' left
-                              ++ indent' ++ drw count' indent' right
-        where
-        indent' = indent ++ "    "
-        count' = count + 1
