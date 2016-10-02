@@ -5,6 +5,8 @@ import Test.QuickCheck.Checkers
 import Test.QuickCheck.Classes
 import Control.Monad
 import Data.Char
+import Numeric
+import Data.Ratio
 
 -- data Variable = Ω | X -- | ω | Φ | χ | γ | α | β | θ
 
@@ -22,6 +24,7 @@ data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
 
 data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq, Show)
 
+a = fst . head $ readFloat "0.75" :: Rational
 
 instance Show Expr where
     show X = "x"
@@ -105,6 +108,24 @@ getExpr (Node "^" left right) = Pow (getExpr left) (getExpr right)
 
 
 
+percolate :: Tree Expr -> Tree Expr
+percolate (Node "-" Empty (Leaf (Num m))) = Leaf (Num (-m)) -- neg
+percolate (Node "+" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n + m))  -- add
+percolate (Node "-" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n - m))
+percolate (Node "*" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n * m))
+--percolate (Node "/" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n / m))
+percolate (Node "^" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n ^ m))
+
+percolate (Node "*" (Leaf (Num num)) right) = perc (num *) right
+
+
+-- assume no constants in the right subtree, just on the left, always, assume we have
+-- pass this tree into the rearrange const function
+perc :: (Int -> Int) -> Tree Expr -> Tree Expr
+perc f (Node "*" (Leaf X) right) = perc f right
+perc f (Node "*" (Leaf (Num n)) right) = perc ((f n) *) right
+
+{-
 
 -- note yields in order results
 foldrIn :: (a -> b -> b) -> b -> Tree a -> b
@@ -134,6 +155,8 @@ foldrPre f acc (Node n left right) = foldrPre f (foldrPre f (f n acc) left) righ
 foldlPre :: (b -> a -> b) -> b -> Tree a -> b
 foldlPre _ acc Nil = acc
 foldlPre f acc (Node n left right) = foldlPre f (foldlPre f (f acc n) left) right
+-}
+
 
 {-
 
