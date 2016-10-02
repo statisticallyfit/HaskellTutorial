@@ -22,9 +22,38 @@ data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
     | Pow Expr Expr | Neg Expr | Num Int  {-Var Expr-} | X | Y | F Function
     deriving (Eq)
 
-data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq, Show)
+data Tree a = Empty | Leaf a | Node (Tree a) String (Tree a) deriving (Eq, Show)
 
 a = fst . head $ readFloat "0.75" :: Rational
+
+{-
+printWordyExpr :: Expr -> String
+printWordyExpr X = "x"
+printWordyExpr Y = "y"
+printWordyExpr (F func) = show func
+printWordyExpr (Add e1 e2) = "Add (" ++ printWordyExpr e1 ++ ") (" ++ printWordyExpr e2 ++ ") "
+printWordyExpr (Sub e1 e2) = "Sub (" ++ printWordyExpr e1 ++ ") (" ++ printWordyExpr e2 ++ ") "
+printWordyExpr (Mul e1 e2) = "Mul (" ++ printWordyExpr e1 ++ ") (" ++ printWordyExpr e2 ++ ") "
+printWordyExpr (Div e1 e2) = "Div (" ++ printWordyExpr e1 ++ ") (" ++ printWordyExpr e2 ++ ") "
+printWordyExpr (Pow e1 e2) = "Pow (" ++ printWordyExpr e1 ++ ") (" ++ printWordyExpr e2 ++ ") "
+printWordyExpr (Neg e) = "Neg (" ++ printWordyExpr e1 ++ ") "
+printWordyExpr (Num n) = "Num " ++ show n
+
+instance Show Function where
+    show (Sin e) = "sin(" ++ printWordyExpr e ++ ")"
+    show (Cos e) = "cos(" ++ printWordyExpr e ++ ")"
+    show (Tan e) = "tan(" ++ printWordyExpr e ++ ")"
+    show (Csc e) = "csc(" ++ printWordyExpr e ++ ")"
+    show (Sec e) = "sec(" ++ printWordyExpr e ++ ")"
+    show (Cot e) = "cot(" ++ printWordyExpr e ++ ")"
+    show (Arcsin e) = "arcsin(" ++ printWordyExpr e ++ ")"
+    show (Arccos e) = "arccos(" ++ printWordyExpr e ++ ")"
+    show (Arctan e) = "arctan(" ++ printWordyExpr e ++ ")"
+    show (Arccsc e) = "arccsc(" ++ printWordyExpr e ++ ")"
+    show (Arcsec e) = "arcsec(" ++ printWordyExpr e ++ ")"
+    show (Arccot e) = "arccot(" ++ printWordyExpr e ++ ")"-}
+
+
 
 instance Show Expr where
     show X = "x"
@@ -37,6 +66,7 @@ instance Show Expr where
     show (Pow e1 e2) = show e1 ++ "^" ++ show e2
     show (Neg e) = "-(" ++ show e ++ ")"
     show (Num n) = show n
+
 
 instance Show Function where
     show (Sin e) = "sin(" ++ show e ++ ")"
@@ -51,6 +81,7 @@ instance Show Function where
     show (Arccsc e) = "arccsc(" ++ show e ++ ")"
     show (Arcsec e) = "arcsec(" ++ show e ++ ")"
     show (Arccot e) = "arccot(" ++ show e ++ ")"
+
 
 
 infixl 6 .+
@@ -77,13 +108,14 @@ e5 = Neg (Num(4) .* X .+ Num(2) .* Y)
 
 {-
 NOTE:
-be able to fold over tree and simplify constants but also remember order that they
+TODO be able to fold over tree and simplify constants but also remember order that they
 were in the tree!
 Then remember also where they go at the end!
+TODO get infinite decimal to fraction converter.
 -}
 
 
-mkTree :: Expr -> Tree Expr
+{-mkTree :: Expr -> Tree Expr
 mkTree X = Leaf X
 mkTree Y = Leaf Y
 mkTree (Num n) = Leaf (Num n)
@@ -93,7 +125,20 @@ mkTree (Add e1 e2) = Node "+" (mkTree e1) (mkTree e2)
 mkTree (Sub e1 e2) = Node "-" (mkTree e1) (mkTree e2)
 mkTree (Mul e1 e2) = Node "*" (mkTree e1) (mkTree e2)
 mkTree (Div e1 e2) = Node "/" (mkTree e1) (mkTree e2)
-mkTree (Pow e1 e2) = Node "^" (mkTree e1) (mkTree e2)
+mkTree (Pow e1 e2) = Node "^" (mkTree e1) (mkTree e2)-}
+
+
+mkTree :: Expr -> Tree Expr
+mkTree X = Leaf X
+mkTree Y = Leaf Y
+mkTree (Num n) = Leaf (Num n)
+mkTree (F func) = Leaf (F func)
+mkTree (Neg e) = Node Empty "-" (mkTree e)
+mkTree (Add e1 e2) = Node (mkTree e1) "+" (mkTree e2)
+mkTree (Sub e1 e2) = Node (mkTree e1) "-" (mkTree e2)
+mkTree (Mul e1 e2) = Node (mkTree e1) "*" (mkTree e2)
+mkTree (Div e1 e2) = Node (mkTree e1) "/" (mkTree e2)
+mkTree (Pow e1 e2) = Node (mkTree e1) "^" (mkTree e2)
 
 
 --- testing that mkTree and expr are inverses of each other.
@@ -116,14 +161,24 @@ percolate (Node "*" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n * m))
 --percolate (Node "/" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n / m))
 percolate (Node "^" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n ^ m))
 
-percolate (Node "*" (Leaf (Num num)) right) = perc (num *) right
+-- if we found a constant, percolate the rest, if they exist...
+--percolate (Node "*" (Leaf (Num num)) right) = perc (num *) right
 
 
 -- assume no constants in the right subtree, just on the left, always, assume we have
--- pass this tree into the rearrange const function
-perc :: (Int -> Int) -> Tree Expr -> Tree Expr
-perc f (Node "*" (Leaf X) right) = perc f right
+-- already passed this tree into the rearrange const function
+perc :: (Int -> Int) -> Tree Expr -> Int
+perc f (Node "*" (Leaf (Num n)) (Leaf (Num m))) = ((f n) * m)
+perc f (Node "*" (Leaf (Num n)) (Leaf varOrFunc)) = f n
 perc f (Node "*" (Leaf (Num n)) right) = perc ((f n) *) right
+perc f (Node "*" (Leaf varOrFunc) (Leaf (Num m))) = f m
+perc f (Node "*" (Leaf varOrFunc1) (Leaf varOrFunc2)) = f 1
+perc f (Node "*" (Leaf varOrFunc) right) = perc f right
+perc f (Node "*" n1@(Node _ _ _) n2@(Node _ _ _)) = perc f n1 + perc f n2
+perc f (Node _ _ _) = f 1
+-- TODO make helper function to count number of "/" so we know whether to divide or multiply
+-- the constants. So if odd "/" then divide else multiply.
+
 
 {-
 
