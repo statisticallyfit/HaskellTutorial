@@ -8,8 +8,6 @@ import Data.Char
 import Numeric
 import Data.Maybe
 
--- data Variable = Ω | X -- | ω | Φ | χ | γ | α | β | θ
-
 
 data Function
     = Sin Expr | Cos Expr | Tan Expr |
@@ -20,44 +18,14 @@ data Function
     deriving (Eq)
 
 
--- constructor color before: ADF8FA
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
     | Pow Expr Expr | Neg Expr | Num Int  {-Var Expr-} | X | Y | F Function
     deriving (Eq)
 
 data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq)
 
-a = fst . head $ readFloat "0.75" :: Rational
-{-
-printWordyExpr :: Expr -> String
-printWordyExpr X = "x"
-printWordyExpr Y = "y"
-printWordyExpr (F func) = show func
-printWordyExpr (Add e1 e2) = "Add (" ++ printWordyExpr e1 ++ ") (" ++ printWordyExpr e2 ++ ") "
-printWordyExpr (Sub e1 e2) = "Sub (" ++ printWordyExpr e1 ++ ") (" ++ printWordyExpr e2 ++ ") "
-printWordyExpr (Mul e1 e2) = "Mul (" ++ printWordyExpr e1 ++ ") (" ++ printWordyExpr e2 ++ ") "
-printWordyExpr (Div e1 e2) = "Div (" ++ printWordyExpr e1 ++ ") (" ++ printWordyExpr e2 ++ ") "
-printWordyExpr (Pow e1 e2) = "Pow (" ++ printWordyExpr e1 ++ ") (" ++ printWordyExpr e2 ++ ") "
-printWordyExpr (Neg e) = "Neg (" ++ printWordyExpr e1 ++ ") "
-printWordyExpr (Num n) = "Num " ++ show n
-
-instance Show Function where
-    show (Sin e) = "sin(" ++ printWordyExpr e ++ ")"
-    show (Cos e) = "cos(" ++ printWordyExpr e ++ ")"
-    show (Tan e) = "tan(" ++ printWordyExpr e ++ ")"
-    show (Csc e) = "csc(" ++ printWordyExpr e ++ ")"
-    show (Sec e) = "sec(" ++ printWordyExpr e ++ ")"
-    show (Cot e) = "cot(" ++ printWordyExpr e ++ ")"
-    show (Arcsin e) = "arcsin(" ++ printWordyExpr e ++ ")"
-    show (Arccos e) = "arccos(" ++ printWordyExpr e ++ ")"
-    show (Arctan e) = "arctan(" ++ printWordyExpr e ++ ")"
-    show (Arccsc e) = "arccsc(" ++ printWordyExpr e ++ ")"
-    show (Arcsec e) = "arcsec(" ++ printWordyExpr e ++ ")"
-    show (Arccot e) = "arccot(" ++ printWordyExpr e ++ ")"-}
-
-
-
-
+-- TODO for fractional int dividing
+-- a = fst . head $ readFloat "0.75" :: Rational
 
 
 instance Show Expr where
@@ -128,6 +96,8 @@ e2 = e1 .+ Num(2) .* X .+ Num(7) .* X
 e3 = Num(4) .* X .+ Num(3) .* X .^ Num(5) .- (F (Sin (Num(3) .+ X)))
 e4 = Neg(F (Sin X)) .* Neg(Num(2))
 e5 = Neg (Num(4) .* X .+ Num(2) .* Y)
+-- TODO test percolate minus cases
+e6 = Node "-" (Node "-" (Leaf $ Num 1) (Leaf $ Num 4)) (Leaf $ Num (-10))
 
 {-
 NOTE:
@@ -195,31 +165,112 @@ getExpr (Node "^" left right) = Pow (getExpr left) (getExpr right)
 -- where the first constant was located (now marked with Empty)
 -- So we are shifting the tree upwards.
 
-percolate :: Tree Expr -> Tree Expr
-percolate (Node "-" Empty (Leaf (Num m))) = Leaf (Num (-m)) -- neg
-percolate (Node "+" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n + m))  -- add
-percolate (Node "-" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n - m))
-percolate (Node "*" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n * m))
-percolate (Node "/" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n `div` m)) -- TODO make fraction
-percolate (Node "^" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n ^ m))
-
 -- if we found a constant, percolate the rest, if they exist...
-percolate (Node "*" (Leaf (Num num)) right) = Node "*" Empty (perc (num *) right)
+percolate :: Tree Expr -> Tree Expr
+percolate (Node op Empty right) = percolate right
+percolate (Node op left Empty) = percolate left
+percolate (Node "+" left right) = Node "+" (perc (0 +) left) (perc (0 +) right)
+percolate (Node "-" left right) = Node "-" (perc gSub left) (perc gSub right)
+    where gSub = \x -> x - 0
+percolate (Node "*" left right) = Node "*" (perc (1 *) left) (perc (1 *) right)
+percolate (Node "/" left right) = Node "/" (perc gDiv left) (perc gDiv right)
+    where gDiv = \x -> x `div` 1
+percolate (Node "^" left right) = Node "^" (perc gPow left) (perc gPow  right)
+    where gPow = \x -> x ^ 1
+{-
+percolate (Node "+" (Leaf (Num n)) (Leaf (Num m))) = Leaf $ Num $ n + m
+percolate (Node "+" (Leaf (Num n)) right) = Node "+" Empty (perc (n +) right)
+percolate (Node "+" left (Leaf (Num n))) = Node "+" (perc (n +) left) Empty
+percolate (Node "+" leaf@(Leaf varOrFunc) right) = Node "+" leaf (perc id right)
+percolate (Node "+" left right) = Node "+" (percolate left) (percolate right)
+
+percolate (Node "-" (Leaf (Num n)) (Leaf (Num m))) = Leaf $ Num $ n - m
+percolate (Node "-" (Leaf (Num n)) right) = Node "-" Empty (perc (n -) right)
+percolate (Node "-" left (Leaf (Num n))) = Node "-" Empty (perc (\x -> x - n) left)
+percolate (Node "-" leaf@(Leaf varOrFunc) right) = Node "+" leaf (perc id right)
+percolate (Node "-" left right) = Node "-" (percolate left) (percolate right)
+
+percolate (Node "*" (Leaf (Num n)) (Leaf (Num m))) = Leaf $ Num $ n * m
+percolate (Node "*" (Leaf (Num n)) right) = Node "*" Empty (perc (n *) right)
+percolate (Node "*" left (Leaf (Num n))) = Node "*" Empty (perc (n *) left)
+percolate (Node "*" leaf@(Leaf varOrFunc) right) = Node "*" leaf (perc id right)
+percolate (Node "*" left right) = Node "*" (percolate left) (percolate right)
+
+percolate (Node "/" (Leaf (Num n)) (Leaf (Num m))) = Leaf $ Num $ n `div` m
+percolate (Node "/" (Leaf (Num n)) right) = Node "/" Empty (perc (n `div`) right)
+percolate (Node "/" left (Leaf (Num n))) = Node "/" Empty (perc (\x -> x `div` n) left)
+percolate (Node "/" leaf@(Leaf varOrFunc) right) = Node "/" leaf (perc id right)
+percolate (Node "/" left right) = Node "/" (percolate left) (percolate right)
+
+percolate (Node "^" (Leaf (Num n)) (Leaf (Num m))) = Leaf $ Num $ n ^ m
+percolate (Node "^" (Leaf (Num n)) right) = Node "^" Empty (perc (n ^) right)
+percolate (Node "^" left (Leaf (Num n))) = Node "^" Empty (perc (\x -> x ^ n) left)
+percolate (Node "^" leaf@(Leaf varOrFunc) right) = Node "^" leaf (perc id right)
+percolate (Node "^" left right) = Node "^" (percolate left) (percolate right)
+-}
+
 
 
 -- assume no constants in the right subtree, just on the left, always, assume we have
 -- already passed this tree into the rearrange const function
 perc :: (Int -> Int) -> Tree Expr -> Tree Expr
-perc f (Node "*" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num ((f n) * m))
-perc f (Node "*" (Leaf (Num n)) leaf@(Leaf varOrFunc)) = Node "*" (Leaf (Num (f n))) leaf
-perc f (Node "*" (Leaf (Num n)) right) = Node "*" Empty (perc ((f n) *) right)
-perc f (Node "*" (Leaf varOrFunc) (Leaf (Num m))) = Leaf (Num (f m))
-perc f (Node "*" (Leaf varOrFunc1) (Leaf varOrFunc2)) = Leaf (Num (f 1))
-perc f (Node "*" leaf@(Leaf varOrFunc) right) = Node "*" leaf (perc f right)
---perc f (Node "*" n1@(Node _ _ _) n2@(Node _ _ _)) = perc f n1 + perc f n2 -- TODO join trees
+-- note: the num-num cases
 perc f (Node "+" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n + m))
 perc f (Node "-" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n - m))
-perc f (Node _ _ _) = Leaf (Num (f 1))
+perc f (Node "*" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num ((f n) * m))
+perc f (Node "/" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n `div` m)) -- TODO make fraction
+perc f (Node "^" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n ^ m))
+-- note: the var/func - var/func cases
+perc f (Node "+" (Leaf varOrFunc1) (Leaf varOrFunc2)) = Leaf (Num (f 0))
+perc f (Node "-" (Leaf varOrFunc1) (Leaf varOrFunc2)) = Leaf (Num (f 0)) -- TODO check if correct
+perc f (Node "*" (Leaf varOrFunc1) (Leaf varOrFunc2)) = Leaf (Num (f 1))
+perc f (Node "/" (Leaf varOrFunc1) (Leaf varOrFunc2)) = Leaf (Num (f 1)) -- TODO check correctness
+perc f (Node "+" (Leaf varOrFunc1) (Leaf varOrFunc2)) = Leaf (Num (f 1)) -- TODO check correctness
+
+-- note: the meat add cases
+perc f (Node "+" (Leaf (Num n)) leaf@(Leaf varOrFunc)) = Node "+" (Leaf (Num (f n))) leaf
+perc f (Node "+" leaf@(Leaf varOrFunc) (Leaf (Num m))) = Node "+" leaf (Leaf (Num (f m)))
+perc f (Node "+" (Leaf (Num n)) right) = Node "+" Empty (perc ((f n) +) right)
+perc f (Node "+" left (Leaf (Num m))) = Node "+" (perc (\x -> x + (f m)) left) Empty
+perc f (Node "+" leaf@(Leaf varOrFunc) right) = Node "+" leaf (perc f right)
+perc f (Node "+" left leaf@(Leaf varOrFunc)) = Node "+" (perc f left) leaf
+-- note: the meat sub cases
+perc f (Node "-" (Leaf (Num n)) leaf@(Leaf varOrFunc)) = Node "-" (Leaf (Num (f n))) leaf
+perc f (Node "-" leaf@(Leaf varOrFunc) (Leaf (Num m))) = Node "-" leaf (Leaf (Num (f m)))
+perc f (Node "-" (Leaf (Num n)) right) = Node "-" Empty (perc ((f n) -) right)
+perc f (Node "-" left (Leaf (Num m))) = Node "-" (perc (\x -> x - (f m)) left) Empty
+perc f (Node "-" leaf@(Leaf varOrFunc) right) = Node "-" leaf (perc f right)
+perc f (Node "-" left leaf@(Leaf varOrFunc)) = Node "-" (perc f left) leaf
+-- note: the meat mult cases
+perc f (Node "*" (Leaf (Num n)) leaf@(Leaf varOrFunc)) = Node "*" (Leaf (Num (f n))) leaf
+perc f (Node "*" leaf@(Leaf varOrFunc) (Leaf (Num m))) = Node "*" leaf (Leaf (Num (f m)))
+perc f (Node "*" (Leaf (Num n)) right) = Node "*" Empty (perc ((f n) *) right)
+perc f (Node "*" left (Leaf (Num m))) = Node "*" (perc ((f m) *) left) Empty
+perc f (Node "*" leaf@(Leaf varOrFunc) right) = Node "*" leaf (perc f right)
+perc f (Node "*" left leaf@(Leaf varOrFunc)) = Node "*" (perc f left) leaf
+-- note: the meat div cases
+perc f (Node "/" (Leaf (Num n)) leaf@(Leaf varOrFunc)) = Node "/" (Leaf (Num (f n))) leaf
+perc f (Node "/" leaf@(Leaf varOrFunc) (Leaf (Num m))) = Node "/" leaf (Leaf (Num (f m)))
+perc f (Node "/" (Leaf (Num n)) right) = Node "/" Empty (perc ((f n) `div`) right)
+perc f (Node "/" left (Leaf (Num m))) = Node "/" (perc (\x -> x `div` (f m)) left) Empty
+perc f (Node "/" leaf@(Leaf varOrFunc) right) = Node "/" leaf (perc f right)
+perc f (Node "/" left leaf@(Leaf varOrFunc)) = Node "/" (perc f left) leaf
+-- note: the meat pow cases
+perc f (Node "^" (Leaf (Num n)) leaf@(Leaf varOrFunc)) = Node "^" (Leaf (Num (f n))) leaf
+perc f (Node "^" leaf@(Leaf varOrFunc) (Leaf (Num m))) = Node "^" leaf (Leaf (Num (f m)))
+perc f (Node "^" (Leaf (Num n)) right) = Node "^" Empty (perc ((f n) ^) right)
+perc f (Node "^" left (Leaf (Num m))) = Node "^" (perc (\x -> x ^ (f m)) left) Empty
+perc f (Node "^" leaf@(Leaf varOrFunc) right) = Node "^" leaf (perc f right)
+perc f (Node "^" left leaf@(Leaf varOrFunc)) = Node "^" (perc f left) leaf
+
+perc f (Node op Empty right) = Node op Empty (perc f right)
+perc f (Node op left Empty) = Node op (perc f left) Empty
+-- note: the node-node cases
+perc f (Node op left right) = Node op (perc f left) (perc f right)
+
+-- perc f (Node _ _ _) = Leaf (Num (f 1))
+
+
 -- TODO make helper function to count number of "/" so we know whether to divide or multiply
 -- the constants. So if odd "/" then divide else multiply.
 
@@ -251,17 +302,12 @@ remove t node@(Node op left right)
     | t == right = remove t left
     | otherwise = Node op (remove t left) (remove t right)
 
-{-
-join :: Tree Expr -> Tree Expr -> Tree Expr
-join left right = Node "+" left right
--}
-
 
 
 -- assume should be no unsimplified constants like Node num num left (passed to perc first)
 -- assume no Empty , so has been passed to squash first.
-climb :: Tree Expr -> Tree Expr
-climb tree
+rearrangeConsts :: Tree Expr -> Tree Expr
+rearrangeConsts tree
     | isNothing constMaybe = Empty
     | otherwise = crownTree num tree''
     where tree' = remove Empty $ percolate tree
