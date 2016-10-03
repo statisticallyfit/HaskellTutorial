@@ -3,12 +3,13 @@ module ExprTreeOps where
 import Test.QuickCheck -- (Arbitrary, arbitrary, elements)
 import Test.QuickCheck.Checkers
 import Test.QuickCheck.Classes
-import Control.Monad
+import Control.Monad hiding (join)
 import Data.Char
 import Numeric
-import Data.Ratio
+import Data.Maybe
 
 -- data Variable = Ω | X -- | ω | Φ | χ | γ | α | β | θ
+
 
 data Function
     = Sin Expr | Cos Expr | Tan Expr |
@@ -16,6 +17,7 @@ data Function
       Arcsin Expr | Arccos Expr | Arctan Expr |
       Arccsc Expr | Arcsec Expr | Arccot Expr
     deriving (Eq)
+
 
 -- constructor color before: ADF8FA
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
@@ -25,7 +27,6 @@ data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
 data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq)
 
 a = fst . head $ readFloat "0.75" :: Rational
-
 {-
 printWordyExpr :: Expr -> String
 printWordyExpr X = "x"
@@ -56,17 +57,23 @@ instance Show Function where
 
 
 
+
+
 instance Show Expr where
     show X = "x"
     show Y = "y"
     show (F func) = show func
     show (Add e1 e2) = show e1 ++ " + " ++ show e2
     show (Sub e1 e2) = show e1 ++ " - " ++ show e2
+    show (Mul (Num n) (Mul (Num m) (Mul (Num p) rest)))
+        = "(" ++ show n ++ ")(" ++ show m ++ ")(" ++ show p ++ ")" ++ show rest
+    show (Mul (Num n) (Mul (Num m) rest)) = "(" ++ show n ++ ")(" ++ show m ++ ")" ++ show rest
     show (Mul e1 e2) = show e1 ++ show e2
     show (Div e1 e2) = show e1 ++ " / " ++ show e2
     show (Pow e1 e2) = show e1 ++ "^" ++ show e2
     show (Neg e) = "-(" ++ show e ++ ")"
     show (Num n) = show n
+
 
 
 instance Show Function where
@@ -84,7 +91,6 @@ instance Show Function where
     show (Arccot e) = "arccot(" ++ show e ++ ")"
 
 
-
 instance Show a => Show (Tree a) where
     show tree = draw 1 "\n" tree
         where
@@ -96,9 +102,6 @@ instance Show a => Show (Tree a) where
             where
             indent' = indent ++ "    "
             count' = count + 1
-
-
-
 
 
 infixl 6 .+
@@ -117,9 +120,9 @@ infixl 8 .^
 ---------------------------------------------------------------------------------------------
 
 e1 :: Expr
-e1 = Num(4) .* X .* (F (Sin X)) .* Num(3) .* (F (Cos X))
+e1 = Num(4) .* X .* (F (Sin X)) .* Num(2) .* (F (Cos X)) .* Num(5) .* Num(2) .* Num(3) .* (F (Tan X))
 e2 = e1 .+ Num(2) .* X .+ Num(7) .* X
-e3 = Num(4) .* X .+ Num(3) .* X .^ Num(5)
+e3 = Num(4) .* X .+ Num(3) .* X .^ Num(5) .- (F (Sin (Num(3) .+ X)))
 e4 = Neg(F (Sin X)) .* Neg(Num(2))
 e5 = Neg (Num(4) .* X .+ Num(2) .* Y)
 
@@ -131,12 +134,38 @@ Then remember also where they go at the end!
 TODO get infinite decimal to fraction converter.
 -}
 
+leftSub :: Tree a -> Tree a
+leftSub (Node _ left _) = left
+leftSub _ = error "leftSub"
+
+isLeaf :: Tree a -> Bool
+isLeaf (Leaf x) = True
+isLeaf _ = False
+
+leafVal :: Tree a -> a
+leafVal (Leaf x) = x
+leafVal _ = error "leafVal"
+
+isEmpty :: Tree a -> Bool
+isEmpty Empty = True
+isEmpty _ = False
+
+
+
+mapTree :: (Int -> Int) -> Tree Expr -> Tree Expr
+mapTree _ Empty = Empty
+mapTree f (Leaf (Num n)) = Leaf (Num (f n))
+mapTree f leaf@(Leaf l) = leaf -- TODO extend tree so that if f = +1 ans sinx then 1 (Node +) sin x
+mapTree f (Node n left right) = Node n (mapTree f left) (mapTree f right)
+
+
 
 mkTree :: Expr -> Tree Expr
 mkTree X = Leaf X
 mkTree Y = Leaf Y
 mkTree (Num n) = Leaf (Num n)
 mkTree (F func) = Leaf (F func)
+mkTree (Neg (Num n)) = Leaf (Num (-n))
 mkTree (Neg e) = Node "-" Empty (mkTree e)
 mkTree (Add e1 e2) = Node "+" (mkTree e1) (mkTree e2)
 mkTree (Sub e1 e2) = Node "-" (mkTree e1) (mkTree e2)
@@ -155,35 +184,104 @@ getExpr (Node "*" left right) = Mul (getExpr left) (getExpr right)
 getExpr (Node "/" left right) = Div (getExpr left) (getExpr right)
 getExpr (Node "^" left right) = Pow (getExpr left) (getExpr right)
 
+-- TODO idea:
+-- percolate constant multiplication result to the lowest
+-- last constant's position and return tree with the result
+-- constant in the last constant's position.
+-- THen, do separate function that moves the result back up to the
+-- where the first constant was located (now marked with Empty)
+-- So we are shifting the tree upwards.
 
-
-percolate :: Tree Expr -> Expr
-percolate (Node "-" Empty (Leaf (Num m))) =  (Num (-m)) -- neg
-percolate (Node "+" (Leaf (Num n)) (Leaf (Num m))) =  (Num (n + m))  -- add
-percolate (Node "-" (Leaf (Num n)) (Leaf (Num m))) =  (Num (n - m))
-percolate (Node "*" (Leaf (Num n)) (Leaf (Num m))) =  (Num (n * m))
-percolate (Node "/" (Leaf (Num n)) (Leaf (Num m))) =  (Num (n `div` m)) -- TODO make fraction
-percolate (Node "^" (Leaf (Num n)) (Leaf (Num m))) =  (Num (n ^ m))
+percolate :: Tree Expr -> Tree Expr
+percolate (Node "-" Empty (Leaf (Num m))) = Leaf (Num (-m)) -- neg
+percolate (Node "+" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n + m))  -- add
+percolate (Node "-" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n - m))
+percolate (Node "*" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n * m))
+percolate (Node "/" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n `div` m)) -- TODO make fraction
+percolate (Node "^" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n ^ m))
 
 -- if we found a constant, percolate the rest, if they exist...
-percolate (Node "*" (Leaf (Num num)) right) = Num (perc (num *) right)
+percolate (Node "*" (Leaf (Num num)) right) = Node "*" Empty (perc (num *) right)
 
 
 -- assume no constants in the right subtree, just on the left, always, assume we have
 -- already passed this tree into the rearrange const function
-perc :: (Int -> Int) -> Tree Expr -> Int
-perc f (Node "*" (Leaf (Num n)) (Leaf (Num m))) = ((f n) * m)
-perc f (Node "*" (Leaf (Num n)) (Leaf varOrFunc)) = f n
-perc f (Node "*" (Leaf (Num n)) right) = perc ((f n) *) right
-perc f (Node "*" (Leaf varOrFunc) (Leaf (Num m))) = f m
-perc f (Node "*" (Leaf varOrFunc1) (Leaf varOrFunc2)) = f 1
-perc f (Node "*" (Leaf varOrFunc) right) = perc f right
-perc f (Node "*" n1@(Node _ _ _) n2@(Node _ _ _)) = perc f n1 + perc f n2
-perc f (Node "+" (Leaf (Num n)) (Leaf (Num m))) = n + m
-perc f (Node "-" (Leaf (Num n)) (Leaf (Num m))) = n - m
-perc f (Node _ _ _) = f 1
+perc :: (Int -> Int) -> Tree Expr -> Tree Expr
+perc f (Node "*" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num ((f n) * m))
+perc f (Node "*" (Leaf (Num n)) leaf@(Leaf varOrFunc)) = Node "*" (Leaf (Num (f n))) leaf
+perc f (Node "*" (Leaf (Num n)) right) = Node "*" Empty (perc ((f n) *) right)
+perc f (Node "*" (Leaf varOrFunc) (Leaf (Num m))) = Leaf (Num (f m))
+perc f (Node "*" (Leaf varOrFunc1) (Leaf varOrFunc2)) = Leaf (Num (f 1))
+perc f (Node "*" leaf@(Leaf varOrFunc) right) = Node "*" leaf (perc f right)
+--perc f (Node "*" n1@(Node _ _ _) n2@(Node _ _ _)) = perc f n1 + perc f n2 -- TODO join trees
+perc f (Node "+" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n + m))
+perc f (Node "-" (Leaf (Num n)) (Leaf (Num m))) = Leaf (Num (n - m))
+perc f (Node _ _ _) = Leaf (Num (f 1))
 -- TODO make helper function to count number of "/" so we know whether to divide or multiply
 -- the constants. So if odd "/" then divide else multiply.
+
+
+
+
+-- NOTE this is awesomely cool function ! Test thoroughly to make sure not missing any cases. 
+remove :: Tree Expr -> Tree Expr -> Tree Expr
+remove t Empty = Empty
+remove t node@(Node _ l1@(Leaf x) l2@(Leaf y))
+    | l1 == t = l2
+    | l2 == t = l1
+    | otherwise = node
+remove t node@(Node op l1@(Leaf x) right)
+    | right == t = l1
+    | otherwise = Node op l1 (remove t right)
+remove t node@(Node op left l2@(Leaf y))
+    | left == t = l2
+    | otherwise = Node op (remove t left) l2
+remove t node@(Node op left right)
+    | t == left = {-remove t -}right
+    | t == right = {-remove t-} left
+    | otherwise = Node op (remove t left) (remove t right)
+
+
+-- note is auxiliary, not exported.
+-- postcondition: all elements on left are smaller than those on right.
+join :: Tree Expr -> Tree Expr -> Tree Expr
+join left right = Node "+" left right
+
+
+
+-- assume should be no unsimplified constants like Node num num left (passed to perc first)
+-- assume no Empty , so has been passed to squash first.
+climb :: Tree Expr -> Tree Expr
+climb tree
+    | isNothing constMaybe = Empty
+    | otherwise = crownTree num tree''
+    where tree' = remove Empty $ percolate tree
+          constMaybe = findConst tree'
+          num = fromJust constMaybe
+          tree'' = remove (Leaf (Num num)) tree'
+
+
+-- findConst returns the first constant we find and puts Empty in its place.
+-- (after percolate, it is at bottom)
+findConst :: Tree Expr -> Maybe Int
+findConst (Node "*" (Leaf (Num n)) leaf@(Leaf varOrFunc)) = Just n
+findConst (Node "*" (Leaf l1) (Leaf l2)) = Nothing
+findConst (Node "*" (Leaf l) right) = findConst right
+
+
+-- puts the constant given in the first available place (right under first node)
+crownTree :: Int -> Tree Expr -> Tree Expr
+crownTree n tree@(Node op left right) = Node op (Leaf (Num n)) tree
+
+
+-- makes tree shorter by removing given thing.
+{-
+squash :: Tree Expr -> Tree Expr
+squash node@(Node op (Leaf l1) (Leaf l2)) = node
+squash (Node op Empty leaf@(Leaf l)) = leaf
+squash (Node op Empty right) = squash right
+squash (Node op leaf@(Leaf l) right) = Node op leaf (squash right)
+-}
 
 
 {-
