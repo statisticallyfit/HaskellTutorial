@@ -15,7 +15,8 @@ data Function
     = Sin Expr | Cos Expr | Tan Expr |
       Csc Expr | Sec Expr | Cot Expr |
       Arcsin Expr | Arccos Expr | Arctan Expr |
-      Arccsc Expr | Arcsec Expr | Arccot Expr
+      Arccsc Expr | Arcsec Expr | Arccot Expr |
+      Ln Expr | E Expr | Log Expr Expr -- first expr is base
     deriving (Eq)
 
 
@@ -89,6 +90,8 @@ instance Show Function where
     show (Arccsc e) = "arccsc(" ++ show e ++ ")"
     show (Arcsec e) = "arcsec(" ++ show e ++ ")"
     show (Arccot e) = "arccot(" ++ show e ++ ")"
+    show (Ln e) = "ln(" ++ show e ++ ")"
+    show (Log b a) = "log" ++ show b ++ "(" ++ show a ++ ")"
 
 
 instance Show a => Show (Tree a) where
@@ -221,9 +224,16 @@ perc f (Node _ _ _) = Leaf (Num (f 1))
 -- the constants. So if odd "/" then divide else multiply.
 
 
+-- makes tree shorter by removing given thing.
+{-
+squash :: Tree Expr -> Tree Expr
+squash node@(Node op (Leaf l1) (Leaf l2)) = node
+squash (Node op Empty leaf@(Leaf l)) = leaf
+squash (Node op Empty right) = squash right
+squash (Node op leaf@(Leaf l) right) = Node op leaf (squash right)
+-}
 
-
--- NOTE this is awesomely cool function ! Test thoroughly to make sure not missing any cases. 
+-- NOTE this is awesomely cool function ! Test thoroughly to make sure not missing any cases.
 remove :: Tree Expr -> Tree Expr -> Tree Expr
 remove t Empty = Empty
 remove t node@(Node _ l1@(Leaf x) l2@(Leaf y))
@@ -237,15 +247,14 @@ remove t node@(Node op left l2@(Leaf y))
     | left == t = l2
     | otherwise = Node op (remove t left) l2
 remove t node@(Node op left right)
-    | t == left = {-remove t -}right
-    | t == right = {-remove t-} left
+    | t == left = remove t right
+    | t == right = remove t left
     | otherwise = Node op (remove t left) (remove t right)
 
-
--- note is auxiliary, not exported.
--- postcondition: all elements on left are smaller than those on right.
+{-
 join :: Tree Expr -> Tree Expr -> Tree Expr
 join left right = Node "+" left right
+-}
 
 
 
@@ -274,14 +283,7 @@ crownTree :: Int -> Tree Expr -> Tree Expr
 crownTree n tree@(Node op left right) = Node op (Leaf (Num n)) tree
 
 
--- makes tree shorter by removing given thing.
-{-
-squash :: Tree Expr -> Tree Expr
-squash node@(Node op (Leaf l1) (Leaf l2)) = node
-squash (Node op Empty leaf@(Leaf l)) = leaf
-squash (Node op Empty right) = squash right
-squash (Node op leaf@(Leaf l) right) = Node op leaf (squash right)
--}
+
 
 
 {-
