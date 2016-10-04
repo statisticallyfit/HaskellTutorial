@@ -227,6 +227,27 @@ perc f (Node "*" (Leaf varOrFunc1) (Leaf varOrFunc2)) = Leaf (Num (f 1))
 perc f (Node "/" (Leaf varOrFunc1) (Leaf varOrFunc2)) = Leaf (Num (f 1)) -- TODO check correctness
 perc f (Node "+" (Leaf varOrFunc1) (Leaf varOrFunc2)) = Leaf (Num (f 1)) -- TODO check correctness
 
+perc f (Node op (Leaf (Num n)) leaf@(Leaf varOrFunc)) = Node op (Leaf (Num (f n))) leaf
+perc f (Node op leaf@(Leaf varOrFunc) (Leaf (Num m))) = Node op leaf (Leaf (Num (f m)))
+perc f (Node op (Leaf (Num n)) right) = Node op Empty (perc (g n) right)
+perc f (Node op left (Leaf (Num m))) = Node op (perc (h m) left) Empty
+perc f (Node op leaf@(Leaf varOrFunc) right) = Node op leaf (perc f right)
+perc f (Node op left leaf@(Leaf varOrFunc)) = Node op (perc f left) leaf
+
+perc f (Node op Empty right) = Node op Empty (perc f right)
+perc f (Node op left Empty) = Node op (perc f left) Empty
+-- note: the node-node cases
+perc f (Node op left right) = Node op (perc f left) (perc f right)
+    where
+    tuple n = opFunc op f n
+    (g, h) = tuple n
+    opFunc op func n
+        | op == "+" = (((func n) +), (\x -> x + (func n)))
+        | op == "-" = (((func n) -), (\x -> x - (func n)))
+        | op == "*" = (((func n) *), (\x -> x * (func n)))
+        | op == "/" = (((func n) `div`), (\x -> x `div` (func n)))
+        | op == "^" = (((func n) ^), (\x -> x ^ (func n)))
+{-
 -- note: the meat add cases
 perc f (Node "+" (Leaf (Num n)) leaf@(Leaf varOrFunc)) = Node "+" (Leaf (Num (f n))) leaf
 perc f (Node "+" leaf@(Leaf varOrFunc) (Leaf (Num m))) = Node "+" leaf (Leaf (Num (f m)))
@@ -262,14 +283,21 @@ perc f (Node "^" (Leaf (Num n)) right) = Node "^" Empty (perc ((f n) ^) right)
 perc f (Node "^" left (Leaf (Num m))) = Node "^" (perc (\x -> x ^ (f m)) left) Empty
 perc f (Node "^" leaf@(Leaf varOrFunc) right) = Node "^" leaf (perc f right)
 perc f (Node "^" left leaf@(Leaf varOrFunc)) = Node "^" (perc f left) leaf
+-}
 
-perc f (Node op Empty right) = Node op Empty (perc f right)
-perc f (Node op left Empty) = Node op (perc f left) Empty
--- note: the node-node cases
-perc f (Node op left right) = Node op (perc f left) (perc f right)
 
 -- perc f (Node _ _ _) = Leaf (Num (f 1))
 
+
+-- TODO idea: make array holding coefficients of powers
+-- so that Array (2, 0, 1, 5) means 5x^3 + x^2 + 2
+-- then we can add/sub/mul/div/pow.
+-- Once we simplify the expression this way (single elements only)
+-- then we can use the tree to simplify things like x^2 * sin^3(2x)
+-- by providing a ~= operator that is true if the structure is the same.
+
+-- TODO also make another operator that is true for (3)(X) == (X)(3)
+-- and 3 + x == x + 3
 
 -- TODO make helper function to count number of "/" so we know whether to divide or multiply
 -- the constants. So if odd "/" then divide else multiply.
