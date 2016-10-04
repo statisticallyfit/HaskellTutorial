@@ -157,6 +157,22 @@ Then remember also where they go at the end!
 TODO get infinite decimal to fraction converter.
 -}
 
+-- TODO idea: make array holding coefficients of powers
+-- so that Array (2, 0, 1, 5) means 5x^3 + x^2 + 2
+-- then we can add/sub/mul/div/pow.
+-- Once we simplify the expression this way (single elements only)
+-- then we can use the tree to simplify things like x^2 * sin^3(2x)
+-- by providing a ~= operator that is true if the structure is the same.
+
+-- TODO also make another operator that is true for (3)(X) == (X)(3)
+-- and 3 + x == x + 3
+
+-- TODO make helper function to count number of "/" so we know whether to divide or multiply
+-- the constants. So if odd "/" then divide else multiply.
+
+
+-- TODO fix percolation so that we don't get order of operations wrong. 
+
 leftSub :: Tree a -> Tree a
 leftSub (Node _ left _) = left
 leftSub _ = error "leftSub"
@@ -224,8 +240,8 @@ getExpr (Node "^" left right) = Pow (getExpr left) (getExpr right)
 
 
 
--- note: moves product/sum of constants to lowest level then. Earlier constants
--- are replaced by Empty.
+-- note: moves product/sum of constants to last level that a constant was present. Earlier constants
+-- are replaced by Empty. Other node sor functions or variables are kept.
 percolate :: Tree Expr -> Tree Expr
 percolate (Node op (Leaf s) Empty) = Leaf s
 percolate node@(Node op Empty (Leaf s)) = node
@@ -247,7 +263,6 @@ percolate (Node op left right)
 -- already passed this tree into the rearrange const function
 -- TODO need to fix this to avoid cases where op is lower precedence than function
 -- example: op = + and we plus over leaf connected to a "*"
-
 perc :: (Int -> Int) -> Tree Expr -> Tree Expr
 perc f (Node op (Leaf (Num n)) (Leaf (Num m)))
     | op == "+" = Leaf (Num ((f n) + m))
@@ -283,20 +298,6 @@ opFunc op f n
     | op == "*" = (((f n) *), (\x -> x * (f n)))
     | op == "/" = (((f n) `div`), (\x -> x `div` (f n)))
     | op == "^" = (((f n) ^), (\x -> x ^ (f n)))
-
-
--- TODO idea: make array holding coefficients of powers
--- so that Array (2, 0, 1, 5) means 5x^3 + x^2 + 2
--- then we can add/sub/mul/div/pow.
--- Once we simplify the expression this way (single elements only)
--- then we can use the tree to simplify things like x^2 * sin^3(2x)
--- by providing a ~= operator that is true if the structure is the same.
-
--- TODO also make another operator that is true for (3)(X) == (X)(3)
--- and 3 + x == x + 3
-
--- TODO make helper function to count number of "/" so we know whether to divide or multiply
--- the constants. So if odd "/" then divide else multiply.
 
 
 -- makes tree shorter by removing given thing.
