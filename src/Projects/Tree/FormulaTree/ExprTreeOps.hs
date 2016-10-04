@@ -225,12 +225,14 @@ perc f (Node "+" (Leaf varOrFunc1) (Leaf varOrFunc2)) = Leaf (Num (f 0))
 perc f (Node "-" (Leaf varOrFunc1) (Leaf varOrFunc2)) = Leaf (Num (f 0)) -- TODO check if correct
 perc f (Node "*" (Leaf varOrFunc1) (Leaf varOrFunc2)) = Leaf (Num (f 1))
 perc f (Node "/" (Leaf varOrFunc1) (Leaf varOrFunc2)) = Leaf (Num (f 1)) -- TODO check correctness
-perc f (Node "+" (Leaf varOrFunc1) (Leaf varOrFunc2)) = Leaf (Num (f 1)) -- TODO check correctness
+perc f (Node "^" (Leaf varOrFunc1) (Leaf varOrFunc2)) = Leaf (Num (f 1)) -- TODO check correctness
 
 perc f (Node op (Leaf (Num n)) leaf@(Leaf varOrFunc)) = Node op (Leaf (Num (f n))) leaf
 perc f (Node op leaf@(Leaf varOrFunc) (Leaf (Num m))) = Node op leaf (Leaf (Num (f m)))
-perc f (Node op (Leaf (Num n)) right) = Node op Empty (perc (g n) right)
-perc f (Node op left (Leaf (Num m))) = Node op (perc (h m) left) Empty
+perc f (Node op (Leaf (Num n)) right) = Node op Empty (perc g right)
+    where (g, _) = opFunc op f n
+perc f (Node op left (Leaf (Num m))) = Node op (perc h left) Empty
+    where (_, h) = opFunc op f m
 perc f (Node op leaf@(Leaf varOrFunc) right) = Node op leaf (perc f right)
 perc f (Node op left leaf@(Leaf varOrFunc)) = Node op (perc f left) leaf
 
@@ -238,15 +240,14 @@ perc f (Node op Empty right) = Node op Empty (perc f right)
 perc f (Node op left Empty) = Node op (perc f left) Empty
 -- note: the node-node cases
 perc f (Node op left right) = Node op (perc f left) (perc f right)
-    where
-    tuple n = opFunc op f n
-    (g, h) = tuple n
-    opFunc op func n
-        | op == "+" = (((func n) +), (\x -> x + (func n)))
-        | op == "-" = (((func n) -), (\x -> x - (func n)))
-        | op == "*" = (((func n) *), (\x -> x * (func n)))
-        | op == "/" = (((func n) `div`), (\x -> x `div` (func n)))
-        | op == "^" = (((func n) ^), (\x -> x ^ (func n)))
+
+opFunc op func nn
+    | op == "+" = (((func nn) +), (\x -> x + (func nn)))
+    | op == "-" = (((func nn) -), (\x -> x - (func nn)))
+    | op == "*" = (((func nn) *), (\x -> x * (func nn)))
+    | op == "/" = (((func nn) `div`), (\x -> x `div` (func nn)))
+    | op == "^" = (((func nn) ^), (\x -> x ^ (func nn)))
+
 {-
 -- note: the meat add cases
 perc f (Node "+" (Leaf (Num n)) leaf@(Leaf varOrFunc)) = Node "+" (Leaf (Num (f n))) leaf
