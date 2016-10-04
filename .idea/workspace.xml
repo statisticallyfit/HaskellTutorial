@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bc679e25-6068-417c-8b02-1d7896297961" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/TrashExprTreeOps.hs" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/ExprTreeOps.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/ExprTreeOps.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
@@ -38,8 +39,18 @@
       <file leaf-file-name="ExprTreeOps.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/ExprTreeOps.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.53780067">
-              <caret line="305" column="0" selection-start-line="305" selection-start-column="0" selection-end-line="305" selection-end-column="0" />
+            <state vertical-scroll-proportion="2.492683">
+              <caret line="411" column="0" selection-start-line="411" selection-start-column="0" selection-end-line="411" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="TrashExprTreeOps.hs" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/TrashExprTreeOps.hs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="134" column="0" selection-start-line="134" selection-start-column="0" selection-end-line="134" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -106,6 +117,7 @@
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/TrySimplify.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/BinarySearchTree/BSTOps.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Test.hs" />
+        <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/TrashExprTreeOps.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/ExprTreeOps.hs" />
       </list>
     </option>
@@ -820,12 +832,12 @@
       <workItem from="1475303212787" duration="13783000" />
       <workItem from="1475388435733" duration="11505000" />
       <workItem from="1475473570744" duration="20981000" />
-      <workItem from="1475555341212" duration="19429000" />
+      <workItem from="1475555341212" duration="20920000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="119914000" />
+    <option name="totallyTimeSpent" value="121405000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="52" width="976" height="749" extended-state="0" />
@@ -1076,10 +1088,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/TrashExprTreeOps.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="134" column="0" selection-start-line="134" selection-start-column="0" selection-end-line="134" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/ExprTreeOps.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.53780067">
-          <caret line="305" column="0" selection-start-line="305" selection-start-column="0" selection-end-line="305" selection-end-column="0" />
+        <state vertical-scroll-proportion="2.492683">
+          <caret line="411" column="0" selection-start-line="411" selection-start-column="0" selection-end-line="411" selection-end-column="0" />
           <folding />
         </state>
       </provider>
