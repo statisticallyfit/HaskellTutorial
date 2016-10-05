@@ -38,6 +38,7 @@ data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq)
 -- TODO for fractional int dividing
 -- a = fst . head $ readFloat "0.75" :: Rational
 
+
 instance Show Expr where
     show X = "x"
     show Y = "y"
@@ -53,6 +54,7 @@ instance Show Expr where
     show (Pow e1 e2) = show e1 ++ "^" ++ show e2
     show (Neg e) = "-(" ++ show e ++ ")"
     show (Num n) = show n
+
 
 instance Show Function where
     show (Sin e) = "sin(" ++ show e ++ ")"
@@ -185,53 +187,77 @@ TODO get infinite decimal to fraction converter.
 -- Once we simplify the expression this way (single elements only)
 -- then we can use the tree to simplify things like x^2 * sin^3(2x)
 -- by providing a ~= operator that is true if the structure is the same.
+
 {-
-data Function
-    = Sin Expr | Cos Expr | Tan Expr |
-      Csc Expr | Sec Expr | Cot Expr |
-      Arcsin Expr | Arccos Expr | Arctan Expr |
-      Arccsc Expr | Arcsec Expr | Arccot Expr |
-      Ln Expr | E Expr | Log Expr Expr -- first expr is base
-    deriving (Eq)
 
-
-data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
-    | Pow Expr Expr | Neg Expr | Num Int  -}
-{-Var Expr-}{-
- | X | Y | F Function
-    deriving (Eq)
--}
-
-{-exprHolder :: Expr -> ExprHolder
+exprHolder :: Expr -> ExprHolder
 exprHolder
 exprHolder (Add e1 e2) =
-exprHolder (Sub e1 e2) =-}
+exprHolder (Sub e1 e2) =
+-}
 
+-- note in cases like 4x + sin(3x) is just separates polynomials from trig and log so that we just
+-- simplify those.
+-- takes something like single expression 2sin(3x) + 4sin(3x) = 6sin(3x)
+-- TODO: fix holderToExpr to handle 2xsin(3x) things then update this one too.
+-- TODO help when given multiplication or division or powers. won't know how to parse
+-- into expression holder.
+-- IMPORTANT oh wait, i made multiplication left associative  so
+-- will the expression look like this (2) (xsin(3x)) so that it will work for this function?
+
+-- TODO correct to take exprholder (holds poly, trig..)
+-- TODO now to convert to expression, unzip, get rid of justa nd conver nothings to 0.
+
+addH :: [(Coeff, Exps, Expr)] -> [(Coeff, Exps, Expr)] -> Expr
+addH h1 h2 = map simpMaybe $ map add (zip h1' h2')
+    where
+    h1' = map numify h1
+    h2' = map numify h2
+    add (a@(c1,e1,x1),b@(c2,e2,x2)) =
+        if x1 == x2 then (Just (c1 .+ c2,e1,x1), Nothing)
+        else (Just a, Just b)
+    simpFirst (x,y,z) = (simplify x, y, z)
+    simpMaybe (a,b) =
+        if (isJust a && isNothing b) then (Just $ simpFirst $ fromJust a, Nothing)
+        else (a,b)
+
+list = map numify [(4,1,X), (3,1,X), (1,7,(Num 2) .* X .^ Num 5), (2,2,X),(1,1,X), (7,7,Num 7 .* X)]
+add (a@(c1,e1,x1),b@(c2,e2,x2)) = if x1 == x2 then (Just (c1 .+ c2,e1,x1), Nothing) else (Just a, Just b)
+hs = zip list list
+js = map add hs
+simp' (x,y,z) = (simplify x, y, z)
+ms = map (\(a, b) -> if (isJust a && isNothing b) then (Just $ simp' $ fromJust a, Nothing) else (a,b)) js
+--g (a@(c1,e1,x1), b@(c2,e2,x2)) = if (x1 == x2) then (c1 .+ c2,e1,x1) else (a,b)
+
+-- TODO make polynomials and trigs and other functions be raised to powers of functions
+-- not just constants (make the middle element in tuple to be an expression)
+-- While you're at it, make the first coeff an expression so that we can do xsin(x) + 2xsin(x)
+-- TODO return error if one of the tuples has patterns (1, 0, ..) because that yields a constant.
 -- NOTE rules:
 -- POlynomial: [1, 0, 2, 7, -4] represents 1 + x^2 + 7x^3 - 4x^4
 -- Trig: [(0,1), (1,1), (4,1), (1,1), (2,4), (3, 5)]
 --      represents (cos x + 4tan x + csc x + 2sec^4 x  + 3cot^5 x
 --      where x = any expression and note (0, 1) = 0 always and (1,0) gets error
-holderExpr :: ExprHolder -> [Expr]
-holderExpr (Polynomial ps) = reverse $ map simplify $ zipWith (.*) ps' (zipWith (.^) xs es )
+holderToExpr :: ExprHolder -> [Expr]
+holderToExpr (Polynomial ps) = reverse $ map simplify $ zipWith (.*) ps' (zipWith (.^) xs es )
     where xs = replicate (length ps) X
           es = map Num [0 .. (length ps - 1)]
           ps' = map Num ps
 -- TODO inside function is holder -- find way to deal with that.
-holderExpr (Trig ts) = map simplify $ latch (zip ts fs)
+holderToExpr (Trig ts) = map simplify $ latch (zip ts fs)
     where fs = map F [Sin X, Cos X, Tan X, Csc X, Sec X, Cot X]
-holderExpr (InvTrig ts) = map simplify $ latch (zip ts fs)
+holderToExpr (InvTrig ts) = map simplify $ latch (zip ts fs)
     where fs = map F [Arcsin X, Arccos X, Arctan X, Arccsc X, Arcsec X, Arccot X]
-holderExpr (Hyperbolic hs) = map simplify $ latch (zip hs fs)
+holderToExpr (Hyperbolic hs) = map simplify $ latch (zip hs fs)
     where fs = map F [Sinh X, Cosh X, Tanh X, Csch X, Sech X, Coth X]
-holderExpr (InvHyp hs) = map simplify $ latch  (zip hs fs)
+holderToExpr (InvHyp hs) = map simplify $ latch  (zip hs fs)
     where fs = map F [Arcsinh X, Arccosh X, Arctanh X, Arccsch X, Arcsech X, Arccoth X]
-holderExpr (Logarithmic ls) = map simplify $ latch (zip ls fs)
+holderToExpr (Logarithmic ls) = map simplify $ latch (zip ls fs)
     where fs = map F [E X, Ln X, Log X X]  -- TODO fix so we can have different args for log base and arg.
 
 
-latch zs = map (\((c,e,u), f) -> c .* (push u f) .^ e) (map numify zs)
-numify ((c,e,u), f) = ((Num c, Num e, u), f)
+latch zs = map (\((c,e,u), f) -> c .* (push u f) .^ e) (map (\((tup, f)) -> (numify tup, f)) zs)
+numify (c,e,u) = (Num c, Num e, u)
 
 
 -- TODO types wrong
@@ -254,6 +280,21 @@ push u (F (Arctan v)) = F $ Arctan u
 push u (F (Arccsc v)) = F $ Arccsc u
 push u (F (Arcsec v)) = F $ Arcsec u
 push u (F (Arccot v)) = F $ Arccot u
+push u (F (Sinh v)) = F $ Sinh u
+push u (F (Cosh v)) = F $ Cosh u
+push u (F (Tanh v)) = F $ Tanh u
+push u (F (Csch v)) = F $ Csch u
+push u (F (Sech v)) = F $ Sech u
+push u (F (Coth v)) = F $ Coth u
+push u (F (Arcsinh v)) = F $ Arcsinh u
+push u (F (Arccosh v)) = F $ Arccosh u
+push u (F (Arctanh v)) = F $ Arctanh u
+push u (F (Arccsch v)) = F $ Arccsch u
+push u (F (Arcsech v)) = F $ Arcsech u
+push u (F (Arccoth v)) = F $ Arccoth u
+push u (F (E v)) = F $ E u
+push u (F (Ln v)) = F $ Ln u
+push u (F (Log v1 v2)) = F $ Log u u
 
 
 simplify :: Expr -> Expr
@@ -272,9 +313,41 @@ simplify (F (Arctan e)) = F $ Arctan $ simplify e
 simplify (F (Arccsc e)) = F $ Arccsc $ simplify e
 simplify (F (Arcsec e)) = F $ Arcsec $ simplify e
 simplify (F (Arccot e)) = F $ Arccot $ simplify e
+simplify (F (Sinh e)) = F $ Sinh $ simplify e
+simplify (F (Cosh e)) = F $ Cosh $ simplify e
+simplify (F (Tanh e)) = F $ Tanh $ simplify e
+simplify (F (Csch e)) = F $ Csch $ simplify e
+simplify (F (Sech e)) = F $ Sech $ simplify e
+simplify (F (Coth e)) = F $ Coth $ simplify e
+simplify (F (Arcsinh e)) = F $ Arcsinh $ simplify e
+simplify (F (Arccosh e)) = F $ Arccosh $ simplify e
+simplify (F (Arctanh e)) = F $ Arctanh $ simplify e
+simplify (F (Arccsch e)) = F $ Arccsch $ simplify e
+simplify (F (Arcsech e)) = F $ Arcsech $ simplify e
+simplify (F (Arccoth e)) = F $ Arccoth $ simplify e
+simplify (F (E e)) = F $ E $ simplify e
+simplify (F (Ln e)) = F $ Ln $ simplify e
+simplify (F (Log e1 e2)) = F $ Log (simplify e1) (simplify e2)
+
+-- TODO may not need these cases once I do operations on expression holders of arrays.
+simplify (Add (Num n) (Num m)) = Num $ n + m
 simplify (Add (Mul (Num a) (Num b)) (Mul (Num c) (Num d))) = Num $ a * b + c + d
 simplify (Add (Mul (Num a) x) (Mul (Num b) y))
-    = if x == y then 
+    = if x == y then (Num (a + b) .* simplify x) else ((Num a) .* simplify x .+ (Num b) .* simplify y)
+simplify (Add (Mul (Num a) x) (Mul y (Num b))) = simplify ((Num a) .* x .+ (Num b) .* y)
+simplify (Add (Mul x (Num a)) (Mul (Num b) y)) = simplify ((Num a) .* x .+ (Num b) .* y)
+simplify (Add (Mul x (Num a)) (Mul y (Num b))) = simplify ((Num a) .* x .+ (Num b) .* y)
+simplify (Add x y) = if x == y then (Num 2 .* simplify x) else (simplify x .+ simplify y)
+
+simplify (Sub (Num n) (Num m)) = Num $ n - m
+simplify (Sub (Mul (Num a) (Num b)) (Mul (Num c) (Num d))) = Num $ a * b - c + d
+simplify (Sub (Mul (Num a) x) (Mul (Num b) y))
+    = if x == y then (Num (a - b) .* simplify x) else ((Num a) .* simplify x .- (Num b) .* simplify y)
+simplify (Sub (Mul (Num a) x) (Mul y (Num b))) = simplify ((Num a) .* x .- (Num b) .* y)
+simplify (Sub (Mul x (Num a)) (Mul (Num b) y)) = simplify ((Num a) .* x .- (Num b) .* y)
+simplify (Sub (Mul x (Num a)) (Mul y (Num b))) = simplify ((Num a) .* x .- (Num b) .* y)
+simplify (Sub x y) = if x == y then (Num 0) else (simplify x .- simplify y)
+
 simplify (Mul (Num 1) e2) = simplify e2
 simplify (Mul e1 (Num 1)) = simplify e1
 simplify (Mul (Num 0) e2) = Num 0
@@ -283,22 +356,25 @@ simplify (Mul (Num n) (Num m)) = Num $ n * m
 simplify (Mul (Neg u) (Neg v)) = simplify u .* simplify v
 simplify (Mul (Neg u) v) = Neg (simplify u .* simplify v)
 simplify (Mul u (Neg v)) = Neg (simplify u .* simplify v)
+simplify (Mul x y) = if x == y then simplify x .* (Num 2) else simplify x .* simplify y
+
 simplify (Div (Num 0) (Num 0)) = error "0/0 not possible"
+simplify (Div (Num n) (Num m)) = Num $ n `div` m
 simplify (Div (Num 0) e2) = Num 0
 simplify (Div e1 (Num 0)) = error "divide by zero!"
 simplify (Div e1 (Num 1)) = simplify e1
+simplify (Div x y) = if x == y then (Num 1) else simplify x ./ simplify y
+
+simplify (Pow (Num n) (Num m)) = Num $ n ^ m
 simplify (Pow e (Num 0)) = Num 1
 simplify (Pow (Num 0) e) = Num 0
 simplify (Pow (Num 1) e) = Num 1
-simplify (Pow e (Num 1)) = simplify e
+simplify (Pow e (Num 1)) = simplify e --- TODO do power rules next
+simplify (Pow x y) = simplify x .^ simplify y
+
 simplify (Neg (Num n)) = Num (-n)
 simplify (Neg (Neg e)) = simplify e
 simplify (Neg e) = Neg $ simplify e
-simplify (Add e1 e2) = simplify e1 .+ simplify e2
-simplify (Sub e1 e2) = simplify e1 .- simplify e2
-simplify (Mul e1 e2) = simplify e1 .* simplify e2
-simplify (Div e1 e2) = simplify e1 ./ simplify e2
-simplify (Pow e1 e2) = simplify e1 .^ simplify e2
 
 
 
