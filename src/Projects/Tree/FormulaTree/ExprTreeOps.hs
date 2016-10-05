@@ -22,11 +22,17 @@ data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
     | Pow Expr Expr | Neg Expr | Num Int  {-Var Expr-} | X | Y | F Function
     deriving (Eq)
 
+type Coeff = Int
+type Exps = Int
+
+data ExprHolder = Polynomial [Coeff] | Trig [(Coeff, Exps, Expr)] | InvTrig [(Coeff, Exps, Expr)] |
+    Hyperbolic [(Coeff, Exps, Expr)] | Logarithmic [(Coeff, Exps, Expr)]
+    deriving (Eq, Show)
+
 data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq)
 
 -- TODO for fractional int dividing
 -- a = fst . head $ readFloat "0.75" :: Rational
-
 
 instance Show Expr where
     show X = "x"
@@ -42,8 +48,6 @@ instance Show Expr where
     show (Pow e1 e2) = show e1 ++ "^" ++ show e2
     show (Neg e) = "-(" ++ show e ++ ")"
     show (Num n) = show n
-
-
 
 instance Show Function where
     show (Sin e) = "sin(" ++ show e ++ ")"
@@ -163,6 +167,91 @@ TODO get infinite decimal to fraction converter.
 -- Once we simplify the expression this way (single elements only)
 -- then we can use the tree to simplify things like x^2 * sin^3(2x)
 -- by providing a ~= operator that is true if the structure is the same.
+{-
+data Function
+    = Sin Expr | Cos Expr | Tan Expr |
+      Csc Expr | Sec Expr | Cot Expr |
+      Arcsin Expr | Arccos Expr | Arctan Expr |
+      Arccsc Expr | Arcsec Expr | Arccot Expr |
+      Ln Expr | E Expr | Log Expr Expr -- first expr is base
+    deriving (Eq)
+
+
+data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
+    | Pow Expr Expr | Neg Expr | Num Int  -}
+{-Var Expr-}{-
+ | X | Y | F Function
+    deriving (Eq)
+-}
+
+exprHolder :: Expr -> ExprHolder
+exprHolder
+exprHolder (Add e1 e2) =
+exprHolder (Sub e1 e2) =
+
+-- NOTE rules:
+-- POlynomial: [1, 0, 2, 7, -4] represents 1 + x^2 + 7x^3 - 4x^4
+-- Trig: [(0,1), (1,1), (4,1), (1,1), (2,4), (3, 5)]
+--      represents (cos x + 4tan x + csc x + 2sec^4 x  + 3cot^5 x
+--      where x = any expression and note (0, 1) = 0 always and (1,0) gets error
+holderExpr :: ExprHolder -> Expr
+holderExpr (Polynomial cs) = reverse $ map simplify $ zipWith (.*) cs (zipWith (.^) xs es )
+    where xs = replicate (length cs) X
+          es = map Num [0 .. (length cs - 1)]
+-- TODO inside function is holder -- find way to deal with that.
+holderExpr (Trig (cs, es, u)) =
+    where fs = [F $ Sin u, F $ Cos u, F $ Tan u, F $ Csc u, F $ Sec u, F $ Cot u]
+
+
+-- TODO types wrong
+--- insdie the function is a type expression holder that is converted to expression.
+{-holderExprFunctions :: Expr -> Expr
+holderExprFunctions (F (Sin h)) = -}
+
+
+-- puts an expression inside a function
+push :: Expr -> Function -> Expr
+push u (F (Sin v)) = F $ Sin $ simplify e
+push u (F (Cos v)) = F $ Cos $ simplify e
+push u (F (Tan v)) = F $ Tan $ simplify e
+push u (F (Csc v)) = F $ Csc $ simplify e
+push u (F (Sec v)) = F $ Sec $ simplify e
+push u (F (Cot v)) = F $ Cot $ simplify e
+push u (F (Arcsin v)) = F $ Arcsin $ simplify e
+push u (F (Arccos v)) = F $ Arccos $ simplify e
+push u (F (Arctan v)) = F $ Arctan $ simplify e
+push u (F (Arccsc v)) = F $ Arccsc $ simplify e
+push u (F (Arcsec v)) = F $ Arcsec $ simplify e
+push u (F (Arccot v)) = F $ Arccot $ simplify e
+
+
+simplify :: Expr -> Expr
+simplify X = X
+simplify Y = Y
+simplify (Num n) = Num n
+simplify (F (Sin e)) = F $ Sin $ simplify e
+simplify (F (Cos e)) = F $ Cos $ simplify e
+simplify (F (Tan e)) = F $ Tan $ simplify e
+simplify (F (Csc e)) = F $ Csc $ simplify e
+simplify (F (Sec e)) = F $ Sec $ simplify e
+simplify (F (Cot e)) = F $ Cot $ simplify e
+simplify (F (Arcsin e)) = F $ Arcsin $ simplify e
+simplify (F (Arccos e)) = F $ Arccos $ simplify e
+simplify (F (Arctan e)) = F $ Arctan $ simplify e
+simplify (F (Arccsc e)) = F $ Arccsc $ simplify e
+simplify (F (Arcsec e)) = F $ Arcsec $ simplify e
+simplify (F (Arccot e)) = F $ Arccot $ simplify e
+simplify (Pow e (Num 0)) = Num 1
+simplify (Pow e (Num 1)) = simplify e
+simplify (Mul (Num 1) e2) = simplify e2
+simplify (Neg e) = Neg $ simplify e
+simplify (Add e1 e2) = simplify e1 .+ simplify e2
+simplify (Sub e1 e2) = simplify e1 .- simplify e2
+simplify (Mul e1 e2) = simplify e1 .* simplify e2
+simplify (Div e1 e2) = simplify e1 ./ simplify e2
+simplify (Pow e1 e2) = simplify e1 .^ simplify e2
+
+
 
 -- TODO also make another operator that is true for (3)(X) == (X)(3)
 -- and 3 + x == x + 3
@@ -171,7 +260,7 @@ TODO get infinite decimal to fraction converter.
 -- the constants. So if odd "/" then divide else multiply.
 
 
--- TODO fix percolation so that we don't get order of operations wrong. 
+-- TODO fix percolation so that we don't get order of operations wrong.
 
 leftSub :: Tree a -> Tree a
 leftSub (Node _ left _) = left
