@@ -14,6 +14,10 @@ data Function
       Csc Expr | Sec Expr | Cot Expr |
       Arcsin Expr | Arccos Expr | Arctan Expr |
       Arccsc Expr | Arcsec Expr | Arccot Expr |
+      Sinh Expr | Cosh Expr | Tanh Expr |
+      Csch Expr | Sech Expr | Coth Expr |
+      Arcsinh Expr | Arccosh Expr | Arctanh Expr |
+      Arccsch Expr | Arcsech Expr | Arccoth Expr |
       Ln Expr | E Expr | Log Expr Expr -- first expr is base
     deriving (Eq)
 
@@ -26,7 +30,7 @@ type Coeff = Int
 type Exps = Int
 
 data ExprHolder = Polynomial [Coeff] | Trig [(Coeff, Exps, Expr)] | InvTrig [(Coeff, Exps, Expr)] |
-    Hyperbolic [(Coeff, Exps, Expr)] | Logarithmic [(Coeff, Exps, Expr)]
+    Hyperbolic [(Coeff, Exps, Expr)] | InvHyp [(Coeff, Exps, Expr)] | Logarithmic [(Coeff, Exps, Expr)]
     deriving (Eq, Show)
 
 data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq)
@@ -40,6 +44,7 @@ instance Show Expr where
     show (F func) = show func
     show (Add e1 e2) = show e1 ++ " + " ++ show e2
     show (Sub e1 e2) = show e1 ++ " - " ++ show e2
+    show (Mul (Num n) (Num m)) = "(" ++ show n ++ ")(" ++ show m ++ ")"
     show (Mul (Num n) (Mul (Num m) (Mul (Num p) rest)))
         = "(" ++ show n ++ ")(" ++ show m ++ ")(" ++ show p ++ ")" ++ show rest
     show (Mul (Num n) (Mul (Num m) rest)) = "(" ++ show n ++ ")(" ++ show m ++ ")" ++ show rest
@@ -62,6 +67,19 @@ instance Show Function where
     show (Arccsc e) = "arccsc(" ++ show e ++ ")"
     show (Arcsec e) = "arcsec(" ++ show e ++ ")"
     show (Arccot e) = "arccot(" ++ show e ++ ")"
+    show (Sinh e) = "sinh(" ++ show e ++ ")"
+    show (Cosh e) = "cosh(" ++ show e ++ ")"
+    show (Tanh e) = "tanh(" ++ show e ++ ")"
+    show (Csch e) = "csch(" ++ show e ++ ")"
+    show (Sech e) = "sech(" ++ show e ++ ")"
+    show (Coth e) = "coth(" ++ show e ++ ")"
+    show (Arcsinh e) = "arcsinh(" ++ show e ++ ")"
+    show (Arccosh e) = "arccosh(" ++ show e ++ ")"
+    show (Arctanh e) = "arctanh(" ++ show e ++ ")"
+    show (Arccsch e) = "arccsch(" ++ show e ++ ")"
+    show (Arcsech e) = "arcsech(" ++ show e ++ ")"
+    show (Arccoth e) = "arccoth(" ++ show e ++ ")"
+    show (E e) = "e^(" ++ show e ++ ")"
     show (Ln e) = "ln(" ++ show e ++ ")"
     show (Log b a) = "log" ++ show b ++ "(" ++ show a ++ ")"
 
@@ -184,23 +202,36 @@ data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
     deriving (Eq)
 -}
 
-exprHolder :: Expr -> ExprHolder
+{-exprHolder :: Expr -> ExprHolder
 exprHolder
 exprHolder (Add e1 e2) =
-exprHolder (Sub e1 e2) =
+exprHolder (Sub e1 e2) =-}
 
 -- NOTE rules:
 -- POlynomial: [1, 0, 2, 7, -4] represents 1 + x^2 + 7x^3 - 4x^4
 -- Trig: [(0,1), (1,1), (4,1), (1,1), (2,4), (3, 5)]
 --      represents (cos x + 4tan x + csc x + 2sec^4 x  + 3cot^5 x
 --      where x = any expression and note (0, 1) = 0 always and (1,0) gets error
-holderExpr :: ExprHolder -> Expr
-holderExpr (Polynomial cs) = reverse $ map simplify $ zipWith (.*) cs (zipWith (.^) xs es )
-    where xs = replicate (length cs) X
-          es = map Num [0 .. (length cs - 1)]
+holderExpr :: ExprHolder -> [Expr]
+holderExpr (Polynomial ps) = reverse $ map simplify $ zipWith (.*) ps' (zipWith (.^) xs es )
+    where xs = replicate (length ps) X
+          es = map Num [0 .. (length ps - 1)]
+          ps' = map Num ps
 -- TODO inside function is holder -- find way to deal with that.
-holderExpr (Trig (cs, es, u)) =
-    where fs = [F $ Sin u, F $ Cos u, F $ Tan u, F $ Csc u, F $ Sec u, F $ Cot u]
+holderExpr (Trig ts) = map simplify $ latch (zip ts fs)
+    where fs = map F [Sin X, Cos X, Tan X, Csc X, Sec X, Cot X]
+holderExpr (InvTrig ts) = map simplify $ latch (zip ts fs)
+    where fs = map F [Arcsin X, Arccos X, Arctan X, Arccsc X, Arcsec X, Arccot X]
+holderExpr (Hyperbolic hs) = map simplify $ latch (zip hs fs)
+    where fs = map F [Sinh X, Cosh X, Tanh X, Csch X, Sech X, Coth X]
+holderExpr (InvHyp hs) = map simplify $ latch  (zip hs fs)
+    where fs = map F [Arcsinh X, Arccosh X, Arctanh X, Arccsch X, Arcsech X, Arccoth X]
+holderExpr (Logarithmic ls) = map simplify $ latch (zip ls fs)
+    where fs = map F [E X, Ln X, Log X X]  -- TODO fix so we can have different args for log base and arg.
+
+
+latch zs = map (\((c,e,u), f) -> c .* (push u f) .^ e) (map numify zs)
+numify ((c,e,u), f) = ((Num c, Num e, u), f)
 
 
 -- TODO types wrong
@@ -210,19 +241,19 @@ holderExprFunctions (F (Sin h)) = -}
 
 
 -- puts an expression inside a function
-push :: Expr -> Function -> Expr
-push u (F (Sin v)) = F $ Sin $ simplify e
-push u (F (Cos v)) = F $ Cos $ simplify e
-push u (F (Tan v)) = F $ Tan $ simplify e
-push u (F (Csc v)) = F $ Csc $ simplify e
-push u (F (Sec v)) = F $ Sec $ simplify e
-push u (F (Cot v)) = F $ Cot $ simplify e
-push u (F (Arcsin v)) = F $ Arcsin $ simplify e
-push u (F (Arccos v)) = F $ Arccos $ simplify e
-push u (F (Arctan v)) = F $ Arctan $ simplify e
-push u (F (Arccsc v)) = F $ Arccsc $ simplify e
-push u (F (Arcsec v)) = F $ Arcsec $ simplify e
-push u (F (Arccot v)) = F $ Arccot $ simplify e
+push :: Expr -> Expr -> Expr
+push u (F (Sin v)) = F $ Sin u
+push u (F (Cos v)) = F $ Cos u
+push u (F (Tan v)) = F $ Tan u
+push u (F (Csc v)) = F $ Csc u
+push u (F (Sec v)) = F $ Sec u
+push u (F (Cot v)) = F $ Cot u
+push u (F (Arcsin v)) = F $ Arcsin u
+push u (F (Arccos v)) = F $ Arccos u
+push u (F (Arctan v)) = F $ Arctan u
+push u (F (Arccsc v)) = F $ Arccsc u
+push u (F (Arcsec v)) = F $ Arcsec u
+push u (F (Arccot v)) = F $ Arccot u
 
 
 simplify :: Expr -> Expr
@@ -241,9 +272,27 @@ simplify (F (Arctan e)) = F $ Arctan $ simplify e
 simplify (F (Arccsc e)) = F $ Arccsc $ simplify e
 simplify (F (Arcsec e)) = F $ Arcsec $ simplify e
 simplify (F (Arccot e)) = F $ Arccot $ simplify e
-simplify (Pow e (Num 0)) = Num 1
-simplify (Pow e (Num 1)) = simplify e
+simplify (Add (Mul (Num a) (Num b)) (Mul (Num c) (Num d))) = Num $ a * b + c + d
+simplify (Add (Mul (Num a) x) (Mul (Num b) y))
+    = if x == y then 
 simplify (Mul (Num 1) e2) = simplify e2
+simplify (Mul e1 (Num 1)) = simplify e1
+simplify (Mul (Num 0) e2) = Num 0
+simplify (Mul e1 (Num 0)) = Num 0
+simplify (Mul (Num n) (Num m)) = Num $ n * m
+simplify (Mul (Neg u) (Neg v)) = simplify u .* simplify v
+simplify (Mul (Neg u) v) = Neg (simplify u .* simplify v)
+simplify (Mul u (Neg v)) = Neg (simplify u .* simplify v)
+simplify (Div (Num 0) (Num 0)) = error "0/0 not possible"
+simplify (Div (Num 0) e2) = Num 0
+simplify (Div e1 (Num 0)) = error "divide by zero!"
+simplify (Div e1 (Num 1)) = simplify e1
+simplify (Pow e (Num 0)) = Num 1
+simplify (Pow (Num 0) e) = Num 0
+simplify (Pow (Num 1) e) = Num 1
+simplify (Pow e (Num 1)) = simplify e
+simplify (Neg (Num n)) = Num (-n)
+simplify (Neg (Neg e)) = simplify e
 simplify (Neg e) = Neg $ simplify e
 simplify (Add e1 e2) = simplify e1 .+ simplify e2
 simplify (Sub e1 e2) = simplify e1 .- simplify e2
