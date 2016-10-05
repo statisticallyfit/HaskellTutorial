@@ -27,11 +27,13 @@ data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
     deriving (Eq)
 
 type Coeff = Int
-type Exps = Int
+type Expo = Int
 
-data ExprHolder = Polynomial [Coeff] | Trig [(Coeff, Exps, Expr)] | InvTrig [(Coeff, Exps, Expr)] |
-    Hyperbolic [(Coeff, Exps, Expr)] | InvHyp [(Coeff, Exps, Expr)] | Logarithmic [(Coeff, Exps, Expr)]
+data ExprType = Poly [Coeff] | Trig [(Coeff, Expo, Expr)] | InvTrig [(Coeff, Expo, Expr)] |
+    Hyperbolic [(Coeff, Expo, Expr)] | InvHyp [(Coeff, Expo, Expr)] | Logarithmic [(Coeff, Expo, Expr)]
     deriving (Eq, Show)
+
+data Code = Code [ExprType]
 
 data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq)
 
@@ -85,50 +87,6 @@ instance Show Function where
     show (Ln e) = "ln(" ++ show e ++ ")"
     show (Log b a) = "log" ++ show b ++ "(" ++ show a ++ ")"
 
-{-
-
-e3 should look like:
-(-)
- |
- `-- (+)
- |    |
- |    `-- (*)
- |    |    |
- |    |    `-- 4
- |    |    `-- x
- |    |
- |    `-- (*)
- |         |
- |         `-- 3
- |         `-- (^)
- |              |
- |              `-- x
- |              `-- 5
- |
- `-- sin(*) ...
-
-instance Show a => Show (Tree a) where
-    show theTree = draw 1 "\n     " "\n" "\n" theTree
-        where
-        draw _ _ _ _ Empty = "_"
-        draw _ _ _ _ (Leaf n) = show n
-        draw c i lb rb (Node op left right)
-            | isNode left && isNode right
-                = "(" ++ op ++ ")" ++ lb' ++ draw c' i' lb' rb' left ++
-                    lb' ++ draw c' i' lb' rb' right
-            | isNode left
-                = "(" ++ op ++ ")" ++ lb' ++ draw c' i' lb' rb' left ++
-                    rb' ++ draw c' i' lb' rb' right
-            | isNode right
-                = rb' ++ draw c' i' lb' rb' left ++
-                    "(" ++ op ++ ")" ++ lb' ++ draw c' i' lb' rb' right
-            where
-            i' = i ++ "     "
-            c' = c + 1
-            lb' = lb ++ " |\n `-- "
-            rb' = " |\n"  ++ i'
--}
-
 
 instance Show a => Show (Tree a) where
     show tree = draw 1 "\n" tree
@@ -141,7 +99,6 @@ instance Show a => Show (Tree a) where
             where
             indent' = indent ++ "    "
             count' = count + 1
-
 
 
 infixl 6 .+
@@ -190,7 +147,7 @@ TODO get infinite decimal to fraction converter.
 
 {-
 
-exprHolder :: Expr -> ExprHolder
+exprHolder :: Expr -> ExprType
 exprHolder
 exprHolder (Add e1 e2) =
 exprHolder (Sub e1 e2) =
@@ -208,8 +165,8 @@ exprHolder (Sub e1 e2) =
 -- TODO correct to take exprholder (holds poly, trig..)
 -- TODO now to convert to expression, unzip, get rid of justa nd conver nothings to 0.
 
-addH :: [(Coeff, Exps, Expr)] -> [(Coeff, Exps, Expr)] -> Expr
-addH h1 h2 = map simpMaybe $ map add (zip h1' h2')
+--addH :: [(Coeff, Expo, Expr)] -> [(Coeff, Expo, Expr)] -> Expr
+addH h1 h2 = simplifiedMaybes
     where
     h1' = map numify h1
     h2' = map numify h2
@@ -220,6 +177,7 @@ addH h1 h2 = map simpMaybe $ map add (zip h1' h2')
     simpMaybe (a,b) =
         if (isJust a && isNothing b) then (Just $ simpFirst $ fromJust a, Nothing)
         else (a,b)
+    simplifiedMaybes = map simpMaybe $ map add (zip h1' h2')
 
 list = map numify [(4,1,X), (3,1,X), (1,7,(Num 2) .* X .^ Num 5), (2,2,X),(1,1,X), (7,7,Num 7 .* X)]
 add (a@(c1,e1,x1),b@(c2,e2,x2)) = if x1 == x2 then (Just (c1 .+ c2,e1,x1), Nothing) else (Just a, Just b)
@@ -234,12 +192,12 @@ ms = map (\(a, b) -> if (isJust a && isNothing b) then (Just $ simp' $ fromJust 
 -- While you're at it, make the first coeff an expression so that we can do xsin(x) + 2xsin(x)
 -- TODO return error if one of the tuples has patterns (1, 0, ..) because that yields a constant.
 -- NOTE rules:
--- POlynomial: [1, 0, 2, 7, -4] represents 1 + x^2 + 7x^3 - 4x^4
+-- Poly: [1, 0, 2, 7, -4] represents 1 + x^2 + 7x^3 - 4x^4
 -- Trig: [(0,1), (1,1), (4,1), (1,1), (2,4), (3, 5)]
 --      represents (cos x + 4tan x + csc x + 2sec^4 x  + 3cot^5 x
 --      where x = any expression and note (0, 1) = 0 always and (1,0) gets error
-holderToExpr :: ExprHolder -> [Expr]
-holderToExpr (Polynomial ps) = reverse $ map simplify $ zipWith (.*) ps' (zipWith (.^) xs es )
+holderToExpr :: ExprType -> [Expr]
+holderToExpr (Poly ps) = reverse $ map simplify $ zipWith (.*) ps' (zipWith (.^) xs es )
     where xs = replicate (length ps) X
           es = map Num [0 .. (length ps - 1)]
           ps' = map Num ps
@@ -624,3 +582,50 @@ arbTree n = frequency [(1, return Empty),
                        (3, liftM Leaf arbitrary),
                        (4, liftM3 Node arbitrary (arbTree (n `div` 2))
                                                  (arbTree (n `div` 2)) )]
+
+
+
+
+{-
+
+e3 should look like:
+(-)
+ |
+ `-- (+)
+ |    |
+ |    `-- (*)
+ |    |    |
+ |    |    `-- 4
+ |    |    `-- x
+ |    |
+ |    `-- (*)
+ |         |
+ |         `-- 3
+ |         `-- (^)
+ |              |
+ |              `-- x
+ |              `-- 5
+ |
+ `-- sin(*) ...
+
+instance Show a => Show (Tree a) where
+    show theTree = draw 1 "\n     " "\n" "\n" theTree
+        where
+        draw _ _ _ _ Empty = "_"
+        draw _ _ _ _ (Leaf n) = show n
+        draw c i lb rb (Node op left right)
+            | isNode left && isNode right
+                = "(" ++ op ++ ")" ++ lb' ++ draw c' i' lb' rb' left ++
+                    lb' ++ draw c' i' lb' rb' right
+            | isNode left
+                = "(" ++ op ++ ")" ++ lb' ++ draw c' i' lb' rb' left ++
+                    rb' ++ draw c' i' lb' rb' right
+            | isNode right
+                = rb' ++ draw c' i' lb' rb' left ++
+                    "(" ++ op ++ ")" ++ lb' ++ draw c' i' lb' rb' right
+            where
+            i' = i ++ "     "
+            c' = c + 1
+            lb' = lb ++ " |\n `-- "
+            rb' = " |\n"  ++ i'
+-}
