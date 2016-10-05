@@ -4,9 +4,12 @@ import Test.QuickCheck -- (Arbitrary, arbitrary, elements)
 import Test.QuickCheck.Checkers
 import Test.QuickCheck.Classes
 import Control.Monad hiding (join)
+import Control.Applicative
 import Data.Char
 import Numeric
 import Data.Maybe
+import Data.List
+-- import Data.List.Extra (trim, wordsBy)
 
 
 data Function
@@ -29,11 +32,11 @@ data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
 type Coeff = Int
 type Expo = Int
 
-data ExprType = Poly [Coeff] | Trig [(Coeff, Expo, Expr)] | InvTrig [(Coeff, Expo, Expr)] |
+data Group = Poly [Coeff] | Trig [(Coeff, Expo, Expr)] | InvTrig [(Coeff, Expo, Expr)] |
     Hyperbolic [(Coeff, Expo, Expr)] | InvHyp [(Coeff, Expo, Expr)] | Logarithmic [(Coeff, Expo, Expr)]
     deriving (Eq, Show)
 
-data Code = Code [ExprType]
+data Code = Code [Group]
 
 data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq)
 
@@ -122,6 +125,8 @@ e2 = e1 .+ Num(2) .* X .+ Num(7) .* X
 e3 = Num(4) .* X .+ Num(3) .* X .^ Num(5) .- (F (Sin (Num(3) .+ X)))
 e4 = Neg(F (Sin X)) .* Neg(Num(2))
 e5 = Neg (Num(4) .* X .+ Num(2) .* Y)
+e6 = Num (-7) .* X .^ Num 2 .+ Num 3 .* X .+ Num 4 .* X .+ Num 5 .* X .^ Num 2 .-
+    Num 3 .* (F $ Sin $ Num 4 .* X) .+ Num 5 .* (F $ Cos X) .+ Num 2 .+ Num 3
 
 -- TODO test percolate minus cases
 t1 :: Tree Expr
@@ -144,13 +149,80 @@ TODO get infinite decimal to fraction converter.
 -- Once we simplify the expression this way (single elements only)
 -- then we can use the tree to simplify things like x^2 * sin^3(2x)
 -- by providing a ~= operator that is true if the structure is the same.
+{-
+isPolyTerm :: Expr -> Bool
+isPolyTerm (Mul (Num n) X)
+
+exprToCode :: Expr -> Code
+exprToCode-}
+
+isAdd :: Expr -> Bool
+isAdd (Add _ _) = True
+isAdd _ = False
+
+isSub :: Expr -> Bool
+isSub (Sub _ _) = True
+isSub _ = False
+
+isMul :: Expr -> Bool
+isMul (Mul _ _) = True
+isMul _ = False
+
+isDiv :: Expr -> Bool
+isDiv (Div _ _) = True
+isDiv _ = False
+
+isPow :: Expr -> Bool
+isPow (Pow _ _) = True
+isPow _ = False
+
+
+-- count of terms where terms are separated by + or - but not * or / or ^
+numTerms :: Expr -> Int
+numTerms = length . split -- expr arg here
+
+-- TODO apply the first mul case thinking to other cases to get all cases.
+-- splits the terms in the expression at + or -
+split :: Expr -> [Expr]
+split n@(Num _) = [n]
+split (Neg e) = map Neg (split e)
+split f@(F _) = [f]
+-- TODO HELP how to deal with this? 
+split (Mul (Num a) e2) = [Num a .* (head exprs)] ++ tail exprs
+    where exprs = (split e2)
+split (Mul e1 e2) = [e1, e2]
+split (Div e1 e2) = [e1, e2]
+split (Pow e1 e2) = [e1, e2]
+split (Add e1 e2)
+    | isGlued e1 && isGlued e2 = [e1, e2]
+    | isGlued e1 = [e1] ++ split e2
+    | isGlued e2 = split e1 ++ [e2]
+    | otherwise = split e1 ++ split e2
+    where isGlued e = isDiv e || isMul e || isPow e
+split (Sub e1 e2)
+    | isGlued e1 && isGlued e2 = [e1, Neg e2]
+    | isGlued e1 = [e1, Neg e2]
+    | isGlued e2 = split e1 ++ [Neg e2]
+    | otherwise = split e1 ++ [Neg e2]
+    where isGlued e = isDiv e || isMul e || isPow e
+
+
+{-split X = [X]
+split Y = [Y]
+split (Num n) = [Num n]
+split (F func) = [F func]
+split (Neg e) = [Neg $ split e]
+split (Add e1 e2) = split e1 ++ split e2
+split (Sub e1 e2) = split e1 ++ split (Neg e2)
+split (Mul e1 e2) = split e1 ++ split e2
+split (Div e1 e2) = split e1 ++ split e2
+split (Pow e1 e2) = split e1 ++ split e2-}
+
 
 {-
-
-exprHolder :: Expr -> ExprType
-exprHolder
-exprHolder (Add e1 e2) =
-exprHolder (Sub e1 e2) =
+split (Mul e1 e2) = <*> ((split e1) .*) (split e1)
+split (Div e1 e2) = <*> ((split e1) ./) (split e1)
+split (Pow e1 e2) = <*> ((split e1) .^) (split e1)
 -}
 
 -- note in cases like 4x + sin(3x) is just separates polynomials from trig and log so that we just
@@ -196,21 +268,21 @@ ms = map (\(a, b) -> if (isJust a && isNothing b) then (Just $ simp' $ fromJust 
 -- Trig: [(0,1), (1,1), (4,1), (1,1), (2,4), (3, 5)]
 --      represents (cos x + 4tan x + csc x + 2sec^4 x  + 3cot^5 x
 --      where x = any expression and note (0, 1) = 0 always and (1,0) gets error
-holderToExpr :: ExprType -> [Expr]
-holderToExpr (Poly ps) = reverse $ map simplify $ zipWith (.*) ps' (zipWith (.^) xs es )
+groupToExpr :: Group -> [Expr]
+groupToExpr (Poly ps) = reverse $ map simplify $ zipWith (.*) ps' (zipWith (.^) xs es )
     where xs = replicate (length ps) X
           es = map Num [0 .. (length ps - 1)]
           ps' = map Num ps
 -- TODO inside function is holder -- find way to deal with that.
-holderToExpr (Trig ts) = map simplify $ latch (zip ts fs)
+groupToExpr (Trig ts) = map simplify $ latch (zip ts fs)
     where fs = map F [Sin X, Cos X, Tan X, Csc X, Sec X, Cot X]
-holderToExpr (InvTrig ts) = map simplify $ latch (zip ts fs)
+groupToExpr (InvTrig ts) = map simplify $ latch (zip ts fs)
     where fs = map F [Arcsin X, Arccos X, Arctan X, Arccsc X, Arcsec X, Arccot X]
-holderToExpr (Hyperbolic hs) = map simplify $ latch (zip hs fs)
+groupToExpr (Hyperbolic hs) = map simplify $ latch (zip hs fs)
     where fs = map F [Sinh X, Cosh X, Tanh X, Csch X, Sech X, Coth X]
-holderToExpr (InvHyp hs) = map simplify $ latch  (zip hs fs)
+groupToExpr (InvHyp hs) = map simplify $ latch  (zip hs fs)
     where fs = map F [Arcsinh X, Arccosh X, Arctanh X, Arccsch X, Arcsech X, Arccoth X]
-holderToExpr (Logarithmic ls) = map simplify $ latch (zip ls fs)
+groupToExpr (Logarithmic ls) = map simplify $ latch (zip ls fs)
     where fs = map F [E X, Ln X, Log X X]  -- TODO fix so we can have different args for log base and arg.
 
 
@@ -376,6 +448,12 @@ isEmpty _ = False
 isThree :: Tree a -> Bool
 isThree (Node n (Leaf x) (Leaf y)) = True
 isThree _ = False
+
+
+depth :: Tree a -> Int
+depth Empty = 0
+depth (Leaf n) = 1
+depth (Node n left right) = 1 + max (depth left) (depth right)
 
 
 mapTree :: (Int -> Int) -> Tree Expr -> Tree Expr
