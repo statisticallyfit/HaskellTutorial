@@ -44,8 +44,6 @@ data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq)
 -- a = fst . head $ readFloat "0.75" :: Rational
 
 
-
-
 instance Show Expr where
     show X = "x"
     show Y = "y"
@@ -55,18 +53,22 @@ instance Show Expr where
     show (Add e1 e2) = show e1 ++ " + " ++ show e2
     show (Sub e1 e2) = show e1 ++ " - " ++ show e2
     show (Mul (Num n) (Num m)) = "(" ++ show n ++ ")(" ++ show m ++ ")"
+    show (Mul p@(Pow e1 e2) (Num n)) = show p ++ "(" ++ show n ++ ")"
+    show (Mul (Mul (Mul rest (Num n1)) (Num n2)) (Num n3))
+        = show rest ++ "(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")"
+    show (Mul (Mul rest (Num n1)) (Num n2)) = show rest ++ "(" ++ show n1 ++ ")(" ++ show n2 ++ ")"
+    show (Mul d1@(Div _ _) d2@(Div _ _)) = show d1 ++ " * " ++ show d2
+    show (Mul d@(Div _ _) m@(Mul _ _)) = show d ++ " * " ++ show m
+    show (Mul rest (Num n)) = show rest ++ "(" ++ show n ++ ")"
+    show (Mul p1@(Pow _ _) p2@(Pow _ _)) = show p1 ++ " * " ++ show p2
+    show (Mul m1@(Mul (Num a) (Pow _ _)) m2@(Mul (Num b) (Pow _ _))) = show m1 ++ " * " ++ show m2 
     show (Mul n (Pow x d@(Div (Num a) (Num b)))) = show n ++ show x ++ "^(" ++ show d ++ ")"
     show (Mul n (Pow x d@(Div e1 e2))) = show n ++ show x ++ "^" ++ show d
-    show (Mul (Num n) (Mul (Num m) (Mul (Num p) rest)))
-        = "(" ++ show n ++ ")(" ++ show m ++ ")(" ++ show p ++ ")" ++ show rest
-    show (Mul (Num n) (Mul (Num m) rest)) = "(" ++ show n ++ ")(" ++ show m ++ ")" ++ show rest
-    show (Mul p@(Pow e1 e2) (Num n)) = show p ++ "(" ++ show n ++ ")"
     show (Mul e1 ng@(Neg (Num n))) = show e1 ++ "(" ++ show ng ++ ")"
     show (Mul e1 e2) = show e1 ++ show e2
     show (Div (Num n) (Num m)) = show n ++ "/" ++ show m
     show (Div e1 e2) = "(" ++ show e1 ++ ") / (" ++ show e2 ++ ")"
     show (Pow e1 e2) = show e1 ++ "^" ++ show e2
-
 
 
 instance Show Function where
@@ -142,8 +144,8 @@ e8 = e6 .+ e7
 -- error says you cannot mix ./ and .* because one is infix l and other is infix r.
 e9 = ((Num 3 .* X .^ Num 3) ./ (Num 3 .* X .^ (Num 1 ./ Num 3))) .*
      ((Num 8 .* X .^ Num 9) ./ (Num 4 .* X .^ Num 3))
-e10 = (Num 3 .* X .^ Num 3) ./ ((Num 3 .* X .^ (Num 1 ./ Num 3))) .*
-     ((Num 8 .* X .^ Num 9) ./ (Num 4 .* X .^ Num 3))
+e10 = (Num 3 .* X .^ Num 3) ./ ((Num 3 .* X .^ (Num 1 ./ Num 3)) .*
+     (Num 8 .* X .^ Num 9)) ./ (Num 4 .* X .^ Num 3)
 
 
 -- TODO test percolate minus cases
