@@ -30,10 +30,10 @@ data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
     deriving (Eq)
 
 type Coeff = Int
-type Expo = Int
+type Description = (Expr, Expr, Expr)
 
-data Group = Poly [Coeff] | Trig [(Coeff, Expo, Expr)] | InvTrig [(Coeff, Expo, Expr)] |
-    Hyperbolic [(Coeff, Expo, Expr)] | InvHyp [(Coeff, Expo, Expr)] | Logarithmic [(Coeff, Expo, Expr)]
+data Group = Poly [Coeff] | Trig [Description] | InvTrig [Description] | Hyperbolic [Description] |
+    InvHyp [Description] | Logarithmic [Description]
     deriving (Eq, Show)
 
 data Code = Code [Group]
@@ -44,21 +44,29 @@ data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq)
 -- a = fst . head $ readFloat "0.75" :: Rational
 
 
+
+
 instance Show Expr where
     show X = "x"
     show Y = "y"
+    show (Neg e) = "-(" ++ show e ++ ")"
+    show (Num n) = show n
     show (F func) = show func
     show (Add e1 e2) = show e1 ++ " + " ++ show e2
     show (Sub e1 e2) = show e1 ++ " - " ++ show e2
     show (Mul (Num n) (Num m)) = "(" ++ show n ++ ")(" ++ show m ++ ")"
+    show (Mul n (Pow x d@(Div (Num a) (Num b)))) = show n ++ show x ++ "^(" ++ show d ++ ")"
+    show (Mul n (Pow x d@(Div e1 e2))) = show n ++ show x ++ "^" ++ show d
     show (Mul (Num n) (Mul (Num m) (Mul (Num p) rest)))
         = "(" ++ show n ++ ")(" ++ show m ++ ")(" ++ show p ++ ")" ++ show rest
     show (Mul (Num n) (Mul (Num m) rest)) = "(" ++ show n ++ ")(" ++ show m ++ ")" ++ show rest
+    show (Mul p@(Pow e1 e2) (Num n)) = show p ++ "(" ++ show n ++ ")"
+    show (Mul e1 ng@(Neg (Num n))) = show e1 ++ "(" ++ show ng ++ ")"
     show (Mul e1 e2) = show e1 ++ show e2
-    show (Div e1 e2) = show e1 ++ " / " ++ show e2
+    show (Div (Num n) (Num m)) = show n ++ "/" ++ show m
+    show (Div e1 e2) = "(" ++ show e1 ++ ") / (" ++ show e2 ++ ")"
     show (Pow e1 e2) = show e1 ++ "^" ++ show e2
-    show (Neg e) = "-(" ++ show e ++ ")"
-    show (Num n) = show n
+
 
 
 instance Show Function where
@@ -106,7 +114,7 @@ instance Show a => Show (Tree a) where
 
 infixl 6 .+
 infixl 6 .-
-infixr 7 .*  -- NOTE made this right associative so tree would lean to the left (go right down)
+infixl 7 .*  -- NOTE made this right associative so tree would lean to the left (go right down)
 infixl 7 ./
 infixl 8 .^
 
@@ -127,6 +135,16 @@ e4 = Neg(F (Sin X)) .* Neg(Num(2))
 e5 = Neg (Num(4) .* X .+ Num(2) .* Y)
 e6 = Num (-7) .* X .^ Num 2 .+ Num 3 .* X .+ Num 4 .* X .+ Num 5 .* X .^ Num 2 .-
     Num 3 .* (F $ Sin $ Num 4 .* X) .+ Num 5 .* (F $ Cos X) .+ Num 2 .+ Num 3
+e7 = (Num 3 .* X .^ Num 3) ./ (Num 3 .* X .^ (Num 1 ./ Num 3)) .-
+    (Num 8 .* X .^ Num 9) ./ (Num 4 .* X .^ Num 3)
+e8 = e6 .+ e7
+-- NOTE IMPORTANT you must put (e1 * e2) / (e3 * e4) brakcets like that because otherwise
+-- error says you cannot mix ./ and .* because one is infix l and other is infix r.
+e9 = ((Num 3 .* X .^ Num 3) ./ (Num 3 .* X .^ (Num 1 ./ Num 3))) .*
+     ((Num 8 .* X .^ Num 9) ./ (Num 4 .* X .^ Num 3))
+e10 = (Num 3 .* X .^ Num 3) ./ ((Num 3 .* X .^ (Num 1 ./ Num 3))) .*
+     ((Num 8 .* X .^ Num 9) ./ (Num 4 .* X .^ Num 3))
+
 
 -- TODO test percolate minus cases
 t1 :: Tree Expr
@@ -143,18 +161,6 @@ Then remember also where they go at the end!
 TODO get infinite decimal to fraction converter.
 -}
 
--- TODO idea: make array holding coefficients of powers
--- so that Array (2, 0, 1, 5) means 5x^3 + x^2 + 2
--- then we can add/sub/mul/div/pow.
--- Once we simplify the expression this way (single elements only)
--- then we can use the tree to simplify things like x^2 * sin^3(2x)
--- by providing a ~= operator that is true if the structure is the same.
-{-
-isPolyTerm :: Expr -> Bool
-isPolyTerm (Mul (Num n) X)
-
-exprToCode :: Expr -> Code
-exprToCode-}
 
 isAdd :: Expr -> Bool
 isAdd (Add _ _) = True
@@ -177,53 +183,73 @@ isPow (Pow _ _) = True
 isPow _ = False
 
 
+hasAdd :: Expr -> Bool
+hasAdd X = False
+hasAdd Y = False
+hasAdd (Add e1 e2) = True
+hasAdd (Num _) = False
+hasAdd (Neg e) = hasAdd e
+hasAdd (F f) = False
+hasAdd (Sub e1 e2) = hasAdd e1 || hasAdd e2
+hasAdd (Mul e1 e2) = hasAdd e1 || hasAdd e2
+hasAdd (Div e1 e2) = hasAdd e1 || hasAdd e2
+hasAdd (Pow e1 e2) = hasAdd e1 || hasAdd e2
+
+hasSub :: Expr -> Bool
+hasSub X = False
+hasSub Y = False
+hasSub (Sub e1 e2) = True
+hasSub (Num _) = False
+hasSub (Neg e) = hasSub e
+hasSub (F f) = False
+hasSub (Add e1 e2) = hasSub e1 || hasSub e2
+hasSub (Mul e1 e2) = hasSub e1 || hasSub e2
+hasSub (Div e1 e2) = hasSub e1 || hasSub e2
+hasSub (Pow e1 e2) = hasSub e1 || hasSub e2
+
 -- count of terms where terms are separated by + or - but not * or / or ^
-numTerms :: Expr -> Int
-numTerms = length . split -- expr arg here
+numSepTerms :: Expr -> Int
+numSepTerms = length . split -- expr arg here
 
 -- TODO apply the first mul case thinking to other cases to get all cases.
 -- splits the terms in the expression at + or -
 split :: Expr -> [Expr]
-split n@(Num _) = [n]
-split (Neg e) = map Neg (split e)
-split f@(F _) = [f]
--- TODO HELP how to deal with this? 
-split (Mul (Num a) e2) = [Num a .* (head exprs)] ++ tail exprs
-    where exprs = (split e2)
-split (Mul e1 e2) = [e1, e2]
-split (Div e1 e2) = [e1, e2]
-split (Pow e1 e2) = [e1, e2]
-split (Add e1 e2)
-    | isGlued e1 && isGlued e2 = [e1, e2]
-    | isGlued e1 = [e1] ++ split e2
-    | isGlued e2 = split e1 ++ [e2]
-    | otherwise = split e1 ++ split e2
-    where isGlued e = isDiv e || isMul e || isPow e
-split (Sub e1 e2)
-    | isGlued e1 && isGlued e2 = [e1, Neg e2]
-    | isGlued e1 = [e1, Neg e2]
-    | isGlued e2 = split e1 ++ [Neg e2]
-    | otherwise = split e1 ++ [Neg e2]
-    where isGlued e = isDiv e || isMul e || isPow e
+split expr
+    | hasAdd expr || hasSub expr = split' expr
+    | otherwise = [expr]
+    where
+    split' n@(Num _) = [n]
+    split' (Neg e) = map Neg (split' e)
+    split' f@(F _) = [f]
+    split' (Mul e1 e2) = [e1, e2]
+    split' (Div e1 e2) = [e1, e2]
+    split' (Pow e1 e2) = [e1, e2]
+    split' (Add e1 e2)
+        | isGlued e1 && isGlued e2 = [e1, e2]
+        | isGlued e1 = [e1] ++ split' e2
+        | isGlued e2 = split' e1 ++ [e2]
+        | otherwise = split' e1 ++ split' e2
+        where isGlued e = isDiv e || isMul e || isPow e
+    split' (Sub e1 e2)
+        | isGlued e1 && isGlued e2 = [e1, Neg e2]
+        | isGlued e1 = [e1, Neg e2]
+        | isGlued e2 = split' e1 ++ [Neg e2]
+        | otherwise = split' e1 ++ [Neg e2]
+        where isGlued e = isDiv e || isMul e || isPow e
 
 
-{-split X = [X]
-split Y = [Y]
-split (Num n) = [Num n]
-split (F func) = [F func]
-split (Neg e) = [Neg $ split e]
-split (Add e1 e2) = split e1 ++ split e2
-split (Sub e1 e2) = split e1 ++ split (Neg e2)
-split (Mul e1 e2) = split e1 ++ split e2
-split (Div e1 e2) = split e1 ++ split e2
-split (Pow e1 e2) = split e1 ++ split e2-}
+-- TODO idea: make array holding coefficients of powers
+-- so that Array (2, 0, 1, 5) means 5x^3 + x^2 + 2
+-- then we can add/sub/mul/div/pow.
+-- Once we simplify the expression this way (single elements only)
+-- then we can use the tree to add/sub  things like x^2 * sin^3(2x)
+-- by providing a ~= operator that is true if the structure is the same.
+-- TODO PLAN:
+-- 1) make parseExpr
+-- 2) make parseCode
+-- 3) make addH cases: polynomial, trig, invtrig...
+-- 4) make subH cases ... (then same for mulH, divH)
 
-
-{-
-split (Mul e1 e2) = <*> ((split e1) .*) (split e1)
-split (Div e1 e2) = <*> ((split e1) ./) (split e1)
-split (Pow e1 e2) = <*> ((split e1) .^) (split e1)
--}
 
 -- note in cases like 4x + sin(3x) is just separates polynomials from trig and log so that we just
 -- simplify those.
@@ -255,9 +281,57 @@ list = map numify [(4,1,X), (3,1,X), (1,7,(Num 2) .* X .^ Num 5), (2,2,X),(1,1,X
 add (a@(c1,e1,x1),b@(c2,e2,x2)) = if x1 == x2 then (Just (c1 .+ c2,e1,x1), Nothing) else (Just a, Just b)
 hs = zip list list
 js = map add hs
-simp' (x,y,z) = (simplify x, y, z)
-ms = map (\(a, b) -> if (isJust a && isNothing b) then (Just $ simp' $ fromJust a, Nothing) else (a,b)) js
+clean' (x,y,z) = (simplify x, y, z)
+ms = map (\(a, b) -> if (isJust a && isNothing b) then (Just $ clean' $ fromJust a, Nothing) else (a,b)) js
 --g (a@(c1,e1,x1), b@(c2,e2,x2)) = if (x1 == x2) then (c1 .+ c2,e1,x1) else (a,b)
+
+
+
+-- note says if expression contains no functions and is just a polynomial term like 7x^2
+isPoly :: Expr -> Bool
+isPoly X = True
+isPoly Y = True
+isPoly (Num n) = True
+isPoly (F f) = False
+isPoly (Neg e) = isPoly e
+isPoly (Add e1 e2) = isPoly e1 && isPoly e2
+isPoly (Sub e1 e2) = isPoly e1 && isPoly e2
+isPoly (Mul e1 e2) = isPoly e1 && isPoly e2
+isPoly (Div e1 e2) = isPoly e1 && isPoly e2
+isPoly (Pow e1 e2) = isPoly e1 && isPoly e2
+
+-- note converts expression to code
+-- first splits expr at the plus / minus signs and then categorizes each element as either
+-- function or polynomial term. Puts them into code accordingly.
+-- If we have 7x^2 and 3x^2 in the same expr, then we have: Poly [0,0,(7+3)
+{-
+
+exprToCode :: Expr -> Code
+exprToCode expr =
+    where splitted = partition isPoly (split expr)
+-}
+
+{-
+data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
+    | Pow Expr Expr | Neg Expr | Num Int  -}{-Var Expr-}{- | X | Y | F Function-}
+
+
+
+--makePoly :: [Expr] -> Group
+{-
+makePoly ps = Poly $ map poly (map simplify ps)
+    where
+    poly X = [0, 1]
+    poly Y = [0, 1]
+    poly (Num n) = [n]
+    poly (F func) = error "no functions allowed in makePoly"
+    poly (Neg e) = poly e
+    poly (Mul (Neg (Num n)) (Pow X (Num p))) = replicate p 0 ++ [-n]
+    poly (Mul (Num n) (Pow X (Num p))) = replicate p 0 ++ [n]
+-}
+
+
+
 
 -- TODO make polynomials and trigs and other functions be raised to powers of functions
 -- not just constants (make the middle element in tuple to be an expression)
@@ -268,6 +342,8 @@ ms = map (\(a, b) -> if (isJust a && isNothing b) then (Just $ simp' $ fromJust 
 -- Trig: [(0,1), (1,1), (4,1), (1,1), (2,4), (3, 5)]
 --      represents (cos x + 4tan x + csc x + 2sec^4 x  + 3cot^5 x
 --      where x = any expression and note (0, 1) = 0 always and (1,0) gets error
+-- help TODO fix so that it handles (expr, expr, expr) and not (int, int, expr)
+{-
 groupToExpr :: Group -> [Expr]
 groupToExpr (Poly ps) = reverse $ map simplify $ zipWith (.*) ps' (zipWith (.^) xs es )
     where xs = replicate (length ps) X
@@ -284,6 +360,7 @@ groupToExpr (InvHyp hs) = map simplify $ latch  (zip hs fs)
     where fs = map F [Arcsinh X, Arccosh X, Arctanh X, Arccsch X, Arcsech X, Arccoth X]
 groupToExpr (Logarithmic ls) = map simplify $ latch (zip ls fs)
     where fs = map F [E X, Ln X, Log X X]  -- TODO fix so we can have different args for log base and arg.
+-}
 
 
 latch zs = map (\((c,e,u), f) -> c .* (push u f) .^ e) (map (\((tup, f)) -> (numify tup, f)) zs)
@@ -367,15 +444,21 @@ simplify (Add (Mul (Num a) x) (Mul (Num b) y))
 simplify (Add (Mul (Num a) x) (Mul y (Num b))) = simplify ((Num a) .* x .+ (Num b) .* y)
 simplify (Add (Mul x (Num a)) (Mul (Num b) y)) = simplify ((Num a) .* x .+ (Num b) .* y)
 simplify (Add (Mul x (Num a)) (Mul y (Num b))) = simplify ((Num a) .* x .+ (Num b) .* y)
+simplify (Add (Neg e1) (Neg e2)) = simplify (Neg e1) .- simplify e2
+simplify (Add (Neg e1) e2) = simplify (Neg e1) .+ simplify e2
+simplify (Add e1 (Neg e2)) = simplify e1 .- simplify e2
 simplify (Add x y) = if x == y then (Num 2 .* simplify x) else (simplify x .+ simplify y)
 
 simplify (Sub (Num n) (Num m)) = Num $ n - m
 simplify (Sub (Mul (Num a) (Num b)) (Mul (Num c) (Num d))) = Num $ a * b - c + d
 simplify (Sub (Mul (Num a) x) (Mul (Num b) y))
     = if x == y then (Num (a - b) .* simplify x) else ((Num a) .* simplify x .- (Num b) .* simplify y)
-simplify (Sub (Mul (Num a) x) (Mul y (Num b))) = simplify ((Num a) .* x .- (Num b) .* y)
-simplify (Sub (Mul x (Num a)) (Mul (Num b) y)) = simplify ((Num a) .* x .- (Num b) .* y)
-simplify (Sub (Mul x (Num a)) (Mul y (Num b))) = simplify ((Num a) .* x .- (Num b) .* y)
+simplify (Sub (Mul (Num a) x) (Mul y (Num b))) = simplify ((Num a) .* simplify x .- (Num b) .* simplify y)
+simplify (Sub (Mul x (Num a)) (Mul (Num b) y)) = simplify ((Num a) .* simplify x .- (Num b) .* simplify y)
+simplify (Sub (Mul x (Num a)) (Mul y (Num b))) = simplify ((Num a) .* simplify x .- (Num b) .* simplify y)
+simplify (Sub (Neg e1) (Neg e2)) = simplify e1 .+ simplify e2
+simplify (Sub (Neg e1) e2) = simplify e1 .- simplify e2
+simplify (Sub e1 (Neg e2)) = simplify e1 .+ simplify e2
 simplify (Sub x y) = if x == y then (Num 0) else (simplify x .- simplify y)
 
 simplify (Mul (Num 1) e2) = simplify e2
@@ -383,19 +466,33 @@ simplify (Mul e1 (Num 1)) = simplify e1
 simplify (Mul (Num 0) e2) = Num 0
 simplify (Mul e1 (Num 0)) = Num 0
 simplify (Mul (Num n) (Num m)) = Num $ n * m
+simplify (Mul u (Num n)) = Num n .* simplify u
 simplify (Mul (Neg u) (Neg v)) = simplify u .* simplify v
 simplify (Mul (Neg u) v) = Neg (simplify u .* simplify v)
 simplify (Mul u (Neg v)) = Neg (simplify u .* simplify v)
+simplify m@(Mul (Mul (Num a) (Pow x (Num p)))
+                (Mul (Num b) (Pow y (Num q))))
+    = if x == y then (Num $ a * b) .* simplify x .^ (Num $ p + q) else simplify m
 simplify (Mul x y) = if x == y then simplify x .* (Num 2) else simplify x .* simplify y
 
 simplify (Div (Num 0) (Num 0)) = error "0/0 not possible"
 simplify (Div (Num n) (Num m)) = Num $ n `div` m
 simplify (Div (Num 0) e2) = Num 0
+simplify (Div (Neg e1) (Neg e2)) = simplify $ simplify e1 ./ simplify e2
+simplify (Div (Neg e1) e2) = Neg (simplify e1 ./ simplify e2)
+simplify (Div e1 (Neg e2)) = Neg (simplify e1 ./ simplify e2)
 simplify (Div e1 (Num 0)) = error "divide by zero!"
 simplify (Div e1 (Num 1)) = simplify e1
+simplify d@(Div (Mul (Num a) (Pow x (Num p)))
+                (Mul (Num b) (Pow y (Num q))))
+    = if x == y then (Num $ a `div` b) .* simplify x .^ (Num $ p - q) else simplify d
 simplify (Div x y) = if x == y then (Num 1) else simplify x ./ simplify y
 
 simplify (Pow (Num n) (Num m)) = Num $ n ^ m
+simplify (Pow (Neg e1) (Neg e2)) = Num 1 ./ ((simplify (Neg e1)) .^ (simplify e2))
+simplify (Pow (Neg e1) (Num p)) = if (even p) then (simplify e1 .^ Num p)
+    else ((simplify (Neg e1)) .^ Num p)
+simplify (Pow e1 (Neg e2)) = Num 1 ./ (simplify e1 .^ simplify e2)
 simplify (Pow e (Num 0)) = Num 1
 simplify (Pow (Num 0) e) = Num 0
 simplify (Pow (Num 1) e) = Num 1
@@ -404,6 +501,9 @@ simplify (Pow x y) = simplify x .^ simplify y
 
 simplify (Neg (Num n)) = Num (-n)
 simplify (Neg (Neg e)) = simplify e
+simplify (Neg a@(Add e1 e2)) = simplify (Neg e1) .- simplify e2
+simplify (Neg s@(Sub e1 e2)) = simplify (Neg e1) .+ simplify e2
+simplify (Neg m@(Mul _ _)) = simplify m
 simplify (Neg e) = Neg $ simplify e
 
 
@@ -601,6 +701,7 @@ crownTree opMaybe n tree
     crown n tree@(Node op left right) = Node op (Leaf (Num n)) tree
 
 
+-- TODO fix because percolate makes x^2 * 3 into 6^X
 -- precondition: passed to percolation so there are no patterns like Node num num.
 -- precondition: passed to remove Empty _ after first thing so no Empty trees.
 rearrangeConsts :: Tree Expr -> Tree Expr
