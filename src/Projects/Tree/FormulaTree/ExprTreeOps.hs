@@ -27,14 +27,14 @@ data Function
 
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
     | Pow Expr Expr | Neg Expr | Num Int  {-Var Expr-} | X | Y | F Function
-    deriving (Eq, Show)
+    deriving (Eq)
 
 type Coeff = Int
 type Description = (Expr, Expr, Expr)
 
 data Group = Poly [Coeff] | Trig [Description] | InvTrig [Description] | Hyperbolic [Description] |
     InvHyp [Description] | Logarithmic [Description]
-    deriving (Eq)
+    deriving (Eq, Show)
 
 data Code = Code [Group]
 
@@ -195,31 +195,121 @@ isNegNum :: Expr -> Bool
 isNegNum (Neg (Num n)) = True
 isNegNum _ = False
 
-isSin :: Function -> Bool
-isSin (Sin _) = True
+--- Trigonometric ---
+isSin :: Expr -> Bool
+isSin (F (Sin _)) = True
 isSin _ = False
 
-isCos :: Function -> Bool
-isCos (Cos _) = True
+isCos :: Expr -> Bool
+isCos (F (Cos _)) = True
 isCos _ = False
 
-isTan :: Function -> Bool
-isTan (Tan _) = True
+isTan :: Expr -> Bool
+isTan (F (Tan _)) = True
 isTan _ = False
 
-isCsc :: Function -> Bool
-isCsc (Csc _) = True
+isCsc :: Expr -> Bool
+isCsc (F (Csc _)) = True
 isCsc _ = False
 
-isSec :: Function -> Bool
-isSec (Sec _) = True
+isSec :: Expr -> Bool
+isSec (F (Sec _)) = True
 isSec _ = False
 
-isCot :: Function -> Bool
-isCot (Cot _) = True
+isCot :: Expr -> Bool
+isCot (F (Cot _)) = True
 isCot _ = False
--- TODO finish making isFunctions things. Then make is Function where or all of them.
 
+isArcsin :: Expr -> Bool
+isArcsin (F (Arcsin _)) = True
+isArcsin _ = False
+
+isArccos :: Expr -> Bool
+isArccos (F (Arccos _)) = True
+isArccos _ = False
+
+isArctan :: Expr -> Bool
+isArctan (F (Arctan _)) = True
+isArctan _ = False
+
+isArccsc :: Expr -> Bool
+isArccsc (F (Arccsc _)) = True
+isArccsc _ = False
+
+isArcsec :: Expr -> Bool
+isArcsec (F (Arcsec _)) = True
+isArcsec _ = False
+
+isArccot :: Expr -> Bool
+isArccot (F (Arccot _)) = True
+isArccot _ = False
+
+--- Hyperbolic ---
+
+isSinh :: Expr -> Bool
+isSinh (F (Sinh _)) = True
+isSinh _ = False
+
+isCosh :: Expr -> Bool
+isCosh (F (Cosh _)) = True
+isCosh _ = False
+
+isTanh :: Expr -> Bool
+isTanh (F (Tanh _)) = True
+isTanh _ = False
+
+isCsch :: Expr -> Bool
+isCsch (F (Csch _)) = True
+isCsch _ = False
+
+isSech :: Expr -> Bool
+isSech (F (Sech _)) = True
+isSech _ = False
+
+isCoth :: Expr -> Bool
+isCoth (F (Coth _)) = True
+isCoth _ = False
+
+isArcsinh :: Expr -> Bool
+isArcsinh (F (Arcsinh _)) = True
+isArcsinh _ = False
+
+isArccosh :: Expr -> Bool
+isArccosh (F (Arccosh _)) = True
+isArccosh _ = False
+
+isArctanh :: Expr -> Bool
+isArctanh (F (Arctanh _)) = True
+isArctanh _ = False
+
+isArccsch :: Expr -> Bool
+isArccsch (F (Arccsch _)) = True
+isArccsch _ = False
+
+isArcsech :: Expr -> Bool
+isArcsech (F (Arcsech _)) = True
+isArcsech _ = False
+
+isArccoth :: Expr -> Bool
+isArccoth (F (Arccoth _)) = True
+isArccoth _ = False
+
+--- Logarithmic ---
+
+isLn :: Expr -> Bool
+isLn (F (Ln _)) = True
+isLn _ = False
+
+isLog :: Expr -> Bool
+isLog (F (Log _ _)) = True
+isLog _ = False
+
+isE :: Expr -> Bool
+isE (F (E _)) = True
+isE _ = False
+
+
+---------------------------------
 
 hasAdd :: Expr -> Bool
 hasAdd X = False
@@ -250,6 +340,7 @@ numSepTerms :: Expr -> Int
 numSepTerms = length . split -- expr arg here
 
 isGlued :: Expr -> Bool
+isGlued (Neg e) = isDiv e || isMul e || isPow e
 isGlued e = isDiv e || isMul e || isPow e
 
 -- TODO apply the first mul case thinking to other cases to get all cases.
@@ -262,8 +353,7 @@ split expr
     where
     split' n@(Num _) = [n]
     split' (Neg a@(Add _ _)) = map Neg (split' a)
-    {-split' (Neg (Mul e1 e2)) =
-        where es = split' e-}
+    split' (Neg s@(Sub _ _)) = map Neg (split' s)
     split' f@(F _) = [f]
     split' (Mul e1 e2) = [e1, e2]
     split' (Div e1 e2) = [e1, e2]
@@ -277,7 +367,7 @@ split expr
         | isGlued e1 && isGlued e2 = [e1, Neg e2]
         | isGlued e1 = [e1, Neg e2]
         | isGlued e2 = split' e1 ++ [Neg e2]
-        | otherwise = split' e1 ++ [Neg e2]
+        | otherwise = map Neg $ split' e1 ++ split' e2
 
 -- takes output of split and returns rebuilt expression
 rebuild :: [Expr] -> Expr
@@ -346,35 +436,101 @@ isPoly (Mul e1 e2) = isPoly e1 && isPoly e2
 isPoly (Div e1 e2) = isPoly e1 && isPoly e2
 isPoly (Pow e1 e2) = isPoly e1 && isPoly e2
 
+isTrig :: Expr -> Bool
+isTrig f = isSin f || isCos f || isTan f || isCsc f || isSec f || isCot f
+
+-- note this is passed only glued expressions!
+-- example hasOnlyOne isTrig 3x^7x^2sin(4x) = True
+hasOnlyOne :: (Expr -> Bool) -> Expr -> Bool
+hasOnlyOne f expr
+    | isGlued expr = (length $ filter (== True) $ map f (unGlue expr)) == 1
+    | otherwise = error "was passed non-glued expression"
+
+
+isInvTrig :: Expr -> Bool
+isInvTrig f = isArcsin f || isArccos f || isArctan f
+    || isArccsc f || isArcsec f || isArccot f
+
+isHyp :: Expr -> Bool
+isHyp f = isSinh f || isCosh f || isTanh f || isCsch f || isSech f || isCoth f
+
+isInvHyp :: Expr -> Bool
+isInvHyp f = isArcsinh f || isArccosh f || isArctanh f
+    || isArccsch f || isArcsech f || isArccoth f
+
+isLogar :: Expr -> Bool
+isLogar f = isLog f || isE f || isLn f
+
+
 -- note converts expression to code
 -- first splits expr at the plus / minus signs and then categorizes each element as either
 -- function or polynomial term. Puts them into code accordingly.
 -- If we have 7x^2 and 3x^2 in the same expr, then we have: Poly [0,0,(7+3)
+-- NOTE TODO if we have 3sec^2 x + sinxcosxtanx + x^2 tan x then
+-- we split: [3sec^2 x, sinxcosxtanx, x^2tan x]
+-- THen decide: map (decide if more than one function) over this
+-- then if not we send partition those that have more than one function and those that do not.
+-- For those that do not: send to simplify or rearrangeconst and to codifying to be simplified
+-- in case of repeat things, like we can have 4sec^2x that we must add to get 7sec^2x...
+-- For those that do have more than 1 func: send to functionsimplifier.
+-- TODO help filtering is incorrect here. Learn to allow things like x^2 sinx through the filter as well
+-- not just pure trig or hyp .. functions.
 {-
-
 exprToCode :: Expr -> Code
-exprToCode expr =
-    where splitted = partition isPoly (split expr)
+exprToCode expr = Code $ filter (not . emptyGroup) [poly, trig, invTrig, hyp, invHyp, logs]
+    where
+    ss = split expr
+    poly = codifyPoly $ filter isPoly ss
+    trig = codifyOther $ filter isTrig ss
+    invTrig = codifyOther $ filter isTrig ss
+    hyp = codifyOther $ filter isTrig ss
+    invHyp = codifyOther $ filter isTrig ss
+    logs = codifyOther $ filter isTrig ss
+
+    emptyGroup (Poly ps) = null ps
+    emptyGroup (Trig ts) = null ts
+    emptyGroup (InvTrig is) = null is
+    emptyGroup (Hyperbolic hs) = null hs
+    emptyGroup (InvHyp is) = null is
+    emptyGroup (Logarithmic ls) = null ls
+-}
+-- note
+-- precondition: an expression like 3sec^2x + sinx * cosx * tanx + x^2tan^2(x) will be separated
+-- from the glued and non-glued expressions. THen this function is passed the non-glued expressions,
+-- whereas the glued expressions like sinxcosxtanx will get passed to simplifyFunction then both
+-- come together in a simplifier function that  rebuilds the two expression lists.
+-- precondition: so in short, this functino is not prepared for things like sinx * cos x * tan x
+{-
+codifyOther :: [Expr] -> Group
+codifyOther [] = Tr
 -}
 
-{-
-data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
-    | Pow Expr Expr | Neg Expr | Num Int  -}{-Var Expr-}{- | X | Y | F Function-}
+-- TODO simplifier function that uses codifyOther and exprToCode must pass the sinxcosxtanx
+-- as trailing thread then rebuild the nonglued expressions with the above glued expressions
+-- similar to rebuild split thing.  Remember to learn to separate by calling "hasMoreThanOneFunc"
 
 
 
---makePoly :: [Expr] -> Group
-{-
-makePoly ps = Poly $ map poly (map simplify ps)
-    where
+
+-- note takes list of polynomials and makes it into Group type Poly [...]
+-- so 7x^2 + 3x^2 + 3x + 4x + 1 is [1, (3+4), (7+3)]
+codifyPoly :: [Expr] -> Group
+codifyPoly [] = Poly []
+codifyPoly ps = Poly $ foldl1 (zipWith (+)) $ addZeroes $ codify ps
+    where -- note poly expects no forms like 7x / 4x^3 in the list element position
+    addZeroes cs = map (\xs -> xs ++ replicate (maxCodeLen - length xs) 0) cs
+    codify ps = map poly (map simplify ps)
+    maxCodeLen = foldl1 max $ map length (codify ps)
     poly X = [0, 1]
     poly Y = [0, 1]
     poly (Num n) = [n]
     poly (F func) = error "no functions allowed in makePoly"
     poly (Neg e) = poly e
     poly (Mul (Neg (Num n)) (Pow X (Num p))) = replicate p 0 ++ [-n]
+    poly (Mul (Neg (Num n)) X) = [0, -n]
     poly (Mul (Num n) (Pow X (Num p))) = replicate p 0 ++ [n]
--}
+    poly (Mul (Num n) X) = [0, n]
+
 
 
 
@@ -450,6 +606,9 @@ push u (F (Ln v)) = F $ Ln u
 push u (F (Log v1 v2)) = F $ Log u u
 
 
+
+
+-- TODO major help why doesn't 4(x+3) simplify to 4x + 12, why 4x + (4)(3)?? ?
 simplify :: Expr -> Expr
 simplify X = X
 simplify Y = Y
@@ -571,19 +730,48 @@ simplify (Neg m@(Mul _ _)) = Neg $ simplify m
 simplify (Neg e) = Neg $ simplify e
 
 
-
--- takes an expression that just has * or / (no + or -) and  and returns the terms in list order
-{-
+-- TODO idea have list of lists to have divisions where division is inner but then
+-- how far would it go as we want to have muliplications in the divisions too... HELP
+-- postcondition takes an expression that just has * or / (no + or -) and  and returns the
+-- terms in list order
 unGlue :: Expr -> [Expr]
 unGlue X = [X]
 unGlue Y = [Y]
 unGlue (Num n) = [Num n]
-unGlue (Neg e) = [Neg (head $ unGlue e)] ++ tail $ unGlue e
+unGlue (Neg e) = [Neg (head (unGlue e))] ++ tail (unGlue e)
 unGlue (F f) = [F f]
 unGlue (Mul e1 e2) = unGlue e1 ++ unGlue e2
 unGlue (Div e1 e2) = unGlue e1 ++ unGlue e2
 unGlue p@(Pow _ _) = [p]
--}
+
+
+
+-- precondition: the items in the list were multiplied only! Not divided or added or subtracted
+-- TODO help improve (look at unglue todo)
+glue :: [Expr] -> Expr
+glue es = foldl1 Mul es
+-- TODO
+-- genius:
+-- foldl1 (\acc y -> if isNum y then (acc .* y) else acc)    (unGlue e1)
+
+-- note passed a thing like 4xsinxcosx4x^2tanxsecx(3)(2) and result is: 96sinxcosx(x^2)tanxsecx
+-- where we write sweep isNum arg to get result.
+-- precondition: the expr has to be glued! No add or subtract, just multiply and power.
+-- NOTE todo does not work if there are divisions... we just multiply. (look at unglue todo)
+sweep :: (Expr -> Bool) -> Expr -> Expr
+sweep f expr = glue $ [itemSwept] ++ remainder
+    where
+    elements = unGlue expr
+    itemSwept = simplifyComplete $ foldl1 (\acc y -> if f y then (acc .* y) else acc) elements
+    remainder = filter (not . f) elements
+    -- TODO e4 breaks at foldl1 because 2 is ignored.. FIX. 
+
+
+simplifyComplete :: Expr -> Expr
+simplifyComplete expr
+    | s == expr = expr
+    | otherwise = simplifyComplete $ simplify s
+    where s = simplify expr
 
 
 sameArgs :: Function -> Function -> Bool
