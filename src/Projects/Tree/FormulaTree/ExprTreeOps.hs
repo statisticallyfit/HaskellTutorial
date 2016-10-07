@@ -27,7 +27,7 @@ data Function
 
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
     | Pow Expr Expr | Neg Expr | Num Int  {-Var Expr-} | X | Y | F Function
-    deriving (Eq)
+    deriving (Eq, Show)
 
 type Coeff = Int
 type Description = (Expr, Expr, Expr)
@@ -43,6 +43,7 @@ data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq)
 -- TODO for fractional int dividing
 -- a = fst . head $ readFloat "0.75" :: Rational
 
+{-
 
 instance Show Expr where
     show X = "x"
@@ -70,6 +71,9 @@ instance Show Expr where
     show (Div (Num n) (Num m)) = show n ++ "/" ++ show m
     show (Div e1 e2) = "(" ++ show e1 ++ ") / (" ++ show e2 ++ ")"
     show (Pow e1 e2) = show e1 ++ "^" ++ show e2
+-}
+-- TODO do show instance for odd and even:
+-- Mul (Mul (Num 2) (Pow X (Num 3))) (Pow X (Num 6))
 
 
 instance Show Function where
@@ -343,6 +347,31 @@ isGlued :: Expr -> Bool
 isGlued (Neg e) = isDiv e || isMul e || isPow e
 isGlued e = isDiv e || isMul e || isPow e
 
+
+-- TODO rename split to take constructor and split based on that so split Mul and split Add and
+-- split Sub and split DIv ...
+-- TODO idea have list of lists to have divisions where division is inner but then
+-- how far would it go as we want to have muliplications in the divisions too... HELP
+-- postcondition takes an expression that just has * or / (no + or -) and  and returns the
+-- terms in list order
+unGlue :: Expr -> [Expr]
+unGlue X = [X]
+unGlue Y = [Y]
+unGlue (Num n) = [Num n]
+unGlue (Neg e) = [Neg (head (unGlue e))] ++ tail (unGlue e)
+unGlue (F f) = [F f]
+unGlue (Mul e1 e2) = unGlue e1 ++ unGlue e2
+unGlue (Div e1 e2) = unGlue e1 ++ unGlue e2
+unGlue p@(Pow _ _) = [p]
+
+
+
+-- precondition: the items in the list were multiplied only! Not divided or added or subtracted
+-- TODO help improve (look at unglue todo)
+glue :: [Expr] -> Expr
+glue es = foldl1 Mul es
+
+
 -- TODO apply the first mul case thinking to other cases to get all cases.
 -- splits the terms in the expression at + or -
 -- TODO rename unGlue to be splitGlue and the rebuild for glue to be rebuildGlue
@@ -368,6 +397,8 @@ split expr
         | isGlued e1 = [e1, Neg e2]
         | isGlued e2 = split' e1 ++ [Neg e2]
         | otherwise = map Neg $ split' e1 ++ split' e2
+
+
 
 -- takes output of split and returns rebuilt expression
 rebuild :: [Expr] -> Expr
@@ -726,30 +757,11 @@ simplify (Neg (Num n)) = Num (-n)
 simplify (Neg (Neg e)) = simplify e
 simplify (Neg a@(Add e1 e2)) = simplify (Neg e1) .- simplify e2
 simplify (Neg s@(Sub e1 e2)) = simplify (Neg e1) .+ simplify e2
+simplify (Neg (Mul (Num n) x)) = Num (-n) .* simplify x
 simplify (Neg m@(Mul _ _)) = Neg $ simplify m
 simplify (Neg e) = Neg $ simplify e
 
 
--- TODO idea have list of lists to have divisions where division is inner but then
--- how far would it go as we want to have muliplications in the divisions too... HELP
--- postcondition takes an expression that just has * or / (no + or -) and  and returns the
--- terms in list order
-unGlue :: Expr -> [Expr]
-unGlue X = [X]
-unGlue Y = [Y]
-unGlue (Num n) = [Num n]
-unGlue (Neg e) = [Neg (head (unGlue e))] ++ tail (unGlue e)
-unGlue (F f) = [F f]
-unGlue (Mul e1 e2) = unGlue e1 ++ unGlue e2
-unGlue (Div e1 e2) = unGlue e1 ++ unGlue e2
-unGlue p@(Pow _ _) = [p]
-
-
-
--- precondition: the items in the list were multiplied only! Not divided or added or subtracted
--- TODO help improve (look at unglue todo)
-glue :: [Expr] -> Expr
-glue es = foldl1 Mul es
 -- TODO
 -- genius:
 -- foldl1 (\acc y -> if isNum y then (acc .* y) else acc)    (unGlue e1)
@@ -758,13 +770,16 @@ glue es = foldl1 Mul es
 -- where we write sweep isNum arg to get result.
 -- precondition: the expr has to be glued! No add or subtract, just multiply and power.
 -- NOTE todo does not work if there are divisions... we just multiply. (look at unglue todo)
+-- IDEA or maybe we just use for this multiple trig functions and simplifying general x^2sinx functions
+-- before codifying them in codifyOther
+-- help don't know whether to simplify expr first or to pass to sweep.
 sweep :: (Expr -> Bool) -> Expr -> Expr
 sweep f expr = glue $ [itemSwept] ++ remainder
     where
     elements = unGlue expr
     itemSwept = simplifyComplete $ foldl1 (\acc y -> if f y then (acc .* y) else acc) elements
     remainder = filter (not . f) elements
-    -- TODO e4 breaks at foldl1 because 2 is ignored.. FIX. 
+    -- TODO e4 breaks at foldl1 because 2 is ignored.. FIX.
 
 
 simplifyComplete :: Expr -> Expr
