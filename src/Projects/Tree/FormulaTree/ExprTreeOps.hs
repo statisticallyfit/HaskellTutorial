@@ -36,7 +36,7 @@ data Group = Poly [Coeff] | Trig [Description] | InvTrig [Description] | Hyperbo
     InvHyp [Description] | Logarithmic [Description]
     deriving (Eq, Show)
 
-data Code = Code [Group]
+data Code = Code [Group] deriving (Eq, Show)
 
 data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq)
 
@@ -44,42 +44,116 @@ data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq)
 -- a = fst . head $ readFloat "0.75" :: Rational
 
 
+getNeg :: Expr -> Expr
+getNeg (Neg n) = n
+getNeg _ = error "incorrect argument"
+
+
+-- TODO update for division.
+-- idea: if has Add or sub then we split and apply this to the elements.
+-- precondition: argument is either power, num, neg, function.
+-- RULE: if the first thing in the unglued list is a number then do not surround it with brackets.
+{-
+
+lace :: String -> Expr -> String
+lace acc e
+    | isNum e = if (acc == "") then show e else (acc ++ "(" ++ show e ++ ")")
+    | isNegNum e || isNeg e = if (acc == "") then ("-" ++ show ne) else (acc ++ "(" ++ show e ++ ")")
+    | isPow e = acc ++ "(" ++ show e ++ ")"
+    | isFunction e = acc ++ show e
+    | otherwise = acc ++ "(" ++ show e ++ ")"
+    where ne = getNeg e
+
+-- TODO edit for division.
+printExpr :: Expr -> IO()
+printExpr e
+-- note here we differentiate between -7x^2 and 4(x)(3)(5)
+    | (isMono e) && (numTerms e <= 2) = putStrLn $ show $ simplifyComplete e -- is monomial then print simply.
+    | hasAdd e || hasSub e = putStrLn $ foldl1 plus $ map foldPrint (split e)
+    | otherwise = putStrLn $ foldPrint e
+    where
+    foldPrint expr = foldl lace "" (unGlue expr)
+    plus acc x = acc ++ " + " ++ x
+-}
+
+
+
+
+-- TODO idea: count num elements and then decide whether ot put brackets.
+-- Example: x^6 * 4 is shown as 4x^6 while 4 * (x+3) is shown as 4(x+3)
+-- idea: glued things are wrapped each.
+
 instance Show Expr where
     show X = "x"
     show Y = "y"
-    show (Neg e) = "-(" ++ show e ++ ")"
     show (Num n) = show n
     show (F func) = show func
     show (Add e1 e2) = show e1 ++ " + " ++ show e2
     show (Sub e1 e2) = show e1 ++ " - " ++ show e2
+
     show (Mul (Num n) (Num m)) = "(" ++ show n ++ ")(" ++ show m ++ ")"
-    show (Mul (Mul (Num n1) (Num n2)) (Num n3))
-        = "(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")"
-    show (Mul (Mul (Mul (Num n1) (Num n2)) (Num n3)) (Num n4))
-        = "(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")(" ++ show n4 ++ ")"
-    show (Mul p@(Pow e1 e2) (Num n)) = "(" ++ show p ++ ")(" ++ show n ++ ")"
-    show (Mul (Mul (Mul rest (Num n1)) (Num n2)) (Num n3))
-        = show rest ++ "(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")"
-    show (Mul (Mul rest (Num n1)) (Num n2)) = show rest ++ "(" ++ show n1 ++ ")(" ++ show n2 ++ ")"
-    show (Mul d1@(Div _ _) d2@(Div _ _)) = show d1 ++ " * " ++ show d2
-    show (Mul d@(Div _ _) m@(Mul _ _)) = show d ++ " * " ++ show m
-    show (Mul rest (Num n)) = show rest ++ "(" ++ show n ++ ")"
-    show (Mul p1@(Pow _ _) p2@(Pow _ _)) = show p1 ++ " * " ++ show p2
-    show (Mul m1@(Mul (Num a) (Pow _ _)) m2@(Mul (Num b) (Pow _ _))) = show m1 ++ " * " ++ show m2
     show (Mul (Num n) p@(Pow _ _)) = show n ++ show p
+    show (Mul (Num n) X) = show n ++ show X
+    show (Mul (Neg (Num n)) X) = "-" ++ show n ++ show X
+    show (Neg (Mul (Num n) X)) = "-" ++ show n ++ show X
+    show (Mul (Num n) rest) = show n ++ "(" ++ show rest ++ ")"
+
+    show (Mul (Mul (Mul (Mul rest p1@(Pow _ _)) p2@(Pow _ _)) p3@(Pow _ _)) p4@(Pow _ _))
+        = if isPow rest
+        then "(" ++ show rest ++ ")(" ++ show p1 ++ ")(" ++ show p2 ++ ")(" ++ show p3 ++ ")(" ++ show p4 ++ ")"
+        else show rest ++ "(" ++ show p1 ++ ")(" ++ show p2 ++ ")(" ++ show p3 ++ ")(" ++ show p4 ++ ")"
     show (Mul (Mul (Mul rest p1@(Pow _ _)) p2@(Pow _ _)) p3@(Pow _ _))
-        = show rest ++ "(" ++ show p1 ++ ")(" ++ show p2 ++ ")(" ++ show p3 ++ ")"
+        = if isPow rest
+        then "(" ++ show rest ++ ")(" ++ show p1 ++ ")(" ++ show p2 ++ ")(" ++ show p3 ++ ")"
+        else show rest ++ "(" ++ show p1 ++ ")(" ++ show p2 ++ ")(" ++ show p3 ++ ")"
     show (Mul (Mul rest p1@(Pow _ _)) p2@(Pow _ _))
-        = show rest ++ "(" ++ show p1 ++ ")(" ++ show p2 ++ ")"
-    show (Mul rest p@(Pow _ _)) = show rest ++ "(" ++ show p ++ ")"
+        = if isPow rest
+        then "(" ++ show rest ++ ")(" ++ show p1 ++ ")(" ++ show p2 ++ ")"
+        else show rest ++ "(" ++ show p1 ++ ")(" ++ show p2 ++ ")"
+    show (Mul rest p@(Pow _ _))
+        = if isPow rest
+        then "(" ++ show rest ++ ")(" ++ show p ++ ")"
+        else show rest ++ "(" ++ show p ++ ")"
+
+
+    show (Mul (Mul (Mul (Mul rest (Num n1)) (Num n2)) (Num n3)) (Num n4))
+        = if isNum rest
+        then "(" ++ show rest ++ ")(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")(" ++ show n4 ++ ")"
+        else show rest ++ "(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")(" ++ show n4 ++ ")"
+    show (Mul (Mul (Mul rest (Num n1)) (Num n2)) (Num n3))
+        = if isNum rest
+        then "(" ++ show rest ++ ")(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")"
+        else show rest ++ "(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")"
+    show (Mul (Mul rest (Num n1)) (Num n2))
+        = if isNum rest
+        then "(" ++ show rest ++ ")(" ++ show n1 ++ ")(" ++ show n2 ++ ")"
+        else show rest ++ "(" ++ show n1 ++ ")(" ++ show n2 ++ ")"
+    show (Mul rest (Num n))
+        = if isNum rest
+        then "(" ++ show rest ++ ")(" ++ show n ++ ")"
+        else show rest ++ "(" ++ show n ++ ")"
+
+    show (Mul d1@(Div _ _) d2@(Div _ _)) = "(" ++ show d1 ++ ") (" ++ show d2 ++ ")"
+    show (Mul d@(Div _ _) m@(Mul _ _)) = "(" ++ show d ++ ") (" ++ show m ++ ")"
+    show (Mul m@(Mul _ _) d@(Div _ _)) = "(" ++ show m ++ ") (" ++ show d ++ ")"
+    show (Mul m1@(Mul (Num a) (Pow _ _)) m2@(Mul (Num b) (Pow _ _)))
+        = "(" ++ show m1 ++ ") (" ++ show m2 ++ ")"
     show (Mul e1 a@(Add _ _)) = show e1 ++ "(" ++ show a ++ ")"
     show (Mul e1 ng@(Neg (Num n))) = show e1 ++ "(" ++ show ng ++ ")"
-    show (Mul e1 e2) = show e1 ++ show e2
+    show (Mul e1 e2)
+        = if isPow e1 && isPow e2
+         then show e1 ++ " * " ++ show e2
+         else if isPow e1 && isNum e2
+         then "(" ++ show e1 ++ ")(" ++ show e2 ++ ")"
+         else show e1 ++ show e2
+
     show (Div (Num n) (Num m)) = show n ++ "/" ++ show m
     show (Div e1 e2) = "(" ++ show e1 ++ ") / (" ++ show e2 ++ ")"
     show (Pow x d@(Div (Num a) (Num b))) = show x ++ "^(" ++ show d ++ ")"
     show (Pow x d@(Div e1 e2)) = show x ++ "^" ++ show d
     show (Pow e1 e2) = show e1 ++ "^" ++ show e2
+
+    show (Neg e) = "-(" ++ show e ++ ")"
 
 -- TODO do show instance for odd and even:
 -- Mul (Mul (Num 2) (Pow X (Num 3))) (Pow X (Num 6))
@@ -207,6 +281,15 @@ isNum _ = False
 isNegNum :: Expr -> Bool
 isNegNum (Neg (Num n)) = True
 isNegNum _ = False
+
+isVar :: Expr -> Bool
+isVar X = True
+isVar Y = True
+isVar _ = False
+
+isNeg :: Expr -> Bool
+isNeg (Neg e) = True
+isNeg _ = False
 
 --- Trigonometric ---
 isSin :: Expr -> Bool
@@ -349,13 +432,19 @@ hasSub (Div e1 e2) = hasSub e1 || hasSub e2
 hasSub (Pow e1 e2) = hasSub e1 || hasSub e2
 
 -- count of terms where terms are separated by + or - but not * or / or ^
-numSepTerms :: Expr -> Int
-numSepTerms = length . split -- expr arg here
+numFloatingTerms :: Expr -> Int
+numFloatingTerms = length . split -- expr arg here
 
 isGlued :: Expr -> Bool
 isGlued (Neg e) = isDiv e || isMul e || isPow e
 isGlued e = isDiv e || isMul e || isPow e
 
+
+-- counts total number of separate terms, where powers are counted as 1 term.
+numTerms :: Expr -> Int
+numTerms expr
+    | hasAdd expr || hasSub expr = length $ concatMap unGlue (split expr)
+    | otherwise = length $ unGlue expr
 
 -- TODO rename split to take constructor and split based on that so split Mul and split Add and
 -- split Sub and split DIv ...
@@ -381,37 +470,45 @@ glue :: [Expr] -> Expr
 glue es = foldl1 Mul es
 
 
+{-
+data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
+    | Pow Expr Expr | Neg Expr | Num Int  -}{-Var Expr-}{- | X | Y | F Function
+    deriving (Eq)-}
+
+
 -- TODO apply the first mul case thinking to other cases to get all cases.
 -- splits the terms in the expression at + or -
 -- TODO rename unGlue to be splitGlue and the rebuild for glue to be rebuildGlue
 split :: Expr -> [Expr]
-split expr
-    | hasAdd expr || hasSub expr = split' expr
-    | otherwise = [expr]
+split op expr
+    | op == Add = splitA expr
+    | op == Sub = splitS expr
+    | op == Mul = splitM expr
+    | op == Div = splitD expr
     where
-    split' n@(Num _) = [n]
-    split' (Neg a@(Add _ _)) = map Neg (split' a)
-    split' (Neg s@(Sub _ _)) = map Neg (split' s)
-    split' f@(F _) = [f]
-    split' (Mul e1 e2) = [e1, e2]
-    split' (Div e1 e2) = [e1, e2]
-    split' (Pow e1 e2) = [e1, e2]
-    split' (Add e1 e2)
+    splitA (Num n) = [Num n]
+    splitA (Neg e) = if isGlued e then [Neg e] else (map Neg (splitA e))
+    splitA (F f) = [F f]
+    splitA (Mul e1 e2) = [e1, e2]
+    splitA (Div e1 e2) = [e1, e2]
+    splitA (Pow e1 e2) = [e1, e2]
+    splitA (Add e1 e2)
         | isGlued e1 && isGlued e2 = [e1, e2]
-        | isGlued e1 = [e1] ++ split' e2
-        | isGlued e2 = split' e1 ++ [e2]
-        | otherwise = split' e1 ++ split' e2
-    split' (Sub e1 e2)
+        | isGlued e1 = [e1] ++ splitA e2
+        | isGlued e2 = splitA e1 ++ [e2]
+        | otherwise = splitA e1 ++ splitA e2
+    splitA (Sub e1 e2)
         | isGlued e1 && isGlued e2 = [e1, Neg e2]
-        | isGlued e1 = [e1, Neg e2]
-        | isGlued e2 = split' e1 ++ [Neg e2]
-        | otherwise = map Neg $ split' e1 ++ split' e2
+        | isGlued e1 = [e1] ++ splitA (Neg e2)
+        | isGlued e2 = splitA e1 ++ [Neg e2]
+        | otherwise = splitA e1 ++ map Neg (splitA e2)
 
 
 
 -- takes output of split and returns rebuilt expression
 rebuild :: [Expr] -> Expr
-rebuild es = foldl1 Add es
+rebuild es = foldl1 f es
+    where f acc x = if isNeg x then (Sub acc (getNeg x)) else (Add acc x)
 
 
 -- TODO idea: make array holding coefficients of powers
@@ -427,20 +524,38 @@ rebuild es = foldl1 Add es
 -- 4) make subH cases ... (then same for mulH, divH)
 
 
--- note in cases like 4x + sin(3x) is just separates polynomials from trig and log so that we just
--- simplify those.
--- takes something like single expression 2sin(3x) + 4sin(3x) = 6sin(3x)
--- TODO: fix holderToExpr to handle 2xsin(3x) things then update this one too.
--- TODO help when given multiplication or division or powers. won't know how to parse
--- into expression holder.
--- IMPORTANT oh wait, i made multiplication left associative  so
--- will the expression look like this (2) (xsin(3x)) so that it will work for this function?
+{-
+TODO PLAN
 
--- TODO correct to take exprholder (holds poly, trig..)
--- TODO now to convert to expression, unzip, get rid of justa nd conver nothings to 0.
+input -> split Add -> partition -> (poly terms (1), other)
 
+other -> split Mul -> partition -> (poly terms (2), functions)
+
+functions -> send to function simplifyFunctions (or fold using simplifyFunctions principles)
+principle:
+represent sin ^ tan x (x) or sin^ 2 (3x^6) as:
+Trig [(tan x, X), 0,0,0,0,0] and,
+Trig [(Num 2, (3x^6)),0,0,0,0,0] respectively.
+
+principle: we add only if both elements in tuple are equal pairwise, (same for sub) resulting in
+new data holder: Trig [(Num 2, same exp, same arg)]
+
+and we multiply only if the argument is equal (snd) so we get Trig [(tanx + Num 2 as exp, X)]
+assuming arg was X for both. same for div
+
+---
+poly terms (1) -> (make sure to split by both add and sub) then send to addH
+
+poly terms (2) -> these are split by Mul, so if any of these elements "have Div" then split that one
+by Div and send to divH. Otherwise, send to mulH.
+-}
+
+
+-- note takes a codeified polynomial, or trig or invtrig... and adds the two codified things.
+-- note todo currently just impleneted for codified polynomial
 --addH :: [(Coeff, Expo, Expr)] -> [(Coeff, Expo, Expr)] -> Expr
-addH h1 h2 = simplifiedMaybes
+-- addCodes :: Code -> Code -> Code 
+addCodes h1 h2 = simplifiedMaybes
     where
     h1' = map numify h1
     h2' = map numify h2
@@ -463,8 +578,23 @@ ms = map (\(a, b) -> if (isJust a && isNothing b) then (Just $ clean' $ fromJust
 
 
 
--- note says if expression contains no functions and is just a polynomial term like 7x^2
+-- note says if expression is a single polynomial term like 5x (monomial)
+isMono:: Expr -> Bool
+isMono e
+    | hasAdd e' || hasSub e' = False
+    | otherwise = foldl f True s'
+    where
+    e' = simplifyComplete e
+    s' = map simplifyComplete $ unGlue e'
+    f = (\acc x -> acc && (isNum x || isVar x || isPolyPow x))
+    isPolyPow (Pow X (Num n)) = True
+    isPolyPow (Pow Y (Num n)) = True
+    isPolyPow _ = False
+
+
+-- note says if expression contains no functions and is just a polynomial term like 7x^2 / 6x or just 5x
 isPoly :: Expr -> Bool
+--isPoly = not . isFunction
 isPoly X = True
 isPoly Y = True
 isPoly (Num n) = True
@@ -501,6 +631,9 @@ isInvHyp f = isArcsinh f || isArccosh f || isArctanh f
 isLogar :: Expr -> Bool
 isLogar f = isLog f || isE f || isLn f
 
+isFunction :: Expr -> Bool
+isFunction (F _) = True
+isFunction _ = False
 
 -- note converts expression to code
 -- first splits expr at the plus / minus signs and then categorizes each element as either
