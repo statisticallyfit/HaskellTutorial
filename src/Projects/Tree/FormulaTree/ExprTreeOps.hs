@@ -27,7 +27,7 @@ data Function
 
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
     | Pow Expr Expr | Neg Expr | Num Int  {-Var Expr-} | X | Y | F Function
-    deriving (Eq, Show)
+    deriving (Eq)
 
 type Coeff = Int
 type Description = (Expr, Expr, Expr)
@@ -43,7 +43,6 @@ data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq)
 -- TODO for fractional int dividing
 -- a = fst . head $ readFloat "0.75" :: Rational
 
-{-
 
 instance Show Expr where
     show X = "x"
@@ -54,7 +53,11 @@ instance Show Expr where
     show (Add e1 e2) = show e1 ++ " + " ++ show e2
     show (Sub e1 e2) = show e1 ++ " - " ++ show e2
     show (Mul (Num n) (Num m)) = "(" ++ show n ++ ")(" ++ show m ++ ")"
-    show (Mul p@(Pow e1 e2) (Num n)) = show p ++ "(" ++ show n ++ ")"
+    show (Mul (Mul (Num n1) (Num n2)) (Num n3))
+        = "(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")"
+    show (Mul (Mul (Mul (Num n1) (Num n2)) (Num n3)) (Num n4))
+        = "(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")(" ++ show n4 ++ ")"
+    show (Mul p@(Pow e1 e2) (Num n)) = "(" ++ show p ++ ")(" ++ show n ++ ")"
     show (Mul (Mul (Mul rest (Num n1)) (Num n2)) (Num n3))
         = show rest ++ "(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")"
     show (Mul (Mul rest (Num n1)) (Num n2)) = show rest ++ "(" ++ show n1 ++ ")(" ++ show n2 ++ ")"
@@ -63,15 +66,21 @@ instance Show Expr where
     show (Mul rest (Num n)) = show rest ++ "(" ++ show n ++ ")"
     show (Mul p1@(Pow _ _) p2@(Pow _ _)) = show p1 ++ " * " ++ show p2
     show (Mul m1@(Mul (Num a) (Pow _ _)) m2@(Mul (Num b) (Pow _ _))) = show m1 ++ " * " ++ show m2
-    show (Mul n (Pow x d@(Div (Num a) (Num b)))) = show n ++ show x ++ "^(" ++ show d ++ ")"
-    show (Mul n (Pow x d@(Div e1 e2))) = show n ++ show x ++ "^" ++ show d
+    show (Mul (Num n) p@(Pow _ _)) = show n ++ show p
+    show (Mul (Mul (Mul rest p1@(Pow _ _)) p2@(Pow _ _)) p3@(Pow _ _))
+        = show rest ++ "(" ++ show p1 ++ ")(" ++ show p2 ++ ")(" ++ show p3 ++ ")"
+    show (Mul (Mul rest p1@(Pow _ _)) p2@(Pow _ _))
+        = show rest ++ "(" ++ show p1 ++ ")(" ++ show p2 ++ ")"
+    show (Mul rest p@(Pow _ _)) = show rest ++ "(" ++ show p ++ ")"
     show (Mul e1 a@(Add _ _)) = show e1 ++ "(" ++ show a ++ ")"
     show (Mul e1 ng@(Neg (Num n))) = show e1 ++ "(" ++ show ng ++ ")"
     show (Mul e1 e2) = show e1 ++ show e2
     show (Div (Num n) (Num m)) = show n ++ "/" ++ show m
     show (Div e1 e2) = "(" ++ show e1 ++ ") / (" ++ show e2 ++ ")"
+    show (Pow x d@(Div (Num a) (Num b))) = show x ++ "^(" ++ show d ++ ")"
+    show (Pow x d@(Div e1 e2)) = show x ++ "^" ++ show d
     show (Pow e1 e2) = show e1 ++ "^" ++ show e2
--}
+
 -- TODO do show instance for odd and even:
 -- Mul (Mul (Num 2) (Pow X (Num 3))) (Pow X (Num 6))
 
