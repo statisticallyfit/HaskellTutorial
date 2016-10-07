@@ -38,8 +38,8 @@
       <file leaf-file-name="ExprTreeOps.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/ExprTreeOps.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="1.1156352">
-              <caret line="556" column="36" selection-start-line="556" selection-start-column="36" selection-end-line="556" selection-end-column="36" />
+            <state vertical-scroll-proportion="0.22964169">
+              <caret line="515" column="9" selection-start-line="515" selection-start-column="9" selection-end-line="515" selection-end-column="9" />
               <folding />
             </state>
           </provider>
@@ -920,12 +920,12 @@
       <workItem from="1475555341212" duration="21822000" />
       <workItem from="1475647976487" duration="26816000" />
       <workItem from="1475732694803" duration="31916000" />
-      <workItem from="1475814668011" duration="23463000" />
+      <workItem from="1475814668011" duration="23916000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="204502000" />
+    <option name="totallyTimeSpent" value="204955000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="24" width="968" height="776" extended-state="0" />
@@ -1260,8 +1260,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/ExprTreeOps.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.1156352">
-          <caret line="556" column="36" selection-start-line="556" selection-start-column="36" selection-end-line="556" selection-end-column="36" />
+        <state vertical-scroll-proportion="0.22964169">
+          <caret line="515" column="9" selection-start-line="515" selection-start-column="9" selection-end-line="515" selection-end-column="9" />
           <folding />
         </state>
       </provider>

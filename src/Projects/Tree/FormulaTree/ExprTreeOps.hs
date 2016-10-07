@@ -60,6 +60,7 @@ lace acc e
     | isNum e = if (acc == "") then show e else (acc ++ "(" ++ show e ++ ")")
     | isNegNum e || isNeg e = if (acc == "") then ("-" ++ show ne) else (acc ++ "(" ++ show e ++ ")")
     | isPow e = acc ++ "(" ++ show e ++ ")"
+    | isDiv e = --peseudo code: acc ++ ( ++ printExpr e1 ++ ") / (" ++ print Expr e2 ++ ")" of div expr
     | isFunction e = acc ++ show e
     | otherwise = acc ++ "(" ++ show e ++ ")"
     where ne = getNeg e
@@ -250,7 +251,7 @@ NOTE:
 TODO be able to fold over tree and simplify constants but also remember order that they
 were in the tree!
 Then remember also where they go at the end!
-TODO get infinite decimal to fraction converter.
+-- TODO get infinite decimal to fraction converter.
 -}
 
 
@@ -511,19 +512,6 @@ rebuild es = foldl1 f es
     where f acc x = if isNeg x then (Sub acc (getNeg x)) else (Add acc x)
 
 
--- TODO idea: make array holding coefficients of powers
--- so that Array (2, 0, 1, 5) means 5x^3 + x^2 + 2
--- then we can add/sub/mul/div/pow.
--- Once we simplify the expression this way (single elements only)
--- then we can use the tree to add/sub  things like x^2 * sin^3(2x)
--- by providing a ~= operator that is true if the structure is the same.
--- TODO PLAN:
--- 1) make parseExpr
--- 2) make parseCode
--- 3) make addH cases: polynomial, trig, invtrig...
--- 4) make subH cases ... (then same for mulH, divH)
-
-
 {-
 TODO PLAN
 
@@ -548,13 +536,16 @@ poly terms (1) -> (make sure to split by both add and sub) then send to addH
 
 poly terms (2) -> these are split by Mul, so if any of these elements "have Div" then split that one
 by Div and send to divH. Otherwise, send to mulH.
+
+---
+Clean up with sweep Num _
 -}
 
 
 -- note takes a codeified polynomial, or trig or invtrig... and adds the two codified things.
 -- note todo currently just impleneted for codified polynomial
 --addH :: [(Coeff, Expo, Expr)] -> [(Coeff, Expo, Expr)] -> Expr
--- addCodes :: Code -> Code -> Code 
+-- addCodes :: Code -> Code -> Code
 addCodes h1 h2 = simplifiedMaybes
     where
     h1' = map numify h1
@@ -608,6 +599,7 @@ isPoly (Pow e1 e2) = isPoly e1 && isPoly e2
 
 isTrig :: Expr -> Bool
 isTrig f = isSin f || isCos f || isTan f || isCsc f || isSec f || isCot f
+{-
 
 -- note this is passed only glued expressions!
 -- example hasOnlyOne isTrig 3x^7x^2sin(4x) = True
@@ -615,6 +607,7 @@ hasOnlyOne :: (Expr -> Bool) -> Expr -> Bool
 hasOnlyOne f expr
     | isGlued expr = (length $ filter (== True) $ map f (unGlue expr)) == 1
     | otherwise = error "was passed non-glued expression"
+-}
 
 
 isInvTrig :: Expr -> Bool
@@ -634,6 +627,8 @@ isLogar f = isLog f || isE f || isLn f
 isFunction :: Expr -> Bool
 isFunction (F _) = True
 isFunction _ = False
+
+-- note TODO look at plan above split keep this for reference if above doesn't work but it seems to ..
 
 -- note converts expression to code
 -- first splits expr at the plus / minus signs and then categorizes each element as either
