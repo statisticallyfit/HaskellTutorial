@@ -25,6 +25,8 @@ data Function
     deriving (Eq)
 
 
+data Op = AddOp | SubOp | MulOp | DivOp | PowOp deriving (Eq, Show)
+
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
     | Pow Expr Expr | Neg Expr | Num Int  {-Var Expr-} | X | Y | F Function
     deriving (Eq)
@@ -85,76 +87,89 @@ printExpr e
 -- idea: glued things are wrapped each.
 
 instance Show Expr where
-    show X = "x"
-    show Y = "y"
-    show (Num n) = show n
-    show (F func) = show func
-    show (Add e1 e2) = show e1 ++ " + " ++ show e2
-    show (Sub e1 e2) = show e1 ++ " - " ++ show e2
+    show expr
+        | isMono expr = concatMap show $ split MulOp expr
+        | otherwise = show' expr
+        where
+        show' X = "x"
+        show' Y = "y"
+        show' (Num n) = show' n
+        show' (F func) = show' func
+        show' (Add e1 e2) = show' e1 ++ " + " ++ show' e2
+        show' (Sub e1 e2) = show' e1 ++ " - " ++ show' e2
 
-    show (Mul (Num n) (Num m)) = "(" ++ show n ++ ")(" ++ show m ++ ")"
-    show (Mul (Num n) p@(Pow _ _)) = show n ++ show p
-    show (Mul (Num n) X) = show n ++ show X
-    show (Mul (Neg (Num n)) X) = "-" ++ show n ++ show X
-    show (Neg (Mul (Num n) X)) = "-" ++ show n ++ show X
-    show (Mul (Num n) rest) = show n ++ "(" ++ show rest ++ ")"
+        show' (Mul (Num n) (Num m)) = "(" ++ show' n ++ ")(" ++ show' m ++ ")"
+        show' (Mul (Num n) p@(Pow _ _)) = show' n ++ show p
+        show' (Mul (Num n) X) = show' n ++ show' X
+        show' (Mul (Neg (Num n)) X) = "-" ++ show' n ++ show' X
+        show' (Neg (Mul (Num n) X)) = "-" ++ show' n ++ show' X
+        show' (Mul (Num n) rest) = show' n ++ "(" ++ show' rest ++ ")"
 
-    show (Mul (Mul (Mul (Mul rest p1@(Pow _ _)) p2@(Pow _ _)) p3@(Pow _ _)) p4@(Pow _ _))
-        = if isPow rest
-        then "(" ++ show rest ++ ")(" ++ show p1 ++ ")(" ++ show p2 ++ ")(" ++ show p3 ++ ")(" ++ show p4 ++ ")"
-        else show rest ++ "(" ++ show p1 ++ ")(" ++ show p2 ++ ")(" ++ show p3 ++ ")(" ++ show p4 ++ ")"
-    show (Mul (Mul (Mul rest p1@(Pow _ _)) p2@(Pow _ _)) p3@(Pow _ _))
-        = if isPow rest
-        then "(" ++ show rest ++ ")(" ++ show p1 ++ ")(" ++ show p2 ++ ")(" ++ show p3 ++ ")"
-        else show rest ++ "(" ++ show p1 ++ ")(" ++ show p2 ++ ")(" ++ show p3 ++ ")"
-    show (Mul (Mul rest p1@(Pow _ _)) p2@(Pow _ _))
-        = if isPow rest
-        then "(" ++ show rest ++ ")(" ++ show p1 ++ ")(" ++ show p2 ++ ")"
-        else show rest ++ "(" ++ show p1 ++ ")(" ++ show p2 ++ ")"
-    show (Mul rest p@(Pow _ _))
-        = if isPow rest
-        then "(" ++ show rest ++ ")(" ++ show p ++ ")"
-        else show rest ++ "(" ++ show p ++ ")"
+        show (Mul (Mul (Mul (Mul rest p1@(Pow _ _)) p2@(Pow _ _)) p3@(Pow _ _)) p4@(Pow _ _))
+            = if isPow rest
+            then "(" ++ show rest ++ ")(" ++ show p1 ++ ")(" ++ show p2 ++ ")(" ++ show p3 ++ ")(" ++ show p4 ++ ")"
+            else show rest ++ "(" ++ show p1 ++ ")(" ++ show p2 ++ ")(" ++ show p3 ++ ")(" ++ show p4 ++ ")"
+        show (Mul (Mul (Mul rest p1@(Pow _ _)) p2@(Pow _ _)) p3@(Pow _ _))
+            = if isPow rest
+            then "(" ++ show rest ++ ")(" ++ show p1 ++ ")(" ++ show p2 ++ ")(" ++ show p3 ++ ")"
+            else show rest ++ "(" ++ show p1 ++ ")(" ++ show p2 ++ ")(" ++ show p3 ++ ")"
+        show (Mul (Mul rest p1@(Pow _ _)) p2@(Pow _ _))
+            = if isPow rest
+            then "(" ++ show rest ++ ")(" ++ show p1 ++ ")(" ++ show p2 ++ ")"
+            else show rest ++ "(" ++ show p1 ++ ")(" ++ show p2 ++ ")"
+        show (Mul rest p@(Pow _ _))
+            = if isPow rest
+            then "(" ++ show rest ++ ")(" ++ show p ++ ")"
+            else show rest ++ "(" ++ show p ++ ")"
 
 
-    show (Mul (Mul (Mul (Mul rest (Num n1)) (Num n2)) (Num n3)) (Num n4))
-        = if isNum rest
-        then "(" ++ show rest ++ ")(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")(" ++ show n4 ++ ")"
-        else show rest ++ "(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")(" ++ show n4 ++ ")"
-    show (Mul (Mul (Mul rest (Num n1)) (Num n2)) (Num n3))
-        = if isNum rest
-        then "(" ++ show rest ++ ")(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")"
-        else show rest ++ "(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")"
-    show (Mul (Mul rest (Num n1)) (Num n2))
-        = if isNum rest
-        then "(" ++ show rest ++ ")(" ++ show n1 ++ ")(" ++ show n2 ++ ")"
-        else show rest ++ "(" ++ show n1 ++ ")(" ++ show n2 ++ ")"
-    show (Mul rest (Num n))
-        = if isNum rest
-        then "(" ++ show rest ++ ")(" ++ show n ++ ")"
-        else show rest ++ "(" ++ show n ++ ")"
+        show (Mul (Mul (Mul (Mul rest (Num n1)) (Num n2)) (Num n3)) (Num n4))
+            = if isNum rest
+            then "(" ++ show rest ++ ")(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")(" ++ show n4 ++ ")"
+            else show rest ++ "(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")(" ++ show n4 ++ ")"
+        show (Mul (Mul (Mul rest (Num n1)) (Num n2)) (Num n3))
+            = if isNum rest
+            then "(" ++ show rest ++ ")(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")"
+            else show rest ++ "(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")"
+        show (Mul (Mul rest (Num n1)) (Num n2))
+            = if isNum rest
+            then "(" ++ show rest ++ ")(" ++ show n1 ++ ")(" ++ show n2 ++ ")"
+            else show rest ++ "(" ++ show n1 ++ ")(" ++ show n2 ++ ")"
+        show (Mul rest (Num n))
+            = if isNum rest
+            then "(" ++ show rest ++ ")(" ++ show n ++ ")"
+            else show rest ++ "(" ++ show n ++ ")"
 
-    show (Mul d1@(Div _ _) d2@(Div _ _)) = "(" ++ show d1 ++ ") (" ++ show d2 ++ ")"
-    show (Mul d@(Div _ _) m@(Mul _ _)) = "(" ++ show d ++ ") (" ++ show m ++ ")"
-    show (Mul m@(Mul _ _) d@(Div _ _)) = "(" ++ show m ++ ") (" ++ show d ++ ")"
-    show (Mul m1@(Mul (Num a) (Pow _ _)) m2@(Mul (Num b) (Pow _ _)))
-        = "(" ++ show m1 ++ ") (" ++ show m2 ++ ")"
-    show (Mul e1 a@(Add _ _)) = show e1 ++ "(" ++ show a ++ ")"
-    show (Mul e1 ng@(Neg (Num n))) = show e1 ++ "(" ++ show ng ++ ")"
-    show (Mul e1 e2)
-        = if isPow e1 && isPow e2
-         then show e1 ++ " * " ++ show e2
-         else if isPow e1 && isNum e2
-         then "(" ++ show e1 ++ ")(" ++ show e2 ++ ")"
-         else show e1 ++ show e2
+        show (Mul d1@(Div _ _) d2@(Div _ _)) = "(" ++ show d1 ++ ") (" ++ show d2 ++ ")"
+        show (Mul d@(Div _ _) m@(Mul _ _)) = "(" ++ show d ++ ") (" ++ show m ++ ")"
+        show (Mul m@(Mul _ _) d@(Div _ _)) = "(" ++ show m ++ ") (" ++ show d ++ ")"
+        show (Mul m1@(Mul (Num a) (Pow _ _)) m2@(Mul (Num b) (Pow _ _)))
+            = "(" ++ show m1 ++ ") (" ++ show m2 ++ ")"
+        show (Mul e1 a@(Add _ _)) = show e1 ++ "(" ++ show a ++ ")"
+        show (Mul e1 ng@(Neg (Num n))) = show e1 ++ "(" ++ show ng ++ ")"
+        show (Mul e1 e2)
+            = if isPow e1 && isPow e2
+             then show e1 ++ " * " ++ show e2
+             else if isPow e1 && isNum e2
+             then "(" ++ show e1 ++ ")(" ++ show e2 ++ ")"
+             else show e1 ++ show e2
 
-    show (Div (Num n) (Num m)) = show n ++ "/" ++ show m
-    show (Div e1 e2) = "(" ++ show e1 ++ ") / (" ++ show e2 ++ ")"
-    show (Pow x d@(Div (Num a) (Num b))) = show x ++ "^(" ++ show d ++ ")"
-    show (Pow x d@(Div e1 e2)) = show x ++ "^" ++ show d
-    show (Pow e1 e2) = show e1 ++ "^" ++ show e2
+        show (Div (Num n) (Num m)) = show n ++ "/" ++ show m
+        show (Div e1 e2) = "(" ++ show e1 ++ ") / (" ++ show e2 ++ ")"
+        show (Pow x d@(Div (Num a) (Num b))) = show x ++ "^(" ++ show d ++ ")"
+        show (Pow x d@(Div e1 e2)) = show x ++ "^" ++ show d
+        show (Pow e1 e2) = show e1 ++ "^" ++ show e2
 
-    show (Neg e) = "-(" ++ show e ++ ")"
+        show (Neg m@(Mul _ _)) = "-" ++ show m
+        show (Neg d@(Div _ _)) = "-" ++ show d
+        show (Neg p@(Pow _ _)) = "-" ++ show p
+        show (Neg f@(F _)) = "-" ++ show f
+        show (Neg X) = "-" ++ show X
+        show (Neg Y) = "-" ++ show Y
+        show (Neg e) = "-(" ++ show e ++ ")"
+
+
+
 
 -- TODO do show instance for odd and even:
 -- Mul (Mul (Num 2) (Pow X (Num 3))) (Pow X (Num 6))
@@ -407,6 +422,10 @@ isE _ = False
 
 
 ---------------------------------
+-- does not refer to data Op, just data Expr (Add, sub, mul..)
+isOp :: Expr -> Bool
+isOp e = isAdd e || isSub e || isMul e || isDiv e || isPow e
+
 
 hasAdd :: Expr -> Bool
 hasAdd X = False
@@ -432,20 +451,15 @@ hasSub (Mul e1 e2) = hasSub e1 || hasSub e2
 hasSub (Div e1 e2) = hasSub e1 || hasSub e2
 hasSub (Pow e1 e2) = hasSub e1 || hasSub e2
 
--- count of terms where terms are separated by + or - but not * or / or ^
-numFloatingTerms :: Expr -> Int
-numFloatingTerms = length . split -- expr arg here
-
-isGlued :: Expr -> Bool
-isGlued (Neg e) = isDiv e || isMul e || isPow e
-isGlued e = isDiv e || isMul e || isPow e
-
 
 -- counts total number of separate terms, where powers are counted as 1 term.
 numTerms :: Expr -> Int
-numTerms expr
-    | hasAdd expr || hasSub expr = length $ concatMap unGlue (split expr)
-    | otherwise = length $ unGlue expr
+numTerms expr = length $ divid
+    where
+    added = split AddOp expr
+    subbed = concatMap (split SubOp) added
+    multip = concatMap (split MulOp) subbed
+    divid = concatMap (split DivOp) multip
 
 -- TODO rename split to take constructor and split based on that so split Mul and split Add and
 -- split Sub and split DIv ...
@@ -463,6 +477,18 @@ unGlue (Mul e1 e2) = unGlue e1 ++ unGlue e2
 unGlue (Div e1 e2) = unGlue e1 ++ unGlue e2
 unGlue p@(Pow _ _) = [p]
 
+{-
+
+isGlued :: Expr -> Bool
+isGlued (Neg e) = categ e
+isGlued e = categ e
+    where
+    categ x = isDiv x || isMul x || isPow x || isNum x || isFunction x || x == X || x == Y
+-}
+
+isSeparable :: Expr -> Bool
+isSeparable (Neg e) =isAdd e || isSub e
+isSeparable e = isAdd e || isSub e
 
 
 -- precondition: the items in the list were multiplied only! Not divided or added or subtracted
@@ -471,38 +497,99 @@ glue :: [Expr] -> Expr
 glue es = foldl1 Mul es
 
 
-{-
-data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
-    | Pow Expr Expr | Neg Expr | Num Int  -}{-Var Expr-}{- | X | Y | F Function
-    deriving (Eq)-}
-
 
 -- TODO apply the first mul case thinking to other cases to get all cases.
 -- splits the terms in the expression at + or -
 -- TODO rename unGlue to be splitGlue and the rebuild for glue to be rebuildGlue
-split :: Expr -> [Expr]
-split op expr
-    | op == Add = splitA expr
-    | op == Sub = splitS expr
-    | op == Mul = splitM expr
-    | op == Div = splitD expr
-    where
-    splitA (Num n) = [Num n]
-    splitA (Neg e) = if isGlued e then [Neg e] else (map Neg (splitA e))
-    splitA (F f) = [F f]
-    splitA (Mul e1 e2) = [e1, e2]
-    splitA (Div e1 e2) = [e1, e2]
-    splitA (Pow e1 e2) = [e1, e2]
-    splitA (Add e1 e2)
-        | isGlued e1 && isGlued e2 = [e1, e2]
-        | isGlued e1 = [e1] ++ splitA e2
-        | isGlued e2 = splitA e1 ++ [e2]
-        | otherwise = splitA e1 ++ splitA e2
-    splitA (Sub e1 e2)
-        | isGlued e1 && isGlued e2 = [e1, Neg e2]
-        | isGlued e1 = [e1] ++ splitA (Neg e2)
-        | isGlued e2 = splitA e1 ++ [Neg e2]
-        | otherwise = splitA e1 ++ map Neg (splitA e2)
+split :: Op -> Expr -> [Expr]
+split _ X = [X]
+split _ Y = [Y]
+split _ (Num n) = [Num n]
+split _ (F f) = [F f]
+split op (Neg e) = genSplit op (Neg e)
+split op expr = pickMethod op expr
+
+splitA :: Expr -> [Expr]
+splitA (Sub e1 e2) = splitA e1 ++ splitA (Neg e2)
+splitA e
+    | isAdd e = splitA' e
+    | not $ isAdd e = [e]
+    | otherwise = genSplit AddOp e -- TODO deal below with negs.
+splitA' (Add e1 e2)
+    | notAdd e1 && notAdd e2 = [e1, e2]
+    | notAdd e1 = [e1] ++ splitA e2
+    | notAdd e2 = splitA e1 ++ [e2]
+    | otherwise = splitA e1 ++ splitA e2
+    where notAdd = not . isAdd
+
+splitS :: Expr -> [Expr]
+splitS e
+    | isSub e = splitS' e
+    | not $ isSub e = [e]
+    | otherwise = genSplit SubOp e
+splitS' (Sub e1 e2)
+    | notSub e1 && notSub e2 = [e1, Neg e2]
+    | notSub e1 = [e1] ++ splitS (Neg e2)
+    | notSub e2 = splitS e1 ++ [Neg e2]
+    | otherwise = splitS e1 ++ map Neg (splitS e2)
+    where notSub = not . isSub
+
+splitM :: Expr -> [Expr]
+splitM e
+    | isMul e = splitM' e
+    | not $ isMul e = [e]
+    | otherwise = genSplit MulOp e
+splitM' (Mul e1 e2)
+    | notMul e1 && notMul e2 = [e1, e2]
+    | notMul e1 = [e1] ++ splitM e2
+    | notMul e2 = splitM e1 ++ [e2]
+    | otherwise = splitM e1 ++ splitM e2
+    where notMul = not . isMul
+
+splitD :: Expr -> [Expr]
+splitD e
+    | isDiv e = splitD' e
+    | not $ isDiv e = [e]
+    | otherwise = genSplit DivOp e
+splitD' (Mul e1 e2)
+    | isDiv e1 && isDiv e2 = [e1, e2]
+    | isDiv e1 = [e1] ++ splitD e2
+    | isDiv e2 = splitD e1 ++ [e2]
+    | otherwise = splitD e1 ++ splitD e2
+    where notDiv = not . isDiv
+
+
+pickMethod :: Op -> Expr -> [Expr]
+pickMethod AddOp expr = splitA expr
+pickMethod SubOp expr = splitS expr
+pickMethod MulOp expr = splitM expr
+pickMethod DivOp expr = splitD expr
+pickMethod _ _  = error "only ops are: add, sub, mul, div"
+
+
+genSplit :: Op -> Expr -> [Expr]
+genSplit op X = [X]
+genSplit op Y = [Y]
+genSplit op (Num n) = [Num n]
+genSplit op (F f) = [F f]
+genSplit op (Neg e)  -- = if isGlued e then [Neg e] else (map Neg ((pickMethod op) e))
+    | isAdd e || isSub e = map Neg pick
+    | isMul e || isDiv e || isPow e = [Neg (head pick)] ++ tail pick
+    | otherwise = [Neg (head gen)] ++ tail gen
+    where pick = pickMethod op e
+          gen = genSplit op e
+
+{-
+
+unGlue X = [X]
+unGlue Y = [Y]
+unGlue (Num n) = [Num n]
+unGlue (Neg e) = [Neg (head (unGlue e))] ++ tail (unGlue e)
+unGlue (F f) = [F f]
+unGlue (Mul e1 e2) = unGlue e1 ++ unGlue e2
+unGlue (Div e1 e2) = unGlue e1 ++ unGlue e2
+unGlue p@(Pow _ _) = [p]
+-}
 
 
 
