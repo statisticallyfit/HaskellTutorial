@@ -56,19 +56,32 @@ getNeg _ = error "incorrect argument"
 -- precondition: argument is either power, num, neg, function.
 -- RULE: if the first thing in the unglued list is a number then do not surround it with brackets.
 
+lace acc e
+    = if (isMono e) then (concatMap show (split MulOp e))
+    else if (isPow e) then (acc ++ "(" ++ show e ++ ")")
+    else if (acc == "" && isNum e) then (show e)
+    else if (isNum e) then (acc ++ "(" ++ show e ++ ")")
+    else if (isFunction e || isMul e) then (acc ++ show e)
+    else if (isDiv e) then (decideDiv acc e)
+    else if (isNeg e && (isAdd neg || isSub neg)) then (acc ++ "-(" ++ show e ++ ")")
+    else if (isNeg e) then (acc ++ "-" ++ show e)
+    else (acc ++ "(" ++ show e ++ ")")
+    where neg = getNeg e
 
+{-
 
 lace :: String -> Expr -> String
 lace acc e
-    | isMono e = concatMap show $ split MulOp e
+    | isMono e = concatMap show (split MulOp e)
     | isPow e = acc ++ "(" ++ show e ++ ")"
     | acc == "" && isNum e = show e
     | isNum e = acc ++ "(" ++ show e ++ ")"
     | isFunction e || isMul e = acc ++ show e
     | isDiv e = decideDiv acc e
-    | isNeg e
-        = if (isAdd e || isSub e) then (acc ++ "-(" ++ show e ++ ")") else acc ++ "-" ++ show e
+    | isNeg e = if (isAdd e || isSub e) then (acc ++ "-(" ++ show e ++ ")") else (acc ++ "-" ++ show e)
     | otherwise = acc ++ show e
+-}
+
 
 decideDiv acc expr
     | (numTerms up > 1) && (numTerms lo > 1) = acc ++ " (" ++ show up ++ ") / (" ++ show lo ++ ")"
