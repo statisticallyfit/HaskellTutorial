@@ -56,6 +56,8 @@ getNeg _ = error "incorrect argument"
 -- precondition: argument is either power, num, neg, function.
 -- RULE: if the first thing in the unglued list is a number then do not surround it with brackets.
 
+{-
+
 lace acc e
     = if (isMono e) then (concatMap show (split MulOp e))
     else if (isPow e) then (acc ++ "(" ++ show e ++ ")")
@@ -67,20 +69,22 @@ lace acc e
     else if (isNeg e) then (acc ++ "-" ++ show e)
     else (acc ++ "(" ++ show e ++ ")")
     where neg = getNeg e
+-}
 
-{-
-
+-- note laces certain expressions with brackets.
 lace :: String -> Expr -> String
 lace acc e
-    | isMono e = concatMap show (split MulOp e)
-    | isPow e = acc ++ "(" ++ show e ++ ")"
     | acc == "" && isNum e = show e
     | isNum e = acc ++ "(" ++ show e ++ ")"
+    | isMono e = acc ++ (concatMap show (split MulOp e))
+    | isPow e = acc ++ "(" ++ show e ++ ")"
     | isFunction e || isMul e = acc ++ show e
     | isDiv e = decideDiv acc e
-    | isNeg e = if (isAdd e || isSub e) then (acc ++ "-(" ++ show e ++ ")") else (acc ++ "-" ++ show e)
+    | isNeg e = if (isAdd e || isSub e)
+    then (acc ++ "-(" ++ show (getNeg e) ++ ")") else if (not (acc == ""))
+    then (acc ++ "( -(" ++ show (getNeg e) ++ "))") else (acc ++ "-" ++ show (getNeg e))
     | otherwise = acc ++ show e
--}
+
 
 
 decideDiv acc expr
@@ -150,7 +154,7 @@ instance Show Expr where
     --show (Neg (Mul (Num n) Y)) = "-" ++ show n ++ show Y
     show (Mul (Num n) rest) = show n ++ "(" ++ show rest ++ ")"
 
-    show (Mul (Mul (Mul (Mul rest p1@(Pow _ _)) p2@(Pow _ _)) p3@(Pow _ _)) p4@(Pow _ _))
+    {-show (Mul (Mul (Mul (Mul rest p1@(Pow _ _)) p2@(Pow _ _)) p3@(Pow _ _)) p4@(Pow _ _))
         = if isPow rest
         then "(" ++ show rest ++ ")(" ++ show p1 ++ ")(" ++ show p2 ++ ")(" ++ show p3 ++ ")(" ++ show p4 ++ ")"
         else show rest ++ "(" ++ show p1 ++ ")(" ++ show p2 ++ ")(" ++ show p3 ++ ")(" ++ show p4 ++ ")"
@@ -161,13 +165,13 @@ instance Show Expr where
     show (Mul (Mul rest p1@(Pow _ _)) p2@(Pow _ _))
         = if isPow rest
         then "(" ++ show rest ++ ")(" ++ show p1 ++ ")(" ++ show p2 ++ ")"
-        else show rest ++ "(" ++ show p1 ++ ")(" ++ show p2 ++ ")"
+        else show rest ++ "(" ++ show p1 ++ ")(" ++ show p2 ++ ")"-}
     show (Mul rest p@(Pow _ _))
         = if isPow rest
         then "(" ++ show rest ++ ")(" ++ show p ++ ")"
         else show rest ++ "(" ++ show p ++ ")"
 
-
+{-
     show (Mul (Mul (Mul (Mul rest (Num n1)) (Num n2)) (Num n3)) (Num n4))
         = if isNum rest
         then "(" ++ show rest ++ ")(" ++ show n1 ++ ")(" ++ show n2 ++ ")(" ++ show n3 ++ ")(" ++ show n4 ++ ")"
@@ -179,7 +183,7 @@ instance Show Expr where
     show (Mul (Mul rest (Num n1)) (Num n2))
         = if isNum rest
         then "(" ++ show rest ++ ")(" ++ show n1 ++ ")(" ++ show n2 ++ ")"
-        else show rest ++ "(" ++ show n1 ++ ")(" ++ show n2 ++ ")"
+        else show rest ++ "(" ++ show n1 ++ ")(" ++ show n2 ++ ")" -}
     show (Mul rest (Num n))
         = if isNum rest
         then "(" ++ show rest ++ ")(" ++ show n ++ ")"
