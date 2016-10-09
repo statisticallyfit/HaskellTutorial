@@ -27,9 +27,18 @@ data Function
 
 data Op = AddOp | SubOp | MulOp | DivOp | PowOp deriving (Eq, Show)
 
-data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
-    | Pow Expr Expr | Neg Expr | Num Int  {-Var Expr-} | X | Y | F Function
+data Expr = Add [Expr] [Expr] | Sub [Expr] [Expr] | Mul [Expr] [Expr]
+    | Div [Expr] [Expr] | Pow [Expr] [Expr] | Neg Expr | Num Int | X | Y | F Function
+    deriving (Eq, Show)
+
+{-
+
+data Expr = Add [Expr] | Sub [Expr] | Mul [Expr] | Div [Expr] [Expr] | Pow [Expr] |
+    Neg Expr | Num Int |-}
+{- Var Char |-}{-
+ F Function | X | Y
     deriving (Eq)
+-}
 
 type Coeff = Int
 type Description = (Expr, Expr, Expr)
@@ -53,6 +62,7 @@ data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq)
 -- precondition: argument is either power, num, neg, function.
 -- RULE: if the first thing in the unglued list is a number then do not surround it with brackets.
 
+{-
 
 -- note laces certain expressions with brackets.
 lace :: String -> Expr -> String
@@ -77,6 +87,7 @@ decideDiv acc expr
     where up = getUpper expr
           lo = getLower expr
 
+-}
 
 -- | (isMono e) && (numTerms e <= 2) = putStrLn $ show $ simplifyComplete e -- is monomial then print simply.
 -- TODO edit for division.
@@ -118,21 +129,18 @@ lace acc e
 -- Example: x^6 * 4 is shown as 4x^6 while 4 * (x+3) is shown as 4(x+3)
 -- idea: glued things are wrapped each.
 -- NOTE original
+{-
 instance Show Expr where
-    show X = "x"
-    show Y = "y"
+    show (Var x) = show x
     show (Num n) = show n
     show (F func) = show func
-    show (Add e1 e2) = show e1 ++ " + " ++ show e2
-    show (Sub e1 e2) = show e1 ++ " - " ++ show e2
-
+    show (Add (e:es)) = foldl (\acc x -> acc ++ " + " ++ show x) (show e) es
+    show (Sub (e:es)) = foldl (\acc x -> acc ++ " - " ++ show x) (show e) es
     show (Mul (Num n) (Num m)) = "(" ++ show n ++ ")(" ++ show m ++ ")"
     show (Mul (Num n) p@(Pow _ _)) = show n ++ show p
-    show (Mul (Num n) X) = show n ++ show X
-    show (Mul (Neg (Num n)) X) = "-" ++ show n ++ show X
+    show (Mul (Num n) (Var x)) = show n ++ show x
+    show (Mul (Neg (Num n)) (Var x)) = "-" ++ show n ++ show x
     --show (Neg (Mul (Num n) X)) = "-" ++ show n ++ show X
-    show (Mul (Num n) Y) = show n ++ show Y
-    show (Mul (Neg (Num n)) Y) = "-" ++ show n ++ show Y
     --show (Neg (Mul (Num n) Y)) = "-" ++ show n ++ show Y
     show (Mul (Num n) rest) = show n ++ "(" ++ show rest ++ ")"
 
@@ -173,6 +181,7 @@ instance Show Expr where
     show (Neg X) = "-" ++ show X
     show (Neg Y) = "-" ++ show Y
     show (Neg e) = "-(" ++ show e ++ ")"
+-}
 
 
 instance Show Function where
@@ -232,6 +241,7 @@ infixl 8 .^
 (.^) = Pow
 
 ---------------------------------------------------------------------------------------------
+{-
 
 e1 :: Expr
 e1 = Num(4) .* X .* (F (Sin X)) .* Num(2) .* (F (Cos X)) .* Num(5) .* Num(2) .* Num(3) .* (F (Tan X))
@@ -251,16 +261,40 @@ e9 = ((Num 3 .* X .^ Num 3) ./ (Num 3 .* X .^ (Num 1 ./ Num 3))) .*
 e10 = (Num 3 .* X .^ Num 3) ./ ((Num 3 .* X .^ (Num 1 ./ Num 3)) .*
      (Num 8 .* X .^ Num 9)) ./ (Num 4 .* X .^ Num 3)
 e11 = Num 4 .* (X .+ Num 3)
-e12 = Num 2 .* X .^ Num 2 .* (Num 3 .* X .^ Num 5) .* (F (Sin (Num 4 .* X)))
-    .* (F (Cos (Num 5 .* X .^ Num 2))) .^ Num 2 .* (Num 3 .* X .^ Num 9) .* (Num 2 ./ (F (Sin X)))
-    ./ (Num 4 .* X .* (F (Sec X)) .* (F (Tan X)) .* Num 2)
+-}
 
+e1 :: Expr
+e1 = [[Num (-7)] .* [X]] .^ [Num 2]
+{-
+e1 = Add [Sub [Add [Mul [Num (-7), Pow [X, Num 2]], Mul [Num 3, X], Mul [Num 4, X],
+    Mul [Num 5, Pow [X, Num 2]],  Mul [Num 3, F $ Sin (Mul [Num 4, X])]]], Mul [Num 5, (F (Cos X))],
+    Num 2, Num 3]
+-}
+
+-- NOTE alive definition for two list expr
+--instance Show Expr where
+
+
+{- NOTE alive for first definition with one list expr, not two list expr
+instance Show Expr where
+    show X = "x"
+    show Y = "y"
+    show (Num n) = show n
+    show (F f) = show f
+    show (Neg e) = "-" ++ show e
+    show (Add (e:es)) = foldl (\acc x -> acc ++ " + " ++ show x) (show e) es
+    show (Sub (e:es)) = foldl (\acc x -> acc ++ " - " ++ show x) (show e) es
+    show (Mul (e:es)) = foldl (\acc x -> acc ++ show x) (show e) es
+    show (Div xs ys) = "(" ++ show xs ++ ") / (" ++ show ys ++ ")"
+    show (Pow (e:es)) = foldl (\acc x -> acc ++ "^" ++ show x) (show e) es-}
+{-
 
 -- TODO test percolate minus cases
 t1 :: Tree Expr
 t1 = Node "-" (Node "-" (Leaf $ Num 1) (Leaf $ Num 4)) (Leaf $ Num (-10))
 t2 = Node "-" Empty (Node "*" (Leaf X) (Leaf $ Num 3))
 t3 = Node "-" (Leaf $ Num 4) Empty
+-}
 
 
 {-
@@ -270,6 +304,7 @@ were in the tree!
 Then remember also where they go at the end!
 -- TODO get infinite decimal to fraction converter.
 -}
+{-
 
 isAdd :: Expr -> Bool
 isAdd (Add _ _) = True
@@ -506,6 +541,7 @@ numTerms expr = length $ divid
 -- how far would it go as we want to have muliplications in the divisions too... HELP
 -- postcondition takes an expression that just has * or / (no + or -) and  and returns the
 -- terms in list order
+-}
 {-unGlue :: Expr -> [Expr]
 unGlue X = [X]
 unGlue Y = [Y]
@@ -514,8 +550,10 @@ unGlue (Neg e) = [Neg (head (unGlue e))] ++ tail (unGlue e)
 unGlue (F f) = [F f]
 unGlue (Mul e1 e2) = unGlue e1 ++ unGlue e2
 unGlue (Div e1 e2) = unGlue e1 ++ unGlue e2
-unGlue p@(Pow _ _) = [p]-}
+unGlue p@(Pow _ _) = [p]-}{-
 
+
+-}
 {-
 
 isGlued :: Expr -> Bool
@@ -523,7 +561,8 @@ isGlued (Neg e) = categ e
 isGlued e = categ e
     where
     categ x = isDiv x || isMul x || isPow x || isNum x || isFunction x || x == X || x == Y
--}
+-}{-
+
 
 isSeparable :: Expr -> Bool
 isSeparable (Neg e) =isAdd e || isSub e
@@ -618,6 +657,7 @@ genSplit op (Neg e)  -- = if isGlued e then [Neg e] else (map Neg ((pickMethod o
     where pick = pickMethod op e
           gen = genSplit op e
 
+-}
 {-
 
 unGlue X = [X]
@@ -628,7 +668,8 @@ unGlue (F f) = [F f]
 unGlue (Mul e1 e2) = unGlue e1 ++ unGlue e2
 unGlue (Div e1 e2) = unGlue e1 ++ unGlue e2
 unGlue p@(Pow _ _) = [p]
--}
+-}{-
+
 
 
 
@@ -652,6 +693,7 @@ rebuildD es = foldl1 (\acc x -> Div acc x) es
 
 
 
+-}
 {-
 TODO PLAN OVERALL * ~ *
 
@@ -682,7 +724,8 @@ by Div and send to divH. Otherwise, send to mulH.
 
 ---
 Clean up with sweep Num _
--}
+-}{-
+
 
 
 -- note takes a codeified polynomial, or trig or invtrig... and adds the two codified things.
@@ -742,6 +785,7 @@ isPoly (Pow e1 e2) = isPoly e1 && isPoly e2
 
 isTrig :: Expr -> Bool
 isTrig f = isSin f || isCos f || isTan f || isCsc f || isSec f || isCot f
+-}
 {-
 
 -- note this is passed only glued expressions!
@@ -750,7 +794,8 @@ hasOnlyOne :: (Expr -> Bool) -> Expr -> Bool
 hasOnlyOne f expr
     | isGlued expr = (length $ filter (== True) $ map f (unGlue expr)) == 1
     | otherwise = error "was passed non-glued expression"
--}
+-}{-
+
 
 
 isInvTrig :: Expr -> Bool
@@ -786,6 +831,7 @@ isFunction _ = False
 -- For those that do have more than 1 func: send to functionsimplifier.
 -- TODO help filtering is incorrect here. Learn to allow things like x^2 sinx through the filter as well
 -- not just pure trig or hyp .. functions.
+-}
 {-
 exprToCode :: Expr -> Code
 exprToCode expr = Code $ filter (not . emptyGroup) [poly, trig, invTrig, hyp, invHyp, logs]
@@ -804,17 +850,20 @@ exprToCode expr = Code $ filter (not . emptyGroup) [poly, trig, invTrig, hyp, in
     emptyGroup (Hyperbolic hs) = null hs
     emptyGroup (InvHyp is) = null is
     emptyGroup (Logarithmic ls) = null ls
--}
+-}{-
+
 -- note
 -- precondition: an expression like 3sec^2x + sinx * cosx * tanx + x^2tan^2(x) will be separated
 -- from the glued and non-glued expressions. THen this function is passed the non-glued expressions,
 -- whereas the glued expressions like sinxcosxtanx will get passed to simplifyFunction then both
 -- come together in a simplifier function that  rebuilds the two expression lists.
 -- precondition: so in short, this functino is not prepared for things like sinx * cos x * tan x
+-}
 {-
 codifyOther :: [Expr] -> Group
 codifyOther [] = Tr
--}
+-}{-
+
 
 -- TODO simplifier function that uses codifyOther and exprToCode must pass the sinxcosxtanx
 -- as trailing thread then rebuild the nonglued expressions with the above glued expressions
@@ -856,6 +905,7 @@ codifyPoly ps = Poly $ foldl1 (zipWith (+)) $ addZeroes $ codify ps
 --      represents (cos x + 4tan x + csc x + 2sec^4 x  + 3cot^5 x
 --      where x = any expression and note (0, 1) = 0 always and (1,0) gets error
 -- help TODO fix so that it handles (expr, expr, expr) and not (int, int, expr)
+-}
 {-
 groupToExpr :: Group -> [Expr]
 groupToExpr (Poly ps) = reverse $ map simplify $ zipWith (.*) ps' (zipWith (.^) xs es )
@@ -873,7 +923,8 @@ groupToExpr (InvHyp hs) = map simplify $ latch  (zip hs fs)
     where fs = map F [Arcsinh X, Arccosh X, Arctanh X, Arccsch X, Arcsech X, Arccoth X]
 groupToExpr (Logarithmic ls) = map simplify $ latch (zip ls fs)
     where fs = map F [E X, Ln X, Log X X]  -- TODO fix so we can have different args for log base and arg.
--}
+-}{-
+
 
 
 latch zs = map (\((c,e,u), f) -> c .* (push u f) .^ e) (map (\((tup, f)) -> (numify tup, f)) zs)
@@ -882,8 +933,10 @@ numify (c,e,u) = (Num c, Num e, u)
 
 -- TODO types wrong
 --- insdie the function is a type expression holder that is converted to expression.
+-}
 {-holderExprFunctions :: Expr -> Expr
-holderExprFunctions (F (Sin h)) = -}
+holderExprFunctions (F (Sin h)) = -}{-
+
 
 
 -- puts an expression inside a function
@@ -1000,16 +1053,20 @@ simplify (Mul a (Mul b rest))
     | isNum a && isNegNum b = Neg a .* b .* simplify rest
     | otherwise = simplify a .* simplify b .* simplify rest
 -- TODO after poly stuff fix this so that we simplify functions (go to simpFuncs partition)
+-}
 {-
 simplify (Mul (Mul (Mul rest f@(F _)) g@(F _)) h@(F _)) = simplify rest .* simplifyFunctions (f .* g .* h)
 simplify (Mul (Mul rest f@(F _)) g@(F _)) = simplify rest .* simplifyFunctions (f .* g)
--}
+-}{-
+
 -- TODO now these functions are ready to go into the function simplifier (sin * cos * tan)
+-}
 {-simplify (Mul (F (Sin u)) (F (Cos v)))
     = if u == v then F (Tan u) else (F (Sin $ simplify u)) .* (F (Cos $ simplify v))
 simplify (Mul t1@(F (Tan u)) t2@(F (Tan v)))
     = if u == v then (F (Tan u)) .^ Num 2 else simplify t1 .* simplify t2
-simplify (Mul (F (Sin u)) (F (Cos v)))-}
+simplify (Mul (F (Sin u)) (F (Cos v)))-}{-
+
 simplify (Mul x y) = if x == y then simplify x .^ (Num 2) else simplify x .* simplify y
 
 simplify (Div (Num 0) (Num 0)) = error "0/0 not possible"
@@ -1105,6 +1162,7 @@ sameArgs f g
     getArg (Ln u) = u
     getArg (Log u v) = v -- TODO fix so we can get both or handle log separately.
 
+-}
 {-
 TODO idea then after we state how functions should simplify, do foldl1 (simpFunc . MUl) over the list.
 help
@@ -1133,7 +1191,8 @@ simplifyFunctions (Mul f@(F (Sin u)) (g@F (Cos v)))
 simplifyFunctions (Mul f@(F (Sin u)) (g@F (Cos v)))
     | sameArgs f g = F $ Tan u
     | otherwise = simplify f .* simplify g
--}
+-}{-
+
 
 
 
@@ -1394,6 +1453,7 @@ arbTree n = frequency [(1, return Empty),
                        (4, liftM3 Node arbitrary (arbTree (n `div` 2))
                                                  (arbTree (n `div` 2)) )]
 
+-}
 
 
 
