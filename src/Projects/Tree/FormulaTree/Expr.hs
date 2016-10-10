@@ -28,7 +28,7 @@ data Function
 data Op = AddOp | SubOp | MulOp | DivOp | PowOp deriving (Eq, Show)
 
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
-    | Pow Expr Expr | Neg Expr | Num Int  {-Var Expr-} | X | Y | F Function
+    | Pow Expr Expr | Neg Expr | Num Int | Var String | F Function
     deriving (Eq)
 
 type Coeff = Int
@@ -119,8 +119,7 @@ lace acc e
 -- idea: glued things are wrapped each.
 -- NOTE original
 instance Show Expr where
-    show X = "x"
-    show Y = "y"
+    show (Var x) = x
     show (Num n) = show n
     show (F func) = show func
     show (Add e1 e2) = show e1 ++ " + " ++ show e2
@@ -128,11 +127,9 @@ instance Show Expr where
 
     show (Mul (Num n) (Num m)) = "(" ++ show n ++ ")(" ++ show m ++ ")"
     show (Mul (Num n) p@(Pow _ _)) = show n ++ show p
-    show (Mul (Num n) X) = show n ++ show X
-    show (Mul (Neg (Num n)) X) = "-" ++ show n ++ show X
+    show (Mul (Num n) (Var x)) = show n ++ x
+    show (Mul (Neg (Num n)) (Var x)) = "-" ++ show n ++ x
     --show (Neg (Mul (Num n) X)) = "-" ++ show n ++ show X
-    show (Mul (Num n) Y) = show n ++ show Y
-    show (Mul (Neg (Num n)) Y) = "-" ++ show n ++ show Y
     --show (Neg (Mul (Num n) Y)) = "-" ++ show n ++ show Y
     show (Mul (Num n) rest) = show n ++ "(" ++ show rest ++ ")"
 
@@ -170,8 +167,7 @@ instance Show Expr where
     show (Neg d@(Div _ _)) = "-" ++ show d
     show (Neg p@(Pow _ _)) = "-" ++ show p
     show (Neg f@(F _)) = "-" ++ show f
-    show (Neg X) = "-" ++ show X
-    show (Neg Y) = "-" ++ show Y
+    show (Neg (Var x)) = "-" ++ x
     show (Neg e) = "-(" ++ show e ++ ")"
 
 
@@ -218,6 +214,8 @@ instance Show a => Show (Tree a) where
             indent' = indent ++ "    "
             count' = count + 1
 
+x = Var "x"
+y = Var "y"
 
 infixl 6 .+
 infixl 6 .-
@@ -235,33 +233,32 @@ infixl 8 .^
 ---------------------------------------------------------------------------------------------
 
 e1 :: Expr
-e1 = Num(4) .* X .* (F (Sin X)) .* Num(2) .* (F (Cos X)) .* Num(5) .* Num(2) .* Num(3) .* (F (Tan X))
-e2 = e1 .+ Num(2) .* X .+ Num(7) .* X
-e3 = Num(4) .* X .+ Num(3) .* X .^ Num(5) .- (F (Sin (Num(3) .+ X)))
-e4 = Neg(F (Sin X)) .* Neg(Num(2))
-e5 = Neg (Num(4) .* X .+ Num(2) .* Y)
-e6 = Num (-7) .* X .^ Num 2 .+ Num 3 .* X .+ Num 4 .* X .+ Num 5 .* X .^ Num 2 .-
-    Num 3 .* (F $ Sin $ Num 4 .* X) .+ Num 5 .* (F $ Cos X) .+ Num 2 .+ Num 3
-e7 = (Num 3 .* X .^ Num 3) ./ (Num 3 .* X .^ (Num 1 ./ Num 3)) .-
-    (Num 8 .* X .^ Num 9) ./ (Num 4 .* X .^ Num 3)
+e1 = Num(4) .* x .* (F (Sin x)) .* Num(2) .* (F (Cos x)) .* Num(5) .* Num(2) .* Num(3) .* (F (Tan x))
+e2 = e1 .+ Num(2) .* x .+ Num(7) .* x
+e3 = Num(4) .* x .+ Num(3) .* x .^ Num(5) .- (F (Sin (Num(3) .+ x)))
+e4 = Neg(F (Sin x)) .* Neg(Num(2))
+e5 = Neg (Num(4) .* x .+ Num(2) .* y)
+e6 = Num (-7) .* x .^ Num 2 .+ Num 3 .* x .+ Num 4 .* x .+ Num 5 .* x .^ Num 2 .-
+    Num 3 .* (F $ Sin $ Num 4 .* x) .+ Num 5 .* (F $ Cos x) .+ Num 2 .+ Num 3
+e7 = (Num 3 .* x .^ Num 3) ./ (Num 3 .* x .^ (Num 1 ./ Num 3)) .-
+    (Num 8 .* x .^ Num 9) ./ (Num 4 .* x .^ Num 3)
 e8 = e6 .+ e7
 -- NOTE IMPORTANT you must put (e1 * e2) / (e3 * e4) brakcets like that because otherwise
 -- error says you cannot mix ./ and .* because one is infix l and other is infix r.
-e9 = ((Num 3 .* X .^ Num 3) ./ (Num 3 .* X .^ (Num 1 ./ Num 3))) .*
-     ((Num 8 .* X .^ Num 9) ./ (Num 4 .* X .^ Num 3))
-e10 = (Num 3 .* X .^ Num 3) ./ ((Num 3 .* X .^ (Num 1 ./ Num 3)) .*
-     (Num 8 .* X .^ Num 9)) ./ (Num 4 .* X .^ Num 3)
-e11 = Num 4 .* (X .+ Num 3)
-e12 = Num 2 .* X .^ Num 2 .* (Num 3 .* X .^ Num 5) .* (F (Sin (Num 4 .* X)))
-    .* (F (Cos (Num 5 .* X .^ Num 2))) .^ Num 2 .* (Num 3 .* X .^ Num 9) .* (Num 2 ./ (F (Sin X)))
-    ./ (Num 4 .* X .* (F (Sec X)) .* (F (Tan X)) .* Num 2)
-e13 = Num 4 .* X .+ (F (Sin X)) .* (F (Cos X)) .* Num 3 .+ Num 5 .* X .^ Num 2
+e9 = ((Num 3 .* x .^ Num 3) ./ (Num 3 .* x .^ (Num 1 ./ Num 3))) .*
+     ((Num 8 .* x .^ Num 9) ./ (Num 4 .* x .^ Num 3))
+e10 = (Num 3 .* x .^ Num 3) ./ ((Num 3 .* x .^ (Num 1 ./ Num 3)) .*
+     (Num 8 .* x .^ Num 9)) ./ (Num 4 .* x .^ Num 3)
+e11 = Num 4 .* (x .+ Num 3)
+-- TODO fix show for this one using numTerms.
+e12 = ((F (Sin x)) .+ (F (Cos x)) .* Num 4 .* x .^ Num 2) .^ (x .+ Num 5 .- (F (Tan (Num 2 .* x))))
+e13 = Num 4 .* x .+ Num 3 .* x .+ x .+ Num 6 .* x .^ Num 7 .+ Num 2 .+ Num 3
 
 
 -- TODO test percolate minus cases
 t1 :: Tree Expr
 t1 = Node "-" (Node "-" (Leaf $ Num 1) (Leaf $ Num 4)) (Leaf $ Num (-10))
-t2 = Node "-" Empty (Node "*" (Leaf X) (Leaf $ Num 3))
+t2 = Node "-" Empty (Node "*" (Leaf x) (Leaf $ Num 3))
 t3 = Node "-" (Leaf $ Num 4) Empty
 
 
@@ -310,8 +307,7 @@ isNegNum (Neg (Num n)) = True
 isNegNum _ = False
 
 isVar :: Expr -> Bool
-isVar X = True
-isVar Y = True
+isVar (Var _) = True
 isVar _ = False
 
 isNeg :: Expr -> Bool
@@ -443,10 +439,15 @@ isOp :: Expr -> Bool
 isOp e = isAdd e || isSub e || isMul e || isDiv e || isPow e
 
 
+isSimple :: Expr -> Bool
+isSimple (Var _) = True
+isSimple (Num _) = True
+isSimple (F f) = True
+isSimple _ = False
+
 hasAdd :: Expr -> Bool
-hasAdd X = False
-hasAdd Y = False
-hasAdd (Add e1 e2) = True
+hasAdd (Var _) = False
+hasAdd (Add _ _) = True
 hasAdd (Num _) = False
 hasAdd (Neg e) = hasAdd e
 hasAdd (F f) = False
@@ -456,9 +457,8 @@ hasAdd (Div e1 e2) = hasAdd e1 || hasAdd e2
 hasAdd (Pow e1 e2) = hasAdd e1 || hasAdd e2
 
 hasSub :: Expr -> Bool
-hasSub X = False
-hasSub Y = False
-hasSub (Sub e1 e2) = True
+hasSub (Var _) = False
+hasSub (Sub _ _) = True
 hasSub (Num _) = False
 hasSub (Neg e) = hasSub e
 hasSub (F f) = False
@@ -468,9 +468,8 @@ hasSub (Div e1 e2) = hasSub e1 || hasSub e2
 hasSub (Pow e1 e2) = hasSub e1 || hasSub e2
 
 hasMul :: Expr -> Bool
-hasMul X = False
-hasMul Y = False
-hasMul (Mul e1 e2) = True
+hasMul (Var _) = False
+hasMul (Mul _ _) = True
 hasMul (Num _) = False
 hasMul (Neg e) = hasMul e
 hasMul (F f) = False
@@ -480,9 +479,8 @@ hasMul (Div e1 e2) = hasMul e1 || hasMul e2
 hasMul (Pow e1 e2) = hasMul e1 || hasMul e2
 
 hasDiv :: Expr -> Bool
-hasDiv X = False
-hasDiv Y = False
-hasDiv (Div e1 e2) = True
+hasDiv (Var _) = False
+hasDiv (Div _ _) = True
 hasDiv (Num _) = False
 hasDiv (Neg e) = hasDiv e
 hasDiv (F f) = False
@@ -492,8 +490,7 @@ hasDiv (Mul e1 e2) = hasDiv e1 || hasDiv e2
 hasDiv (Pow e1 e2) = hasDiv e1 || hasDiv e2
 
 hasFunction :: Expr -> Bool
-hasFunction X = False
-hasFunction Y = False
+hasFunction (Var _) = False
 hasFunction (F _) = True
 hasFunction (Num _) = False
 hasFunction (Neg e) = hasDiv e
@@ -565,12 +562,20 @@ right (Mul e1 e2) = e2
 right (Div e1 e2) = e2
 
 
+getOp :: Expr -> Op
+getOp (Add _ _) = AddOp
+getOp (Sub _ _) = SubOp
+getOp (Mul _ _) = MulOp
+getOp (Div _ _) = DivOp
+getOp (Pow _ _) = PowOp
+getOp _ = error "no other op"
+
+
 -- TODO apply the first mul case thinking to other cases to get all cases.
 -- splits the terms in the expression at + or -
 -- TODO rename unGlue to be splitGlue and the rebuild for glue to be rebuildGlue
 split :: Op -> Expr -> [Expr]
-split _ X = [X]
-split _ Y = [Y]
+split _ (Var x) = [Var x]
 split _ (Num n) = [Num n]
 split _ (F f) = [F f]
 split op (Neg e) = genSplit op (Neg e)
@@ -580,8 +585,16 @@ splitA :: Expr -> [Expr]
 splitA e@(Add _ _) = splitAdd e
 splitA e
     | isAdd e = splitAdd e
-    | hasAdd e = splitA (left e) ++ splitA (right e)
+    | hasAdd e = init lefties ++ (newRight e lefties)
+    | not $ isSimple e = [e]
     | otherwise = genSplit AddOp e
+    where lefties = splitA (left e)
+newRight e ls
+    | getOp e == AddOp = [(last ls) .+ (right e)]
+    | getOp e == SubOp = [(last ls) .- (right e)]
+    | getOp e == MulOp = [(last ls) .* (right e)]
+    | getOp e == DivOp = [(last ls) ./ (right e)]
+    | getOp e == PowOp = [(last ls) .^ (right e)]
 splitAdd (Add e1 e2)
     | notAdd e1 && notAdd e2 = [e1, e2]
     | notAdd e1 = [e1] ++ splitA e2
@@ -594,6 +607,7 @@ splitS :: Expr -> [Expr]
 splitS e
     | isSub e = splitSub e
     | hasSub e = splitS (left e) ++ splitS (right e)
+    | not $ isSimple e = [e]
     | otherwise = genSplit SubOp e
 splitSub (Sub e1 e2)
     | notSub e1 && notSub e2 = [e1, Neg e2]
@@ -607,6 +621,7 @@ splitM :: Expr -> [Expr]
 splitM e
     | isMul e = splitMul e
     | hasMul e = splitM (left e) ++ splitM (right e)
+    | not $ isSimple e = [e]
     | otherwise = genSplit MulOp e
 splitMul (Mul e1 e2)
     | notMul e1 && notMul e2 = [e1, e2]
@@ -620,6 +635,7 @@ splitD :: Expr -> [Expr]
 splitD e
     | isDiv e = splitDiv e
     | hasDiv e = splitD (left e) ++ splitD (right e)
+    | not $ isSimple e = [e]
     | otherwise = genSplit DivOp e
 splitDiv (Div e1 e2)
     | notDiv e1 && notDiv e2 = [e1, e2]
@@ -640,8 +656,7 @@ pickMethod _ _  = error "only ops are: add, sub, mul, div"
 
 
 genSplit :: Op -> Expr -> [Expr]
-genSplit op X = [X]
-genSplit op Y = [Y]
+genSplit op (Var x) = [Var x]
 genSplit op (Num n) = [Num n]
 genSplit op (F f) = [F f]
 genSplit op (Neg e)  -- = if isGlued e then [Neg e] else (map Neg ((pickMethod op) e))
@@ -735,7 +750,7 @@ addCodes h1 h2 = simplifiedMaybes
         else (a,b)
     simplifiedMaybes = map simpMaybe $ map add (zip h1' h2')
 
-list = map numify [(4,1,X), (3,1,X), (1,7,(Num 2) .* X .^ Num 5), (2,2,X),(1,1,X), (7,7,Num 7 .* X)]
+list = map numify [(4,1,x), (3,1,x), (1,7,(Num 2) .* x .^ Num 5), (2,2,x),(1,1,x), (7,7,Num 7 .* x)]
 add (a@(c1,e1,x1),b@(c2,e2,x2)) = if x1 == x2 then (Just (c1 .+ c2,e1,x1), Nothing) else (Just a, Just b)
 hs = zip list list
 js = map add hs
@@ -754,16 +769,13 @@ isMono e
     e' = simplifyComplete e
     s' = map simplifyComplete $ split MulOp e'
     f = (\acc x -> acc && (isNum x || isVar x || isPolyPow x))
-    isPolyPow (Pow X (Num n)) = True
-    isPolyPow (Pow Y (Num n)) = True
+    isPolyPow (Pow (Var x) (Num n)) = True
     isPolyPow _ = False
 
 
 -- note says if expression contains no functions and is just a polynomial term like 7x^2 / 6x or just 5x
 isPoly :: Expr -> Bool
---isPoly = not . isFunction
-isPoly X = True
-isPoly Y = True
+isPoly (Var _) = False
 isPoly (Num n) = True
 isPoly (F f) = False
 isPoly (Neg e) = isPoly e
@@ -865,15 +877,14 @@ codifyPoly ps = Poly $ foldl1 (zipWith (+)) $ addZeroes $ codify ps
     addZeroes cs = map (\xs -> xs ++ replicate (maxCodeLen - length xs) 0) cs
     codify ps = map poly (map simplify ps)
     maxCodeLen = foldl1 max $ map length (codify ps)
-    poly X = [0, 1]
-    poly Y = [0, 1]
+    poly (Var x) = [0, 1]
     poly (Num n) = [n]
     poly (F func) = error "no functions allowed in makePoly"
     poly (Neg e) = poly e
-    poly (Mul (Neg (Num n)) (Pow X (Num p))) = replicate p 0 ++ [-n]
-    poly (Mul (Neg (Num n)) X) = [0, -n]
-    poly (Mul (Num n) (Pow X (Num p))) = replicate p 0 ++ [n]
-    poly (Mul (Num n) X) = [0, n]
+    poly (Mul (Neg (Num n)) (Pow x (Num p))) = replicate p 0 ++ [-n]
+    poly (Mul (Neg (Num n)) x) = [0, -n]
+    poly (Mul (Num n) (Pow x (Num p))) = replicate p 0 ++ [n]
+    poly (Mul (Num n) x) = [0, n]
 
 
 
@@ -956,8 +967,7 @@ push u (F (Log v1 v2)) = F $ Log u u
 -- TODO probably because this has gotten too old - perhaps ther eis a case that goes ahead of the
 -- one that should be entered that keeps it in this ugly state? Fix with printExpr and foldl.
 simplify :: Expr -> Expr
-simplify X = X
-simplify Y = Y
+simplify (Var x) = Var x
 simplify (Num n) = Num n
 simplify (F (Sin e)) = F $ Sin $ simplify e
 simplify (F (Cos e)) = F $ Cos $ simplify e
@@ -1229,8 +1239,7 @@ mapTree f (Node n left right) = Node n (mapTree f left) (mapTree f right)
 
 
 mkTree :: Expr -> Tree Expr
-mkTree X = Leaf X
-mkTree Y = Leaf Y
+mkTree (Var x) = Leaf (Var x)
 mkTree (Num n) = Leaf (Num n)
 mkTree (F func) = Leaf (F func) -- TODO should I show expressions in functino as a tree as well?
 mkTree (Neg (Num n)) = Leaf (Num (-n))
@@ -1394,7 +1403,7 @@ rearrangeConsts tree
 instance Arbitrary Expr where
     arbitrary = sized arbExpr
 arbExpr 0 = liftM Num arbitrary
-arbExpr n = frequency [(2, return X), (2, return Y),
+arbExpr n = frequency [(2, return (Var "x")),
                        (1, liftM Num arbitrary),
                        (4, liftM Neg arbitrary),
                        (4, liftM2 Add (arbExpr (n `div` 2)) (arbExpr (n `div` 2))),
