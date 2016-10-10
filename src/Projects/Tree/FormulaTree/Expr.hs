@@ -172,6 +172,7 @@ instance Show Expr where
 
 
 
+
 instance Show Function where
     show (Sin e) = "sin(" ++ show e ++ ")"
     show (Cos e) = "cos(" ++ show e ++ ")"
@@ -242,6 +243,8 @@ e6 = Num (-7) .* x .^ Num 2 .+ Num 3 .* x .+ Num 4 .* x .+ Num 5 .* x .^ Num 2 .
     Num 3 .* (F $ Sin $ Num 4 .* x) .+ Num 5 .* (F $ Cos x) .+ Num 2 .+ Num 3
 e7 = (Num 3 .* x .^ Num 3) ./ (Num 3 .* x .^ (Num 1 ./ Num 3)) .-
     (Num 8 .* x .^ Num 9) ./ (Num 4 .* x .^ Num 3)
+e7' = (Num 3 .* x .^ Num 3) ./ ((Num 3 .* x .^ (Num 1 ./ Num 3)) .-
+    (Num 8 .* x .^ Num 9)) ./ (Num 4 .* x .^ Num 3)
 e8 = e6 .+ e7
 -- NOTE IMPORTANT you must put (e1 * e2) / (e3 * e4) brakcets like that because otherwise
 -- error says you cannot mix ./ and .* because one is infix l and other is infix r.
@@ -253,6 +256,7 @@ e11 = Num 4 .* (x .+ Num 3)
 -- TODO fix show for this one using numTerms.
 e12 = ((F (Sin x)) .+ (F (Cos x)) .* Num 4 .* x .^ Num 2) .^ (x .+ Num 5 .- (F (Tan (Num 2 .* x))))
 e13 = Num 4 .* x .+ Num 3 .* x .+ x .+ Num 6 .* x .^ Num 7 .+ Num 2 .+ Num 3
+e14 = Num 10 .* x .- (F (Sin x)) .- (F (Cos (Num 2 .* x))) .+ x .- y .- Num 5 .- Num 8 .- Num 9 .+ x
 
 
 -- TODO test percolate minus cases
@@ -439,11 +443,11 @@ isOp :: Expr -> Bool
 isOp e = isAdd e || isSub e || isMul e || isDiv e || isPow e
 
 
-isSimple :: Expr -> Bool
-isSimple (Var _) = True
-isSimple (Num _) = True
-isSimple (F f) = True
-isSimple _ = False
+isVarNumFunc :: Expr -> Bool
+isVarNumFunc (Var _) = True
+isVarNumFunc (Num _) = True
+isVarNumFunc (F f) = True
+isVarNumFunc _ = False
 
 hasAdd :: Expr -> Bool
 hasAdd (Var _) = False
@@ -537,7 +541,7 @@ isGlued e = categ e
 -}
 
 isSeparable :: Expr -> Bool
-isSeparable (Neg e) =isAdd e || isSub e
+isSeparable (Neg e) = isAdd e || isSub e
 isSeparable e = isAdd e || isSub e
 
 
@@ -549,17 +553,27 @@ glue es = foldl1 Mul es
 
 
 left :: Expr -> Expr
+left (Var x) = Var x
+left (Num n) = Num n
+left (F f) = F f
+left (Neg e) = Neg (left e)
 left (Add e1 e2) = e1
 left (Sub e1 e2) = e1
 left (Mul e1 e2) = e1
 left (Div e1 e2) = e1
+left (Pow e1 e2) = e1
 
 
 right :: Expr -> Expr
+right (Var x) = Var x
+right (Num n) = Num n
+right (F f) = F f
+right (Neg e) = Neg (right e)
 right (Add e1 e2) = e2
 right (Sub e1 e2) = e2
 right (Mul e1 e2) = e2
 right (Div e1 e2) = e2
+right (Pow e1 e2) = e2
 
 
 getOp :: Expr -> Op
@@ -571,79 +585,92 @@ getOp (Pow _ _) = PowOp
 getOp _ = error "no other op"
 
 
--- TODO apply the first mul case thinking to other cases to get all cases.
--- splits the terms in the expression at + or -
--- TODO rename unGlue to be splitGlue and the rebuild for glue to be rebuildGlue
+newRight :: Expr -> [Expr] -> [Expr]
+newRight e ls
+    | isAdd e = [(last ls) .+ foldl1 Add (split AddOp (right e))]
+    | isSub e = [(last ls) .- foldl1 Sub (split SubOp (right e))]
+    | isMul e = [(last ls) .* foldl1 Mul (split MulOp (right e))]
+    | isDiv e = [(last ls) ./ foldl1 Div (split DivOp (right e))]
+    | isPow e = [(last ls) .^ foldl1 Pow (split PowOp (right e))]
+
+
+
+-- note must be used wisely or else order of operations won't be used.
+-- for example:
+-- split MulOp e5   ==>    [-(4),-x,-(2),-y] which is not correct
+-- but we can do instead:
+-- split SubOp e5   ==>    [-4x,-2y]
 split :: Op -> Expr -> [Expr]
 split _ (Var x) = [Var x]
 split _ (Num n) = [Num n]
 split _ (F f) = [F f]
-split op (Neg e) = genSplit op (Neg e)
+split op (Neg e) = handleNeg op (Neg e)
 split op expr = pickMethod op expr
 
 splitA :: Expr -> [Expr]
-splitA e@(Add _ _) = splitAdd e
 splitA e
     | isAdd e = splitAdd e
     | hasAdd e = init lefties ++ (newRight e lefties)
-    | not $ isSimple e = [e]
-    | otherwise = genSplit AddOp e
+    | isNeg e = handleNeg AddOp e
+    | not $ isVarNumFunc e = [e]
+    | otherwise = split AddOp e
     where lefties = splitA (left e)
-newRight e ls
-    | getOp e == AddOp = [(last ls) .+ (right e)]
-    | getOp e == SubOp = [(last ls) .- (right e)]
-    | getOp e == MulOp = [(last ls) .* (right e)]
-    | getOp e == DivOp = [(last ls) ./ (right e)]
-    | getOp e == PowOp = [(last ls) .^ (right e)]
 splitAdd (Add e1 e2)
     | notAdd e1 && notAdd e2 = [e1, e2]
     | notAdd e1 = [e1] ++ splitA e2
     | notAdd e2 = splitA e1 ++ [e2]
     | otherwise = splitA e1 ++ splitA e2
-    where notAdd = not . isAdd
-
+    where notAdd = not . hasAdd
 
 splitS :: Expr -> [Expr]
 splitS e
     | isSub e = splitSub e
-    | hasSub e = splitS (left e) ++ splitS (right e)
-    | not $ isSimple e = [e]
-    | otherwise = genSplit SubOp e
+    | hasSub e = init lefties ++ (newRight e lefties)
+    | isNeg e = handleNeg SubOp e
+    | not $ isVarNumFunc e = [e]
+    | otherwise = split SubOp e
+    where lefties = splitS (left e)
 splitSub (Sub e1 e2)
     | notSub e1 && notSub e2 = [e1, Neg e2]
     | notSub e1 = [e1] ++ splitS (Neg e2)
     | notSub e2 = splitS e1 ++ [Neg e2]
     | otherwise = splitS e1 ++ map Neg (splitS e2)
-    where notSub = not . isSub
+    where notSub = not . hasSub
 
-
+-- TODO -- think of how to splitM e11
+-- TODO fix e12 tomorrow 
 splitM :: Expr -> [Expr]
 splitM e
+    | hasAdd e || hasSub e = [e]
     | isMul e = splitMul e
-    | hasMul e = splitM (left e) ++ splitM (right e)
-    | not $ isSimple e = [e]
-    | otherwise = genSplit MulOp e
+    | hasMul e = init lefties ++ (newRight e lefties)
+    | isNeg e = handleNeg MulOp e
+    | not $ isVarNumFunc e = [e]
+    | otherwise = split MulOp e
+    where lefties = splitM (left e)
 splitMul (Mul e1 e2)
     | notMul e1 && notMul e2 = [e1, e2]
     | notMul e1 = [e1] ++ splitM e2
     | notMul e2 = splitM e1 ++ [e2]
     | otherwise = splitM e1 ++ splitM e2
-    where notMul = not . isMul
+    where notMul = not . hasMul
 
-
+-- NOTE no need to fix e9 so that it divides everywhere no?
 splitD :: Expr -> [Expr]
 splitD e
+    | hasAdd e || hasSub e = [e]
     | isDiv e = splitDiv e
-    | hasDiv e = splitD (left e) ++ splitD (right e)
-    | not $ isSimple e = [e]
-    | otherwise = genSplit DivOp e
+    | hasDiv e = init lefties ++ (newRight e lefties)
+    | isNeg e = handleNeg DivOp e
+    | not $ isVarNumFunc e = [e]
+    | otherwise = split DivOp e
+    where lefties = splitD (left e)
 splitDiv (Div e1 e2)
     | notDiv e1 && notDiv e2 = [e1, e2]
     | notDiv e1 = [e1] ++ splitD e2
     | notDiv e2 = splitD e1 ++ [e2]
     | otherwise = splitD e1 ++ splitD e2
-    where notDiv = not . isDiv
-
+    where notDiv = not . hasDiv
 
 
 pickMethod :: Op -> Expr -> [Expr]
@@ -653,18 +680,15 @@ pickMethod MulOp expr = splitM expr
 pickMethod DivOp expr = splitD expr
 pickMethod _ _  = error "only ops are: add, sub, mul, div"
 
-
-
-genSplit :: Op -> Expr -> [Expr]
-genSplit op (Var x) = [Var x]
-genSplit op (Num n) = [Num n]
-genSplit op (F f) = [F f]
-genSplit op (Neg e)  -- = if isGlued e then [Neg e] else (map Neg ((pickMethod op) e))
+handleNeg :: Op -> Expr -> [Expr]
+handleNeg op (Neg e)
+    | isAdd e && (op == SubOp) = map Neg (pickMethod AddOp e)
     | isAdd e || isSub e = map Neg pick
     | isMul e || isDiv e || isPow e = [Neg (head pick)] ++ tail pick
-    | otherwise = [Neg (head gen)] ++ tail gen
+    | otherwise = [Neg (head vnf)] ++ tail vnf
     where pick = pickMethod op e
-          gen = genSplit op e
+          vnf = split op e -- stands for var or num or func
+
 
 {-
 
