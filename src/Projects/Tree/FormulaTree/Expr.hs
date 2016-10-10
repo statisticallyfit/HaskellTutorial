@@ -175,6 +175,7 @@ instance Show Expr where
     show (Neg e) = "-(" ++ show e ++ ")"
 
 
+
 instance Show Function where
     show (Sin e) = "sin(" ++ show e ++ ")"
     show (Cos e) = "cos(" ++ show e ++ ")"
@@ -254,6 +255,7 @@ e11 = Num 4 .* (X .+ Num 3)
 e12 = Num 2 .* X .^ Num 2 .* (Num 3 .* X .^ Num 5) .* (F (Sin (Num 4 .* X)))
     .* (F (Cos (Num 5 .* X .^ Num 2))) .^ Num 2 .* (Num 3 .* X .^ Num 9) .* (Num 2 ./ (F (Sin X)))
     ./ (Num 4 .* X .* (F (Sec X)) .* (F (Tan X)) .* Num 2)
+e13 = Num 4 .* X .+ (F (Sin X)) .* (F (Cos X)) .* Num 3 .+ Num 5 .* X .^ Num 2
 
 
 -- TODO test percolate minus cases
@@ -465,6 +467,18 @@ hasSub (Mul e1 e2) = hasSub e1 || hasSub e2
 hasSub (Div e1 e2) = hasSub e1 || hasSub e2
 hasSub (Pow e1 e2) = hasSub e1 || hasSub e2
 
+hasMul :: Expr -> Bool
+hasMul X = False
+hasMul Y = False
+hasMul (Mul e1 e2) = True
+hasMul (Num _) = False
+hasMul (Neg e) = hasMul e
+hasMul (F f) = False
+hasMul (Add e1 e2) = hasMul e1 || hasMul e2
+hasMul (Sub e1 e2) = hasMul e1 || hasMul e2
+hasMul (Div e1 e2) = hasMul e1 || hasMul e2
+hasMul (Pow e1 e2) = hasMul e1 || hasMul e2
+
 hasDiv :: Expr -> Bool
 hasDiv X = False
 hasDiv Y = False
@@ -537,6 +551,20 @@ glue es = foldl1 Mul es
 
 
 
+left :: Expr -> Expr
+left (Add e1 e2) = e1
+left (Sub e1 e2) = e1
+left (Mul e1 e2) = e1
+left (Div e1 e2) = e1
+
+
+right :: Expr -> Expr
+right (Add e1 e2) = e2
+right (Sub e1 e2) = e2
+right (Mul e1 e2) = e2
+right (Div e1 e2) = e2
+
+
 -- TODO apply the first mul case thinking to other cases to get all cases.
 -- splits the terms in the expression at + or -
 -- TODO rename unGlue to be splitGlue and the rebuild for glue to be rebuildGlue
@@ -550,11 +578,10 @@ split op expr = pickMethod op expr
 
 splitA :: Expr -> [Expr]
 splitA e@(Add _ _) = splitAdd e
-splitA (Sub e1 e2) = splitA e1 ++ splitA (Neg e2)
-splitA (Mul e1 e2) = splitA e1 ++ splitA e2
-splitA (Div e1 e2) = splitA e1 ++ splitA e2
-splitA e = genSplit AddOp e
-
+splitA e
+    | isAdd e = splitAdd e
+    | hasAdd e = splitA (left e) ++ splitA (right e)
+    | otherwise = genSplit AddOp e
 splitAdd (Add e1 e2)
     | notAdd e1 && notAdd e2 = [e1, e2]
     | notAdd e1 = [e1] ++ splitA e2
@@ -564,12 +591,10 @@ splitAdd (Add e1 e2)
 
 
 splitS :: Expr -> [Expr]
-splitS (Add e1 e2) = splitS e1 ++ splitS e2
-splitS e@(Sub _ _) = splitSub e
-splitS (Mul e1 e2) = splitS e1 ++ splitS e2
-splitS (Div e1 e2) = splitS e1 ++ splitS e2
-splitS e = genSplit SubOp e
-
+splitS e
+    | isSub e = splitSub e
+    | hasSub e = splitS (left e) ++ splitS (right e)
+    | otherwise = genSplit SubOp e
 splitSub (Sub e1 e2)
     | notSub e1 && notSub e2 = [e1, Neg e2]
     | notSub e1 = [e1] ++ splitS (Neg e2)
@@ -579,12 +604,10 @@ splitSub (Sub e1 e2)
 
 
 splitM :: Expr -> [Expr]
-splitM (Add e1 e2) = splitM e1 ++ splitM e2
-splitM (Sub e1 e2) = splitM e1 ++ splitM (Neg e2)
-splitM e@(Mul _ _) = splitMul e
-splitM (Div e1 e2) = splitM e1 ++ splitM e2
-splitM e = genSplit MulOp e
-
+splitM e
+    | isMul e = splitMul e
+    | hasMul e = splitM (left e) ++ splitM (right e)
+    | otherwise = genSplit MulOp e
 splitMul (Mul e1 e2)
     | notMul e1 && notMul e2 = [e1, e2]
     | notMul e1 = [e1] ++ splitM e2
@@ -594,12 +617,10 @@ splitMul (Mul e1 e2)
 
 
 splitD :: Expr -> [Expr]
-splitD (Add e1 e2) = splitD e1 ++ splitD e2
-splitD (Sub e1 e2) = splitD e1 ++ splitD (Neg e2)
-splitD (Mul e1 e2) = splitD e1 ++ splitD e2
-splitD e@(Div _ _) = splitDiv e
-splitD e = genSplit DivOp e
-
+splitD e
+    | isDiv e = splitDiv e
+    | hasDiv e = splitD (left e) ++ splitD (right e)
+    | otherwise = genSplit DivOp e
 splitDiv (Div e1 e2)
     | notDiv e1 && notDiv e2 = [e1, e2]
     | notDiv e1 = [e1] ++ splitD e2

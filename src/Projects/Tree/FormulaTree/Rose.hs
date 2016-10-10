@@ -40,8 +40,8 @@ data Function
 data Op = AddOp | SubOp | MulOp | DivOp | PowOp deriving (Eq, Show)
 
 
-data ExprList = AddL [ExprList] | SubL [ExprList] | MulL [ExprList] | DivL [ExprList] [ExprList]
-    | PowL ExprList [ExprList] | NegL ExprList | NumL Int | VarL String | G FunctionL
+data ExprList = AddL [ExprList] | SubL [ExprList] | MulL [ExprList] | DivL [ExprList]
+    | PowL [ExprList] [ExprList] | NegL ExprList | NumL Int | VarL String | G FunctionL
     deriving (Eq, Show)
 
 
@@ -203,7 +203,19 @@ e9 = ((Num 3 .* x .^ Num 3) ./ (Num 3 .* x .^ (Num 1 ./ Num 3))) .*
 e10 = (Num 3 .* x .^ Num 3) ./ ((Num 3 .* x .^ (Num 1 ./ Num 3)) .*
      (Num 8 .* x .^ Num 9)) ./ (Num 4 .* x .^ Num 3)
 e11 = Num 4 .* (x .+ Num 3)
+-- TODO fix show for this one using numTerms.
+e12 = ((F (Sin x)) .+ (F (Cos x)) .* Num 4 .* x .^ Num 2) .^ (x .+ Num 5 .- (F (Tan (Num 2 .* x))))
+e13 = Num 4 .* x .+ Num 3 .* x .+ x .+ Num 6 .* x .^ Num 7 .+ Num 2 .+ Num 3
+{-
 
+
+flatten :: ExprList -> ExprList
+flatten (VarL x) = VarL x
+flatten (NumL c) = NumL c
+flatten (G f) = G f
+flatten (AddL [x,y]) = AddL [x,y]
+flatten (AddL es) = AddL [flatten (init es), last es]
+-}
 
 convert :: Expr -> ExprList
 convert (Var x) = VarL x
@@ -213,9 +225,8 @@ convert (F f) = G $ push (convert (getArg f)) f
 convert (Add e1 e2) = AddL [convert e1, convert e2]
 convert (Sub e1 e2) = SubL [convert e1, convert e2]
 convert (Mul e1 e2) = MulL [convert e1, convert e2]
-convert (Div e1 e2) = DivL [convert e1] [convert e2]
-convert (Pow base es) = PowL (convert base) [convert es]
-
+convert (Div e1 e2) = DivL [convert e1, convert e2]
+convert (Pow base es) = PowL [convert base] [convert es]
 
 
 getArg :: Function -> Expr
@@ -391,7 +402,7 @@ isDiv (Div _ _) = True
 isDiv _ = False
 
 isDivL :: ExprList -> Bool
-isDivL (DivL _ _) = True
+isDivL (DivL _) = True
 isDivL _ = False
 
 getUpper :: Expr -> Expr
