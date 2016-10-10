@@ -12,33 +12,33 @@ import Data.List
 -- import Data.List.Extra (trim, wordsBy)
 
 
+data FunctionExpr
+    =
 data Function
-    = Sin Expr | Cos Expr | Tan Expr |
-      Csc Expr | Sec Expr | Cot Expr |
-      Arcsin Expr | Arccos Expr | Arctan Expr |
-      Arccsc Expr | Arcsec Expr | Arccot Expr |
-      Sinh Expr | Cosh Expr | Tanh Expr |
-      Csch Expr | Sech Expr | Coth Expr |
-      Arcsinh Expr | Arccosh Expr | Arctanh Expr |
-      Arccsch Expr | Arcsech Expr | Arccoth Expr |
-      Ln Expr | E Expr | Log Expr Expr -- first expr is base
+    = Sin Equation | Cos Equation | Tan Equation |
+      Csc Equation | Sec Equation | Cot Equation |
+      Arcsin Equation | Arccos Equation | Arctan Equation |
+      Arccsc Equation | Arcsec Equation | Arccot Equation |
+      Sinh Equation | Cosh Equation | Tanh Equation |
+      Csch Equation | Sech Equation | Coth Equation |
+      Arcsinh Equation | Arccosh Equation | Arctanh Equation |
+      Arccsch Equation | Arcsech Equation | Arccoth Equation |
+      Ln Equation | E Equation | Log Equation Equation -- first expr is base
     deriving (Eq)
 
 
 data Op = AddOp | SubOp | MulOp | DivOp | PowOp deriving (Eq, Show)
 
-data Expr = Add [Expr] [Expr] | Sub [Expr] [Expr] | Mul [Expr] [Expr]
-    | Div [Expr] [Expr] | Pow [Expr] [Expr] | Neg Expr | Num Int | X | Y | F Function
+
+data Expr = Plus [Expr] | Minus [Expr] | Times [Expr] | Quotient [Expr] [Expr]
+    | Expo Expr [Expr] | Negate Expr | Val Int | Func Function | X' | Y'
     deriving (Eq, Show)
 
-{-
 
-data Expr = Add [Expr] | Sub [Expr] | Mul [Expr] | Div [Expr] [Expr] | Pow [Expr] |
-    Neg Expr | Num Int |-}
-{- Var Char |-}{-
- F Function | X | Y
-    deriving (Eq)
--}
+data Equation = Add Equation Equation | Sub Equation Equation | Mul Equation Equation
+    | Div Equation Equation | Pow Equation Equation | Neg Equation | Num Int | F Function | X | Y
+    deriving (Eq, Show)
+
 
 type Coeff = Int
 type Description = (Expr, Expr, Expr)
@@ -234,14 +234,14 @@ infixl 7 ./
 infixl 8 .^
 
 (.+), (.-), (.*), (./), (.^) :: Expr -> Expr -> Expr
-(.+) = Add
-(.-) = Sub
-(.*) = Mul
-(./) = Div
-(.^) = Pow
+(.+) = Plus
+(.-) = Minus
+(.*) = Times
+(./) = Quotient
+(.^) = Expo
 
 ---------------------------------------------------------------------------------------------
-{-
+
 
 e1 :: Expr
 e1 = Num(4) .* X .* (F (Sin X)) .* Num(2) .* (F (Cos X)) .* Num(5) .* Num(2) .* Num(3) .* (F (Tan X))
@@ -261,10 +261,234 @@ e9 = ((Num 3 .* X .^ Num 3) ./ (Num 3 .* X .^ (Num 1 ./ Num 3))) .*
 e10 = (Num 3 .* X .^ Num 3) ./ ((Num 3 .* X .^ (Num 1 ./ Num 3)) .*
      (Num 8 .* X .^ Num 9)) ./ (Num 4 .* X .^ Num 3)
 e11 = Num 4 .* (X .+ Num 3)
+
+
+{-
+
+data Expr = Plus [Expr] | Minus [Expr] | Times [Expr] | Quotient [Expr] [Expr]
+    | Expo Expr [Expr] | Negate Expr | Const Int | Func Function | X' | Y'
+    deriving (Eq, Show)
+
+
+data Equation = Add Equation Equation | Sub Equation Equation | Mul Equation Equation
+    | Div Equation Equation | Pow Equation Equation | Neg Equation | Num Int | F Function | X | Y
+    deriving (Eq, Show)
 -}
 
-e1 :: Expr
-e1 = [[Num (-7)] .* [X]] .^ [Num 2]
+
+convert :: Expr -> Equation
+convert X' = X
+convert Y' = Y
+convert (Val c) = Num c
+convert (Negate e) = Neg (convert e)
+convert (Func f) = F $ pushEq (convert (getArg f)) f
+convert (Plus (e:es)) = Add (convert e) (convert (Plus es))
+convert (Minus (e:es)) = Sub (convert e) (convert (Minus es))
+convert (Times (e:es)) = Mul (convert e) (convert (Times es))
+convert (Quotient (e:es)) = Div (convert e) (convert (Quotient es))
+convert (Expo base es) = Pow (convert base) (convert es)
+
+
+getArg :: Function -> Expr
+getArg (Sin u) = u
+getArg (Cos u) = u
+getArg (Tan u) = u
+getArg (Csc u) = u
+getArg (Sec u) = u
+getArg (Cot u) = u
+getArg (Arcsin u) = u
+getArg (Arccos u) = u
+getArg (Arctan u) = u
+getArg (Arccsc u) = u
+getArg (Arcsec u) = u
+getArg (Arccot u) = u
+getArg (Sinh u) = u
+getArg (Cosh u) = u
+getArg (Tanh u) = u
+getArg (Csch u) = u
+getArg (Sech u) = u
+getArg (Coth u) = u
+getArg (Arcsinh u) = u
+getArg (Arccosh u) = u
+getArg (Arctanh u) = u
+getArg (Arccsch u) = u
+getArg (Arcsech u) = u
+getArg (Arccoth u) = u
+getArg (E u) = u
+getArg (Ln u) = u
+getArg (Log u v) = v -- TODO fix so we can get both or handle log separately.
+
+
+pushEq :: Equation -> Function -> Function
+pushEq u (Sin v) = Sin u
+pushEq u (Cos v) = Cos u
+pushEq u (Tan v) = Tan u
+pushEq u (Csc v) = Csc u
+pushEq u (Sec v) = Sec u
+pushEq u (Cot v) = Cot u
+pushEq u (Arcsin v) = Arcsin u
+pushEq u (Arccos v) = Arccos u
+pushEq u (Arctan v) = Arctan u
+pushEq u (Arccsc v) = Arccsc u
+pushEq u (Arcsec v) = Arcsec u
+pushEq u (Arccot v) = Arccot u
+pushEq u (Sinh v) = Sinh u
+pushEq u (Cosh v) = Cosh u
+pushEq u (Tanh v) = Tanh u
+pushEq u (Csch v) = Csch u
+pushEq u (Sech v) = Sech u
+pushEq u (Coth v) = Coth u
+pushEq u (Arcsinh v) = Arcsinh u
+pushEq u (Arccosh v) = Arccosh u
+pushEq u (Arctanh v) = Arctanh u
+pushEq u (Arccsch v) = Arccsch u
+pushEq u (Arcsech v) = Arcsech u
+pushEq u (Arccoth v) = Arccoth u
+pushEq u (E v) = E u
+pushEq u (Ln v) = Ln u
+pushEq u (Log v1 v2) = Log u u
+
+
+
+
+split :: Op -> Equation -> [Equation]
+split _ X = [X]
+split _ Y = [Y]
+split _ (Num n) = [Num n]
+split _ (F f) = [F f]
+split op (Neg e) = genSplit op (Neg e)
+split op expr = pickMethod op expr
+
+splitA :: Equation -> [Equation]
+splitA (Sub e1 e2) = splitA e1 ++ splitA (Neg e2)
+splitA e
+    | isAdd e = splitA' e
+    | not $ isAdd e = [e]
+    | otherwise = genSplit AddOp e -- TODO deal below with negs.
+splitA' (Add e1 e2)
+    | notAdd e1 && notAdd e2 = [e1, e2]
+    | notAdd e1 = [e1] ++ splitA e2
+    | notAdd e2 = splitA e1 ++ [e2]
+    | otherwise = splitA e1 ++ splitA e2
+    where notAdd = not . isAdd
+
+splitS :: Equation -> [Equation]
+splitS (Add e1 e2) = splitS e1 ++ splitS e2
+splitS e
+    | isSub e = splitS' e
+    | not $ isSub e = [e]
+    | otherwise = genSplit SubOp e
+splitS' (Sub e1 e2)
+    | notSub e1 && notSub e2 = [e1, Neg e2]
+    | notSub e1 = [e1] ++ splitS (Neg e2)
+    | notSub e2 = splitS e1 ++ [Neg e2]
+    | otherwise = splitS e1 ++ map Neg (splitS e2)
+    where notSub = not . isSub
+
+
+splitM :: Equation -> [Equation]
+splitM e
+    | isMul e = splitM' e
+    | not $ isMul e = [e]
+    | otherwise = genSplit MulOp e
+splitM' (Mul e1 e2)
+    | notMul e1 && notMul e2 = [e1, e2]
+    | notMul e1 = [e1] ++ splitM e2
+    | notMul e2 = splitM e1 ++ [e2]
+    | otherwise = splitM e1 ++ splitM e2
+    where notMul = not . isMul
+
+splitD :: Equation -> [Equation]
+splitD e
+    | isDiv e = splitD' e
+    | not $ isDiv e = [e]
+    | otherwise = genSplit DivOp e
+splitD' (Div e1 e2)
+    | isDiv e1 && isDiv e2 = [e1, e2]
+    | isDiv e1 = [e1] ++ splitD e2
+    | isDiv e2 = splitD e1 ++ [e2]
+    | otherwise = splitD e1 ++ splitD e2
+    where notDiv = not . isDiv
+
+
+pickMethod :: Op -> Equation -> [Equation]
+pickMethod AddOp expr = splitA expr
+pickMethod SubOp expr = splitS expr
+pickMethod MulOp expr = splitM expr
+pickMethod DivOp expr = splitD expr
+pickMethod _ _  = error "only ops are: add, sub, mul, div"
+
+
+genSplit :: Op -> Equation -> [Equation]
+genSplit op X = [X]
+genSplit op Y = [Y]
+genSplit op (Num n) = [Num n]
+genSplit op (F f) = [F f]
+genSplit op (Neg e)  -- = if isGlued e then [Neg e] else (map Neg ((pickMethod op) e))
+    | isAdd e || isSub e = map Neg pick
+    | isMul e || isDiv e || isPow e = [Neg (head pick)] ++ tail pick
+    | otherwise = [Neg (head gen)] ++ tail gen
+    where pick = pickMethod op e
+          gen = genSplit op e
+
+
+
+
+isAdd :: Equation -> Bool
+isAdd (Add _ _) = True
+isAdd _ = False
+
+isSub :: Equation -> Bool
+isSub (Sub _ _) = True
+isSub _ = False
+
+isMul :: Equation -> Bool
+isMul (Mul _ _) = True
+isMul _ = False
+
+isDiv :: Equation -> Bool
+isDiv (Div _ _) = True
+isDiv _ = False
+
+getUpper :: Equation -> Equation
+getUpper (Div numer _) = numer
+getUpper _ = error "not div expr in getUpper"
+
+getLower :: Equation -> Equation
+getLower (Div _ denom) = denom
+getLower _ = error "not div expr in getLower"
+
+isPow :: Equation -> Bool
+isPow (Pow _ _) = True
+isPow _ = False
+
+isNum :: Equation -> Bool
+isNum (Num _) = True
+isNum _ = False
+
+isNegNum :: Equation -> Bool
+isNegNum (Neg (Num n)) = True
+isNegNum _ = False
+
+isVar :: Equation -> Bool
+isVar X = True
+isVar Y = True
+isVar _ = False
+
+isNeg :: Equation -> Bool
+isNeg (Neg e) = True
+isNeg _ = False
+
+getNeg :: Equation -> Equation
+getNeg (Neg n) = n
+getNeg _ = error "incorrect argument"
+
+getNegEq :: Expr -> Expr
+getNegEq (Negate n) = n
+getNegEq _ = error "incorrect argument"
+
+
+
 {-
 e1 = Add [Sub [Add [Mul [Num (-7), Pow [X, Num 2]], Mul [Num 3, X], Mul [Num 4, X],
     Mul [Num 5, Pow [X, Num 2]],  Mul [Num 3, F $ Sin (Mul [Num 4, X])]]], Mul [Num 5, (F (Cos X))],

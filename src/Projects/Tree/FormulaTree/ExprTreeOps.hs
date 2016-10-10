@@ -562,16 +562,26 @@ splitA' (Add e1 e2)
     where notAdd = not . isAdd
 
 splitS :: Expr -> [Expr]
+splitS (Add e1 e2) = splitS e1 ++ splitS e2
 splitS e
     | isSub e = splitS' e
     | not $ isSub e = [e]
     | otherwise = genSplit SubOp e
+{-
+splitS :: Expr -> [Expr]
+splitS (Add e1 e2) = splitS' e1 ++ splitS' e2
+splitS (Sub e1 e2) =
+    |
+    | isSub e || isAdd e || isMul e || isDiv e = splitS' e
+    | otherwise = genSplit SubOp e-}
+-- splitS' (Add e1 e2)
 splitS' (Sub e1 e2)
     | notSub e1 && notSub e2 = [e1, Neg e2]
     | notSub e1 = [e1] ++ splitS (Neg e2)
     | notSub e2 = splitS e1 ++ [Neg e2]
     | otherwise = splitS e1 ++ map Neg (splitS e2)
     where notSub = not . isSub
+
 
 splitM :: Expr -> [Expr]
 splitM e
@@ -1076,34 +1086,35 @@ sameArgs :: Function -> Function -> Bool
 sameArgs f g
     | getArg f == getArg g = True
     | otherwise = False
-    where
-    getArg (Sin u) = u
-    getArg (Cos u) = u
-    getArg (Tan u) = u
-    getArg (Csc u) = u
-    getArg (Sec u) = u
-    getArg (Cot u) = u
-    getArg (Arcsin u) = u
-    getArg (Arccos u) = u
-    getArg (Arctan u) = u
-    getArg (Arccsc u) = u
-    getArg (Arcsec u) = u
-    getArg (Arccot u) = u
-    getArg (Sinh u) = u
-    getArg (Cosh u) = u
-    getArg (Tanh u) = u
-    getArg (Csch u) = u
-    getArg (Sech u) = u
-    getArg (Coth u) = u
-    getArg (Arcsinh u) = u
-    getArg (Arccosh u) = u
-    getArg (Arctanh u) = u
-    getArg (Arccsch u) = u
-    getArg (Arcsech u) = u
-    getArg (Arccoth u) = u
-    getArg (E u) = u
-    getArg (Ln u) = u
-    getArg (Log u v) = v -- TODO fix so we can get both or handle log separately.
+
+getArg :: Function -> Expr
+getArg (Sin u) = u
+getArg (Cos u) = u
+getArg (Tan u) = u
+getArg (Csc u) = u
+getArg (Sec u) = u
+getArg (Cot u) = u
+getArg (Arcsin u) = u
+getArg (Arccos u) = u
+getArg (Arctan u) = u
+getArg (Arccsc u) = u
+getArg (Arcsec u) = u
+getArg (Arccot u) = u
+getArg (Sinh u) = u
+getArg (Cosh u) = u
+getArg (Tanh u) = u
+getArg (Csch u) = u
+getArg (Sech u) = u
+getArg (Coth u) = u
+getArg (Arcsinh u) = u
+getArg (Arccosh u) = u
+getArg (Arctanh u) = u
+getArg (Arccsch u) = u
+getArg (Arcsech u) = u
+getArg (Arccoth u) = u
+getArg (E u) = u
+getArg (Ln u) = u
+getArg (Log u v) = v -- TODO fix so we can get both or handle log separately.
 
 {-
 TODO idea then after we state how functions should simplify, do foldl1 (simpFunc . MUl) over the list.
