@@ -1,0 +1,1103 @@
+module ExprPlan where
+
+import Test.QuickCheck -- (Arbitrary, arbitrary, elements)
+import Test.QuickCheck.Checkers
+import Test.QuickCheck.Classes
+import Control.Monad hiding (join)
+import Control.Applicative
+import Data.Char
+import Numeric
+import Data.Maybe
+import Data.List
+
+
+data Function
+    = Sin Expr | Cos Expr | Tan Expr |
+      Csc Expr | Sec Expr | Cot Expr |
+      Arcsin Expr | Arccos Expr | Arctan Expr |
+      Arccsc Expr | Arcsec Expr | Arccot Expr |
+      Sinh Expr | Cosh Expr | Tanh Expr |
+      Csch Expr | Sech Expr | Coth Expr |
+      Arcsinh Expr | Arccosh Expr | Arctanh Expr |
+      Arccsch Expr | Arcsech Expr | Arccoth Expr |
+      Ln Expr | E Expr | Log Expr Expr -- first expr is base
+    deriving (Eq)
+
+data Op = AddOp | SubOp | MulOp | DivOp | PowOp deriving (Eq)
+
+data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
+    | Pow Expr Expr | Neg Expr | Num Int | Var String | F Function
+    deriving (Eq)
+
+type Coeff = Int
+type Description = (Expr, Expr, Expr)
+
+data Group = Poly [Coeff] | Trig [Description] | InvTrig [Description] | Hyperbolic [Description] |
+    InvHyp [Description] | Logarithmic [Description]
+    deriving (Eq, Show)
+
+data Code = Code [Group] deriving (Eq, Show)
+
+
+instance Show Op where
+    show AddOp = "(+)"
+    show SubOp = "(-)"
+    show MulOp = "(*)"
+    show DivOp = "(/)"
+    show PowOp = "(^)"
+
+-- TODO idea: count num elements and then decide whether ot put brackets.
+-- Example: x^6 * 4 is shown as 4x^6 while 4 * (x+3) is shown as 4(x+3)
+-- idea: glued things are wrapped each.
+-- NOTE original
+instance Show Expr where
+    show (Var x) = x
+    show (Num n) = show n
+    show (F func) = show func
+    show (Add e1 e2) = show e1 ++ " + " ++ show e2
+    show (Sub e1 e2) = show e1 ++ " - " ++ show e2
+
+    show (Mul (Num n) (Num m)) = "(" ++ show n ++ ")(" ++ show m ++ ")"
+    show (Mul (Num n) p@(Pow _ _)) = show n ++ show p
+    show (Mul (Num n) (Var x)) = show n ++ x
+    show (Mul (Neg (Num n)) (Var x)) = "-" ++ show n ++ x
+    --show (Neg (Mul (Num n) X)) = "-" ++ show n ++ show X
+    --show (Neg (Mul (Num n) Y)) = "-" ++ show n ++ show Y
+    show (Mul (Num n) rest) = show n ++ "(" ++ show rest ++ ")"
+
+    show (Mul rest p@(Pow _ _))
+        = if isPow rest
+        then "(" ++ show rest ++ ")(" ++ show p ++ ")"
+        else show rest ++ "(" ++ show p ++ ")"
+
+    show (Mul rest (Num n))
+        = if isNum rest
+        then "(" ++ show rest ++ ")(" ++ show n ++ ")"
+        else show rest ++ "(" ++ show n ++ ")"
+
+    show (Mul d1@(Div _ _) d2@(Div _ _)) = "(" ++ show d1 ++ ") (" ++ show d2 ++ ")"
+    show (Mul d@(Div _ _) m@(Mul _ _)) = "(" ++ show d ++ ") (" ++ show m ++ ")"
+    show (Mul m@(Mul _ _) d@(Div _ _)) = "(" ++ show m ++ ") (" ++ show d ++ ")"
+    show (Mul m1@(Mul (Num a) (Pow _ _)) m2@(Mul (Num b) (Pow _ _)))
+        = "(" ++ show m1 ++ ") (" ++ show m2 ++ ")"
+    show (Mul e1 a@(Add _ _)) = show e1 ++ "(" ++ show a ++ ")"
+    show (Mul e1 ng@(Neg (Num n))) = show e1 ++ "(" ++ show ng ++ ")"
+    show (Mul e1 e2)
+        = if isPow e1 && isPow e2
+         then show e1 ++ " * " ++ show e2
+         else if isPow e1 && isNum e2
+         then "(" ++ show e1 ++ ")(" ++ show e2 ++ ")"
+         else show e1 ++ show e2
+
+    show (Div (Num n) (Num m)) = show n ++ "/" ++ show m
+    show (Div e1 e2) = "(" ++ show e1 ++ ") / (" ++ show e2 ++ ")"
+    show (Pow x d@(Div (Num a) (Num b))) = show x ++ "^(" ++ show d ++ ")"
+    show (Pow x d@(Div e1 e2)) = show x ++ "^" ++ show d
+    show (Pow e1 e2) = show e1 ++ "^" ++ show e2
+
+    show (Neg m@(Mul _ _)) = "-" ++ show m
+    show (Neg d@(Div _ _)) = "-" ++ show d
+    show (Neg p@(Pow _ _)) = "-" ++ show p
+    show (Neg f@(F _)) = "-" ++ show f
+    show (Neg (Var x)) = "-" ++ x
+    show (Neg e) = "-(" ++ show e ++ ")"
+
+
+instance Show Function where
+    show (Sin e) = "sin(" ++ show e ++ ")"
+    show (Cos e) = "cos(" ++ show e ++ ")"
+    show (Tan e) = "tan(" ++ show e ++ ")"
+    show (Csc e) = "csc(" ++ show e ++ ")"
+    show (Sec e) = "sec(" ++ show e ++ ")"
+    show (Cot e) = "cot(" ++ show e ++ ")"
+    show (Arcsin e) = "arcsin(" ++ show e ++ ")"
+    show (Arccos e) = "arccos(" ++ show e ++ ")"
+    show (Arctan e) = "arctan(" ++ show e ++ ")"
+    show (Arccsc e) = "arccsc(" ++ show e ++ ")"
+    show (Arcsec e) = "arcsec(" ++ show e ++ ")"
+    show (Arccot e) = "arccot(" ++ show e ++ ")"
+    show (Sinh e) = "sinh(" ++ show e ++ ")"
+    show (Cosh e) = "cosh(" ++ show e ++ ")"
+    show (Tanh e) = "tanh(" ++ show e ++ ")"
+    show (Csch e) = "csch(" ++ show e ++ ")"
+    show (Sech e) = "sech(" ++ show e ++ ")"
+    show (Coth e) = "coth(" ++ show e ++ ")"
+    show (Arcsinh e) = "arcsinh(" ++ show e ++ ")"
+    show (Arccosh e) = "arccosh(" ++ show e ++ ")"
+    show (Arctanh e) = "arctanh(" ++ show e ++ ")"
+    show (Arccsch e) = "arccsch(" ++ show e ++ ")"
+    show (Arcsech e) = "arcsech(" ++ show e ++ ")"
+    show (Arccoth e) = "arccoth(" ++ show e ++ ")"
+    show (E e) = "e^(" ++ show e ++ ")"
+    show (Ln e) = "ln(" ++ show e ++ ")"
+    show (Log b a) = "log" ++ show b ++ "(" ++ show a ++ ")"
+
+
+x = Var "x"
+y = Var "y"
+
+infixl 6 .+
+infixl 6 .-
+infixl 7 .*  -- NOTE made this right associative so tree would lean to the left (go right down)
+infixl 7 ./
+infixl 8 .^
+
+(.+), (.-), (.*), (./), (.^) :: Expr -> Expr -> Expr
+(.+) = Add
+(.-) = Sub
+(.*) = Mul
+(./) = Div
+(.^) = Pow
+
+---------------------------------------------------------------------------------------------
+
+e1 :: Expr
+e1 = Num(4) .* x .* (F (Sin x)) .* Num(2) .* (F (Cos x)) .* Num(5) .* Num(2) .* Num(3) .* (F (Tan x))
+e2 = e1 .+ Num(2) .* x .+ Num(7) .* x
+e3 = Num(4) .* x .+ Num(3) .* x .^ Num(5) .- (F (Sin (Num(3) .+ x)))
+e4 = Neg(F (Sin x)) .* Neg(Num(2))
+e5 = Neg (Num(4) .* x .+ Num(2) .* y)
+e6 = Num (-7) .* x .^ Num 2 .+ Num 3 .* x .+ Num 4 .* x .+ Num 5 .* x .^ Num 2 .-
+    Num 3 .* (F $ Sin $ Num 4 .* x) .+ Num 5 .* (F $ Cos x) .+ Num 2 .+ Num 3
+e7 = (Num 3 .* x .^ Num 3) ./ (Num 3 .* x .^ (Num 1 ./ Num 3)) .-
+    (Num 8 .* x .^ Num 9) ./ (Num 4 .* x .^ Num 3)
+e7' = (Num 3 .* x .^ Num 3) ./ ((Num 3 .* x .^ (Num 1 ./ Num 3)) .-
+    (Num 8 .* x .^ Num 9)) ./ (Num 4 .* x .^ Num 3)
+e8 = e6 .+ e7
+-- NOTE IMPORTANT you must put (e1 * e2) / (e3 * e4) brakcets like that because otherwise
+-- error says you cannot mix ./ and .* because one is infix l and other is infix r.
+e9 = ((Num 3 .* x .^ Num 3) ./ (Num 3 .* x .^ (Num 1 ./ Num 3))) .*
+     ((Num 8 .* x .^ Num 9) ./ (Num 4 .* x .^ Num 3))
+e10 = (Num 3 .* x .^ Num 3) ./ ((Num 3 .* x .^ (Num 1 ./ Num 3)) .*
+     (Num 8 .* x .^ Num 9)) ./ (Num 4 .* x .^ Num 3)
+e11 = Num 4 .* (x .+ Num 3)
+-- TODO fix show for this one using numTerms.
+e12 = ((F (Sin x)) .+ (F (Cos x)) .* Num 4 .* x .^ Num 2) .^ (x .+ Num 5 .- (F (Tan (Num 2 .* x))))
+e13 = Num 4 .* x .+ Num 3 .* x .+ x .+ Num 6 .* x .^ Num 7 .+ Num 2 .+ Num 3
+e14 = Num 10 .* x .- (F (Sin x)) .- (F (Cos (Num 2 .* x))) .+ x .- y .- Num 5 .- Num 8 .- Num 9 .+ x
+e15 = F (Sin (x .+ Num 3 .+ Num 4 .+ Num 8 .* x .- y .+ Num 2 .^ x))
+
+
+---------------------------------------------------------------------------------------------
+
+{-
+TODO PLAN OVERALL * ~ *
+
+input -> split Add and Sub -> partition -> (poly terms (1), other)
+
+other -> if isMul then split Mul and if Div each then split DIv each
+    -> partition -> (poly terms (2), functions)
+
+    (same for div top and bottom)
+
+functions -> send to function simplifyFunctions (or fold using simplifyFunctions principles)
+principle:
+represent sin ^ tan x (x) or sin^ 2 (3x^6) as:
+Trig [(tan x, X), 0,0,0,0,0] and,
+Trig [(Num 2, (3x^6)),0,0,0,0,0] respectively.
+
+principle: we add only if both elements in tuple are equal pairwise, (same for sub) resulting in
+new data holder: Trig [(Num 2, same exp, same arg)]
+
+and we multiply only if the argument is equal (snd) so we get Trig [(tanx + Num 2 as exp, X)]
+assuming arg was X for both. same for div
+
+---
+poly terms (1) -> (make sure to split by both add and sub) then send to addH
+
+poly terms (2) -> these are split by Mul, so if any of these elements "have Div" then split that one
+by Div and send to divH. Otherwise, send to mulH.
+
+---
+Clean up with sweep Num _
+-}
+
+splitAS :: Expr -> [Expr]
+splitAS expr = concatMap (split SubOp) (split AddOp expr)
+
+
+
+-- note must be used wisely or else order of operations won't be used.
+-- for example:
+-- split MulOp e5   ==>    [-(4),-x,-(2),-y] which is not correct
+-- but we can do instead:
+-- split SubOp e5   ==>    [-4x,-2y]
+split :: Op -> Expr -> [Expr]
+split _ (Var x) = [Var x]
+split _ (Num n) = [Num n]
+split _ (F f) = [F f]
+split op (Neg e) = handleNeg op (Neg e)
+split op expr = pickMethod op expr
+
+splitA :: Expr -> [Expr]
+splitA e
+    | isAdd e = splitAdd e
+    | hasAdd e = init lefties ++ (newRight e lefties)
+    | isNeg e = handleNeg AddOp e
+    | not $ isVarNumFunc e = [e]
+    | otherwise = split AddOp e
+    where lefties = splitA (left e)
+splitAdd (Add e1 e2)
+    | notAdd e1 && notAdd e2 = [e1, e2]
+    | notAdd e1 = [e1] ++ splitA e2
+    | notAdd e2 = splitA e1 ++ [e2]
+    | otherwise = splitA e1 ++ splitA e2
+    where notAdd = not . hasAdd
+
+splitS :: Expr -> [Expr]
+splitS e
+    | isSub e = splitSub e
+    | hasSub e = init lefties ++ (newRight e lefties)
+    | isNeg e = handleNeg SubOp e
+    | not $ isVarNumFunc e = [e]
+    | otherwise = split SubOp e
+    where lefties = splitS (left e)
+splitSub (Sub e1 e2)
+    | notSub e1 && notSub e2 = [e1, Neg e2]
+    | notSub e1 = [e1] ++ splitS (Neg e2)
+    | notSub e2 = splitS e1 ++ [Neg e2]
+    | otherwise = splitS e1 ++ map Neg (splitS e2)
+    where notSub = not . hasSub
+
+-- TODO -- think of how to splitM e11
+-- TODO fix e12 tomorrow
+splitM :: Expr -> [Expr]
+splitM e
+    | hasAdd e || hasSub e = [e]
+    | isMul e = splitMul e
+    | hasMul e = init lefties ++ (newRight e lefties)
+    | isNeg e = handleNeg MulOp e
+    | not $ isVarNumFunc e = [e]
+    | otherwise = split MulOp e
+    where lefties = splitM (left e)
+splitMul (Mul e1 e2)
+    | notMul e1 && notMul e2 = [e1, e2]
+    | notMul e1 = [e1] ++ splitM e2
+    | notMul e2 = splitM e1 ++ [e2]
+    | otherwise = splitM e1 ++ splitM e2
+    where notMul = not . hasMul
+
+-- NOTE no need to fix e9 so that it divides everywhere no?
+splitD :: Expr -> [Expr]
+splitD e
+    | hasAdd e || hasSub e = [e]
+    | isDiv e = splitDiv e
+    | hasDiv e = init lefties ++ (newRight e lefties)
+    | isNeg e = handleNeg DivOp e
+    | not $ isVarNumFunc e = [e]
+    | otherwise = split DivOp e
+    where lefties = splitD (left e)
+splitDiv (Div e1 e2)
+    | notDiv e1 && notDiv e2 = [e1, e2]
+    | notDiv e1 = [e1] ++ splitD e2
+    | notDiv e2 = splitD e1 ++ [e2]
+    | otherwise = splitD e1 ++ splitD e2
+    where notDiv = not . hasDiv
+
+
+pickMethod :: Op -> Expr -> [Expr]
+pickMethod AddOp expr = splitA expr
+pickMethod SubOp expr = splitS expr
+pickMethod MulOp expr = splitM expr
+pickMethod DivOp expr = splitD expr
+pickMethod _ _  = error "only ops are: add, sub, mul, div"
+
+handleNeg :: Op -> Expr -> [Expr]
+handleNeg op (Neg e)
+    | isAdd e && (op == SubOp) = map Neg (pickMethod AddOp e)
+    | isAdd e || isSub e = map Neg pick
+    | isMul e || isDiv e || isPow e = [Neg (head pick)] ++ tail pick
+    | otherwise = [Neg (head vnf)] ++ tail vnf
+    where pick = pickMethod op e
+          vnf = split op e -- stands for var or num or func
+
+newRight :: Expr -> [Expr] -> [Expr]
+newRight e ls
+    | isAdd e = [(last ls) .+ foldl1 Add (split AddOp (right e))]
+    | isSub e = [(last ls) .- foldl1 Sub (split SubOp (right e))]
+    | isMul e = [(last ls) .* foldl1 Mul (split MulOp (right e))]
+    | isDiv e = [(last ls) ./ foldl1 Div (split DivOp (right e))]
+    | isPow e = [(last ls) .^ foldl1 Pow (split PowOp (right e))]
+
+
+---------------------------------------------------------
+
+-- note converts expression to code
+-- first splits expr at the plus / minus signs and then categorizes each element as either
+-- function or polynomial term. Puts them into code accordingly.
+-- example If we have 7x^2 and 3x^2 in the same expr, then we have: Poly [0,0,(7+3)
+-- NOTE TODO if we have 3sec^2 x + sinxcosxtanx + x^2 tan x then
+-- we split: [3sec^2 x, sinxcosxtanx, x^2tan x]
+-- THen decide: map (decide if more than one function) over this
+-- then if not we send partition those that have more than one function and those that do not.
+-- For those that do not: send to simplify or rearrangeconst and to codifying to be simplified
+-- in case of repeat things, like we can have 4sec^2x that we must add to get 7sec^2x...
+-- For those that do have more than 1 func: send to functionsimplifier.
+-- TODO help filtering is incorrect here. Learn to allow things like x^2 sinx through the filter as well
+-- not just pure trig or hyp .. functions.
+--exprToCode :: Expr -> Code
+{-exprToCode expr
+    where
+    (ps, other) = partition isMono (splitAS expr)-}
+
+{-exprToCode :: Expr -> Code
+exprToCode expr = Code $ filter (not . emptyGroup) [poly, trig, invTrig, hyp, invHyp, logs]
+    where
+    ss = split expr
+    poly = codifyPoly $ filter isPoly ss
+    trig = codifyOther $ filter isTrig ss
+    invTrig = codifyOther $ filter isTrig ss
+    hyp = codifyOther $ filter isTrig ss
+    invHyp = codifyOther $ filter isTrig ss
+    logs = codifyOther $ filter isTrig ss
+
+    emptyGroup (Poly ps) = null ps
+    emptyGroup (Trig ts) = null ts
+    emptyGroup (InvTrig is) = null is
+    emptyGroup (Hyperbolic hs) = null hs
+    emptyGroup (InvHyp is) = null is
+    emptyGroup (Logarithmic ls) = null ls-}
+
+-- note
+-- precondition: an expression like 3sec^2x + sinx * cosx * tanx + x^2tan^2(x) will be separated
+-- from the glued and non-glued expressions. THen this function is passed the non-glued expressions,
+-- whereas the glued expressions like sinxcosxtanx will get passed to simplifyFunction then both
+-- come together in a simplifier function that  rebuilds the two expression lists.
+-- precondition: so in short, this functino is not prepared for things like sinx * cos x * tan x
+{-
+codifyOther :: [Expr] -> Group
+codifyOther [] = Tr
+-}
+
+-- TODO simplifier function that uses codifyOther and exprToCode must pass the sinxcosxtanx
+-- as trailing thread then rebuild the nonglued expressions with the above glued expressions
+-- similar to rebuild split thing.  Remember to learn to separate by calling "hasMoreThanOneFunc"
+
+
+
+
+-- note takes a codeified polynomial, or trig or invtrig... and adds the two codified things.
+-- note todo currently just impleneted for codified polynomial
+--addH :: [(Coeff, Expo, Expr)] -> [(Coeff, Expo, Expr)] -> Expr
+-- addCodes :: Code -> Code -> Code
+addCodes h1 h2 = simplifiedMaybes
+    where
+    h1' = map numify h1
+    h2' = map numify h2
+    add (a@(c1,e1,x1),b@(c2,e2,x2)) =
+        if x1 == x2 then (Just (c1 .+ c2,e1,x1), Nothing)
+        else (Just a, Just b)
+    simpFirst (x,y,z) = (simplify x, y, z)
+    simpMaybe (a,b) =
+        if (isJust a && isNothing b) then (Just $ simpFirst $ fromJust a, Nothing)
+        else (a,b)
+    simplifiedMaybes = map simpMaybe $ map add (zip h1' h2')
+
+list = map numify [(4,1,x), (3,1,x), (1,7,(Num 2) .* x .^ Num 5), (2,2,x),(1,1,x), (7,7,Num 7 .* x)]
+add (a@(c1,e1,x1),b@(c2,e2,x2)) = if x1 == x2 then (Just (c1 .+ c2,e1,x1), Nothing) else (Just a, Just b)
+hs = zip list list
+js = map add hs
+clean' (x,y,z) = (simplify x, y, z)
+ms = map (\(a, b) -> if (isJust a && isNothing b) then (Just $ clean' $ fromJust a, Nothing) else (a,b)) js
+--g (a@(c1,e1,x1), b@(c2,e2,x2)) = if (x1 == x2) then (c1 .+ c2,e1,x1) else (a,b)
+
+
+
+put :: Int -> a -> [a] -> [a]
+put _ n [] = [n]
+put index n xs
+    | index < 0 = error "index is negative "
+    | otherwise = front ++ [n] ++ (tail back)
+    where (front, back) = splitAt index xs
+          newBack = if null back then [] else (tail back)
+{-
+putAll :: Int -> [a] -> [a] -> [a]
+putAll _ [] xs = xs
+putAll index (n:ns) xs = putAll index ns (put index n xs)
+-}
+
+
+addPoly :: Group -> Group -> Group
+addPoly (Poly ps) (Poly qs) = Poly (zipWith (+) ps qs)
+
+subPoly :: Group -> Group -> Group
+subPoly (Poly ps) (Poly qs) = Poly (zipWith (-) ps qs)
+
+{-
+mulPoly :: Group -> Group -> Group
+-}
+
+mulOnePoly :: Int -> Int -> [Int] -> [Int]
+mulOnePoly n p ms = foldl (zipWith (+)) zs cs
+    where
+    cs = map (\(c,p) -> put p c zs) ts
+    zs = replicate (highestPow + 1) 0
+    ts = mul' n p 0 ms []
+    highestPow = maximum $ map snd ts
+    mul' _ _ _ [] acc = acc
+    mul' n p q (m:ms) acc
+        | n * m == 0 = mul' n p (q + 1) ms acc
+        | otherwise = mul' n p (q + 1) ms (acc ++ [(n * m, p + q)])
+
+
+
+-- note takes list of polynomials and makes it into Group type Poly [...]
+-- so 7x^2 + 3x^2 + 3x + 4x + 1 is [1, (3+4), (7+3)]
+codifyPoly :: [Expr] -> Group
+codifyPoly [] = Poly []
+codifyPoly ps = Poly $ foldl1 (zipWith (+)) $ addZeroes $ codify ps
+    where -- note poly expects no forms like 7x / 4x^3 in the list element position
+    addZeroes cs = map (\xs -> xs ++ replicate (maxCodeLen - length xs) 0) cs
+    codify ps = map poly (map simplify ps)
+    maxCodeLen = foldl1 max $ map length (codify ps)
+    poly (Var x) = [0, 1]
+    poly (Num n) = [n]
+    poly (F func) = error "no functions allowed in makePoly"
+    poly (Neg e) = poly e
+    poly (Mul (Neg (Num n)) (Pow x (Num p))) = replicate p 0 ++ [-n]
+    poly (Mul (Neg (Num n)) x) = [0, -n]
+    poly (Mul (Num n) (Pow x (Num p))) = replicate p 0 ++ [n]
+    poly (Mul (Num n) x) = [0, n]
+
+
+
+
+
+-- TODO make polynomials and trigs and other functions be raised to powers of functions
+-- not just constants (make the middle element in tuple to be an expression)
+-- While you're at it, make the first coeff an expression so that we can do xsin(x) + 2xsin(x)
+-- TODO return error if one of the tuples has patterns (1, 0, ..) because that yields a constant.
+-- NOTE rules:
+-- Poly: [1, 0, 2, 7, -4] represents 1 + x^2 + 7x^3 - 4x^4
+-- Trig: [(0,1), (1,1), (4,1), (1,1), (2,4), (3, 5)]
+--      represents (cos x + 4tan x + csc x + 2sec^4 x  + 3cot^5 x
+--      where x = any expression and note (0, 1) = 0 always and (1,0) gets error
+-- help TODO fix so that it handles (expr, expr, expr) and not (int, int, expr)
+{-
+groupToExpr :: Group -> [Expr]
+groupToExpr (Poly ps) = reverse $ map simplify $ zipWith (.*) ps' (zipWith (.^) xs es )
+    where xs = replicate (length ps) X
+          es = map Num [0 .. (length ps - 1)]
+          ps' = map Num ps
+-- TODO inside function is holder -- find way to deal with that.
+groupToExpr (Trig ts) = map simplify $ latch (zip ts fs)
+    where fs = map F [Sin X, Cos X, Tan X, Csc X, Sec X, Cot X]
+groupToExpr (InvTrig ts) = map simplify $ latch (zip ts fs)
+    where fs = map F [Arcsin X, Arccos X, Arctan X, Arccsc X, Arcsec X, Arccot X]
+groupToExpr (Hyperbolic hs) = map simplify $ latch (zip hs fs)
+    where fs = map F [Sinh X, Cosh X, Tanh X, Csch X, Sech X, Coth X]
+groupToExpr (InvHyp hs) = map simplify $ latch  (zip hs fs)
+    where fs = map F [Arcsinh X, Arccosh X, Arctanh X, Arccsch X, Arcsech X, Arccoth X]
+groupToExpr (Logarithmic ls) = map simplify $ latch (zip ls fs)
+    where fs = map F [E X, Ln X, Log X X]  -- TODO fix so we can have different args for log base and arg.
+-}
+
+
+latch zs = map (\((c,e,u), f) -> c .* (push u f) .^ e) (map (\((tup, f)) -> (numify tup, f)) zs)
+numify (c,e,u) = (Num c, Num e, u)
+
+
+
+
+
+
+
+
+isAdd :: Expr -> Bool
+isAdd (Add _ _) = True
+isAdd _ = False
+
+isSub :: Expr -> Bool
+isSub (Sub _ _) = True
+isSub _ = False
+
+isMul :: Expr -> Bool
+isMul (Mul _ _) = True
+isMul _ = False
+
+isDiv :: Expr -> Bool
+isDiv (Div _ _) = True
+isDiv _ = False
+
+getUpper :: Expr -> Expr
+getUpper (Div numer _) = numer
+getUpper _ = error "not div expr in getUpper"
+
+getLower :: Expr -> Expr
+getLower (Div _ denom) = denom
+getLower _ = error "not div expr in getLower"
+
+isPow :: Expr -> Bool
+isPow (Pow _ _) = True
+isPow _ = False
+
+isNum :: Expr -> Bool
+isNum (Num _) = True
+isNum _ = False
+
+isNegNum :: Expr -> Bool
+isNegNum (Neg (Num n)) = True
+isNegNum _ = False
+
+isVar :: Expr -> Bool
+isVar (Var _) = True
+isVar _ = False
+
+isNeg :: Expr -> Bool
+isNeg (Neg e) = True
+isNeg _ = False
+
+getNeg :: Expr -> Expr
+getNeg (Neg n) = n
+getNeg _ = error "incorrect argument"
+
+
+--- Trigonometric ---
+isSin :: Expr -> Bool
+isSin (F (Sin _)) = True
+isSin _ = False
+
+isCos :: Expr -> Bool
+isCos (F (Cos _)) = True
+isCos _ = False
+
+isTan :: Expr -> Bool
+isTan (F (Tan _)) = True
+isTan _ = False
+
+isCsc :: Expr -> Bool
+isCsc (F (Csc _)) = True
+isCsc _ = False
+
+isSec :: Expr -> Bool
+isSec (F (Sec _)) = True
+isSec _ = False
+
+isCot :: Expr -> Bool
+isCot (F (Cot _)) = True
+isCot _ = False
+
+isArcsin :: Expr -> Bool
+isArcsin (F (Arcsin _)) = True
+isArcsin _ = False
+
+isArccos :: Expr -> Bool
+isArccos (F (Arccos _)) = True
+isArccos _ = False
+
+isArctan :: Expr -> Bool
+isArctan (F (Arctan _)) = True
+isArctan _ = False
+
+isArccsc :: Expr -> Bool
+isArccsc (F (Arccsc _)) = True
+isArccsc _ = False
+
+isArcsec :: Expr -> Bool
+isArcsec (F (Arcsec _)) = True
+isArcsec _ = False
+
+isArccot :: Expr -> Bool
+isArccot (F (Arccot _)) = True
+isArccot _ = False
+
+--- Hyperbolic ---
+
+isSinh :: Expr -> Bool
+isSinh (F (Sinh _)) = True
+isSinh _ = False
+
+isCosh :: Expr -> Bool
+isCosh (F (Cosh _)) = True
+isCosh _ = False
+
+isTanh :: Expr -> Bool
+isTanh (F (Tanh _)) = True
+isTanh _ = False
+
+isCsch :: Expr -> Bool
+isCsch (F (Csch _)) = True
+isCsch _ = False
+
+isSech :: Expr -> Bool
+isSech (F (Sech _)) = True
+isSech _ = False
+
+isCoth :: Expr -> Bool
+isCoth (F (Coth _)) = True
+isCoth _ = False
+
+isArcsinh :: Expr -> Bool
+isArcsinh (F (Arcsinh _)) = True
+isArcsinh _ = False
+
+isArccosh :: Expr -> Bool
+isArccosh (F (Arccosh _)) = True
+isArccosh _ = False
+
+isArctanh :: Expr -> Bool
+isArctanh (F (Arctanh _)) = True
+isArctanh _ = False
+
+isArccsch :: Expr -> Bool
+isArccsch (F (Arccsch _)) = True
+isArccsch _ = False
+
+isArcsech :: Expr -> Bool
+isArcsech (F (Arcsech _)) = True
+isArcsech _ = False
+
+isArccoth :: Expr -> Bool
+isArccoth (F (Arccoth _)) = True
+isArccoth _ = False
+
+--- Logarithmic ---
+
+isLn :: Expr -> Bool
+isLn (F (Ln _)) = True
+isLn _ = False
+
+isLog :: Expr -> Bool
+isLog (F (Log _ _)) = True
+isLog _ = False
+
+isE :: Expr -> Bool
+isE (F (E _)) = True
+isE _ = False
+
+
+---------------------------------
+-- does not refer to data Op, just data Expr (Add, sub, mul..)
+isOp :: Expr -> Bool
+isOp e = isAdd e || isSub e || isMul e || isDiv e || isPow e
+
+
+isVarNumFunc :: Expr -> Bool
+isVarNumFunc (Var _) = True
+isVarNumFunc (Num _) = True
+isVarNumFunc (F f) = True
+isVarNumFunc _ = False
+
+hasAdd :: Expr -> Bool
+hasAdd (Var _) = False
+hasAdd (Add _ _) = True
+hasAdd (Num _) = False
+hasAdd (Neg e) = hasAdd e
+hasAdd (F f) = False
+hasAdd (Sub e1 e2) = hasAdd e1 || hasAdd e2
+hasAdd (Mul e1 e2) = hasAdd e1 || hasAdd e2
+hasAdd (Div e1 e2) = hasAdd e1 || hasAdd e2
+hasAdd (Pow e1 e2) = hasAdd e1 || hasAdd e2
+
+hasSub :: Expr -> Bool
+hasSub (Var _) = False
+hasSub (Sub _ _) = True
+hasSub (Num _) = False
+hasSub (Neg e) = hasSub e
+hasSub (F f) = False
+hasSub (Add e1 e2) = hasSub e1 || hasSub e2
+hasSub (Mul e1 e2) = hasSub e1 || hasSub e2
+hasSub (Div e1 e2) = hasSub e1 || hasSub e2
+hasSub (Pow e1 e2) = hasSub e1 || hasSub e2
+
+hasMul :: Expr -> Bool
+hasMul (Var _) = False
+hasMul (Mul _ _) = True
+hasMul (Num _) = False
+hasMul (Neg e) = hasMul e
+hasMul (F f) = False
+hasMul (Add e1 e2) = hasMul e1 || hasMul e2
+hasMul (Sub e1 e2) = hasMul e1 || hasMul e2
+hasMul (Div e1 e2) = hasMul e1 || hasMul e2
+hasMul (Pow e1 e2) = hasMul e1 || hasMul e2
+
+hasDiv :: Expr -> Bool
+hasDiv (Var _) = False
+hasDiv (Div _ _) = True
+hasDiv (Num _) = False
+hasDiv (Neg e) = hasDiv e
+hasDiv (F f) = False
+hasDiv (Add e1 e2) = hasDiv e1 || hasDiv e2
+hasDiv (Sub e1 e2) = hasDiv e1 || hasDiv e2
+hasDiv (Mul e1 e2) = hasDiv e1 || hasDiv e2
+hasDiv (Pow e1 e2) = hasDiv e1 || hasDiv e2
+
+hasFunction :: Expr -> Bool
+hasFunction (Var _) = False
+hasFunction (F _) = True
+hasFunction (Num _) = False
+hasFunction (Neg e) = hasDiv e
+hasFunction (Add e1 e2) = hasFunction e1 || hasFunction e2
+hasFunction (Sub e1 e2) = hasFunction e1 || hasFunction e2
+hasFunction (Mul e1 e2) = hasFunction e1 || hasFunction e2
+hasFunction (Div e1 e2) = hasFunction e1 || hasFunction e2
+hasFunction (Pow e1 e2) = hasFunction e1 || hasFunction e2
+
+
+
+-- counts total number of separate terms, where powers are counted as 1 term.
+numTerms :: Expr -> Int
+numTerms expr = length $ divid
+    where
+    added = split AddOp expr
+    subbed = concatMap (split SubOp) added
+    multip = concatMap (split MulOp) subbed
+    divid = concatMap (split DivOp) multip
+
+
+left :: Expr -> Expr
+left (Var x) = Var x
+left (Num n) = Num n
+left (F f) = F f
+left (Neg e) = Neg (left e)
+left (Add e1 e2) = e1
+left (Sub e1 e2) = e1
+left (Mul e1 e2) = e1
+left (Div e1 e2) = e1
+left (Pow e1 e2) = e1
+
+
+right :: Expr -> Expr
+right (Var x) = Var x
+right (Num n) = Num n
+right (F f) = F f
+right (Neg e) = Neg (right e)
+right (Add e1 e2) = e2
+right (Sub e1 e2) = e2
+right (Mul e1 e2) = e2
+right (Div e1 e2) = e2
+right (Pow e1 e2) = e2
+
+
+
+
+-- rebuilds with add sub signs.
+rebuildAS :: [Expr] -> Expr
+rebuildAS es = foldl1 f es
+    where f acc x = if isNeg x then (Sub acc (getNeg x)) else (Add acc x)
+
+rebuild :: Op -> [Expr] -> Expr
+rebuild AddOp es = foldl1 (\acc x -> Add acc x) es
+rebuild SubOp es = foldl1 (\acc x -> Sub acc x) es
+rebuild MulOp es = foldl1 (\acc x -> Mul acc x) es
+rebuild DivOp es = foldl1 (\acc x -> Div acc x) es
+rebuild PowOp es = foldl1 (\acc x -> Pow acc x) es
+
+
+
+
+
+-- note says if expression is a single polynomial term like 5x (monomial)
+isMono :: Expr -> Bool
+isMono e
+    | hasAdd e || hasSub e || hasDiv e || hasFunction e = False
+    | otherwise = foldl f True s'
+    where
+    e' = simplifyComplete e
+    s' = map simplifyComplete $ split MulOp e'
+    f = (\acc x -> acc && (isNum x || isVar x || isPolyPow x))
+    isPolyPow (Pow (Var x) (Num n)) = True
+    isPolyPow _ = False
+
+
+-- note says if expression contains no functions and is just a polynomial term like 7x^2 / 6x or just 5x
+isPoly :: Expr -> Bool
+isPoly (Var _) = False
+isPoly (Num n) = True
+isPoly (F f) = False
+isPoly (Neg e) = isPoly e
+isPoly (Add e1 e2) = isPoly e1 && isPoly e2
+isPoly (Sub e1 e2) = isPoly e1 && isPoly e2
+isPoly (Mul e1 e2) = isPoly e1 && isPoly e2
+isPoly (Div e1 e2) = isPoly e1 && isPoly e2
+isPoly (Pow e1 e2) = isPoly e1 && isPoly e2
+
+isTrig :: Expr -> Bool
+isTrig f = isSin f || isCos f || isTan f || isCsc f || isSec f || isCot f
+{-
+
+-- note this is passed only glued expressions!
+-- example hasOnlyOne isTrig 3x^7x^2sin(4x) = True
+hasOnlyOne :: (Expr -> Bool) -> Expr -> Bool
+hasOnlyOne f expr
+    | isGlued expr = (length $ filter (== True) $ map f (unGlue expr)) == 1
+    | otherwise = error "was passed non-glued expression"
+-}
+
+
+isInvTrig :: Expr -> Bool
+isInvTrig f = isArcsin f || isArccos f || isArctan f
+    || isArccsc f || isArcsec f || isArccot f
+
+isHyp :: Expr -> Bool
+isHyp f = isSinh f || isCosh f || isTanh f || isCsch f || isSech f || isCoth f
+
+isInvHyp :: Expr -> Bool
+isInvHyp f = isArcsinh f || isArccosh f || isArctanh f
+    || isArccsch f || isArcsech f || isArccoth f
+
+isLogar :: Expr -> Bool
+isLogar f = isLog f || isE f || isLn f
+
+isFunction :: Expr -> Bool
+isFunction (F _) = True
+isFunction _ = False
+
+
+
+-- puts an expression inside a function
+push :: Expr -> Expr -> Expr
+push u (F (Sin v)) = F $ Sin u
+push u (F (Cos v)) = F $ Cos u
+push u (F (Tan v)) = F $ Tan u
+push u (F (Csc v)) = F $ Csc u
+push u (F (Sec v)) = F $ Sec u
+push u (F (Cot v)) = F $ Cot u
+push u (F (Arcsin v)) = F $ Arcsin u
+push u (F (Arccos v)) = F $ Arccos u
+push u (F (Arctan v)) = F $ Arctan u
+push u (F (Arccsc v)) = F $ Arccsc u
+push u (F (Arcsec v)) = F $ Arcsec u
+push u (F (Arccot v)) = F $ Arccot u
+push u (F (Sinh v)) = F $ Sinh u
+push u (F (Cosh v)) = F $ Cosh u
+push u (F (Tanh v)) = F $ Tanh u
+push u (F (Csch v)) = F $ Csch u
+push u (F (Sech v)) = F $ Sech u
+push u (F (Coth v)) = F $ Coth u
+push u (F (Arcsinh v)) = F $ Arcsinh u
+push u (F (Arccosh v)) = F $ Arccosh u
+push u (F (Arctanh v)) = F $ Arctanh u
+push u (F (Arccsch v)) = F $ Arccsch u
+push u (F (Arcsech v)) = F $ Arcsech u
+push u (F (Arccoth v)) = F $ Arccoth u
+push u (F (E v)) = F $ E u
+push u (F (Ln v)) = F $ Ln u
+push u (F (Log v1 v2)) = F $ Log u u
+
+
+
+
+-- TODO major help why doesn't 4(x+3) simplify to 4x + 12, why 4x + (4)(3)?? ?
+-- TODO probably because this has gotten too old - perhaps ther eis a case that goes ahead of the
+-- one that should be entered that keeps it in this ugly state? Fix with printExpr and foldl.
+simplify :: Expr -> Expr
+simplify (Var x) = Var x
+simplify (Num n) = Num n
+simplify (F (Sin e)) = F $ Sin $ simplify e
+simplify (F (Cos e)) = F $ Cos $ simplify e
+simplify (F (Tan e)) = F $ Tan $ simplify e
+simplify (F (Csc e)) = F $ Csc $ simplify e
+simplify (F (Sec e)) = F $ Sec $ simplify e
+simplify (F (Cot e)) = F $ Cot $ simplify e
+simplify (F (Arcsin e)) = F $ Arcsin $ simplify e
+simplify (F (Arccos e)) = F $ Arccos $ simplify e
+simplify (F (Arctan e)) = F $ Arctan $ simplify e
+simplify (F (Arccsc e)) = F $ Arccsc $ simplify e
+simplify (F (Arcsec e)) = F $ Arcsec $ simplify e
+simplify (F (Arccot e)) = F $ Arccot $ simplify e
+simplify (F (Sinh e)) = F $ Sinh $ simplify e
+simplify (F (Cosh e)) = F $ Cosh $ simplify e
+simplify (F (Tanh e)) = F $ Tanh $ simplify e
+simplify (F (Csch e)) = F $ Csch $ simplify e
+simplify (F (Sech e)) = F $ Sech $ simplify e
+simplify (F (Coth e)) = F $ Coth $ simplify e
+simplify (F (Arcsinh e)) = F $ Arcsinh $ simplify e
+simplify (F (Arccosh e)) = F $ Arccosh $ simplify e
+simplify (F (Arctanh e)) = F $ Arctanh $ simplify e
+simplify (F (Arccsch e)) = F $ Arccsch $ simplify e
+simplify (F (Arcsech e)) = F $ Arcsech $ simplify e
+simplify (F (Arccoth e)) = F $ Arccoth $ simplify e
+simplify (F (E e)) = F $ E $ simplify e
+simplify (F (Ln e)) = F $ Ln $ simplify e
+simplify (F (Log e1 e2)) = F $ Log (simplify e1) (simplify e2)
+
+-- TODO may not need these cases once I do operations on expression holders of arrays.
+simplify (Add (Num n) (Num m)) = Num $ n + m
+simplify (Add (Mul (Num a) (Num b)) (Mul (Num c) (Num d))) = Num $ a * b + c + d
+simplify (Add (Mul (Num a) x) (Mul (Num b) y))
+    = if x == y then (Num (a + b) .* simplify x) else ((Num a) .* simplify x .+ (Num b) .* simplify y)
+simplify (Add (Mul (Num a) x) (Mul y (Num b))) = simplify ((Num a) .* x .+ (Num b) .* y)
+simplify (Add (Mul x (Num a)) (Mul (Num b) y)) = simplify ((Num a) .* x .+ (Num b) .* y)
+simplify (Add (Mul x (Num a)) (Mul y (Num b))) = simplify ((Num a) .* x .+ (Num b) .* y)
+simplify (Add rest (Mul (Num n) (Num m))) = simplify rest .+ (Num $ n * m)
+simplify (Add (Neg e1) (Neg e2)) = simplify (Neg e1) .- simplify e2
+simplify (Add (Neg e1) e2) = simplify (Neg e1) .+ simplify e2
+simplify (Add e1 (Neg e2)) = simplify e1 .- simplify e2
+simplify (Add x y) = if x == y then (Num 2 .* simplify x) else (simplify x .+ simplify y)
+
+simplify (Sub (Num n) (Num m)) = Num $ n - m
+simplify (Sub (Mul (Num a) (Num b)) (Mul (Num c) (Num d))) = Num $ a * b - c + d
+simplify (Sub (Mul (Num a) x) (Mul (Num b) y))
+    = if x == y then (Num (a - b) .* simplify x) else ((Num a) .* simplify x .- (Num b) .* simplify y)
+simplify (Sub (Mul (Num a) x) (Mul y (Num b))) = simplify ((Num a) .* simplify x .- (Num b) .* simplify y)
+simplify (Sub (Mul x (Num a)) (Mul (Num b) y)) = simplify ((Num a) .* simplify x .- (Num b) .* simplify y)
+simplify (Sub (Mul x (Num a)) (Mul y (Num b))) = simplify ((Num a) .* simplify x .- (Num b) .* simplify y)
+simplify (Sub (Neg e1) (Neg e2)) = simplify e1 .+ simplify e2
+simplify (Sub (Neg e1) e2) = simplify (Neg e1) .- simplify e2
+simplify (Sub e1 (Neg e2)) = simplify e1 .+ simplify e2
+simplify (Sub x y) = if x == y then (Num 0) else (simplify x .- simplify y)
+
+simplify (Mul (Num 1) e2) = simplify e2
+simplify (Mul e1 (Num 1)) = simplify e1
+simplify (Mul (Num 0) e2) = Num 0
+simplify (Mul e1 (Num 0)) = Num 0
+simplify (Mul (Num n) (Num m)) = Num $ n * m
+simplify (Mul u (Num n)) = Num n .* simplify u
+simplify (Mul (Neg u) (Neg v)) = simplify u .* simplify v
+simplify (Mul (Neg u) v) = Neg (simplify u .* simplify v)
+simplify (Mul u (Neg v)) = Neg (simplify u .* simplify v)
+simplify (Mul e1 (Add x y)) = simplify e1 .* simplify x .+ simplify e1 .* simplify y
+simplify m@(Mul (Mul (Num a) (Pow x (Num p)))
+                (Mul (Num b) (Pow y (Num q))))
+    = if x == y then (Num $ a * b) .* simplify x .^ (Num $ p + q) else simplify m
+simplify (Mul a (Mul b rest))
+    | isNum a && isNum b = a .* b .* simplify rest
+    | isNegNum a && isNegNum b = a .* b .* simplify rest
+    | isNegNum a && isNum b = Neg a .* b .* simplify rest
+    | isNum a && isNegNum b = Neg a .* b .* simplify rest
+    | otherwise = simplify a .* simplify b .* simplify rest
+-- TODO after poly stuff fix this so that we simplify functions (go to simpFuncs partition)
+{-
+simplify (Mul (Mul (Mul rest f@(F _)) g@(F _)) h@(F _)) = simplify rest .* simplifyFunctions (f .* g .* h)
+simplify (Mul (Mul rest f@(F _)) g@(F _)) = simplify rest .* simplifyFunctions (f .* g)
+-}
+-- TODO now these functions are ready to go into the function simplifier (sin * cos * tan)
+{-simplify (Mul (F (Sin u)) (F (Cos v)))
+    = if u == v then F (Tan u) else (F (Sin $ simplify u)) .* (F (Cos $ simplify v))
+simplify (Mul t1@(F (Tan u)) t2@(F (Tan v)))
+    = if u == v then (F (Tan u)) .^ Num 2 else simplify t1 .* simplify t2
+simplify (Mul (F (Sin u)) (F (Cos v)))-}
+simplify (Mul x y) = if x == y then simplify x .^ (Num 2) else simplify x .* simplify y
+
+simplify (Div (Num 0) (Num 0)) = error "0/0 not possible"
+simplify (Div (Num n) (Num m)) = Num $ n `div` m
+simplify (Div (Num 0) e2) = Num 0
+simplify (Div (Neg e1) (Neg e2)) = simplify $ simplify e1 ./ simplify e2
+simplify (Div (Neg e1) e2) = Neg (simplify e1 ./ simplify e2)
+simplify (Div e1 (Neg e2)) = Neg (simplify e1 ./ simplify e2)
+simplify (Div e1 (Num 0)) = error "divide by zero!"
+simplify (Div e1 (Num 1)) = simplify e1
+simplify d@(Div (Mul (Num a) (Pow x (Num p)))
+                (Mul (Num b) (Pow y (Num q))))
+    = if x == y then (Num $ a `div` b) .* simplify x .^ (Num $ p - q) else simplify d
+simplify (Div x y) = if x == y then (Num 1) else simplify x ./ simplify y
+
+simplify (Pow (Num n) (Num m)) = Num $ n ^ m
+simplify (Pow (Neg e1) (Neg e2)) = Num 1 ./ ((simplify (Neg e1)) .^ (simplify e2))
+simplify (Pow (Neg e1) (Num p)) = if (even p) then (simplify e1 .^ Num p)
+    else ((simplify (Neg e1)) .^ Num p)
+simplify (Pow e1 (Neg e2)) = Num 1 ./ (simplify e1 .^ simplify e2)
+simplify (Pow e (Num 0)) = Num 1
+simplify (Pow (Num 0) e) = Num 0
+simplify (Pow (Num 1) e) = Num 1
+simplify (Pow e (Num 1)) = simplify e --- TODO do power rules next
+simplify (Pow x y) = simplify x .^ simplify y
+
+simplify (Neg (Num n)) = Num (-n)
+simplify (Neg (Neg e)) = simplify e
+simplify (Neg a@(Add e1 e2)) = simplify (Neg e1) .- simplify e2
+simplify (Neg s@(Sub e1 e2)) = simplify (Neg e1) .+ simplify e2
+simplify (Neg (Mul (Num n) x)) = Num (-n) .* simplify x
+simplify (Neg m@(Mul _ _)) = Neg $ simplify m
+simplify (Neg e) = Neg $ simplify e
+
+
+-- TODO
+-- genius:
+-- foldl1 (\acc y -> if isNum y then (acc .* y) else acc)    (unGlue e1)
+
+-- note passed a thing like 4xsinxcosx4x^2tanxsecx(3)(2) and result is: 96sinxcosx(x^2)tanxsecx
+-- where we write sweep isNum arg to get result.
+-- precondition: the expr has to be glued! No add or subtract, just multiply and power.
+-- NOTE todo does not work if there are divisions... we just multiply. (look at unglue todo)
+-- IDEA or maybe we just use for this multiple trig functions and simplifying general x^2sinx functions
+-- before codifying them in codifyOther
+-- help don't know whether to simplify expr first or to pass to sweep.
+{-
+sweep :: (Expr -> Bool) -> Expr -> Expr
+sweep f expr = glue $ [itemSwept] ++ remainder
+    where
+    elements = split MulOp expr
+    itemSwept = simplifyComplete $ foldl1 (\acc y -> if f y then (acc .* y) else acc) elements
+    remainder = filter (not . f) elements
+    -- TODO e4 breaks at foldl1 because 2 is ignored.. FIX.
+-}
+
+
+simplifyComplete :: Expr -> Expr
+simplifyComplete expr
+    | s == expr = expr
+    | otherwise = simplifyComplete $ simplify s
+    where s = simplify expr
+
+
+sameArgs :: Function -> Function -> Bool
+sameArgs f g
+    | getArg f == getArg g = True
+    | otherwise = False
+
+getFunction :: Expr -> Function
+getFunction (F f) = f
+getFunction _ = error "not a function!"
+
+
+getArg :: Function -> Expr
+getArg (Sin u) = u
+getArg (Cos u) = u
+getArg (Tan u) = u
+getArg (Csc u) = u
+getArg (Sec u) = u
+getArg (Cot u) = u
+getArg (Arcsin u) = u
+getArg (Arccos u) = u
+getArg (Arctan u) = u
+getArg (Arccsc u) = u
+getArg (Arcsec u) = u
+getArg (Arccot u) = u
+getArg (Sinh u) = u
+getArg (Cosh u) = u
+getArg (Tanh u) = u
+getArg (Csch u) = u
+getArg (Sech u) = u
+getArg (Coth u) = u
+getArg (Arcsinh u) = u
+getArg (Arccosh u) = u
+getArg (Arctanh u) = u
+getArg (Arccsch u) = u
+getArg (Arcsech u) = u
+getArg (Arccoth u) = u
+getArg (E u) = u
+getArg (Ln u) = u
+getArg (Log u v) = v -- TODO fix so we can get both or handle log separately.
+
+{-
+TODO idea then after we state how functions should simplify, do foldl1 (simpFunc . MUl) over the list.
+help
+
+-- HELP TODO use partition .. ??? how to simplify then?
+--      1) first unglue, then partition into lists. Separate functions on one side and other stuff
+ on other side.
+--      2) plan idea: simplify csc, sec, cot in terms of sin,cos, tan.
+--      3) count how many sin, cos then change num tans so that 1 sin*cos = 1 tan
+--      4) do the same idea for hyperbolics (but depends on their different equality)
+-- note if all functions have the same argument then they are simplified, else returned as is.
+-- example takes sin * cos * tan * sec  and returns sin^2 x / cos x
+-- example takes sin * cos * tan and reurns tan^2 x
+-- note multiplication is left associative so we have (((sin) * cos ) * tan)
+-- note don't have to handle things like sin * sin because the mul case in simplify does it.
+simplifyFunctions :: Expr -> Expr
+simplifyFunctions (Mul f@(F (Sin u)) (g@F (Cos v)))
+    | sameArgs f g = F $ Tan u
+    | otherwise = simplify f .* simplify g
+simplifyFunctions (Mul f@(F (Cos u)) (g@F (Sin v)))
+    | sameArgs f g = F $ Tan u
+    | otherwise = simplify f .* simplify g
+simplifyFunctions (Mul f@(F (Sin u)) (g@F (Cos v)))
+    | sameArgs f g = F $ Tan u
+    | otherwise = simplify f .* simplify g
+simplifyFunctions (Mul f@(F (Sin u)) (g@F (Cos v)))
+    | sameArgs f g = F $ Tan u
+    | otherwise = simplify f .* simplify g
+-}
+
