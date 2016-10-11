@@ -50,6 +50,9 @@ data RoseTree a = EmptyRose | Petal a | Briar Op [RoseTree a] deriving (Eq, Show
 rose = Briar AddOp [Briar MulOp [Petal (Num 4), Petal x], Petal x, Petal y, Petal (Num 3),
     Petal (Num 2), Petal (Num 1), Petal (Num 8)]
 
+
+r1 = Briar AddOp [Briar SubOp [EmptyRose, Briar MulOp [Petal (Num 7),
+    Briar PowOp [Petal x, Petal (Num 2)]]], Petal x, Petal (Num 1), Petal y, Petal (Num 2)]
 -- TODO update for division.
 -- idea: if has Add or sub then we split and apply this to the elements.
 -- precondition: argument is either power, num, neg, function.
@@ -69,11 +72,12 @@ flatten op tree = Briar op (flatten' op tree)
         | op == briarOp = flatten' op e ++ (concatMap (flatten' op) es)
         | otherwise = [Briar briarOp (flatten' op e ++ (concatMap (flatten' op) es))]
 
-
+-- precondition: must be passed flattened rose tree
 roseToExpr :: RoseTree Expr -> Expr
 roseToExpr (Petal (Num n)) = Num n
 roseToExpr (Petal (Var x)) = Var x
 roseToExpr (Petal (F f)) = F f
+-- note we have Neg then one expression after it, so that's why I put no es after the last singleton.
 roseToExpr (Briar SubOp ((EmptyRose) : [Petal p])) = Neg $ roseToExpr (Petal p)
 roseToExpr (Briar SubOp ((EmptyRose) : [Briar AddOp es])) = Neg $ rebuildA $ map roseToExpr es
 roseToExpr (Briar SubOp ((EmptyRose) : [Briar SubOp es])) = Neg $ rebuildS $ map roseToExpr es
@@ -87,6 +91,12 @@ roseToExpr (Briar DivOp es) = rebuildD $ map roseToExpr es
 roseToExpr (Briar PowOp es) = rebuildP $ map roseToExpr es
 
 
+splitR :: Op -> Expr -> [Expr]
+splitR op expr = map roseToExpr $ getRList $ flatten op $ toRose $ mkTree expr
+
+getRList :: RoseTree Expr -> [RoseTree Expr]
+getRList (Petal x) = [Petal x]
+getRList (Briar _ es) = es
 
 
 -- note laces certain expressions with brackets.
