@@ -379,7 +379,7 @@ codifyOther [] = Tr
 -- note takes a codeified polynomial, or trig or invtrig... and adds the two codified things.
 -- note todo currently just impleneted for codified polynomial
 --addH :: [(Coeff, Expo, Expr)] -> [(Coeff, Expo, Expr)] -> Expr
--- addCodes :: Code -> Code -> Code
+--addCodes :: Code -> Code -> Code
 addCodes h1 h2 = simplifiedMaybes
     where
     h1' = map numify h1
@@ -410,23 +410,26 @@ put index n xs
     | otherwise = front ++ [n] ++ (tail back)
     where (front, back) = splitAt index xs
           newBack = if null back then [] else (tail back)
-{-
-putAll :: Int -> [a] -> [a] -> [a]
-putAll _ [] xs = xs
-putAll index (n:ns) xs = putAll index ns (put index n xs)
--}
 
 
+-- Note all these functions with poly below assume the ps inside the Poly are added.
 addPoly :: Group -> Group -> Group
 addPoly (Poly ps) (Poly qs) = Poly (zipWith (+) ps qs)
 
 subPoly :: Group -> Group -> Group
 subPoly (Poly ps) (Poly qs) = Poly (zipWith (-) ps qs)
 
-{-
 mulPoly :: Group -> Group -> Group
--}
+mulPoly (Poly ps) (Poly qs) = Poly $ foldl1 (zipWith (+)) gs'
+    where
+    ts = zip ps [0..(length ps -1)]
+    gs = map (\(n, p) -> mulOnePoly n p qs) ts
+    gs' = map (\xs -> xs ++ replicate (maxPolyPow - length xs) 0) gs
+    maxPolyPow = maximum $ map length gs
 
+-- note n = coeff of poly, p = pow of poly with coeff n, q = pow of multiplied poly (accumulated)
+-- (m:ms) = elements of other polynomial (added), acc = accumulated multiplications (is a list of
+-- tuples that holds first the new coeff value and second the power of this coeff.
 mulOnePoly :: Int -> Int -> [Int] -> [Int]
 mulOnePoly n p ms = foldl (zipWith (+)) zs cs
     where
@@ -435,9 +438,28 @@ mulOnePoly n p ms = foldl (zipWith (+)) zs cs
     ts = mul' n p 0 ms []
     highestPow = maximum $ map snd ts
     mul' _ _ _ [] acc = acc
+    mul' 0 _ _ _ acc = acc
     mul' n p q (m:ms) acc
         | n * m == 0 = mul' n p (q + 1) ms acc
         | otherwise = mul' n p (q + 1) ms (acc ++ [(n * m, p + q)])
+
+-- cannot div if multiple polys on the bottom, so there must be one.
+{-
+divPoly :: Group -> Group -> Group
+divPoly (Poly ps) (Poly qs)
+    | moreThanOneTerm = error "more than one added term in bottom; cannot divide"
+    | otherwise =
+    where
+    moreThanOneTerm = length $ filter (\x -> not (x == 0)) qs > 1
+-- TODO paused on this because need fraction.
+divOnePoly :: Int -> Int -> [Int] -> [Int]
+divOnePoly n p ms =
+    where
+    div' n p q m acc
+        |
+-}
+
+
 
 
 
