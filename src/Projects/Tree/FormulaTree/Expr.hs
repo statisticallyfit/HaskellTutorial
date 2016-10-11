@@ -25,7 +25,7 @@ data Function
     deriving (Eq)
 
 
-data Op = AddOp | SubOp | MulOp | DivOp | PowOp deriving (Eq, Show)
+data Op = AddOp | SubOp | MulOp | DivOp | PowOp deriving (Eq)
 
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
     | Pow Expr Expr | Neg Expr | Num Int | Var String | F Function
@@ -42,16 +42,51 @@ data Code = Code [Group] deriving (Eq, Show)
 
 data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq)
 
+
+data RoseTree a = EmptyRose | Petal a | Briar Op [RoseTree a] deriving (Eq, Show)
 -- TODO for fractional int dividing
 -- a = fst . head $ readFloat "0.75" :: Rational
 
-
-
+rose = Briar AddOp [Briar MulOp [Petal (Num 4), Petal x], Petal x, Petal y, Petal (Num 3),
+    Petal (Num 2), Petal (Num 1), Petal (Num 8)]
 
 -- TODO update for division.
 -- idea: if has Add or sub then we split and apply this to the elements.
 -- precondition: argument is either power, num, neg, function.
 -- RULE: if the first thing in the unglued list is a number then do not surround it with brackets.
+
+
+
+
+
+flatten :: Op -> RoseTree Expr -> RoseTree Expr
+flatten op tree = Briar op (flatten' op tree)
+    where
+    flatten' :: Op -> RoseTree Expr -> [RoseTree Expr]
+    flatten' _ EmptyRose = [EmptyRose]
+    flatten' _ (Petal x) = [Petal x]
+    flatten' op (Briar briarOp (e:es))
+        | op == briarOp = flatten' op e ++ (concatMap (flatten' op) es)
+        | otherwise = [Briar briarOp (flatten' op e ++ (concatMap (flatten' op) es))]
+
+
+roseToExpr :: RoseTree Expr -> Expr
+roseToExpr (Petal (Num n)) = Num n
+roseToExpr (Petal (Var x)) = Var x
+roseToExpr (Petal (F f)) = F f
+roseToExpr (Briar SubOp ((EmptyRose) : [Petal p])) = Neg $ roseToExpr (Petal p)
+roseToExpr (Briar SubOp ((EmptyRose) : [Briar AddOp es])) = Neg $ rebuildA $ map roseToExpr es
+roseToExpr (Briar SubOp ((EmptyRose) : [Briar SubOp es])) = Neg $ rebuildS $ map roseToExpr es
+roseToExpr (Briar SubOp ((EmptyRose) : [Briar MulOp es])) = Neg $ rebuildM $ map roseToExpr es
+roseToExpr (Briar SubOp ((EmptyRose) : [Briar DivOp es])) = Neg $ rebuildD $ map roseToExpr es
+roseToExpr (Briar SubOp ((EmptyRose) : [Briar PowOp es])) = Neg $ rebuildP $ map roseToExpr es
+roseToExpr (Briar AddOp es) = rebuildA $ map roseToExpr es
+roseToExpr (Briar SubOp es) = rebuildS $ map roseToExpr es
+roseToExpr (Briar MulOp es) = rebuildM $ map roseToExpr es
+roseToExpr (Briar DivOp es) = rebuildD $ map roseToExpr es
+roseToExpr (Briar PowOp es) = rebuildP $ map roseToExpr es
+
+
 
 
 -- note laces certain expressions with brackets.
@@ -110,7 +145,12 @@ lace acc e
 -}
 
 
-
+instance Show Op where
+    show AddOp = "(+)"
+    show SubOp = "(-)"
+    show MulOp = "(*)"
+    show DivOp = "(/)"
+    show PowOp = "(^)"
 
 
 
@@ -257,6 +297,8 @@ e11 = Num 4 .* (x .+ Num 3)
 e12 = ((F (Sin x)) .+ (F (Cos x)) .* Num 4 .* x .^ Num 2) .^ (x .+ Num 5 .- (F (Tan (Num 2 .* x))))
 e13 = Num 4 .* x .+ Num 3 .* x .+ x .+ Num 6 .* x .^ Num 7 .+ Num 2 .+ Num 3
 e14 = Num 10 .* x .- (F (Sin x)) .- (F (Cos (Num 2 .* x))) .+ x .- y .- Num 5 .- Num 8 .- Num 9 .+ x
+e15 = F (Sin (x .+ Num 3 .+ Num 4 .+ Num 8 .* x .- y .+ Num 2 .^ x))
+
 
 
 -- TODO test percolate minus cases
@@ -638,7 +680,7 @@ splitSub (Sub e1 e2)
     where notSub = not . hasSub
 
 -- TODO -- think of how to splitM e11
--- TODO fix e12 tomorrow 
+-- TODO fix e12 tomorrow
 splitM :: Expr -> [Expr]
 splitM e
     | hasAdd e || hasSub e = [e]
@@ -722,6 +764,8 @@ rebuildM es = foldl1 (\acc x -> Mul acc x) es
 rebuildD :: [Expr] -> Expr
 rebuildD es = foldl1 (\acc x -> Div acc x) es
 
+rebuildP :: [Expr] -> Expr
+rebuildP es = foldl1 (\acc x -> Pow acc x) es
 
 
 {-
@@ -1260,6 +1304,17 @@ mapTree f (Leaf (Num n)) = Leaf (Num (f n))
 mapTree f leaf@(Leaf l) = leaf -- TODO extend tree so that if f = +1 ans sinx then 1 (Node +) sin x
 mapTree f (Node n left right) = Node n (mapTree f left) (mapTree f right)
 
+
+toRose :: Tree Expr -> RoseTree Expr
+toRose (Empty) = EmptyRose
+toRose (Leaf x) = Petal x
+toRose (Node op left right) = Briar (opStrToOp op) [toRose left, toRose right]
+    where
+    opStrToOp "+" = AddOp
+    opStrToOp "-" = SubOp
+    opStrToOp "*" = MulOp
+    opStrToOp "/" = DivOp
+    opStrToOp "^" = PowOp
 
 
 mkTree :: Expr -> Tree Expr
