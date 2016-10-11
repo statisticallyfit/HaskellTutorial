@@ -65,6 +65,131 @@ data Code = Code [Group] deriving (Eq, Show)
 
 data Tree a = Empty | Leaf a | Node String (Tree a) (Tree a) deriving (Eq)
 
+data RoseTree a = EmptyRose | Petal a | Briar Op [RoseTree a] deriving (Eq, Show)
+-- TODO for fractional int dividing
+-- a = fst . head $ readFloat "0.75" :: Rational
+
+splitRTest = Num 4 .- Num 1 .+ Num 3 .+ Num 5 .- Num 6 .- Num 7 .- Num 8 .+ Num 9 .- Num 2
+
+rose = Briar AddOp [Briar MulOp [Petal (Num 4), Petal x], Petal x, Petal y, Petal (Num 3),
+    Petal (Num 2), Petal (Num 1), Petal (Num 8)]
+
+
+r1 = Briar AddOp [Briar SubOp [EmptyRose, Briar MulOp [Petal (Num 7),
+    Briar PowOp [Petal x, Petal (Num 2)]]], Petal x, Petal (Num 1), Petal y, Petal (Num 2)]
+
+{-
+
+convertFunction :: Function -> FunctionL
+convertFunction (Sin u ) = SinL u
+convertFunction (Cos u ) = CosL u
+convertFunction (Tan u ) = TanL u
+convertFunction (Csc u ) = CscL u
+convertFunction (Sec u ) = SecL u
+convertFunction (Cot u ) = CotL u
+convertFunction (Arcsin u ) = ArcsinL u
+convertFunction (Arccos u ) = ArccosL u
+convertFunction (Arctan u ) = ArctanL u
+convertFunction (Arccsc u ) = ArccscL u
+convertFunction (Arcsec u ) = ArcsecL u
+convertFunction (Arccot u ) = ArccotL u
+convertFunction (Sinh u ) = SinhL u
+convertFunction (Cosh u ) = CoshL u
+convertFunction (Tanh u ) = TanhL u
+convertFunction (Csch u ) = CschL u
+convertFunction (Sech u ) = SechL u
+convertFunction (Coth u ) = CothL u
+convertFunction (Arcsinh u ) = ArcsinhL u
+convertFunction (Arccosh u ) = ArccoshL u
+convertFunction (Arctanh u ) = ArctanhL u
+convertFunction (Arccsch u ) = ArccschL u
+convertFunction (Arcsech u ) = ArcsechL u
+convertFunction (Arccoth u ) = ArccothL u
+-}
+
+
+convert :: RoseTree Expr -> ExprList
+convert (Petal (Num n)) = NumL n
+convert (Petal (Var x)) = VarL x
+--convert (Petal (F f)) = G (convertFunction f)
+convert (Briar AddOp es) = AddL (map convert es)
+convert (Briar SubOp es) = SubL (map convert es)
+convert (Briar MulOp es) = MulL (map convert es)
+convert (Briar DivOp es) = DivL (map convert es)
+convert (Briar PowOp (e:es)) = PowL [convert e] (map convert es)
+
+
+
+flatten :: Op -> RoseTree Expr -> RoseTree Expr
+flatten op tree = Briar op (flatten' op tree)
+    where
+    flatten' :: Op -> RoseTree Expr -> [RoseTree Expr]
+    flatten' _ EmptyRose = [EmptyRose]
+    flatten' _ (Petal x) = [Petal x]
+    flatten' op (Briar briarOp (e:es))
+        | op == briarOp = flatten' op e ++ (concatMap (flatten' op) es)
+        | otherwise = [Briar briarOp (flatten' op e ++ (concatMap (flatten' op) es))]
+
+-- precondition: must be passed flattened rose tree
+roseToExpr :: RoseTree Expr -> Expr
+roseToExpr (Petal (Num n)) = Num n
+roseToExpr (Petal (Var x)) = Var x
+roseToExpr (Petal (F f)) = F f
+-- note we have Neg then one expression after it, so that's why I put no es after the last singleton.
+roseToExpr (Briar SubOp ((EmptyRose) : [Petal p])) = Neg $ roseToExpr (Petal p)
+roseToExpr (Briar SubOp ((EmptyRose) : [Briar AddOp es])) = Neg $ rebuild AddOp $ map roseToExpr es
+roseToExpr (Briar SubOp ((EmptyRose) : [Briar SubOp es])) = Neg $ rebuild SubOp $ map roseToExpr es
+roseToExpr (Briar SubOp ((EmptyRose) : [Briar MulOp es])) = Neg $ rebuild MulOp $ map roseToExpr es
+roseToExpr (Briar SubOp ((EmptyRose) : [Briar DivOp es])) = Neg $ rebuild DivOp $ map roseToExpr es
+roseToExpr (Briar SubOp ((EmptyRose) : [Briar PowOp es])) = Neg $ rebuild PowOp $ map roseToExpr es
+roseToExpr (Briar AddOp es) = rebuild AddOp $ map roseToExpr es
+roseToExpr (Briar SubOp es) = rebuild SubOp $ map roseToExpr es
+roseToExpr (Briar MulOp es) = rebuild MulOp $ map roseToExpr es
+roseToExpr (Briar DivOp es) = rebuild DivOp $ map roseToExpr es
+roseToExpr (Briar PowOp es) = rebuild PowOp $ map roseToExpr es
+
+rebuild :: Op -> [Expr] -> Expr
+rebuild AddOp es = foldl1 (\acc x -> Add acc x) es
+rebuild SubOp es = foldl1 (\acc x -> Sub acc x) es
+rebuild MulOp es = foldl1 (\acc x -> Mul acc x) es
+rebuild DivOp es = foldl1 (\acc x -> Div acc x) es
+rebuild PowOp es = foldl1 (\acc x -> Pow acc x) es
+
+
+toRose :: Tree Expr -> RoseTree Expr
+toRose (Empty) = EmptyRose
+toRose (Leaf x) = Petal x
+toRose (Node op left right) = Briar (opStrToOp op) [toRose left, toRose right]
+    where
+    opStrToOp "+" = AddOp
+    opStrToOp "-" = SubOp
+    opStrToOp "*" = MulOp
+    opStrToOp "/" = DivOp
+    opStrToOp "^" = PowOp
+
+
+mkTree :: Expr -> Tree Expr
+mkTree (Var x) = Leaf (Var x)
+mkTree (Num n) = Leaf (Num n)
+mkTree (F func) = Leaf (F func) -- TODO should I show expressions in functino as a tree as well?
+mkTree (Neg (Num n)) = Leaf (Num (-n))
+mkTree (Neg e) = Node "-" Empty (mkTree e)
+mkTree (Add e1 e2) = Node "+" (mkTree e1) (mkTree e2)
+mkTree (Sub e1 e2) = Node "-" (mkTree e1) (mkTree e2)
+mkTree (Mul e1 e2) = Node "*" (mkTree e1) (mkTree e2)
+mkTree (Div e1 e2) = Node "/" (mkTree e1) (mkTree e2)
+mkTree (Pow e1 e2) = Node "^" (mkTree e1) (mkTree e2)
+
+
+splitR :: Op -> Expr -> [Expr]
+splitR op expr = map roseToExpr [roseTree]
+    where roseTree = flatten op $ toRose $ mkTree expr
+
+getRList :: RoseTree Expr -> [RoseTree Expr]
+getRList (Petal x) = [Petal x]
+getRList (Briar _ es) = es
+
+
 
 
 -- TODO idea: count num elements and then decide whether ot put brackets.
@@ -206,27 +331,6 @@ e11 = Num 4 .* (x .+ Num 3)
 -- TODO fix show for this one using numTerms.
 e12 = ((F (Sin x)) .+ (F (Cos x)) .* Num 4 .* x .^ Num 2) .^ (x .+ Num 5 .- (F (Tan (Num 2 .* x))))
 e13 = Num 4 .* x .+ Num 3 .* x .+ x .+ Num 6 .* x .^ Num 7 .+ Num 2 .+ Num 3
-{-
-
-
-flatten :: ExprList -> ExprList
-flatten (VarL x) = VarL x
-flatten (NumL c) = NumL c
-flatten (G f) = G f
-flatten (AddL [x,y]) = AddL [x,y]
-flatten (AddL es) = AddL [flatten (init es), last es]
--}
-
-convert :: Expr -> ExprList
-convert (Var x) = VarL x
-convert (Num c) = NumL c
-convert (Neg e) = NegL (convert e)
-convert (F f) = G $ push (convert (getArg f)) f
-convert (Add e1 e2) = AddL [convert e1, convert e2]
-convert (Sub e1 e2) = SubL [convert e1, convert e2]
-convert (Mul e1 e2) = MulL [convert e1, convert e2]
-convert (Div e1 e2) = DivL [convert e1, convert e2]
-convert (Pow base es) = PowL [convert base] [convert es]
 
 
 getArg :: Function -> Expr

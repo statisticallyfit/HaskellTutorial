@@ -47,19 +47,17 @@ data RoseTree a = EmptyRose | Petal a | Briar Op [RoseTree a] deriving (Eq, Show
 -- TODO for fractional int dividing
 -- a = fst . head $ readFloat "0.75" :: Rational
 
+splitRTest = Num 4 .- Num 1 .+ Num 3 .+ Num 5 .- Num 6 .- Num 7 .- Num 8 .+ Num 9 .- Num 2
+
 rose = Briar AddOp [Briar MulOp [Petal (Num 4), Petal x], Petal x, Petal y, Petal (Num 3),
     Petal (Num 2), Petal (Num 1), Petal (Num 8)]
 
 
 r1 = Briar AddOp [Briar SubOp [EmptyRose, Briar MulOp [Petal (Num 7),
     Briar PowOp [Petal x, Petal (Num 2)]]], Petal x, Petal (Num 1), Petal y, Petal (Num 2)]
--- TODO update for division.
--- idea: if has Add or sub then we split and apply this to the elements.
--- precondition: argument is either power, num, neg, function.
--- RULE: if the first thing in the unglued list is a number then do not surround it with brackets.
 
 
-
+{-
 
 
 flatten :: Op -> RoseTree Expr -> RoseTree Expr
@@ -79,20 +77,21 @@ roseToExpr (Petal (Var x)) = Var x
 roseToExpr (Petal (F f)) = F f
 -- note we have Neg then one expression after it, so that's why I put no es after the last singleton.
 roseToExpr (Briar SubOp ((EmptyRose) : [Petal p])) = Neg $ roseToExpr (Petal p)
-roseToExpr (Briar SubOp ((EmptyRose) : [Briar AddOp es])) = Neg $ rebuildA $ map roseToExpr es
-roseToExpr (Briar SubOp ((EmptyRose) : [Briar SubOp es])) = Neg $ rebuildS $ map roseToExpr es
-roseToExpr (Briar SubOp ((EmptyRose) : [Briar MulOp es])) = Neg $ rebuildM $ map roseToExpr es
-roseToExpr (Briar SubOp ((EmptyRose) : [Briar DivOp es])) = Neg $ rebuildD $ map roseToExpr es
-roseToExpr (Briar SubOp ((EmptyRose) : [Briar PowOp es])) = Neg $ rebuildP $ map roseToExpr es
-roseToExpr (Briar AddOp es) = rebuildA $ map roseToExpr es
-roseToExpr (Briar SubOp es) = rebuildS $ map roseToExpr es
-roseToExpr (Briar MulOp es) = rebuildM $ map roseToExpr es
-roseToExpr (Briar DivOp es) = rebuildD $ map roseToExpr es
-roseToExpr (Briar PowOp es) = rebuildP $ map roseToExpr es
+roseToExpr (Briar SubOp ((EmptyRose) : [Briar AddOp es])) = Neg $ rebuild AddOp $ map roseToExpr es
+roseToExpr (Briar SubOp ((EmptyRose) : [Briar SubOp es])) = Neg $ rebuild SubOp $ map roseToExpr es
+roseToExpr (Briar SubOp ((EmptyRose) : [Briar MulOp es])) = Neg $ rebuild MulOp $ map roseToExpr es
+roseToExpr (Briar SubOp ((EmptyRose) : [Briar DivOp es])) = Neg $ rebuild DivOp $ map roseToExpr es
+roseToExpr (Briar SubOp ((EmptyRose) : [Briar PowOp es])) = Neg $ rebuild PowOp $ map roseToExpr es
+roseToExpr (Briar AddOp es) = rebuild AddOp $ map roseToExpr es
+roseToExpr (Briar SubOp es) = rebuild SubOp $ map roseToExpr es
+roseToExpr (Briar MulOp es) = rebuild MulOp $ map roseToExpr es
+roseToExpr (Briar DivOp es) = rebuild DivOp $ map roseToExpr es
+roseToExpr (Briar PowOp es) = rebuild PowOp $ map roseToExpr es
 
 
 splitR :: Op -> Expr -> [Expr]
-splitR op expr = map roseToExpr $ getRList $ flatten op $ toRose $ mkTree expr
+splitR op expr = map roseToExpr [roseTree]
+    where roseTree = flatten op $ toRose $ mkTree expr
 
 getRList :: RoseTree Expr -> [RoseTree Expr]
 getRList (Petal x) = [Petal x]
@@ -121,37 +120,6 @@ decideDiv acc expr
     | otherwise = acc ++ show up ++ "/" ++ show lo
     where up = getUpper expr
           lo = getLower expr
-
-
--- | (isMono e) && (numTerms e <= 2) = putStrLn $ show $ simplifyComplete e -- is monomial then print simply.
--- TODO edit for division.
-{-
-printExpr :: Expr -> IO()
-printExpr e
-    | hasAdd e || hasSub e = putStrLn (foldl1 plus elementsStr)
-    | otherwise = putStrLn (foldPrint e)
-    where
-    foldPrint e = foldl lace "" (split MulOp e)
-    addSubSplit = map (split SubOp) (split AddOp e)
-    elementsStr = map foldPrint addSubSplit
-    plus acc x = if (head x == '-') then (acc ++ " - " ++ (tail x)) else (acc ++ " + " ++ x)
--}
-
-
-
-
-
-{-
-
-lace :: String -> Expr -> String
-lace acc e
-    | isNum e = if (acc == "") then show e else (acc ++ "(" ++ show e ++ ")")
-    | isNegNum e || isNeg e = if (acc == "") then ("-" ++ show ne) else (acc ++ "(" ++ show e ++ ")")
-    | isPow e = acc ++ "(" ++ show e ++ ")"
-    | isDiv e = --peseudo code: acc ++ ( ++ printExpr e1 ++ ") / (" ++ print Expr e2 ++ ")" of div expr
-    | isFunction e = acc ++ show e
-    | otherwise = acc ++ "(" ++ show e ++ ")"
-    where ne = getNeg e
 -}
 
 
@@ -161,7 +129,6 @@ instance Show Op where
     show MulOp = "(*)"
     show DivOp = "(/)"
     show PowOp = "(^)"
-
 
 
 -- TODO idea: count num elements and then decide whether ot put brackets.
@@ -219,8 +186,6 @@ instance Show Expr where
     show (Neg f@(F _)) = "-" ++ show f
     show (Neg (Var x)) = "-" ++ x
     show (Neg e) = "-(" ++ show e ++ ")"
-
-
 
 
 instance Show Function where
@@ -318,13 +283,7 @@ t2 = Node "-" Empty (Node "*" (Leaf x) (Leaf $ Num 3))
 t3 = Node "-" (Leaf $ Num 4) Empty
 
 
-{-
-NOTE:
-TODO be able to fold over tree and simplify constants but also remember order that they
-were in the tree!
-Then remember also where they go at the end!
--- TODO get infinite decimal to fraction converter.
--}
+---------------------------------------------------------------------------------------------
 
 isAdd :: Expr -> Bool
 isAdd (Add _ _) = True
@@ -761,21 +720,13 @@ rebuildAS :: [Expr] -> Expr
 rebuildAS es = foldl1 f es
     where f acc x = if isNeg x then (Sub acc (getNeg x)) else (Add acc x)
 
-rebuildA :: [Expr] -> Expr
-rebuildA es = foldl1 (\acc x -> Add acc x) es
+rebuild :: Op -> [Expr] -> Expr
+rebuild AddOp es = foldl1 (\acc x -> Add acc x) es
+rebuild SubOp es = foldl1 (\acc x -> Sub acc x) es
+rebuild MulOp es = foldl1 (\acc x -> Mul acc x) es
+rebuild DivOp es = foldl1 (\acc x -> Div acc x) es
+rebuild PowOp es = foldl1 (\acc x -> Pow acc x) es
 
-rebuildS :: [Expr] -> Expr
-rebuildS es = foldl1 (\acc x -> Sub acc x) es
-
--- rebuilds with Mul op
-rebuildM :: [Expr] -> Expr
-rebuildM es = foldl1 (\acc x -> Mul acc x) es
-
-rebuildD :: [Expr] -> Expr
-rebuildD es = foldl1 (\acc x -> Div acc x) es
-
-rebuildP :: [Expr] -> Expr
-rebuildP es = foldl1 (\acc x -> Pow acc x) es
 
 
 {-
@@ -1571,4 +1522,36 @@ instance Show a => Show (Tree a) where
             c' = c + 1
             lb' = lb ++ " |\n `-- "
             rb' = " |\n"  ++ i'
+-}
+
+
+-- | (isMono e) && (numTerms e <= 2) = putStrLn $ show $ simplifyComplete e -- is monomial then print simply.
+-- TODO edit for division.
+{-
+printExpr :: Expr -> IO()
+printExpr e
+    | hasAdd e || hasSub e = putStrLn (foldl1 plus elementsStr)
+    | otherwise = putStrLn (foldPrint e)
+    where
+    foldPrint e = foldl lace "" (split MulOp e)
+    addSubSplit = map (split SubOp) (split AddOp e)
+    elementsStr = map foldPrint addSubSplit
+    plus acc x = if (head x == '-') then (acc ++ " - " ++ (tail x)) else (acc ++ " + " ++ x)
+-}
+
+
+
+
+
+{-
+
+lace :: String -> Expr -> String
+lace acc e
+    | isNum e = if (acc == "") then show e else (acc ++ "(" ++ show e ++ ")")
+    | isNegNum e || isNeg e = if (acc == "") then ("-" ++ show ne) else (acc ++ "(" ++ show e ++ ")")
+    | isPow e = acc ++ "(" ++ show e ++ ")"
+    | isDiv e = --peseudo code: acc ++ ( ++ printExpr e1 ++ ") / (" ++ print Expr e2 ++ ")" of div expr
+    | isFunction e = acc ++ show e
+    | otherwise = acc ++ "(" ++ show e ++ ")"
+    where ne = getNeg e
 -}
