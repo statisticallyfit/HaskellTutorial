@@ -27,16 +27,16 @@ data Op = AddOp | SubOp | MulOp | DivOp | PowOp deriving (Eq)
 
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
     | Pow Expr Expr | Neg Expr | Num Int | Var String | F Function
-    deriving (Eq)
+    deriving (Eq, Show)
 
 type Coeff = Int
 type Description = (Expr, Expr, Expr)
 
-data Group = Poly [Coeff] | Trig [Description] | InvTrig [Description] | Hyperbolic [Description] |
+data Code = Poly [Coeff] | Trig [Description] | InvTrig [Description] | Hyperbolic [Description] |
     InvHyp [Description] | Logarithmic [Description]
     deriving (Eq, Show)
 
-data Code = Code [Group] deriving (Eq, Show)
+-- data Code = Code [Group] deriving (Eq, Show)
 
 
 instance Show Op where
@@ -50,6 +50,7 @@ instance Show Op where
 -- Example: x^6 * 4 is shown as 4x^6 while 4 * (x+3) is shown as 4(x+3)
 -- idea: glued things are wrapped each.
 -- NOTE original
+{-
 instance Show Expr where
     show (Var x) = x
     show (Num n) = show n
@@ -106,6 +107,7 @@ instance Show Expr where
     show (Neg f@(F _)) = "-" ++ show f
     show (Neg (Var x)) = "-" ++ x
     show (Neg e) = "-(" ++ show e ++ ")"
+-}
 
 
 instance Show Function where
@@ -345,13 +347,18 @@ newRight e ls
 -- For those that do have more than 1 func: send to functionsimplifier.
 -- TODO help filtering is incorrect here. Learn to allow things like x^2 sinx through the filter as well
 -- not just pure trig or hyp .. functions.
---exprToCode :: Expr -> Code
 {-
-exprToCode expr
+simplifyExpr :: Expr -> Expr
+simplifyExpr expr = ps' .+ fs'
     where
-    (ps, functions) = partition isMono (splitAS expr)
-    ps' = codifyPoly ps
+    (ps, fs) = partition isMono (splitAS expr)
+    (gs, ggs) = partition hasOnlyOneFunction fs
+    ps' = rebuild AddOp $ decodifyPoly $ codifyPoly ps
+    gs' = rebuild AddOp $ map decodifySingleFunction $ codifySingleFunctions gs
+    ggs' = simplifyFunctions ggs
+    fs' = gs' .+ ggs'
 -}
+
 
 
 
@@ -393,7 +400,29 @@ codifyOther [] = Tr
 
 -- note takes a codeified polynomial, or trig or invtrig... and adds the two codified things.
 -- note todo currently just impleneted for codified polynomial
---addH :: [(Coeff, Expo, Expr)] -> [(Coeff, Expo, Expr)] -> Expr
+-- postcondition: get somethning like (4x^5)(8x^2)sinx^6 and
+{-codifySingleFunction :: Expr -> Code
+codifySingleFunction expr
+    | isTrig f = Trig f'
+    | isInvTrig f = InvTrig f'
+    | isHyp f = Hyperbolic f'
+    | isInvHyp f = InvHyp f'
+    | isLogar f = Logarithmic f'
+    where
+    (ps, f) = partition isPoly (split MulOp expr)
+    ps' = decodifyPoly $ foldl1 (zipWith mulPoly) (map codifyPoly ps)
+    f' = ps' .* f-}
+
+--decodifyPoly :: Code -> Expr
+decodifyPoly (Poly ps) = {-map simplifyComplete-} polynomials
+    where
+    ns = map Num ps
+    xs = replicate (length ps) x
+    pows = map Num $ [0 .. (length ps - 1)]
+    xs' = zipWith Pow xs pows
+    ps' = zipWith Mul ns xs'
+    polynomials = map (\(Mul (Num n) (Pow _ _)) -> if (n < 0) then (Neg (Num (-1*n))))
+
 --addCodes :: Code -> Code -> Code
 {-
 addSingleFunctions (Trig ts) (Trig us) = simplifiedMaybes
@@ -427,14 +456,16 @@ put index n xs
           newBack = if null back then [] else (tail back)
 
 
+
+
 -- Note all these functions with poly below assume the ps inside the Poly are added.
-addPoly :: Group -> Group -> Group
+addPoly :: Code -> Code -> Code
 addPoly (Poly ps) (Poly qs) = Poly (zipWith (+) ps qs)
 
-subPoly :: Group -> Group -> Group
+subPoly :: Code -> Code -> Code
 subPoly (Poly ps) (Poly qs) = Poly (zipWith (-) ps qs)
 
-mulPoly :: Group -> Group -> Group
+mulPoly :: Code -> Code -> Code
 mulPoly (Poly ps) (Poly qs) = Poly $ foldl1 (zipWith (+)) gs'
     where
     ts = zip ps [0..(length ps -1)]
@@ -480,7 +511,7 @@ divOnePoly n p ms =
 
 -- note takes list of polynomials and makes it into Group type Poly [...]
 -- so 7x^2 + 3x^2 + 3x + 4x + 1 is [1, (3+4), (7+3)]
-codifyPoly :: [Expr] -> Group
+codifyPoly :: [Expr] -> Code
 codifyPoly [] = Poly []
 codifyPoly ps = Poly $ foldl1 (zipWith (+)) $ addZeroes $ codify ps
     where -- note poly expects no forms like 7x / 4x^3 in the list element position
@@ -575,6 +606,10 @@ isNum _ = False
 isNegNum :: Expr -> Bool
 isNegNum (Neg (Num n)) = True
 isNegNum _ = False
+
+isNumNeg :: Expr -> Bool
+isNumNeg (Num n) = n < 0
+isNumNeg _ = False
 
 isVar :: Expr -> Bool
 isVar (Var _) = True
@@ -1084,12 +1119,15 @@ simplify (Mul e1 (Add x y)) = simplify e1 .* simplify x .+ simplify e1 .* simpli
 simplify m@(Mul (Mul (Num a) (Pow x (Num p)))
                 (Mul (Num b) (Pow y (Num q))))
     = if x == y then (Num $ a * b) .* simplify x .^ (Num $ p + q) else simplify m
+{- TODO is this necessary?
 simplify (Mul a (Mul b rest))
     | isNum a && isNum b = a .* b .* simplify rest
-    | isNegNum a && isNegNum b = a .* b .* simplify rest
-    | isNegNum a && isNum b = Neg a .* b .* simplify rest
-    | isNum a && isNegNum b = Neg a .* b .* simplify rest
+    | negNum a && negNum b = a .* b .* simplify rest
+    | negNum a && isNum b = Neg a .* b .* simplify rest
+    | isNum a && negNum b = Neg a .* b .* simplify rest
     | otherwise = simplify a .* simplify b .* simplify rest
+    where negNum x = isNegNum x || isNumNeg x
+-}
 -- TODO after poly stuff fix this so that we simplify functions (go to simpFuncs partition)
 {-
 simplify (Mul (Mul (Mul rest f@(F _)) g@(F _)) h@(F _)) = simplify rest .* simplifyFunctions (f .* g .* h)
@@ -1101,6 +1139,11 @@ simplify (Mul (Mul rest f@(F _)) g@(F _)) = simplify rest .* simplifyFunctions (
 simplify (Mul t1@(F (Tan u)) t2@(F (Tan v)))
     = if u == v then (F (Tan u)) .^ Num 2 else simplify t1 .* simplify t2
 simplify (Mul (F (Sin u)) (F (Cos v)))-}
+simplify poly@(Mul (Num n) pow@(Pow base expo))
+    | n < 0 && isMono poly = Neg $ Mul (Num (-1 * n)) pow
+    | n > 0 && isMono poly = poly
+    | otherwise = Mul (Num n) (simplify pow)
+simplify (Mul other (Div a b)) = Div (other .* a) b
 simplify (Mul x y) = if x == y then simplify x .^ (Num 2) else simplify x .* simplify y
 
 simplify (Div (Num 0) (Num 0)) = error "0/0 not possible"
