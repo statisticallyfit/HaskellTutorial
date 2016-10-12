@@ -76,16 +76,21 @@ instance Show Expr where
         else show rest ++ "(" ++ show n ++ ")"
 
     show (Mul d1@(Div _ _) d2@(Div _ _)) = "(" ++ show d1 ++ ") (" ++ show d2 ++ ")"
-    show (Mul d@(Div _ _) m@(Mul _ _)) = "(" ++ show d ++ ") (" ++ show m ++ ")"
-    show (Mul m@(Mul _ _) d@(Div _ _)) = "(" ++ show m ++ ") (" ++ show d ++ ")"
+    show (Mul d@(Div _ _) m@(Mul _ _)) = "(" ++ show d ++ ") * (" ++ show m ++ ")"
+    show (Mul d@(Div _ _) other) = show d ++ " " ++ show other
+    show (Mul m@(Mul _ _) d@(Div _ _)) = "(" ++ show m ++ ") * (" ++ show d ++ ")"
     show (Mul m1@(Mul (Num a) (Pow _ _)) m2@(Mul (Num b) (Pow _ _)))
         = "(" ++ show m1 ++ ") (" ++ show m2 ++ ")"
+    show (Mul m1@(Mul _ _) m2@(Mul _ _))
+        | many m1 && many m2 = "(" ++ show m1 ++ ") (" ++ show m2 ++ ")"
+        | many m1 = "(" ++ show m1 ++ ") " ++ show m2
+        | many m2 = show m1 ++ " (" ++ show m2 ++ ")"
+        | otherwise = show m1 ++ show m2
+        where many m = (length $ splitAS m) > 1
     show (Mul e1 a@(Add _ _)) = show e1 ++ "(" ++ show a ++ ")"
     show (Mul e1 ng@(Neg (Num n))) = show e1 ++ "(" ++ show ng ++ ")"
     show (Mul e1 e2)
-        = if isPow e1 && isPow e2
-         then show e1 ++ " * " ++ show e2
-         else if isPow e1 && isNum e2
+        = if isPow e1 || isPow e2
          then "(" ++ show e1 ++ ")(" ++ show e2 ++ ")"
          else show e1 ++ show e2
 
@@ -180,17 +185,19 @@ e15 = F (Sin (x .+ Num 3 .+ Num 4 .+ Num 8 .* x .- y .+ Num 2 .^ x))
 
 ---------------------------------------------------------------------------------------------
 
+
 {-
 TODO PLAN OVERALL * ~ *
 
-input -> split Add and Sub -> partition -> (poly terms (1), other)
+input -> split Add and Sub -> partition -> (poly terms, functions)
 
-other -> if isMul then split Mul and if Div each then split DIv each
-    -> partition -> (poly terms (2), functions)
+poly terms -> send to addpoly
 
-    (same for div top and bottom)
-
-functions -> send to function simplifyFunctions (or fold using simplifyFunctions principles)
+functions -> partition
+	-> type 1: x^2 sin(x) - send to addSingleFunctions
+	-> type 2: sinxtanxcosx - send to function simplifyFunctions (or fold using
+	simplifyFunctions principles)
+type 1:
 principle:
 represent sin ^ tan x (x) or sin^ 2 (3x^6) as:
 Trig [(tan x, X), 0,0,0,0,0] and,
@@ -203,14 +210,11 @@ and we multiply only if the argument is equal (snd) so we get Trig [(tanx + Num 
 assuming arg was X for both. same for div
 
 ---
-poly terms (1) -> (make sure to split by both add and sub) then send to addH
 
-poly terms (2) -> these are split by Mul, so if any of these elements "have Div" then split that one
-by Div and send to divH. Otherwise, send to mulH.
+Clean up with sweep Num
 
----
-Clean up with sweep Num _
 -}
+
 
 splitAS :: Expr -> [Expr]
 splitAS expr = concatMap (split SubOp) (split AddOp expr)
@@ -263,13 +267,15 @@ splitSub (Sub e1 e2)
 -- TODO fix e12 tomorrow
 splitM :: Expr -> [Expr]
 splitM e
-    | hasAdd e || hasSub e = [e]
     | isMul e = splitMul e
+    | isDiv e && hasMul e = if (not $ isMul expl) then [expl] else (split MulOp expl)
+    -- | hasAdd e || hasSub e = [e] -- note respecting order of operations
     | hasMul e = init lefties ++ (newRight e lefties)
     | isNeg e = handleNeg MulOp e
     | not $ isVarNumFunc e = [e]
     | otherwise = split MulOp e
     where lefties = splitM (left e)
+          expl = makeMulExplicit e
 splitMul (Mul e1 e2)
     | notMul e1 && notMul e2 = [e1, e2]
     | notMul e1 = [e1] ++ splitM e2
@@ -280,13 +286,15 @@ splitMul (Mul e1 e2)
 -- NOTE no need to fix e9 so that it divides everywhere no?
 splitD :: Expr -> [Expr]
 splitD e
-    | hasAdd e || hasSub e = [e]
     | isDiv e = splitDiv e
+    | isMul e && hasDiv e = if (not $ isDiv expl) then [expl] else (split DivOp expl)
+    -- | hasAdd e || hasSub e = [e] -- note respecting order of operations
     | hasDiv e = init lefties ++ (newRight e lefties)
     | isNeg e = handleNeg DivOp e
     | not $ isVarNumFunc e = [e]
     | otherwise = split DivOp e
     where lefties = splitD (left e)
+          expl = makeDivExplicit e
 splitDiv (Div e1 e2)
     | notDiv e1 && notDiv e2 = [e1, e2]
     | notDiv e1 = [e1] ++ splitD e2
@@ -295,11 +303,13 @@ splitDiv (Div e1 e2)
     where notDiv = not . hasDiv
 
 
+
+
 pickMethod :: Op -> Expr -> [Expr]
 pickMethod AddOp expr = splitA expr
 pickMethod SubOp expr = splitS expr
-pickMethod MulOp expr = splitM expr
-pickMethod DivOp expr = splitD expr
+pickMethod MulOp expr = splitM {-$ makeMulExplicit-} expr
+pickMethod DivOp expr = splitD {-$ makeDivExplicit-} expr
 pickMethod _ _  = error "only ops are: add, sub, mul, div"
 
 handleNeg :: Op -> Expr -> [Expr]
@@ -336,9 +346,14 @@ newRight e ls
 -- TODO help filtering is incorrect here. Learn to allow things like x^2 sinx through the filter as well
 -- not just pure trig or hyp .. functions.
 --exprToCode :: Expr -> Code
-{-exprToCode expr
+{-
+exprToCode expr
     where
-    (ps, other) = partition isMono (splitAS expr)-}
+    (ps, functions) = partition isMono (splitAS expr)
+    ps' = codifyPoly ps
+-}
+
+
 
 {-exprToCode :: Expr -> Code
 exprToCode expr = Code $ filter (not . emptyGroup) [poly, trig, invTrig, hyp, invHyp, logs]
@@ -380,18 +395,18 @@ codifyOther [] = Tr
 -- note todo currently just impleneted for codified polynomial
 --addH :: [(Coeff, Expo, Expr)] -> [(Coeff, Expo, Expr)] -> Expr
 --addCodes :: Code -> Code -> Code
-addCodes h1 h2 = simplifiedMaybes
+{-
+addSingleFunctions (Trig ts) (Trig us) = simplifiedMaybes
     where
-    h1' = map numify h1
-    h2' = map numify h2
-    add (a@(c1,e1,x1),b@(c2,e2,x2)) =
-        if x1 == x2 then (Just (c1 .+ c2,e1,x1), Nothing)
+    add (a@(c1,p1,x1), b@(c2,p2,x2)) =
+        if (x1 == x2 && p1 == p2) then (Just (c1 .+ c2, p1, x1), Nothing)
         else (Just a, Just b)
     simpFirst (x,y,z) = (simplify x, y, z)
     simpMaybe (a,b) =
         if (isJust a && isNothing b) then (Just $ simpFirst $ fromJust a, Nothing)
         else (a,b)
     simplifiedMaybes = map simpMaybe $ map add (zip h1' h2')
+-}
 
 list = map numify [(4,1,x), (3,1,x), (1,7,(Num 2) .* x .^ Num 5), (2,2,x),(1,1,x), (7,7,Num 7 .* x)]
 add (a@(c1,e1,x1),b@(c2,e2,x2)) = if x1 == x2 then (Just (c1 .+ c2,e1,x1), Nothing) else (Just a, Just b)
@@ -836,15 +851,111 @@ isPoly (Pow e1 e2) = isPoly e1 && isPoly e2
 
 isTrig :: Expr -> Bool
 isTrig f = isSin f || isCos f || isTan f || isCsc f || isSec f || isCot f
-{-
+
 
 -- note this is passed only glued expressions!
--- example hasOnlyOne isTrig 3x^7x^2sin(4x) = True
-hasOnlyOne :: (Expr -> Bool) -> Expr -> Bool
-hasOnlyOne f expr
-    | isGlued expr = (length $ filter (== True) $ map f (unGlue expr)) == 1
-    | otherwise = error "was passed non-glued expression"
+-- example 3x^7x^2sin(4x) = True
+-- example (sin (sin x)) = True
+-- example (sinxtanx) = False
+hasOnlyOneFunction :: Expr -> Bool
+hasOnlyOneFunction expr = (oneFunc 0 expr) == 1
+    where
+    oneFunc count (Num n) = count
+    oneFunc count (Var x) = count
+    oneFunc count (F f) = count + 1
+    oneFunc count (Neg e) = oneFunc count e
+    oneFunc count (Add e1 e2) = oneFunc count e1 + oneFunc count e2
+    oneFunc count (Sub e1 e2) = oneFunc count e1 + oneFunc count e2
+    oneFunc count (Mul e1 e2) = oneFunc count e1 + oneFunc count e2
+    oneFunc count (Div e1 e2) = oneFunc count e1 + oneFunc count e2
+    oneFunc count (Pow e1 e2) = oneFunc count e1 + oneFunc count e2
+
+
+{-
+-- precondition: expression must have no add or sub and must have at least one function.
+-- postcondition: takes out first function it finds, leaving the expression otherwise the same.
+-- note only meant to deal with functions like x^2 sin(x) ^ (3x) or sinx ^ tan x but not sinxtanx
+extractFunction :: Expr -> Expr
+extractFunction (Mul (F f) (F g)) = Mul (Num 1) (F g)
+extractFunction (Mul (F f) e) = Mul (Num 1) e
+extractFunction (Mul e (F g)) = Mul e (Num 1)
+extractFunction (Div (F f) (F g)) = Div (Num 1) (F g)
+extractFunction (Div (F f) e) = Div (Num 1) e
+extractFunction (Div e (F g)) = Div e (Num 1)
+extractFunction (Pow (F f) (F g))
+extractFunction (Neg (F f)) = Num (-1) -- here putting into play strong assuming of no add and no sub.
+extractFunction _ = error "not a function"
 -}
+
+-- note puts division expressions on the outside. so (Mul some thing div inside) = > DIv (mul some)
+-- precondition: must only deal with glued expressions (div and mul and pow)
+-- example it we have Mul ((s) / (t), e) = then returns (Div (s * e, t))
+-- example if we have (Mul (s/t, s/t)) then returns the  Div (s*t, s*t)
+-- TODO note do we want to simplify here and so use mul-mul cases? if not remvove
+makeDivExplicit :: Expr -> Expr
+makeDivExplicit expr
+    | expr' == expr = expr
+    | otherwise = makeDivExplicit expr'
+    where
+    expr' = explicit expr
+    explicit (Num n) = Num n
+    explicit (Var x) = Var x
+    explicit (F f) = F f
+    explicit (Neg e) = Neg $ explicit e
+    explicit (Mul (Div a b) (Div c d)) = Div (a .* b) (c .* d)
+    explicit (Mul (Div a b) other) = Div (a .* other) b
+    explicit (Mul other (Div c d)) = Div (other .* c) d
+    explicit (Mul e1 e2) = Mul (explicit e1) (explicit e2)
+    explicit (Div (Div a b) (Div c d)) = Div (a .* d) (b .* c)
+    explicit (Div (Div a b) other) = Div a (b .* other)
+    explicit (Div other (Div c d)) = Div (other .* d) c
+    explicit (Div e1 e2) = Div (explicit e1) (explicit e2)
+    explicit (Pow base expo) = Pow (explicit base) (explicit expo)
+    explicit (Add e1 e2) = Add (explicit e1) (explicit e2)
+    explicit (Sub e1 e2) = Sub (explicit e1) (explicit e2)
+
+-- TODO  note do we want to simplify here to keep the div-div cases? if not remvove
+makeMulExplicit :: Expr -> Expr
+makeMulExplicit expr
+    | expr' == expr = expr
+    | otherwise = makeMulExplicit expr'
+    where
+    expr' = explicit expr
+    explicit (Num n) = Num n
+    explicit (Var x) = Var x
+    explicit (F f) = F f
+    explicit (Neg e) = Neg $ explicit e
+    {-explicit (Mul (Div a b) (Div c d)) = Mul (a ./ b) (d ./ c)
+    explicit (Mul (Div a b) other) = Mul (a ./ b) (Num 1 ./ other)
+    explicit (Mul other (Div c d)) = Mul (other ./ c) d-}
+    explicit (Mul e1 e2) = Mul (explicit e1) (explicit e2)
+    explicit (Div (Mul a b) (Mul c d)) = Mul (a ./ c) (b ./ d)
+    explicit (Div (Mul a b) other) = Mul (a .* b) (Num 1 ./ other)
+    explicit (Div other (Mul c d)) = Mul (other ./ c) (Num 1 ./ d)
+    explicit (Div (Div a b) (Div c d)) = Mul (a ./ b) (d ./ c)
+    explicit (Div (Div a b) other) = Mul (a ./ b) (Num 1 ./ other)
+    explicit (Div other (Div c d)) = Mul (other ./ c) d
+    explicit (Div e1 e2) = Div (explicit e1) (explicit e2)
+    explicit (Pow base expo) = Pow (explicit base) (explicit expo)
+    explicit (Add e1 e2) = Add (explicit e1) (explicit e2)
+    explicit (Sub e1 e2) = Sub (explicit e1) (explicit e2)
+
+-- to test with mulexplicit
+m1 = (Num 4 ./ Num 3) ./ Num 9 -- should be (4/3) * (1/9)
+
+-- to test with divexplicit
+d1 = (Num 1 ./ Num 2) .* Num 4
+d2 = Num 3 .* (Num 4 ./ Num 5)
+d3 = (Num 4 ./ Num 7) .* (Num 9 ./ Num 3)
+d4 = Num 4 ./ Num 8
+d5 = (Num 4 .+ Num 5) ./ Num 8
+
+h = (F (Sin (Num 4 .* x)))
+c = Num 3 .* x .^ Num 7 .* x .^ Num 2
+h1 = c .* h
+h2 = h1 ./ (Num 6 .* x .^ Num 4 .+ Num 8 .- x )
+h3 = (c ./ (Num 6 .* x .^ Num 4 .+ Num 8 .- x)) .* h
+
 
 
 isInvTrig :: Expr -> Bool
