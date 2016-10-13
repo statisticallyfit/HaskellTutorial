@@ -47,6 +47,7 @@ instance Show Op where
     show PowOp = "(^)"
 
 
+
 -- TODO idea: count num elements and then decide whether ot put brackets.
 -- Example: x^6 * 4 is shown as 4x^6 while 4 * (x+3) is shown as 4(x+3)
 -- idea: glued things are wrapped each.
@@ -65,11 +66,13 @@ instance Show Expr where
     show (Mul p@(Pow _ _) f@(F _)) = "(" ++ show p ++ ")" ++ show f
     show (Mul (Num n) p@(Pow _ _)) = show n ++ show p
     show (Mul np@(Mul (Num n) p@(Pow _ _)) other) = "(" ++ show np ++ ")(" ++ show other ++ ")"
-    {-show (Mul (Mul other p@(Pow _ _)) f@(F _))
+
+    show (Mul (Mul other p@(Pow _ _)) f@(F _))
         | many other = "(" ++ show other ++ ")(" ++ show p ++ ")" ++ show f
         | otherwise = show other ++ "(" ++ show p ++ ")" ++ show f
         where
-        many e = (not $ isMono e) || (length $ splitAS e) > 1 || (length $ split MulOp e) > 1-}
+        many e = (not $ isMono e) || (length $ splitAS e) > 1 || (length $ split MulOp e) > 1
+
     show (Mul (Mul (Num n) pow@(Mul b (Pow _ _))) c)
         = "(" ++ show n ++ ")" ++ show pow ++ "(" ++ show b ++ ")"
     show (Mul (Mul a pow@(Mul b (Pow _ _))) c) = show a ++ show pow ++ "(" ++ show b ++ ")"
@@ -136,8 +139,6 @@ instance Show Expr where
     show (Neg f@(F _)) = "-" ++ show f
     show (Neg (Var x)) = "-" ++ x
     show (Neg e) = "-(" ++ show e ++ ")"
-
-
 
 
 instance Show Function where
@@ -245,6 +246,24 @@ assuming arg was X for both. same for div
 ---
 
 Clean up with sweep Num
+
+
+
+** Also make function called rearrange or organize that transforms:
+1 * sin x * cos x * 2 * 4 * ln x * 8 * (-x)
+into
+-64x * sinx * cos x * ln x
+
+By:
+assigning priorities to things:
+num/negnum/numneg = priority 0 (highest)
+var = priority 1
+isMono = priority 2
+(x + 1) ^ 2 or (x + 1) ( things like monomials that are nto quite) = priority 3
+function = priority 4 (last)
+
+-- precondition of function rearrange is: glued expr, so no add or sub (only as inner
+like in x(x+1)(9)). Method: use chisel to get Div separate if present.
 
 -}
 
@@ -1105,31 +1124,31 @@ chisel expr
     chiseler (F f) = F f  -- TODO functor here to map inside and chisel the function args.
 
     --- note: the ((n/m)/p) simplification cases
-    chiseler (Div (Div a b) (Div c d)) = Div (chisel a .* chisel d) (chisel b .* chisel c)
-    chiseler (Div (Div a b) other) = Div (chisel a) (chisel b .* chisel other)
-    chiseler (Div other (Div c d)) = Div (chisel other .* chisel d) (chisel c)
+    chiseler (Div (Div a b) (Div c d)) = Div (chiseler a .* chiseler d) (chiseler b .* chiseler c)
+    chiseler (Div (Div a b) other) = Div (chiseler a) (chiseler b .* chiseler other)
+    chiseler (Div other (Div c d)) = Div (chiseler other .* chiseler d) (chiseler c)
     ------ note the pow cases.
     -- note keeping these despite making div explicit  because result is (7 * 1) / pow
     -- instead of (7 / pow) and we get the latter if we use the below  (for mm3')
     chiseler m@(Mul a (Pow base (Neg (Num n))))
-        | n >= 0 = Div (chisel a) (Pow (chisel base) (Num n))
-        | otherwise = Mul (chisel a) (Pow (chisel base) (Num (-1*n)))
+        | n >= 0 = Div (chiseler a) (Pow (chiseler base) (Num n))
+        | otherwise = Mul (chiseler a) (Pow (chiseler base) (Num (-1*n)))
     chiseler m@((Mul a (Pow base (Num n))))
-        | n < 0 = Div (chisel a) (Pow (chisel base) (Num (-1*n)))
-        | otherwise = (chisel a) .* (chisel base) .^ Num n
+        | n < 0 = Div (chiseler a) (Pow (chiseler base) (Num (-1*n)))
+        | otherwise = (chiseler a) .* (chiseler base) .^ Num n
     chiseler d@(Div a (Pow base (Neg (Num n))))
-        | n >= 0 = Mul (chisel a) (Pow (chisel base) (Num n))
-        | otherwise = Div (chisel a) (Pow (chisel base) (Num (-1*n)))
+        | n >= 0 = Mul (chiseler a) (Pow (chiseler base) (Num n))
+        | otherwise = Div (chiseler a) (Pow (chiseler base) (Num (-1*n)))
     chiseler d@(Div a (Pow base (Num n)))
-        | n < 0 = (chisel a) .* (chisel base) .^ Num (-1*n)
-        | otherwise = Div (chisel a) (Pow (chisel base) (Num n))
+        | n < 0 = (chiseler a) .* (chiseler base) .^ Num (-1*n)
+        | otherwise = Div (chiseler a) (Pow (chiseler base) (Num n))
 
     chiseler p@(Pow base (Neg (Num n)))
-        | n >= 0 = Num 1 ./ ((chisel base) .^ Num n)
-        | otherwise = (chisel base) .^ Num (-1*n)
+        | n >= 0 = Num 1 ./ ((chiseler base) .^ Num n)
+        | otherwise = (chiseler base) .^ Num (-1*n)
     chiseler p@(Pow base (Num n))
-        | n < 0 = Num 1 ./ ((chisel base) .^ (Num (-1*n)))
-        | otherwise = (chisel base) .^ (Num n)
+        | n < 0 = Num 1 ./ ((chiseler base) .^ (Num (-1*n)))
+        | otherwise = (chiseler base) .^ (Num n)
 
 
     chiseler (Add e1 e2) = Add (chiseler e1) (chiseler e2)
@@ -1554,6 +1573,25 @@ mm4' = Num 7 .* Num 8 .* x .^ Num (-22)
 mm5' = Num 7 .* x .^ (Num (-22)) .* (F (Sin x)) .* (F (Cos x)) .* Num 8
 mm6' = Num 7 .* x .^ (Num (-22)) .* (F (Sin x)) .* x .^ Num 2
 
+testMM1' = (chisel mm1') ==
+    ((Num 7 .* x .* Num 8 .* (F (Sin x)) .* (F (Cos x)))) ./ ((x .+ Num 1) .^ Num 22)
+
+testMM2' = (chisel mm2') ==
+    ((Num 7 .* x .* Num 8 .* (F (Sin x))) ./ ((x .+ Num 1) .^ Num 22))
+
+testMM3' = (chisel mm3') ==
+    ((Num 7 .* x .* Num 8) ./ ((x .+ Num 1) .^ Num 22))
+
+testMM4' = (chisel mm4') ==
+    ((Num 7 .* Num 8) ./ (x .^ Num 22))
+
+testMM5' = (chisel mm5') ==
+    ((Num 7 .* (F (Sin x)) .* (F (Cos x)) .* Num 8) ./ (x .^ Num 22))
+
+testMM6' = (chisel mm6') ==
+    ((Num 7 .* (F (Sin x)) .* x .^ Num 2) ./ (x .^ Num 22))
+
+testAllMM' = testMM1' && testMM2' && testMM3' && testMM4' && testMM5' && testMM6'
 
 -- div div
 dd1' = ((Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num 22)))) ./ ((F (Sin x)) .- (F (Cos x)))
@@ -1561,6 +1599,24 @@ dd2' = ((Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num 22)))) ./ (F (Sin x))
 dd3' = ((Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num 22))))
 dd4' = (Num 7 .+ x .* Num 8) ./ (x .^ Num (-22))
 dd5' = ((Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num 22)))) ./ ((F (Sin x)) .* (F (Cos x)) .* x .* Num 2)
+
+testDD1' = (chisel dd1') ==
+    (((Num 7 .+ x .* Num 8) .* x .^ Num 22) ./ (Num 1 .* ((F (Sin x)) .- (F (Cos x)))))
+
+testDD2' = (chisel dd2') ==
+    (((Num 7 .+ x .* Num 8) .* x .^ Num 22) ./ (Num 1 .* (F (Sin x))))
+
+testDD3' = (chisel dd3') ==
+    ( (Num 7 .+ x .* Num 8) .* x .^ Num 22)
+
+testDD4' = (chisel dd4') ==
+    ((Num 7 .+ x .* Num 8) .* x .^ Num 22)
+
+testDD5' = (chisel dd5') ==
+    ( ((Num 7 .+ x .* Num 8) .* x .^ Num 22) ./ (Num 1 .* ((F (Sin x)) .* (F (Cos x)) .* x .* Num 2)) )
+
+testAllDD' = testDD1' && testDD2' && testDD3' && testDD4' && testDD5'
+
 
 -- mul div
 md1' = Num 7 .* x .* (Num 8 ./ ((x .+ Num 1) .^ Num (-22))) .* (F (Sin x)) .* (F (Cos x) .* (F (Tan x)))
@@ -1571,12 +1627,56 @@ md5' = Num 7 .* Num 8 ./ (x .^ (Neg (Num 22)))
 md6' = Num 7 ./ (x .^ Num (-22))
 md7' = x .^ Num (-22)
 
+
+testMD1' = (chisel md1') ==
+    (Num 7 .* x .* Num 8 .* (F (Sin x)) .* ((F (Cos x)) .* (F (Tan x))) .* (x .+ Num 1) .^ Num 22)
+
+testMD2' = (chisel md2') ==
+    (Num 7 .* x .* Num 8 .* (F (Sin x)) .* (F (Cos x)) .* (x .+ Num 1) .^ Num 22)
+
+testMD3' = (chisel md3') ==
+    (Num 7 .* x .* Num 8 .* (F (Sin x)) .* (x .+ Num 1) .^ Num 22)
+
+testMD4' = (chisel md4') ==
+    (Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num 22)
+
+testMD5' = (chisel md5') ==
+    (Num 7 .* Num 8 .* x .^ Num 22)
+
+testMD6' = (chisel md6') ==
+    (Num 7 .* x .^ Num 22)
+
+testMD7' = (chisel md7') ==
+    (Num 1 ./ (x .^ Num 22))
+
+
+testAllMD' = testMD1' && testMD2' && testMD3' && testMD4' && testMD5' && testMD6' && testMD7'
+
 -- div mul
 dm1' = (Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num (-22)) ./ ( (F (Sin x)) .* (F (Cos x)))
 dm2' = (Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num (-22)) ./ ( (F (Sin x)) )
 dm3' = (Num 8 .* (x .+ Num 1) .^ (Neg (Num 22))) ./ ( (F (Sin x)) .* (F (Cos x)))
 dm4' = ((x .+ Num 1) .^ Neg (Num 22)) ./ ( (F (Sin x)) .* (F (Cos x)))
 dm5' = ((x .+ Num 1) .^ (Neg (Num 22))) ./ ( (F (Sin x)) )
+
+
+testDM1' = (chisel dm1') ==
+    ( (Num 7 .* x .* Num 8) ./ ( (x .+ Num 1) .^ Num 22 .* (F (Sin x) .* F (Cos x))))
+
+testDM2' = (chisel dm2') ==
+    ( (Num 7 .* x .* Num 8) ./ ( (x .+ Num 1) .^ Num 22 .* F (Sin x) ))
+
+testDM3' = (chisel dm3') ==
+    ( (Num 8) ./ ( (x .+ Num 1) .^ Num 22 .* (F (Sin x) .* F (Cos x))))
+
+testDM4' = (chisel dm4') ==
+    ( Num 1 ./ ( (x .+ Num 1) .^ Num 22 .* (F (Sin x) .* F (Cos x))))
+
+testDM5' = (chisel dm5') ==
+    ( Num 1 ./ ( (x .+ Num 1) .^ Num 22 .* F (Sin x) ))
+
+
+testAllDM' = testDM1' && testDM2' && testDM3' && testDM4' && testDM5'
 
 -- trivial
 mm1 = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num 22 .* (F (Sin x)) .* (F (Cos x))
