@@ -489,19 +489,6 @@ codifySingleFunction expr
     codes = if (isLogFamily f) then (put (findLoc f) descr zsLog) else (put (findLoc f) descr zs)
 -}
 
--- note takes a poly of the form ((something ) / (other)) where outer expression isDiv and is fresh
--- from chisel function. And returns (possibly) simplified form  in coded form
--- precondition: because input is from chisel's output, then we assume the numerator and
--- denominator have no negpowers nor division, just mul,add,orsub or all.
-{-codifyDivPoly :: [Expr] -> Code
-codifyDivPoly ps-}
-
--- note takes poly that has been trhough chisel so has no negpowers or div at all.
--- If there is an expression like (x + 4 + y)(x)(8)(x^7)(2x^8) then it just paritions it to separate
--- the added term fro mthe rest, which are monomials (isMono). Then we just work with the monomials.
-codifyMulPoly :: [Expr] -> Code
-codifyMulPoly ps = foldl1 mulPoly (map (\p -> codifyAddPoly [p]) ps)
-
 {-
 TODO continue tomorrow here !!!! @ !!!!!
 Need to make a divPoly function for cases like (x + x^2 + 3x^2(4x^7)(5x^3)) / x^7
@@ -553,7 +540,28 @@ codifyMono op expr = Poly $ zs ++ [c]
 
 -- note takes list of polynomials and makes it into Group type Poly [...]
 -- so 7x^2 + 3x^2 + 3x + 4x + 1 is [1, (3+4), (7+3)]
-codifyAddPoly :: [Expr] -> Code
+{-
+codifyPolyA :: [Expr] -> Code
+codifyPolyA ps = foldl1 addPoly (map (codifyMono AddOp) ps)
+-}
+
+
+-- precondition: takes chisel output so has no negpowers. There is no division (assume) just mul.
+-- Ignore expressions that are of form (x+1), just use the monomials.
+codifyPolyM :: [Expr] -> Code
+codifyPolyM ps = foldl1 mulPoly (map (codifyMono MulOp) ps)
+
+
+-- precondition: takes chisel output which isDiv and which has no other div in the numerator
+-- and denominator and no negpowers
+{-
+codifyPolyD :: [Expr] -> Code
+codifyPolyD ps
+-}
+
+
+
+{-
 codifyAddPoly [] = Poly []
 codifyAddPoly ps = Poly $ foldl1 (zipWith (+)) $ addZeroes $ codify ps
     where -- note poly expects no forms like 7x / 4x^3 in the list element position
@@ -569,6 +577,7 @@ codifyAddPoly ps = Poly $ foldl1 (zipWith (+)) $ addZeroes $ codify ps
     poly (Mul (Neg (Num n)) x) = [0, -n]
     poly (Mul (Num n) (Pow x (Num p))) = replicate p 0 ++ [n]
     poly (Mul (Num n) x) = [0, n]
+-}
 
 
 {-
