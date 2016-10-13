@@ -1080,6 +1080,36 @@ chisel expr
     chiseler (Neg e) = Neg $ chiseler e
     chiseler (F f) = F f  -- TODO functor here to map inside and chisel the function args.
 
+
+{-    chiseler m@(Mul (Mul a (Pow base (Neg (Num n)))) other)
+         | n > 0 = Div (a .* other) (Pow base (Num n))
+         | otherwise =  m
+    chiseler m@(Mul (Mul a (Pow base (Num n))) other)
+         | n < 0 = Div (a .* other) (Pow base (Num (-1*n)))
+         | otherwise = m
+
+    chiseler d@(Div (Mul a (Pow base (Neg (Num n)))) other)
+         | n > 0 = Div a ((Pow base (Num n)) .* other)
+         | otherwise = d
+    chiseler d@(Div (Mul a (Pow base (Num n))) other)
+         | n < 0 = Div a (Pow base (Num (-1*n)) .* other)
+         | otherwise = d-}
+
+    chiseler m@(Mul (Div a (Pow base (Neg (Num n)))) other)
+         | n > 0 = Mul a (Pow base (Num n) .* other)
+         | otherwise = m
+    chiseler m@(Mul (Div a (Pow base (Num n))) other)
+         | n < 0 = Mul a (Pow base (Num (-1*n)) .* other)
+         | otherwise = m
+
+    {-chiseler d@(Div (Div a (Pow base (Neg (Num n)))) other)
+         | n > 0 = Div (a .* (Pow base (Num n))) other
+         | otherwise = d
+    chiseler d@(Div (Div a (Pow base (Num n))) other)
+         | n < 0 = Div (a .* (Pow base (Num (-1*n)))) other
+         | otherwise = d-}
+
+    ------
     --- note the pow cases.
     chiseler m@(Mul a (Pow base (Neg (Num n))))
         | n >= 0 = Div a (Pow base (Num n))
@@ -1102,9 +1132,9 @@ chisel expr
         | otherwise = p
 
     --- note: the ((n/m)/p) simplification cases
-    chiseler (Div (Div a b) (Div c d)) = Div (a .* d) (b .* c)
+    {-chiseler (Div (Div a b) (Div c d)) = Div (a .* d) (b .* c)
     chiseler (Div (Div a b) other) = Div a (b .* other)
-    chiseler (Div other (Div c d)) = Div (other .* d) c
+    chiseler (Div other (Div c d)) = Div (other .* d) c-}
 
     chiseler (Add e1 e2) = Add (chiseler e1) (chiseler e2)
     chiseler (Sub e1 e2) = Sub (chiseler e1) (chiseler e2)
@@ -1145,6 +1175,7 @@ md2 = Num 7 .* x .* Num 8 ./ ((x .+ Num 1) .^ Num 22) .* (F (Sin x))
 md3 = Num 7 .* x .* Num 8 ./ ((x .+ Num 1) .^ Num 22)
 md4 = Num 7 .* Num 8 ./ (x .^ Num 22)
 md5 = Num 7 ./ (x .^ Num 22)
+md0' = Num 7 .* x .* (Num 8 ./ ((x .+ Num 1) .^ Num (-22))) .* (F (Sin x)) .* (F (Cos x) .* (F (Tan x)))
 md1' = Num 7 .* x .* (Num 8 ./ ((x .+ Num 1) .^ Num (-22))) .* (F (Sin x)) .* (F (Cos x))
 md2' = Num 7 .* x .* Num 8 ./ ((x .+ Num 1) .^ (Neg (Num 22))) .* (F (Sin x))
 md3' = Num 7 .* x .* Num 8 ./ ((x .+ Num 1) .^ Num (-22))
