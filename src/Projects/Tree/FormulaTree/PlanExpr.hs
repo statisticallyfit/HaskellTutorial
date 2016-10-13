@@ -63,11 +63,13 @@ instance Show Expr where
     show (Sub e1 e2) = show e1 ++ " - " ++ show e2
 
     show (Mul p@(Pow _ _) f@(F _)) = "(" ++ show p ++ ")" ++ show f
-    show (Mul (Mul other p@(Pow _ _)) f@(F _))
+    show (Mul (Num n) p@(Pow _ _)) = show n ++ show p
+    show (Mul np@(Mul (Num n) p@(Pow _ _)) other) = "(" ++ show np ++ ")(" ++ show other ++ ")"
+    {-show (Mul (Mul other p@(Pow _ _)) f@(F _))
         | many other = "(" ++ show other ++ ")(" ++ show p ++ ")" ++ show f
         | otherwise = show other ++ "(" ++ show p ++ ")" ++ show f
         where
-        many e = isPow e || (length $ splitAS e) > 1 || (length $ split MulOp e) > 1
+        many e = (not $ isMono e) || (length $ splitAS e) > 1 || (length $ split MulOp e) > 1-}
     show (Mul (Mul (Num n) pow@(Mul b (Pow _ _))) c)
         = "(" ++ show n ++ ")" ++ show pow ++ "(" ++ show b ++ ")"
     show (Mul (Mul a pow@(Mul b (Pow _ _))) c) = show a ++ show pow ++ "(" ++ show b ++ ")"
@@ -445,6 +447,7 @@ findLoc f
 -- note takes a codeified polynomial, or trig or invtrig... and adds the two codified things.
 -- note todo currently just impleneted for codified polynomial
 -- postcondition: get somethning like (4x^5)(8x^2)sinx^6 and
+{-
 codifySingleFunction :: Expr -> Code
 codifySingleFunction expr
     | isTrig f = Trig codes
@@ -455,16 +458,30 @@ codifySingleFunction expr
     where
     -- note simplifying the polynomial part
     (ps, (f:_)) = partition isMono (split MulOp expr)
-    tempPs = rebuild MulOp ps
-    ps' = if (hasNegPow tempPs) then (split DivOp (makeDivExplicit tempPs)) else ps
-    coef = rebuild MulOp $ decodifyPoly $ foldl1 mulPoly (map (\p -> codifyPoly [p]) ps')
+    divOrMulPs = chisel (rebuild MulOp ps)
+    ps' = if (isDiv divOrMulPs) then (codifyDivPoly divOrMulPs) else (codifyMulPoly divOrMulPs)
+    (low, upper) = if (isDiv ps') then (getLower ps', getUpper ps') else ps'
+    coef = rebuild MulOp $ decodifyPoly $ foldl1 mulPoly (map (\p -> codifyAddPoly [p]) ps')
     -- note now actually making it a code (always 6 spots since: sin,cos,tan,csc,sec,cot are 6)
     -- but there are 3 for log zs
     descr = (coef, getPow f, getArg f)
     zs = replicate 6 (Num 0, Num 0, Num 0)
     zsLog = replicate 3 (Num 0, Num 0, Num 0)
     codes = if (isLogFamily f) then (put (findLoc f) descr zsLog) else (put (findLoc f) descr zs)
+-}
 
+-- note takes a poly of the form ((something ) / (other)) where outer expression isDiv and is fresh
+-- from chisel function. And returns (possibly) simplified form  in coded form
+-- precondition: because input is from chisel's output, then we assume the numerator and
+-- denominator have no negpowers nor division, just mul,add,orsub or all.
+{-codifyDivPoly :: [Expr] -> Code
+codifyDivPoly ps-}
+
+-- note takes poly that has been trhough chisel so has no negpowers or div at all.
+-- If there is an expression like (x + 4 + y)(x)(8)(x^7)(2x^8) then it just paritions it to separate
+-- the added term fro mthe rest, which are monomials (isMono). Then we just work with the monomials.
+codifyMulPoly :: [Expr] -> Code
+codifyMulPoly ps = foldl1 mulPoly (map (\p -> codifyAddPoly [p]) ps)
 
 {-
 TODO continue tomorrow here !!!! @ !!!!!
@@ -500,9 +517,9 @@ True
 
 -- note takes list of polynomials and makes it into Group type Poly [...]
 -- so 7x^2 + 3x^2 + 3x + 4x + 1 is [1, (3+4), (7+3)]
-codifyPoly :: [Expr] -> Code
-codifyPoly [] = Poly []
-codifyPoly ps = Poly $ foldl1 (zipWith (+)) $ addZeroes $ codify ps
+codifyAddPoly :: [Expr] -> Code
+codifyAddPoly [] = Poly []
+codifyAddPoly ps = Poly $ foldl1 (zipWith (+)) $ addZeroes $ codify ps
     where -- note poly expects no forms like 7x / 4x^3 in the list element position
     addZeroes cs = map (\xs -> xs ++ replicate (maxCodeLen - length xs) 0) cs
     codify ps = map poly (map simplify ps)
@@ -1086,33 +1103,34 @@ chisel expr
     chiseler (Var x) = Var x
     chiseler (Neg e) = Neg $ chiseler e
     chiseler (F f) = F f  -- TODO functor here to map inside and chisel the function args.
+
+    --- note: the ((n/m)/p) simplification cases
+    chiseler (Div (Div a b) (Div c d)) = Div (chisel a .* chisel d) (chisel b .* chisel c)
+    chiseler (Div (Div a b) other) = Div (chisel a) (chisel b .* chisel other)
+    chiseler (Div other (Div c d)) = Div (chisel other .* chisel d) (chisel c)
     ------ note the pow cases.
     -- note keeping these despite making div explicit  because result is (7 * 1) / pow
     -- instead of (7 / pow) and we get the latter if we use the below  (for mm3')
     chiseler m@(Mul a (Pow base (Neg (Num n))))
-        | n >= 0 = Div a (Pow base (Num n))
-        | otherwise = Mul a (Pow base (Num (-1*n)))
+        | n >= 0 = Div (chisel a) (Pow (chisel base) (Num n))
+        | otherwise = Mul (chisel a) (Pow (chisel base) (Num (-1*n)))
     chiseler m@((Mul a (Pow base (Num n))))
-        | n < 0 = Div a (Pow base (Num (-1*n)))
-        | otherwise = m
+        | n < 0 = Div (chisel a) (Pow (chisel base) (Num (-1*n)))
+        | otherwise = (chisel a) .* (chisel base) .^ Num n
     chiseler d@(Div a (Pow base (Neg (Num n))))
-        | n >= 0 = Mul a (Pow base (Num n))
-        | otherwise = Div a (Pow base (Num (-1*n)))
+        | n >= 0 = Mul (chisel a) (Pow (chisel base) (Num n))
+        | otherwise = Div (chisel a) (Pow (chisel base) (Num (-1*n)))
     chiseler d@(Div a (Pow base (Num n)))
-        | n < 0 = a .* base .^ Num (-1*n)
-        | otherwise = d
+        | n < 0 = (chisel a) .* (chisel base) .^ Num (-1*n)
+        | otherwise = Div (chisel a) (Pow (chisel base) (Num n))
 
     chiseler p@(Pow base (Neg (Num n)))
-        | n >= 0 = Num 1 ./ (base .^ Num n)
-        | otherwise = base .^ Num (-1*n)
+        | n >= 0 = Num 1 ./ ((chisel base) .^ Num n)
+        | otherwise = (chisel base) .^ Num (-1*n)
     chiseler p@(Pow base (Num n))
-        | n < 0 = Num 1 ./ (base .^ (Num (-1*n)))
-        | otherwise = p
+        | n < 0 = Num 1 ./ ((chisel base) .^ (Num (-1*n)))
+        | otherwise = (chisel base) .^ (Num n)
 
-    --- note: the ((n/m)/p) simplification cases
-    chiseler (Div (Div a b) (Div c d)) = Div (a .* d) (b .* c)
-    chiseler (Div (Div a b) other) = Div a (b .* other)
-    chiseler (Div other (Div c d)) = Div (other .* d) c
 
     chiseler (Add e1 e2) = Add (chiseler e1) (chiseler e2)
     chiseler (Sub e1 e2) = Sub (chiseler e1) (chiseler e2)
@@ -1147,8 +1165,6 @@ makeDivExplicit expr
     {-explicit (Div (Div a b) (Div c d)) = Div (a .* d) (b .* c)
     explicit (Div (Div a b) other) = Div a (b .* other)
     explicit (Div other (Div c d)) = Div (other .* d) c-}
-    --explicit d@(Div (Mul a b) (Mul c d)) = d
-    --explicit (Div (Mul a b) oneEntity) = (a .* b .* c) ./ d
     explicit (Div e1 e2) = Div (explicit e1) (explicit e2)
     explicit (Pow base expo) = Pow (explicit base) (explicit expo)
     explicit (Add e1 e2) = Add (explicit e1) (explicit e2)
@@ -1528,3 +1544,77 @@ simplifyFunctions (Mul f@(F (Sin u)) (g@F (Cos v)))
     | otherwise = simplify f .* simplify g
 -}
 
+
+-- for testing chisel.
+
+mm1' = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num (-22) .* (F (Sin x)) .* (F (Cos x))
+mm2' = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ (Neg (Num 22)) .* (F (Sin x))
+mm3' = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num (-22)
+mm4' = Num 7 .* Num 8 .* x .^ Num (-22)
+mm5' = Num 7 .* x .^ (Num (-22)) .* (F (Sin x)) .* (F (Cos x)) .* Num 8
+mm6' = Num 7 .* x .^ (Num (-22)) .* (F (Sin x)) .* x .^ Num 2
+
+
+-- div div
+dd1' = ((Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num 22)))) ./ ((F (Sin x)) .- (F (Cos x)))
+dd2' = ((Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num 22)))) ./ (F (Sin x))
+dd3' = ((Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num 22))))
+dd4' = (Num 7 .+ x .* Num 8) ./ (x .^ Num (-22))
+dd5' = ((Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num 22)))) ./ ((F (Sin x)) .* (F (Cos x)) .* x .* Num 2)
+
+-- mul div
+md1' = Num 7 .* x .* (Num 8 ./ ((x .+ Num 1) .^ Num (-22))) .* (F (Sin x)) .* (F (Cos x) .* (F (Tan x)))
+md2' = Num 7 .* x .* (Num 8 ./ ((x .+ Num 1) .^ Num (-22))) .* (F (Sin x)) .* (F (Cos x))
+md3' = Num 7 .* x .* Num 8 ./ ((x .+ Num 1) .^ (Neg (Num 22))) .* (F (Sin x))
+md4' = Num 7 .* x .* Num 8 ./ ((x .+ Num 1) .^ Num (-22))
+md5' = Num 7 .* Num 8 ./ (x .^ (Neg (Num 22)))
+md6' = Num 7 ./ (x .^ Num (-22))
+md7' = x .^ Num (-22)
+
+-- div mul
+dm1' = (Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num (-22)) ./ ( (F (Sin x)) .* (F (Cos x)))
+dm2' = (Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num (-22)) ./ ( (F (Sin x)) )
+dm3' = (Num 8 .* (x .+ Num 1) .^ (Neg (Num 22))) ./ ( (F (Sin x)) .* (F (Cos x)))
+dm4' = ((x .+ Num 1) .^ Neg (Num 22)) ./ ( (F (Sin x)) .* (F (Cos x)))
+dm5' = ((x .+ Num 1) .^ (Neg (Num 22))) ./ ( (F (Sin x)) )
+
+-- trivial
+mm1 = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num 22 .* (F (Sin x)) .* (F (Cos x))
+mm2 = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num 22 .* (F (Sin x))
+mm3 = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num 22
+mm4 = Num 7 .* Num 8 .* x .^ Num 22
+mm1'' = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ (Neg (Num (-22))) .* (F (Sin x)) .* (F (Cos x))
+mm2'' = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ (Neg (Num (-22))) .* (F (Sin x))
+mm3'' = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ (Neg (Num (-22)))
+mm4'' = Num 7 .* Num 8 .* x .^ (Neg (Num (-22)))
+---
+dd1 = ((Num 7 .+ x .* Num 8) ./ (x .^ Num 22)) ./ ((F (Sin x)) .- (F (Cos x)))
+dd2 = ((Num 7 .+ x .* Num 8) ./ (x .^ Num 22)) ./ (F (Sin x))
+dd3 = ((Num 7 .+ x .* Num 8) ./ (x .^ Num 22))
+dd4 = ((Num 7 .+ x .* Num 8) ./ (x .^ Num 22))
+dd1'' = (Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num (-22)))) ./ ((F (Sin x)) .- (F (Cos x)))
+dd2'' = ((Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num (-22))))) ./ (F (Sin x))
+dd3'' = ((Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num (-22)))))
+dd4'' = (Num 7 ./ (x .^ (Neg (Num (-22)))))
+---
+md1 = Num 7 .* x .* (Num 8 ./ ((x .+ Num 1) .^ Num 22)) .* (F (Sin x)) .* (F (Cos x))
+md2 = Num 7 .* x .* Num 8 ./ ((x .+ Num 1) .^ Num 22) .* (F (Sin x))
+md3 = Num 7 .* x .* Num 8 ./ ((x .+ Num 1) .^ Num 22)
+md4 = Num 7 .* Num 8 ./ (x .^ Num 22)
+md5 = Num 7 ./ (x .^ Num 22)
+md1'' = Num 7 .* x .* (Num 8 ./ ((x .+ Num 1) .^ (Neg (Num (-22))))) .* (F (Sin x)) .* (F (Cos x))
+md2'' = Num 7 .* x .* Num 8 ./ ((x .+ Num 1) .^ (Neg (Num (-22)))) .* (F (Sin x))
+md3'' = Num 7 .* x .* Num 8 ./ ((x .+ Num 1) .^ (Neg (Num (-22))))
+md4'' = Num 7 .* Num 8 ./ (x .^ (Neg (Num (-22))))
+md5'' = Num 7 ./ (x .^ (Neg (Num (-22))))
+---
+dm1 = (Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num 22) ./ ( (F (Sin x)) .* (F (Cos x)))
+dm2 = (Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num 22) ./ ( (F (Sin x)) )
+dm3 = (Num 8 .* (x .+ Num 1) .^ Num 22) ./ ( (F (Sin x)) .* (F (Cos x)))
+dm4 = ((x .+ Num 1) .^ Num 22) ./ ( (F (Sin x)) .* (F (Cos x)))
+dm5 = ((x .+ Num 1) .^ Num 22) ./ ( (F (Sin x)) )
+dm1'' = (Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ (Neg (Num (-22)))) ./ ( (F (Sin x)) .* (F (Cos x)))
+dm2'' = (Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ (Neg (Num (-22)))) ./ ( (F (Sin x)) )
+dm3'' = (Num 8 .* (x .+ Num 1) .^ (Neg (Num (-22)))) ./ ( (F (Sin x)) .* (F (Cos x)))
+dm4'' = ((x .+ Num 1) .^ (Neg (Num (-22)))) ./ ( (F (Sin x)) .* (F (Cos x)))
+dm5'' = ((x .+ Num 1) .^ (Neg (Num (-22)))) ./ ( (F (Sin x)) )
