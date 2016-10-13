@@ -404,7 +404,7 @@ simplifyExpr expr = ps' .+ fs'
     where
     (ps, fs) = partition isMono (splitAS expr)
     (gs, ggs) = partition hasOnlyOneFunction fs
-    ps' = rebuildAS $ decodifyAddSubPoly $ codifyPoly ps
+    ps' = rebuildAS $ decodifyPolyA $ codifyPoly ps
     gs' = rebuildAS $ map decodifySingleFunction $ codifySingleFunctions gs
     ggs' = simplifyFunctions ggs
     fs' = gs' .+ ggs'
@@ -477,8 +477,8 @@ codifySingleFunction expr
     where
     -- note simplifying the polynomial part
     (ps, (f:_)) = partition isMono (split MulOp expr)
-    divOrMulPs = chisel (rebuild MulOp ps)
-    ps' = if (isDiv divOrMulPs) then (codifyDivPoly divOrMulPs) else (codifyMulPoly divOrMulPs)
+    dmp = chisel (rebuild MulOp ps)
+    ps' = if (isDiv dmp) then (codifyPolyD dmp) else (codifyPolyM dmp)
     (low, upper) = if (isDiv ps') then (getLower ps', getUpper ps') else ps'
     coef = rebuild MulOp $ decodifyMulPoly $ foldl1 mulPoly (map (\p -> codifyAddPoly [p]) ps')
     -- note now actually making it a code (always 6 spots since: sin,cos,tan,csc,sec,cot are 6)
@@ -488,6 +488,7 @@ codifySingleFunction expr
     zsLog = replicate 3 (Num 0, Num 0, Num 0)
     codes = if (isLogFamily f) then (put (findLoc f) descr zsLog) else (put (findLoc f) descr zs)
 -}
+
 
 {-
 TODO continue tomorrow here !!!! @ !!!!!
@@ -534,16 +535,14 @@ getCoefPow _ = error "not a monomial"
 codifyMono :: Op -> Expr -> Code
 codifyMono op expr = Poly $ zs ++ [c]
     where
-    numForZs = if (op == AddOp || op == SubOp) then 0 else 1
+    -- numForZs = if (op == AddOp || op == SubOp) then 0 else 1
     (c, p) = getCoefPow expr
-    zs = replicate p numForZs
+    zs = replicate p 0
 
 -- note takes list of polynomials and makes it into Group type Poly [...]
 -- so 7x^2 + 3x^2 + 3x + 4x + 1 is [1, (3+4), (7+3)]
-{-
 codifyPolyA :: [Expr] -> Code
 codifyPolyA ps = foldl1 addPoly (map (codifyMono AddOp) ps)
--}
 
 
 -- precondition: takes chisel output so has no negpowers. There is no division (assume) just mul.
@@ -598,8 +597,8 @@ decodifyPoly (Poly ps) = polynomials
 -}
 
 
-decodifyAddPoly :: Code -> [Expr]
-decodifyAddPoly (Poly ps) = polynomials
+decodifyPolyA :: Code -> [Expr]
+decodifyPolyA (Poly ps) = {-map simplifyComplete-} polynomials
     where
     ns = map Num ps
     xs = replicate (length ps) x
@@ -648,7 +647,12 @@ put index n xs
 
 -- Note all these functions with poly below assume the ps inside the Poly are added.
 addPoly :: Code -> Code -> Code
-addPoly (Poly ps) (Poly qs) = Poly (zipWith (+) ps qs)
+addPoly (Poly ps) (Poly qs) = Poly (zipWith (+) ps' qs')
+    where
+    elongate ts = ts ++ replicate (maxLen - (length ts)) 0
+    maxLen = max (length ps) (length qs)
+    ps' = elongate ps
+    qs' = elongate qs
 
 subPoly :: Code -> Code -> Code
 subPoly (Poly ps) (Poly qs) = Poly (zipWith (-) ps qs)
@@ -1065,11 +1069,14 @@ right (Pow e1 e2) = e2
 -- rebuilds with add sub signs.
 rebuildAS :: [Expr] -> Expr
 rebuildAS es = foldl1 f es
-    where f acc x = if isNeg x then (Sub acc (getNeg x)) else (Add acc x)
+    where f acc x
+            | isNeg x = (Sub acc (getNeg x))
+            | x == Num 0 = acc
+            | otherwise = Add acc x
 
 rebuild :: Op -> [Expr] -> Expr
-rebuild AddOp es = foldl1 (\acc x -> Add acc x) es
-rebuild SubOp es = foldl1 (\acc x -> Sub acc x) es
+rebuild AddOp es = foldl1 (\acc x -> if (x == Num 0) then acc else (Add acc x)) es
+rebuild SubOp es = foldl1 (\acc x -> if (x == Num 0) then acc else (Sub acc x)) es
 rebuild MulOp es = foldl1 (\acc x -> Mul acc x) es
 rebuild DivOp es = foldl1 (\acc x -> Div acc x) es
 rebuild PowOp es = foldl1 (\acc x -> Pow acc x) es
@@ -1327,6 +1334,39 @@ push u (F (Ln v)) = F $ Ln u
 push u (F (Log v1 v2)) = F $ Log u u
 
 
+class ExprFunctor f where
+    ffmap :: (Expr -> Expr) -> f -> f
+
+instance ExprFunctor Function where
+    ffmap f (Sin x) = Sin (f x)
+    ffmap f (Cos x) = Cos (f x)
+    ffmap f (Tan x) = Tan (f x)
+    ffmap f (Csc x) = Csc (f x)
+    ffmap f (Sec x) = Sec (f x)
+    ffmap f (Cot x) = Cot (f x)
+    ffmap f (Arcsin x) = Arcsin (f x)
+    ffmap f (Arccos x) = Arccos (f x)
+    ffmap f (Arctan x) = Arctan (f x)
+    ffmap f (Arccsc x) = Arccsc (f x)
+    ffmap f (Arcsec x) = Arcsec (f x)
+    ffmap f (Arccot x) = Arccot (f x)
+    ffmap f (Sinh x) = Sinh (f x)
+    ffmap f (Cosh x) = Cosh (f x)
+    ffmap f (Tanh x) = Tanh (f x)
+    ffmap f (Csch x) = Csch (f x)
+    ffmap f (Sech x) = Sech (f x)
+    ffmap f (Coth x) = Coth (f x)
+    ffmap f (Arcsinh x) = Arcsinh (f x)
+    ffmap f (Arccosh x) = Arccosh (f x)
+    ffmap f (Arctanh x) = Arctanh (f x)
+    ffmap f (Arccsch x) = Arccsch (f x)
+    ffmap f (Arcsech x) = Arcsech (f x)
+    ffmap f (Arccoth x) = Arccoth (f x)
+    ffmap f (E x) = E (f x)
+    ffmap f (Ln x) = Ln (f x)
+    ffmap f (Log base x) = Log base (f x)
+
+
 
 
 -- TODO major help why doesn't 4(x+3) simplify to 4x + 12, why 4x + (4)(3)?? ?
@@ -1402,26 +1442,26 @@ simplify (Mul e1 (Add x y)) = simplify e1 .* simplify x .+ simplify e1 .* simpli
 simplify m@(Mul (Mul (Num a) (Pow x (Num p)))
                 (Mul (Num b) (Pow y (Num q))))
     = if x == y then (Num $ a * b) .* simplify x .^ (Num $ p + q) else simplify m
-{- TODO is this necessary?
-simplify (Mul a (Mul b rest))
-    | isNum a && isNum b = a .* b .* simplify rest
-    | negNum a && negNum b = a .* b .* simplify rest
-    | negNum a && isNum b = Neg a .* b .* simplify rest
-    | isNum a && negNum b = Neg a .* b .* simplify rest
-    | otherwise = simplify a .* simplify b .* simplify rest
-    where negNum x = isNegNum x || isNumNeg x
--}
--- TODO after poly stuff fix this so that we simplify functions (go to simpFuncs partition)
-{-
-simplify (Mul (Mul (Mul rest f@(F _)) g@(F _)) h@(F _)) = simplify rest .* simplifyFunctions (f .* g .* h)
-simplify (Mul (Mul rest f@(F _)) g@(F _)) = simplify rest .* simplifyFunctions (f .* g)
--}
--- TODO now these functions are ready to go into the function simplifier (sin * cos * tan)
-{-simplify (Mul (F (Sin u)) (F (Cos v)))
-    = if u == v then F (Tan u) else (F (Sin $ simplify u)) .* (F (Cos $ simplify v))
-simplify (Mul t1@(F (Tan u)) t2@(F (Tan v)))
-    = if u == v then (F (Tan u)) .^ Num 2 else simplify t1 .* simplify t2
-simplify (Mul (F (Sin u)) (F (Cos v)))-}
+        {- TODO is this necessary?
+        simplify (Mul a (Mul b rest))
+            | isNum a && isNum b = a .* b .* simplify rest
+            | negNum a && negNum b = a .* b .* simplify rest
+            | negNum a && isNum b = Neg a .* b .* simplify rest
+            | isNum a && negNum b = Neg a .* b .* simplify rest
+            | otherwise = simplify a .* simplify b .* simplify rest
+            where negNum x = isNegNum x || isNumNeg x
+        -}
+        -- TODO after poly stuff fix this so that we simplify functions (go to simpFuncs partition)
+        {-
+        simplify (Mul (Mul (Mul rest f@(F _)) g@(F _)) h@(F _)) = simplify rest .* simplifyFunctions (f .* g .* h)
+        simplify (Mul (Mul rest f@(F _)) g@(F _)) = simplify rest .* simplifyFunctions (f .* g)
+        -}
+        -- TODO now these functions are ready to go into the function simplifier (sin * cos * tan)
+        {-simplify (Mul (F (Sin u)) (F (Cos v)))
+            = if u == v then F (Tan u) else (F (Sin $ simplify u)) .* (F (Cos $ simplify v))
+        simplify (Mul t1@(F (Tan u)) t2@(F (Tan v)))
+            = if u == v then (F (Tan u)) .^ Num 2 else simplify t1 .* simplify t2
+        simplify (Mul (F (Sin u)) (F (Cos v)))-}
 simplify poly@(Mul (Num n) maybePow)
     | n < 0 && isMono poly = Neg $ Mul (Num (-1 * n)) maybePow
     | n > 0 && isMono poly = poly
