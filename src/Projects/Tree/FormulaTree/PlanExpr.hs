@@ -404,7 +404,7 @@ simplifyExpr expr = ps' .+ fs'
     where
     (ps, fs) = partition isMono (splitAS expr)
     (gs, ggs) = partition hasOnlyOneFunction fs
-    ps' = rebuildAS $ decodifyPoly $ codifyPoly ps
+    ps' = rebuildAS $ decodifyAddSubPoly $ codifyPoly ps
     gs' = rebuildAS $ map decodifySingleFunction $ codifySingleFunctions gs
     ggs' = simplifyFunctions ggs
     fs' = gs' .+ ggs'
@@ -480,7 +480,7 @@ codifySingleFunction expr
     divOrMulPs = chisel (rebuild MulOp ps)
     ps' = if (isDiv divOrMulPs) then (codifyDivPoly divOrMulPs) else (codifyMulPoly divOrMulPs)
     (low, upper) = if (isDiv ps') then (getLower ps', getUpper ps') else ps'
-    coef = rebuild MulOp $ decodifyPoly $ foldl1 mulPoly (map (\p -> codifyAddPoly [p]) ps')
+    coef = rebuild MulOp $ decodifyMulPoly $ foldl1 mulPoly (map (\p -> codifyAddPoly [p]) ps')
     -- note now actually making it a code (always 6 spots since: sin,cos,tan,csc,sec,cot are 6)
     -- but there are 3 for log zs
     descr = (coef, getPow f, getArg f)
@@ -532,7 +532,24 @@ True
 
 -}
 
+-- note gets the coefficient and power of the monomial.
+getCoefPow :: Expr -> (Int, Int)
+getCoefPow (Pow (Var _) (Num p)) = (1, p)
+getCoefPow (Mul (Num c) (Pow (Var _) (Num p))) = (c, p)
+getCoefPow (Var _) = (1, 1)
+getCoefPow (Num n) = (n, 0) -- note this is pow 0 of x, won't be applied to the Num n.
+getCoefPow _ = error "not a monomial"
 
+-- note takes a single monomial and converts it to coded form
+-- precondition: input must have no function, must be either the form (2x^6) or (x^7) or 2
+-- or negative each combination above.
+-- precondition: monomial must have no negative powers, must have been sent to chisel beforehand.
+codifyMono :: Op -> Expr -> Code
+codifyMono op expr = Poly $ zs ++ [c]
+    where
+    numForZs = if (op == AddOp || op == SubOp) then 0 else 1
+    (c, p) = getCoefPow expr
+    zs = replicate p numForZs
 
 -- note takes list of polynomials and makes it into Group type Poly [...]
 -- so 7x^2 + 3x^2 + 3x + 4x + 1 is [1, (3+4), (7+3)]
@@ -554,9 +571,26 @@ codifyAddPoly ps = Poly $ foldl1 (zipWith (+)) $ addZeroes $ codify ps
     poly (Mul (Num n) x) = [0, n]
 
 
-
-decodifyPoly :: Code -> [Expr]
+{-
+-- not done yet, just copied content from addsub decodifier
+-- assumes that we are decoding a polynomial whose elements are multiplied.
+decodifyMulPoly :: Code -> [Expr]
 decodifyPoly (Poly ps) = polynomials
+    where
+    ns = map Num ps
+    xs = replicate (length ps) x
+    pows = map Num $ [0 .. (length ps - 1)]
+    xs' = map simplifyComplete $ zipWith Pow xs pows
+    ps' = map negExplicit $ zipWith Mul ns xs'
+    polynomials = [simplify (head ps')] ++ tail ps'
+
+    negExplicit (m@(Mul (Num n) p@(Pow _ _))) = if (n < 0) then (Neg $ (Num (-1*n)) .* p) else m
+    negExplicit e = e
+-}
+
+
+decodifyAddPoly :: Code -> [Expr]
+decodifyAddPoly (Poly ps) = polynomials
     where
     ns = map Num ps
     xs = replicate (length ps) x

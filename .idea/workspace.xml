@@ -35,8 +35,8 @@
       <file leaf-file-name="PlanExpr.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-0.19178082">
-              <caret line="472" column="33" selection-start-line="472" selection-start-column="33" selection-end-line="472" selection-end-column="33" />
+            <state vertical-scroll-proportion="0.50405186">
+              <caret line="543" column="31" selection-start-line="543" selection-start-column="31" selection-end-line="543" selection-end-column="31" />
               <folding />
             </state>
           </provider>
@@ -812,12 +812,12 @@
       <workItem from="1476079826247" duration="21650000" />
       <workItem from="1476165420483" duration="25563000" />
       <workItem from="1476247548048" duration="33217000" />
-      <workItem from="1476335865316" duration="21490000" />
+      <workItem from="1476335865316" duration="24031000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="333126000" />
+    <option name="totallyTimeSpent" value="335667000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="24" width="968" height="779" extended-state="0" />
@@ -1225,8 +1225,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.19178082">
-          <caret line="472" column="33" selection-start-line="472" selection-start-column="33" selection-end-line="472" selection-end-column="33" />
+        <state vertical-scroll-proportion="0.50405186">
+          <caret line="543" column="31" selection-start-line="543" selection-start-column="31" selection-end-line="543" selection-end-column="31" />
           <folding />
         </state>
       </provider>
