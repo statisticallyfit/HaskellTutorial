@@ -1055,6 +1055,44 @@ extractFunction (Neg (F f)) = Num (-1) -- here putting into play strong assuming
 extractFunction _ = error "not a function"
 -}
 
+
+-- postcondition: converts negative pow to positive by changing to div or mul.
+chisel :: Expr -> Expr
+chisel expr
+    | expr' == expr = expr
+    | otherwise = chisel expr'
+    where
+    expr' = chiseler expr
+    chiseler m@(Mul (Mul a (Pow base (Neg (Num n)))) other)
+        | n > 0 = Div (a .* other) (Pow base (Num n))
+        | otherwise =  m
+    chiseler m@(Mul (Mul a (Pow base (Num n))) other)
+        | n < 0 = Div (a .* other) (Pow base (Num (-1*n)))
+        | otherwise = m
+
+    chiseler d@(Div (Mul a (Pow base (Neg (Num n)))) other)
+        | n > 0 = Div a (Pow base (Num n)) .* other)
+        | otherwise = d
+    chiseler d@(Div (Mul a (Pow base (Num n))) other)
+        | n < 0 = Div a (Pow base (Num (-1*n)) .* other)
+        | otherwise = d
+
+    chiseler m@(Mul (Div a (Pow base (Neg (Num n)))) other)
+        | n > 0 = Mul a (Pow base (Num n) .* other)
+        | otherwise = m
+    chiseler m@(Mul (Div a (Pow base (Num n))) other)
+        | n < 0 = Mul a (Pow base (Num (-1*n)) .* other)
+        | otherwise = m
+
+    chiseler d@(Div (Div a (Pow base (Neg (Num n)))) other)
+        | n > 0 = Div (a .* (Pow base (Num n))) other
+        | otherwise = d
+    chiseler d@(Div (Div a (Pow base (Num n))) other)
+        | n < 0 = Div (a .* (Pow base (Num (-1*n)))) other
+        | otherwise = d
+
+
+
 -- note puts division expressions on the outside. so (Mul some thing div inside) = > DIv (mul some)
 -- precondition: must only deal with glued expressions (div and mul and pow)
 -- example it we have Mul ((s) / (t), e) = then returns (Div (s * e, t))
@@ -1074,12 +1112,6 @@ makeDivExplicit expr
     explicit (Mul (Div a b) other) = Div (a .* other) b
     explicit (Mul other (Div c d)) = Div (other .* c) d
     explicit (Mul (Mul a (Div x y)) other) = Div (a .* x .* other) y
-    explicit m@(Mul (Mul a (Pow base (Neg (Num n)))) other)
-        | n > 0 = Div (a .* other) (Pow base (Num n))
-        | otherwise =  m
-    explicit m@(Mul (Mul a (Pow base (Num n))) other)
-        | n < 0 = Div (a .* other) (Pow base (Num (-1*n)))
-        | otherwise =  m
     explicit (Mul e1 e2) = Mul (explicit e1) (explicit e2)
     explicit (Div (Div a b) (Div c d)) = Div (a .* d) (b .* c)
     explicit (Div (Div a b) other) = Div a (b .* other)
