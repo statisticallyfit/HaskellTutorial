@@ -11,22 +11,22 @@ import Data.Maybe
 import Data.List
 
 
-data Function
-    = Sin Expr | Cos Expr | Tan Expr |
-      Csc Expr | Sec Expr | Cot Expr |
-      Arcsin Expr | Arccos Expr | Arctan Expr |
-      Arccsc Expr | Arcsec Expr | Arccot Expr |
-      Sinh Expr | Cosh Expr | Tanh Expr |
-      Csch Expr | Sech Expr | Coth Expr |
-      Arcsinh Expr | Arccosh Expr | Arctanh Expr |
-      Arccsch Expr | Arcsech Expr | Arccoth Expr |
-      Ln Expr | E Expr | Log Expr Expr -- first expr is base
+data Function a
+    = Sin a | Cos a | Tan a |
+      Csc a | Sec a | Cot a |
+      Arcsin a | Arccos a | Arctan a |
+      Arccsc a | Arcsec a | Arccot a |
+      Sinh a | Cosh a | Tanh a |
+      Csch a | Sech a | Coth a |
+      Arcsinh a | Arccosh a | Arctanh a |
+      Arccsch a | Arcsech a | Arccoth a |
+      Ln a | E a | Log a a -- first expr is base
     deriving (Eq)
 
 data Op = AddOp | SubOp | MulOp | DivOp | PowOp deriving (Eq)
 
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
-    | Pow Expr Expr | Neg Expr | Num Int | Var String | F Function
+    | Pow Expr Expr | Neg Expr | Num Int | Var String | F (Function Expr)
     deriving (Eq)
 
 type Coeff = Int
@@ -39,14 +39,46 @@ data Code = Poly [Coeff] | Trig [Description] | InvTrig [Description] | Hyperbol
 -- data Code = Code [Group] deriving (Eq, Show)
 
 
+
+
+instance Functor Function where
+    fmap f (Sin x) = Sin (f x)
+    fmap f (Cos x) = Cos (f x)
+    fmap f (Tan x) = Tan (f x)
+    fmap f (Csc x) = Csc (f x)
+    fmap f (Sec x) = Sec (f x)
+    fmap f (Cot x) = Cot (f x)
+    fmap f (Arcsin x) = Arcsin (f x)
+    fmap f (Arccos x) = Arccos (f x)
+    fmap f (Arctan x) = Arctan (f x)
+    fmap f (Arccsc x) = Arccsc (f x)
+    fmap f (Arcsec x) = Arcsec (f x)
+    fmap f (Arccot x) = Arccot (f x)
+    fmap f (Sinh x) = Sinh (f x)
+    fmap f (Cosh x) = Cosh (f x)
+    fmap f (Tanh x) = Tanh (f x)
+    fmap f (Csch x) = Csch (f x)
+    fmap f (Sech x) = Sech (f x)
+    fmap f (Coth x) = Coth (f x)
+    fmap f (Arcsinh x) = Arcsinh (f x)
+    fmap f (Arccosh x) = Arccosh (f x)
+    fmap f (Arctanh x) = Arctanh (f x)
+    fmap f (Arccsch x) = Arccsch (f x)
+    fmap f (Arcsech x) = Arcsech (f x)
+    fmap f (Arccoth x) = Arccoth (f x)
+    fmap f (E x) = E (f x)
+    fmap f (Ln x) = Ln (f x)
+    fmap f (Log base x) = Log (f base) (f x)
+
+
+
+
 instance Show Op where
     show AddOp = "(+)"
     show SubOp = "(-)"
     show MulOp = "(*)"
     show DivOp = "(/)"
     show PowOp = "(^)"
-
-
 
 -- TODO idea: count num elements and then decide whether ot put brackets.
 -- Example: x^6 * 4 is shown as 4x^6 while 4 * (x+3) is shown as 4(x+3)
@@ -140,8 +172,8 @@ instance Show Expr where
     show (Neg (Var x)) = "-" ++ x
     show (Neg e) = "-(" ++ show e ++ ")"
 
-
-instance Show Function where
+-- TODO how to fmap this?
+instance Show a => Show (Function a) where
     show (Sin e) = "sin(" ++ show e ++ ")"
     show (Cos e) = "cos(" ++ show e ++ ")"
     show (Tan e) = "tan(" ++ show e ++ ")"
@@ -528,6 +560,7 @@ getCoefPow (Var _) = (1, 1)
 getCoefPow (Num n) = (n, 0) -- note this is pow 0 of x, won't be applied to the Num n.
 getCoefPow _ = error "not a monomial"
 
+-- HELP error TODO when passed argument 2x 
 -- note takes a single monomial and converts it to coded form
 -- precondition: input must have no function, must be either the form (2x^6) or (x^7) or 2
 -- or negative each combination above.
@@ -551,6 +584,7 @@ codifyPolyM :: [Expr] -> Code
 codifyPolyM ps = foldl1 mulPoly (map (codifyMono MulOp) ps)
 
 
+-- TODO START HERE TOMORROW
 -- precondition: takes chisel output which isDiv and which has no other div in the numerator
 -- and denominator and no negpowers
 {-
@@ -580,6 +614,11 @@ codifyAddPoly ps = Poly $ foldl1 (zipWith (+)) $ addZeroes $ codify ps
 
 
 {-
+TODO *** resintate this - don't need a specific decoder for every operation
+IDEA
+
+
+
 -- not done yet, just copied content from addsub decodifier
 -- assumes that we are decoding a polynomial whose elements are multiplied.
 decodifyMulPoly :: Code -> [Expr]
@@ -605,7 +644,7 @@ decodifyPolyA (Poly ps) = {-map simplifyComplete-} polynomials
     pows = map Num $ [0 .. (length ps - 1)]
     xs' = map simplifyComplete $ zipWith Pow xs pows
     ps' = map negExplicit $ zipWith Mul ns xs'
-    polynomials = [simplify (head ps')] ++ tail ps'
+    polynomials = [clean (head ps')] ++ tail ps'
 
     negExplicit (m@(Mul (Num n) p@(Pow _ _))) = if (n < 0) then (Neg $ (Num (-1*n)) .* p) else m
     negExplicit e = e
@@ -628,7 +667,7 @@ list = map numify [(4,1,x), (3,1,x), (1,7,(Num 2) .* x .^ Num 5), (2,2,x),(1,1,x
 add (a@(c1,e1,x1),b@(c2,e2,x2)) = if x1 == x2 then (Just (c1 .+ c2,e1,x1), Nothing) else (Just a, Just b)
 hs = zip list list
 js = map add hs
-clean' (x,y,z) = (simplify x, y, z)
+clean' (x,y,z) = (clean x, y, z)
 ms = map (\(a, b) -> if (isJust a && isNothing b) then (Just $ clean' $ fromJust a, Nothing) else (a,b)) js
 --g (a@(c1,e1,x1), b@(c2,e2,x2)) = if (x1 == x2) then (c1 .+ c2,e1,x1) else (a,b)
 
@@ -780,6 +819,10 @@ getPow expr = Num 1 -- if not an actual power, then expo is 1
 isNum :: Expr -> Bool
 isNum (Num _) = True
 isNum _ = False
+
+getNum :: Expr -> Int
+getNum (Num n) = n
+getNum (Neg (Num n)) = n
 
 isNegNum :: Expr -> Bool
 isNegNum (Neg (Num n)) = True
@@ -1083,8 +1126,11 @@ rebuild PowOp es = foldl1 (\acc x -> Pow acc x) es
 
 
 
+-- START HERE tomorrow 10/14: was working on codifying but first update sweep to save mono
+-- IDEA IMPORTANT: make sweep so that it goes into (Add e1 e2) = Add (sweep e1) (sweep e2)
+-- and then deal with gathering up constants for glued expressions.
 
-
+-- need to use sweep constants (make sweep so that
 -- note says if expression is a single polynomial term like 5x (monomial)
 isMono :: Expr -> Bool
 isMono e
@@ -1305,68 +1351,55 @@ isFunction _ = False
 
 -- puts an expression inside a function
 push :: Expr -> Expr -> Expr
-push u (F (Sin v)) = F $ Sin u
-push u (F (Cos v)) = F $ Cos u
-push u (F (Tan v)) = F $ Tan u
-push u (F (Csc v)) = F $ Csc u
-push u (F (Sec v)) = F $ Sec u
-push u (F (Cot v)) = F $ Cot u
-push u (F (Arcsin v)) = F $ Arcsin u
-push u (F (Arccos v)) = F $ Arccos u
-push u (F (Arctan v)) = F $ Arctan u
-push u (F (Arccsc v)) = F $ Arccsc u
-push u (F (Arcsec v)) = F $ Arcsec u
-push u (F (Arccot v)) = F $ Arccot u
-push u (F (Sinh v)) = F $ Sinh u
-push u (F (Cosh v)) = F $ Cosh u
-push u (F (Tanh v)) = F $ Tanh u
-push u (F (Csch v)) = F $ Csch u
-push u (F (Sech v)) = F $ Sech u
-push u (F (Coth v)) = F $ Coth u
-push u (F (Arcsinh v)) = F $ Arcsinh u
-push u (F (Arccosh v)) = F $ Arccosh u
-push u (F (Arctanh v)) = F $ Arctanh u
-push u (F (Arccsch v)) = F $ Arccsch u
-push u (F (Arcsech v)) = F $ Arcsech u
-push u (F (Arccoth v)) = F $ Arccoth u
-push u (F (E v)) = F $ E u
-push u (F (Ln v)) = F $ Ln u
-push u (F (Log v1 v2)) = F $ Log u u
+push newExpr (F f) = F $ fmap (\oldExpr -> newExpr) f
 
 
-class ExprFunctor f where
-    ffmap :: (Expr -> Expr) -> f -> f
 
-instance ExprFunctor Function where
-    ffmap f (Sin x) = Sin (f x)
-    ffmap f (Cos x) = Cos (f x)
-    ffmap f (Tan x) = Tan (f x)
-    ffmap f (Csc x) = Csc (f x)
-    ffmap f (Sec x) = Sec (f x)
-    ffmap f (Cot x) = Cot (f x)
-    ffmap f (Arcsin x) = Arcsin (f x)
-    ffmap f (Arccos x) = Arccos (f x)
-    ffmap f (Arctan x) = Arctan (f x)
-    ffmap f (Arccsc x) = Arccsc (f x)
-    ffmap f (Arcsec x) = Arcsec (f x)
-    ffmap f (Arccot x) = Arccot (f x)
-    ffmap f (Sinh x) = Sinh (f x)
-    ffmap f (Cosh x) = Cosh (f x)
-    ffmap f (Tanh x) = Tanh (f x)
-    ffmap f (Csch x) = Csch (f x)
-    ffmap f (Sech x) = Sech (f x)
-    ffmap f (Coth x) = Coth (f x)
-    ffmap f (Arcsinh x) = Arcsinh (f x)
-    ffmap f (Arccosh x) = Arccosh (f x)
-    ffmap f (Arctanh x) = Arctanh (f x)
-    ffmap f (Arccsch x) = Arccsch (f x)
-    ffmap f (Arcsech x) = Arcsech (f x)
-    ffmap f (Arccoth x) = Arccoth (f x)
-    ffmap f (E x) = E (f x)
-    ffmap f (Ln x) = Ln (f x)
-    ffmap f (Log base x) = Log base (f x)
-
-
+clean :: Expr -> Expr
+clean expr
+    | expr' == expr = expr
+    | otherwise = cln expr'
+    where
+    expr' = cln expr
+    cln (Num n) = Num n
+    cln (Var x) = Var x
+    cln (F f) = F $ fmap cln f
+    cln (Neg e) = cln e
+    cln (Add (Num 0) e2) = cln e2
+    cln (Add e1 (Num 0)) = cln e1
+    cln (Sub (Num 0) e2) = Neg $ cln e2
+    cln (Sub e1 (Num 0)) = cln e1
+    cln (Mul (Num 1) e2) = cln e2
+    cln (Mul e1 (Num 1)) = cln e1
+    cln (Mul (Num 0) e2) = Num 0
+    cln (Mul e1 (Num 0)) = Num 0
+    cln (Div e1 (Num 0)) = error "div by zero"
+    cln (Div (Num 0) e2) = Num 0
+    cln (Div e1 (Num 1)) = cln e1
+    cln (Pow e1 (Num 0)) = Num 1
+    cln (Pow e1 (Num 1)) = cln e1 --- TODO do power rules next
+    cln (Pow (Num 0) e2) = Num 0
+    cln (Pow (Num 1) e2) = Num 1
+    cln (Add e1 e2)
+        | (num e1 && num e2) = (Num $ (getNum e1) + (getNum e2))
+        | otherwise = cln e1 .+ cln e2
+        where num x = isNegNum x || isNumNeg x || isNum x
+    cln (Sub e1 e2)
+        | (num e1 && num e2) = (Num $ (getNum e1) - (getNum e2))
+        | otherwise = cln e1 .- cln e2
+        where num x = isNegNum x || isNumNeg x || isNum x
+    cln (Mul e1 e2)
+        | (num e1 && num e2) = (Num $ (getNum e1) * (getNum e2))
+        | otherwise = cln e1 .* cln e2
+        where num x = isNegNum x || isNumNeg x || isNum x
+    cln (Div e1 e2)
+        | (num e1 && num e2) = (Num $ (getNum e1) `div` (getNum e2))
+        | otherwise = cln e1 ./ cln e2
+        where num x = isNegNum x || isNumNeg x || isNum x
+    cln (Pow e1 e2)
+        | (num e1 && num e2) = (Num $ (getNum e1) ^ (getNum e2))
+        | otherwise = cln e1 .^ cln e2
+        where num x = isNegNum x || isNumNeg x || isNum x
 
 
 -- TODO major help why doesn't 4(x+3) simplify to 4x + 12, why 4x + (4)(3)?? ?
@@ -1375,33 +1408,7 @@ instance ExprFunctor Function where
 simplify :: Expr -> Expr
 simplify (Var x) = Var x
 simplify (Num n) = Num n
-simplify (F (Sin e)) = F $ Sin $ simplify e
-simplify (F (Cos e)) = F $ Cos $ simplify e
-simplify (F (Tan e)) = F $ Tan $ simplify e
-simplify (F (Csc e)) = F $ Csc $ simplify e
-simplify (F (Sec e)) = F $ Sec $ simplify e
-simplify (F (Cot e)) = F $ Cot $ simplify e
-simplify (F (Arcsin e)) = F $ Arcsin $ simplify e
-simplify (F (Arccos e)) = F $ Arccos $ simplify e
-simplify (F (Arctan e)) = F $ Arctan $ simplify e
-simplify (F (Arccsc e)) = F $ Arccsc $ simplify e
-simplify (F (Arcsec e)) = F $ Arcsec $ simplify e
-simplify (F (Arccot e)) = F $ Arccot $ simplify e
-simplify (F (Sinh e)) = F $ Sinh $ simplify e
-simplify (F (Cosh e)) = F $ Cosh $ simplify e
-simplify (F (Tanh e)) = F $ Tanh $ simplify e
-simplify (F (Csch e)) = F $ Csch $ simplify e
-simplify (F (Sech e)) = F $ Sech $ simplify e
-simplify (F (Coth e)) = F $ Coth $ simplify e
-simplify (F (Arcsinh e)) = F $ Arcsinh $ simplify e
-simplify (F (Arccosh e)) = F $ Arccosh $ simplify e
-simplify (F (Arctanh e)) = F $ Arctanh $ simplify e
-simplify (F (Arccsch e)) = F $ Arccsch $ simplify e
-simplify (F (Arcsech e)) = F $ Arcsech $ simplify e
-simplify (F (Arccoth e)) = F $ Arccoth $ simplify e
-simplify (F (E e)) = F $ E $ simplify e
-simplify (F (Ln e)) = F $ Ln $ simplify e
-simplify (F (Log e1 e2)) = F $ Log (simplify e1) (simplify e2)
+simplify (F f) = F $ fmap simplify f
 
 -- TODO may not need these cases once I do operations on expression holders of arrays.
 simplify (Add (Num n) (Num m)) = Num $ n + m
@@ -1442,7 +1449,8 @@ simplify (Mul e1 (Add x y)) = simplify e1 .* simplify x .+ simplify e1 .* simpli
 simplify m@(Mul (Mul (Num a) (Pow x (Num p)))
                 (Mul (Num b) (Pow y (Num q))))
     = if x == y then (Num $ a * b) .* simplify x .^ (Num $ p + q) else simplify m
-        {- TODO is this necessary?
+
+{- TODO is this necessary?
         simplify (Mul a (Mul b rest))
             | isNum a && isNum b = a .* b .* simplify rest
             | negNum a && negNum b = a .* b .* simplify rest
@@ -1450,18 +1458,23 @@ simplify m@(Mul (Mul (Num a) (Pow x (Num p)))
             | isNum a && negNum b = Neg a .* b .* simplify rest
             | otherwise = simplify a .* simplify b .* simplify rest
             where negNum x = isNegNum x || isNumNeg x
-        -}
+
+
         -- TODO after poly stuff fix this so that we simplify functions (go to simpFuncs partition)
-        {-
+
+
         simplify (Mul (Mul (Mul rest f@(F _)) g@(F _)) h@(F _)) = simplify rest .* simplifyFunctions (f .* g .* h)
         simplify (Mul (Mul rest f@(F _)) g@(F _)) = simplify rest .* simplifyFunctions (f .* g)
-        -}
+
+
         -- TODO now these functions are ready to go into the function simplifier (sin * cos * tan)
-        {-simplify (Mul (F (Sin u)) (F (Cos v)))
+
+simplify (Mul (F (Sin u)) (F (Cos v)))
             = if u == v then F (Tan u) else (F (Sin $ simplify u)) .* (F (Cos $ simplify v))
         simplify (Mul t1@(F (Tan u)) t2@(F (Tan v)))
             = if u == v then (F (Tan u)) .^ Num 2 else simplify t1 .* simplify t2
-        simplify (Mul (F (Sin u)) (F (Cos v)))-}
+        simplify (Mul (F (Sin u)) (F (Cos v))) -}
+
 simplify poly@(Mul (Num n) maybePow)
     | n < 0 && isMono poly = Neg $ Mul (Num (-1 * n)) maybePow
     | n > 0 && isMono poly = poly
@@ -1501,6 +1514,7 @@ simplify (Neg s@(Sub e1 e2)) = simplify (Neg e1) .+ simplify e2
 simplify (Neg (Mul (Num n) x)) = Num (-n) .* simplify x
 simplify (Neg m@(Mul _ _)) = Neg $ simplify m
 simplify (Neg e) = Neg $ simplify e
+
 
 
 -- TODO
@@ -1543,15 +1557,15 @@ simplifyComplete expr
     where s = simplify expr
 
 
-sameArgs :: Function -> Function -> Bool
+sameArgs :: Function Expr -> Function Expr -> Bool
 sameArgs f g
-    | getArg (F f) == getArg (F g) = True
+    | (getArg (F f)) == (getArg (F g)) = True
     | otherwise = False
 
-getFunction :: Expr -> Function
+
+getFunction :: Expr -> Function Expr
 getFunction (F f) = f
 getFunction _ = error "not a function!"
-
 
 
 getArg :: Expr -> Expr
