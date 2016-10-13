@@ -62,6 +62,12 @@ instance Show Expr where
     show (Add e1 e2) = show e1 ++ " + " ++ show e2
     show (Sub e1 e2) = show e1 ++ " - " ++ show e2
 
+    show (Mul p@(Pow _ _) f@(F _)) = "(" ++ show p ++ ")" ++ show f
+    show (Mul (Mul other p@(Pow _ _)) f@(F _))
+        | many other = "(" ++ show other ++ ")(" ++ show p ++ ")" ++ show f
+        | otherwise = show other ++ "(" ++ show p ++ ")" ++ show f
+        where
+        many e = isPow e || (length $ splitAS e) > 1 || (length $ split MulOp e) > 1
     show (Mul (Mul (Num n) pow@(Mul b (Pow _ _))) c)
         = "(" ++ show n ++ ")" ++ show pow ++ "(" ++ show b ++ ")"
     show (Mul (Mul a pow@(Mul b (Pow _ _))) c) = show a ++ show pow ++ "(" ++ show b ++ ")"
@@ -78,6 +84,7 @@ instance Show Expr where
         = if (n >= 0)
         then (show e1 ++ "(-" ++ show n ++ ")")
         else (show e1 ++ "(-(-" ++ show (-1*n) ++ "))")
+
     show (Mul e1 e2)
         | many1 && many2 = "(" ++ show e1 ++ ")(" ++ show e2 ++ ")"
         | many1 = "(" ++ show e1 ++ ")" ++ show e2
@@ -96,7 +103,7 @@ instance Show Expr where
         where
         surround eStr = "[" ++ eStr ++ "]"
         few e = (isVar e || isNum e || (not $ isMono e)) && ((not $ isNumNeg e) && (not $ isNegNum e)
-            && (hasOnlyOneFunction e))
+            && (hasOnlyOneFunction e) && ((length $ split MulOp e) == 1))
 
     show (Pow e1 (Num n))
         | few e1 && (n < 0) = show e1 ++ "^(" ++ show n ++ ")"
@@ -1071,46 +1078,17 @@ extractFunction _ = error "not a function"
 chisel :: Expr -> Expr
 chisel expr
     | (length $ splitAS expr) > 1 = error "expr must not have exterior added/subtracted terms"
-    | expr' == expr = expr
+    | expr' == expr = makeDivExplicit expr
     | otherwise = chisel expr'
     where
-    expr' = chiseler expr
+    expr' = if (hasDiv expr) then (chiseler (makeDivExplicit expr)) else (chiseler expr)
     chiseler (Num n) = Num n
     chiseler (Var x) = Var x
     chiseler (Neg e) = Neg $ chiseler e
     chiseler (F f) = F f  -- TODO functor here to map inside and chisel the function args.
-
-
-{-    chiseler m@(Mul (Mul a (Pow base (Neg (Num n)))) other)
-         | n > 0 = Div (a .* other) (Pow base (Num n))
-         | otherwise =  m
-    chiseler m@(Mul (Mul a (Pow base (Num n))) other)
-         | n < 0 = Div (a .* other) (Pow base (Num (-1*n)))
-         | otherwise = m
-
-    chiseler d@(Div (Mul a (Pow base (Neg (Num n)))) other)
-         | n > 0 = Div a ((Pow base (Num n)) .* other)
-         | otherwise = d
-    chiseler d@(Div (Mul a (Pow base (Num n))) other)
-         | n < 0 = Div a (Pow base (Num (-1*n)) .* other)
-         | otherwise = d-}
-
-    chiseler m@(Mul (Div a (Pow base (Neg (Num n)))) other)
-         | n > 0 = Mul a (Pow base (Num n) .* other)
-         | otherwise = m
-    chiseler m@(Mul (Div a (Pow base (Num n))) other)
-         | n < 0 = Mul a (Pow base (Num (-1*n)) .* other)
-         | otherwise = m
-
-    {-chiseler d@(Div (Div a (Pow base (Neg (Num n)))) other)
-         | n > 0 = Div (a .* (Pow base (Num n))) other
-         | otherwise = d
-    chiseler d@(Div (Div a (Pow base (Num n))) other)
-         | n < 0 = Div (a .* (Pow base (Num (-1*n)))) other
-         | otherwise = d-}
-
-    ------
-    --- note the pow cases.
+    ------ note the pow cases.
+    -- note keeping these despite making div explicit  because result is (7 * 1) / pow
+    -- instead of (7 / pow) and we get the latter if we use the below  (for mm3')
     chiseler m@(Mul a (Pow base (Neg (Num n))))
         | n >= 0 = Div a (Pow base (Num n))
         | otherwise = Mul a (Pow base (Num (-1*n)))
@@ -1132,9 +1110,9 @@ chisel expr
         | otherwise = p
 
     --- note: the ((n/m)/p) simplification cases
-    {-chiseler (Div (Div a b) (Div c d)) = Div (a .* d) (b .* c)
+    chiseler (Div (Div a b) (Div c d)) = Div (a .* d) (b .* c)
     chiseler (Div (Div a b) other) = Div a (b .* other)
-    chiseler (Div other (Div c d)) = Div (other .* d) c-}
+    chiseler (Div other (Div c d)) = Div (other .* d) c
 
     chiseler (Add e1 e2) = Add (chiseler e1) (chiseler e2)
     chiseler (Sub e1 e2) = Sub (chiseler e1) (chiseler e2)
@@ -1142,67 +1120,6 @@ chisel expr
     chiseler (Div e1 e2) = Div (chiseler e1) (chiseler e2)
     chiseler (Pow e1 e2) = Pow (chiseler e1) (chiseler e2)
 
-
--- mul mul
-mm1 = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num 22 .* (F (Sin x)) .* (F (Cos x))
-mm2 = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num 22 .* (F (Sin x))
-mm3 = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num 22
-mm4 = Num 7 .* Num 8 .* x .^ Num 22
-mm1' = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num (-22) .* (F (Sin x)) .* (F (Cos x))
-mm2' = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ (Neg (Num 22)) .* (F (Sin x))
-mm3' = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num (-22)
-mm4' = Num 7 .* Num 8 .* x .^ Num (-22)
-mm1'' = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ (Neg (Num (-22))) .* (F (Sin x)) .* (F (Cos x))
-mm2'' = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ (Neg (Num (-22))) .* (F (Sin x))
-mm3'' = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ (Neg (Num (-22)))
-mm4'' = Num 7 .* Num 8 .* x .^ (Neg (Num (-22)))
--- div div
-dd1 = ((Num 7 .+ x .* Num 8) ./ (x .^ Num 22)) ./ ((F (Sin x)) .- (F (Cos x)))
-dd2 = ((Num 7 .+ x .* Num 8) ./ (x .^ Num 22)) ./ (F (Sin x))
-dd3 = ((Num 7 .+ x .* Num 8) ./ (x .^ Num 22))
-dd4 = ((Num 7 .+ x .* Num 8) ./ (x .^ Num 22))
-dd1' = ((Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num 22)))) ./ ((F (Sin x)) .- (F (Cos x)))
-dd2' = ((Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num 22)))) ./ (F (Sin x))
-dd3' = ((Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num 22))))
-dd4' = (Num 7 .+ x .* Num 8) ./ (x .^ Num (-22))
-dd1'' = (Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num (-22)))) ./ ((F (Sin x)) .- (F (Cos x)))
-dd2'' = ((Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num (-22))))) ./ (F (Sin x))
-dd3'' = ((Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num (-22)))))
-dd4'' = (Num 7 ./ (x .^ (Neg (Num (-22)))))
--- mul div
-md1 = Num 7 .* x .* (Num 8 ./ ((x .+ Num 1) .^ Num 22)) .* (F (Sin x)) .* (F (Cos x))
-md2 = Num 7 .* x .* Num 8 ./ ((x .+ Num 1) .^ Num 22) .* (F (Sin x))
-md3 = Num 7 .* x .* Num 8 ./ ((x .+ Num 1) .^ Num 22)
-md4 = Num 7 .* Num 8 ./ (x .^ Num 22)
-md5 = Num 7 ./ (x .^ Num 22)
-md0' = Num 7 .* x .* (Num 8 ./ ((x .+ Num 1) .^ Num (-22))) .* (F (Sin x)) .* (F (Cos x) .* (F (Tan x)))
-md1' = Num 7 .* x .* (Num 8 ./ ((x .+ Num 1) .^ Num (-22))) .* (F (Sin x)) .* (F (Cos x))
-md2' = Num 7 .* x .* Num 8 ./ ((x .+ Num 1) .^ (Neg (Num 22))) .* (F (Sin x))
-md3' = Num 7 .* x .* Num 8 ./ ((x .+ Num 1) .^ Num (-22))
-md4' = Num 7 .* Num 8 ./ (x .^ (Neg (Num 22)))
-md5' = Num 7 ./ (x .^ Num (-22))
-md6' = x .^ Num (-22)
-md1'' = Num 7 .* x .* (Num 8 ./ ((x .+ Num 1) .^ (Neg (Num (-22))))) .* (F (Sin x)) .* (F (Cos x))
-md2'' = Num 7 .* x .* Num 8 ./ ((x .+ Num 1) .^ (Neg (Num (-22)))) .* (F (Sin x))
-md3'' = Num 7 .* x .* Num 8 ./ ((x .+ Num 1) .^ (Neg (Num (-22))))
-md4'' = Num 7 .* Num 8 ./ (x .^ (Neg (Num (-22))))
-md5'' = Num 7 ./ (x .^ (Neg (Num (-22))))
--- div mul
-dm1 = (Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num 22) ./ ( (F (Sin x)) .* (F (Cos x)))
-dm2 = (Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num 22) ./ ( (F (Sin x)) )
-dm3 = (Num 8 .* (x .+ Num 1) .^ Num 22) ./ ( (F (Sin x)) .* (F (Cos x)))
-dm4 = ((x .+ Num 1) .^ Num 22) ./ ( (F (Sin x)) .* (F (Cos x)))
-dm5 = ((x .+ Num 1) .^ Num 22) ./ ( (F (Sin x)) )
-dm1' = (Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num (-22)) ./ ( (F (Sin x)) .* (F (Cos x)))
-dm2' = (Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num (-22)) ./ ( (F (Sin x)) )
-dm3' = (Num 8 .* (x .+ Num 1) .^ (Neg (Num 22))) ./ ( (F (Sin x)) .* (F (Cos x)))
-dm4' = ((x .+ Num 1) .^ Neg (Num 22)) ./ ( (F (Sin x)) .* (F (Cos x)))
-dm5' = ((x .+ Num 1) .^ (Neg (Num 22))) ./ ( (F (Sin x)) )
-dm1'' = (Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ (Neg (Num (-22)))) ./ ( (F (Sin x)) .* (F (Cos x)))
-dm2'' = (Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ (Neg (Num (-22)))) ./ ( (F (Sin x)) )
-dm3'' = (Num 8 .* (x .+ Num 1) .^ (Neg (Num (-22)))) ./ ( (F (Sin x)) .* (F (Cos x)))
-dm4'' = ((x .+ Num 1) .^ (Neg (Num (-22)))) ./ ( (F (Sin x)) .* (F (Cos x)))
-dm5'' = ((x .+ Num 1) .^ (Neg (Num (-22)))) ./ ( (F (Sin x)) )
 
 
 -- note puts division expressions on the outside. so (Mul some thing div inside) = > DIv (mul some)
@@ -1230,6 +1147,8 @@ makeDivExplicit expr
     {-explicit (Div (Div a b) (Div c d)) = Div (a .* d) (b .* c)
     explicit (Div (Div a b) other) = Div a (b .* other)
     explicit (Div other (Div c d)) = Div (other .* d) c-}
+    --explicit d@(Div (Mul a b) (Mul c d)) = d
+    --explicit (Div (Mul a b) oneEntity) = (a .* b .* c) ./ d
     explicit (Div e1 e2) = Div (explicit e1) (explicit e2)
     explicit (Pow base expo) = Pow (explicit base) (explicit expo)
     explicit (Add e1 e2) = Add (explicit e1) (explicit e2)

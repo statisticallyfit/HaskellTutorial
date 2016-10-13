@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bc679e25-6068-417c-8b02-1d7896297961" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Test.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Test.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -35,8 +37,8 @@
       <file leaf-file-name="PlanExpr.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.64041096">
-              <caret line="1101" column="56" selection-start-line="1101" selection-start-column="56" selection-end-line="1101" selection-end-column="56" />
+            <state vertical-scroll-proportion="0.27552673">
+              <caret line="1122" column="0" selection-start-line="1122" selection-start-column="0" selection-end-line="1122" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -72,7 +74,6 @@
         <option value="$PROJECT_DIR$/HaskellTutorial.cabal" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/TrySimplify.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/BinarySearchTree/BSTOps.hs" />
-        <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Test.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/TrashExprTreeOps.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/RoseExpr.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/ExprTreeOps.hs" />
@@ -80,6 +81,7 @@
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Expr.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/ExprPlan.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs" />
+        <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Test.hs" />
       </list>
     </option>
   </component>
@@ -126,8 +128,9 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
       <pane id="Scope" />
+      <pane id="PackagesPane" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -280,7 +283,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -802,12 +804,12 @@
       <workItem from="1476079826247" duration="21650000" />
       <workItem from="1476165420483" duration="25563000" />
       <workItem from="1476247548048" duration="33217000" />
-      <workItem from="1476335865316" duration="8824000" />
+      <workItem from="1476335865316" duration="12247000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="320460000" />
+    <option name="totallyTimeSpent" value="323883000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="24" width="968" height="779" extended-state="0" />
@@ -1100,13 +1102,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Test.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="7" column="26" selection-start-line="7" selection-start-column="26" selection-end-line="7" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinarySearchTree/BSTOps.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1212,10 +1207,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Test.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="79" column="0" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.64041096">
-          <caret line="1101" column="56" selection-start-line="1101" selection-start-column="56" selection-end-line="1101" selection-end-column="56" />
+        <state vertical-scroll-proportion="0.27552673">
+          <caret line="1122" column="0" selection-start-line="1122" selection-start-column="0" selection-end-line="1122" selection-end-column="0" />
           <folding />
         </state>
       </provider>
