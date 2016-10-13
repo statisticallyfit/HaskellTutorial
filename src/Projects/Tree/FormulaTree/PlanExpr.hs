@@ -1080,36 +1080,6 @@ chisel expr
     chiseler (Neg e) = Neg $ chiseler e
     chiseler (F f) = F f  -- TODO functor here to map inside and chisel the function args.
 
-    ------
-    {-chiseler m@(Mul (Mul a (Pow base (Neg (Num n)))) other)
-        | n > 0 = Div (a .* other) (Pow base (Num n))
-        | otherwise =  m
-    chiseler m@(Mul (Mul a (Pow base (Num n))) other)
-        | n < 0 = Div (a .* other) (Pow base (Num (-1*n)))
-        | otherwise = m
-
-    chiseler d@(Div (Mul a (Pow base (Neg (Num n)))) other)
-        | n > 0 = Div a ((Pow base (Num n)) .* other)
-        | otherwise = d
-    chiseler d@(Div (Mul a (Pow base (Num n))) other)
-        | n < 0 = Div a (Pow base (Num (-1*n)) .* other)
-        | otherwise = d
-
-    chiseler m@(Mul (Div a (Pow base (Neg (Num n)))) other)
-        | n > 0 = Mul a (Pow base (Num n) .* other)
-        | otherwise = m
-    chiseler m@(Mul (Div a (Pow base (Num n))) other)
-        | n < 0 = Mul a (Pow base (Num (-1*n)) .* other)
-        | otherwise = m
-
-    chiseler d@(Div (Div a (Pow base (Neg (Num n)))) other)
-        | n > 0 = Div (a .* (Pow base (Num n))) other
-        | otherwise = d
-    chiseler d@(Div (Div a (Pow base (Num n))) other)
-        | n < 0 = Div (a .* (Pow base (Num (-1*n)))) other
-        | otherwise = d
-    -}
-    ------
     --- note the pow cases.
     chiseler m@(Mul a (Pow base (Neg (Num n))))
         | n >= 0 = Div a (Pow base (Num n))
@@ -1130,6 +1100,11 @@ chisel expr
     chiseler p@(Pow base (Num n))
         | n < 0 = Num 1 ./ (base .^ (Num (-1*n)))
         | otherwise = p
+
+    --- note: the ((n/m)/p) simplification cases
+    chiseler (Div (Div a b) (Div c d)) = Div (a .* d) (b .* c)
+    chiseler (Div (Div a b) other) = Div a (b .* other)
+    chiseler (Div other (Div c d)) = Div (other .* d) c
 
     chiseler (Add e1 e2) = Add (chiseler e1) (chiseler e2)
     chiseler (Sub e1 e2) = Sub (chiseler e1) (chiseler e2)
@@ -1219,9 +1194,11 @@ makeDivExplicit expr
     explicit (Mul other (Div c d)) = Div (other .* c) d
     explicit (Mul (Mul a (Div x y)) other) = Div (a .* x .* other) y
     explicit (Mul e1 e2) = Mul (explicit e1) (explicit e2)
-    explicit (Div (Div a b) (Div c d)) = Div (a .* d) (b .* c)
+    --- TODO note is ok? Took these from here and put them in chisel since these are already
+    -- div explicit but just need to be chiseled into simpler form.
+    {-explicit (Div (Div a b) (Div c d)) = Div (a .* d) (b .* c)
     explicit (Div (Div a b) other) = Div a (b .* other)
-    explicit (Div other (Div c d)) = Div (other .* d) c
+    explicit (Div other (Div c d)) = Div (other .* d) c-}
     explicit (Div e1 e2) = Div (explicit e1) (explicit e2)
     explicit (Pow base expo) = Pow (explicit base) (explicit expo)
     explicit (Add e1 e2) = Add (explicit e1) (explicit e2)
