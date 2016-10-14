@@ -32,12 +32,9 @@ data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
 type Coeff = Int
 type Description = (Expr, Expr, Expr)
 
-data Code = Poly [Coeff] | Trig [Description] | InvTrig [Description] | Hyperbolic [Description] |
-    InvHyp [Description] | Logarithmic [Description]
+data Code = Poly [Coeff] | PolyDiv [Coeff] [Coeff] | Trig [Description] | InvTrig [Description]
+    | Hyperbolic [Description] | InvHyp [Description] | Logarithmic [Description]
     deriving (Eq, Show)
-
--- data Code = Code [Group] deriving (Eq, Show)
-
 
 
 
@@ -90,7 +87,7 @@ instance Show Expr where
     show (Neg (Num n))
         = if (n < 0)
         then ("-(" ++ show n ++ ")")
-        else ("-" ++ show n ++ ")")
+        else ("-" ++ show n)
     show (F func) = show func
     show (Add e1 e2) = show e1 ++ " + " ++ show e2
     show (Sub e1 e2) = show e1 ++ " - " ++ show e2
@@ -138,7 +135,7 @@ instance Show Expr where
         | few e2 = surround $ "(" ++ show e1 ++ ")/" ++ show e2
         | otherwise = surround $ "(" ++ show e1 ++ ") / (" ++ show e2 ++ ")"
         where
-        surround eStr = "[" ++ eStr ++ "]"
+        surround eStr = "{" ++ eStr ++ "}"
         few e = (isVar e || isNum e || (not $ isMono e)) && ((not $ isNumNeg e) && (not $ isNegNum e)
             && (hasOnlyOneFunction e) && ((length $ split MulOp e) == 1))
 
@@ -248,7 +245,20 @@ e14 = Num 10 .* x .- (F (Sin x)) .- (F (Cos (Num 2 .* x))) .+ x .- y .- Num 5 .-
 e15 = F (Sin (x .+ Num 3 .+ Num 4 .+ Num 8 .* x .- y .+ Num 2 .^ x))
 e16 = Num 2 .* Num 8 .* Num 2 .* x .^ Num (-7) .* Num 3 .* x .* (F (Sin (x .^ Num (-8))))
 e17 = Num 2 .* x .^ Num (-7) .* (Num 3 .+ x) .* (F (Sin (x .^ Num (-8))))
-
+-- NOTE to test poly encoding and decoding
+e18 = ( ( (x .+ Num 1) .^ Num 3) ./ (x .+ Num 1))
+e19 = ( ( (x .+ Num 1) .^ Num 3) ./ ((x .+ Num 1) .^ Num 4))
+e20 = ( ( (x .+ Num 1) .^ Num (-3)) ./ ((x .+ Num 1) .^ Num 4))
+e21 = Num 3 .* x .^ Num 2 .* Num 4 .* x .^ Num (-3) .+ Num 5 .* x .-
+    ( ( (x .+ Num 1) .^ Num 3) ./ (x .+ Num 2)) .+ (x .+ Num 1) .^ Num 3 .+
+    Num 5 .* x .^ Num 3 .* Num 6 .* x .^ Num 2 .- ((Num 4 .* x) ./ (x .+ Num 1))
+e22 = (Num 3 .* x .^ Num (-2) .* Num 4 .* x .^ Num 3 .+ Num 5 .* x .^ Num 4 .* (x .+ Num 1) .^ Num 6) ./
+    (x .+ Num 1)
+e23 = (Num 3 .* x .^ Num (-2) .* Num 4 .* x .^ Num 3 .+ Num 5 .* x .^ Num 4 .* (x .+ Num 1) .^ Num 6) ./
+    (Num 8 .* x .^ Num 3)
+e24 = (Num 3 .* x .^ Num (-2) .* Num 4 .* x .^ Num 3 .+
+    Num 3 .* x .^ Num (-8) .* Num 5 .* x .^ Num 4 .* (x .+ Num 1) .^ Num 6) ./
+    (Num 8 .* x .^ Num 3)
 ---------------------------------------------------------------------------------------------
 
 
@@ -434,6 +444,7 @@ newRight e ls
 simplifyExpr :: Expr -> Expr
 simplifyExpr expr = ps' .+ fs'
     where
+    --- TODO remember to chisel!
     (ps, fs) = partition isMono (splitAS expr)
     (gs, ggs) = partition hasOnlyOneFunction fs
     ps' = rebuildAS $ decodifyPoly $ codifyPoly ps
@@ -597,7 +608,8 @@ codifyPolyM expr = foldl1 mulPoly (map codifyMono ps)
 
 -- TODO START HERE TOMORROW
 -- precondition: takes chisel output which isDiv and which has no other div in the numerator
--- and denominator and no negpowers
+-- and denominator and no negpowers. Can have add/sub in numberator though, but simplification
+-- is only possible in divpoly if denom has no add/sub.
 {-
 codifyPolyD :: Expr -> Code
 codifyPolyD expr = divPoly (codifyPolyM upper) (codifyPolyM lower)
@@ -605,6 +617,7 @@ codifyPolyD expr = divPoly (codifyPolyM upper) (codifyPolyM lower)
     lower = getLower (split DivOp expr)
     upper = getUpper (split DivOp expr)
 -}
+
 
 
 decodifyPoly :: Code -> [Expr]
@@ -696,17 +709,17 @@ put index n xs
     where (front, back) = splitAt index xs
           newBack = if null back then [] else (tail back)
 
-
+elongate :: Int -> [Int] -> [Int]
+elongate toLen xs = xs ++ replicate (toLen - (length xs)) 0
 
 
 -- Note all these functions with poly below assume the ps inside the Poly are added.
 addPoly :: Code -> Code -> Code
 addPoly (Poly ps) (Poly qs) = Poly (zipWith (+) ps' qs')
     where
-    elongate ts = ts ++ replicate (maxLen - (length ts)) 0
     maxLen = max (length ps) (length qs)
-    ps' = elongate ps
-    qs' = elongate qs
+    ps' = elongate maxLen ps
+    qs' = elongate maxLen qs
 
 subPoly :: Code -> Code -> Code
 subPoly (Poly ps) (Poly qs) = Poly (zipWith (-) ps qs)
@@ -735,7 +748,9 @@ mulOnePoly n p ms = foldl (zipWith (+)) zs cs
         | n * m == 0 = mul' n p (q + 1) ms acc
         | otherwise = mul' n p (q + 1) ms (acc ++ [(n * m, p + q)])
 
--- cannot div if multiple polys on the bottom, so there must be one.
+
+-- precondition: takes non-div expression whcih has no negpowers.
+-- Can have add/sub in numberator though, but just mul in denominator.
 {-
 divPoly :: Group -> Group -> Group
 divPoly (Poly ps) (Poly qs)
@@ -750,7 +765,6 @@ divOnePoly n p ms =
     div' n p q m acc
         |
 -}
-
 
 
 
@@ -1238,6 +1252,26 @@ chisel expr
     chiseler (Div (Div a b) (Div c d)) = Div (chiseler a .* chiseler d) (chiseler b .* chiseler c)
     chiseler (Div (Div a b) other) = Div (chiseler a) (chiseler b .* chiseler other)
     chiseler (Div other (Div c d)) = Div (chiseler other .* chiseler d) (chiseler c)
+    chiseler (Div (Add a b) c)
+        | isDiv a' && isDiv b'
+            = Div (Add (getUpper a') (getUpper b')) (getLower a' .* getLower b' .* c')
+        | isDiv a' = Div (Add (getUpper a') b') (getLower a' .* c')
+        | isDiv b' = Div (Add a' (getUpper b')) (getLower b' .* c')
+        | otherwise = (a' .+ b') ./ c'
+        where
+        a' = chiseler a
+        b' = chiseler b
+        c' = chiseler c
+    chiseler (Div (Sub a b) c)
+        | isDiv a' && isDiv b'
+            = Div (Sub (getUpper a') (getUpper b')) (getLower a' .* getLower b' .* c')
+        | isDiv a' = Div (Sub (getUpper a') b') (getLower a' .* c')
+        | isDiv b' = Div (Sub a' (getUpper b')) (getLower b' .* c')
+        | otherwise = (a' .- b') ./ c'
+        where
+        a' = chiseler a
+        b' = chiseler b
+        c' = chiseler c
     ------ note the pow cases.
     -- note keeping these despite making div explicit  because result is (7 * 1) / pow
     -- instead of (7 / pow) and we get the latter if we use the below  (for mm3')
@@ -1678,6 +1712,9 @@ simplifyFunctions (Mul f@(F (Sin u)) (g@F (Cos v)))
 
 -- for testing chisel.
 
+testChisel = testMM' && testMD' && testDM' && testDD'
+
+
 mm1' = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num (-22) .* (F (Sin x)) .* (F (Cos x))
 mm2' = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ (Neg (Num 22)) .* (F (Sin x))
 mm3' = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num (-22)
@@ -1685,25 +1722,16 @@ mm4' = Num 7 .* Num 8 .* x .^ Num (-22)
 mm5' = Num 7 .* x .^ (Num (-22)) .* (F (Sin x)) .* (F (Cos x)) .* Num 8
 mm6' = Num 7 .* x .^ (Num (-22)) .* (F (Sin x)) .* x .^ Num 2
 
-testMM1' = (chisel mm1') ==
-    ((Num 7 .* x .* Num 8 .* (F (Sin x)) .* (F (Cos x)))) ./ ((x .+ Num 1) .^ Num 22)
 
-testMM2' = (chisel mm2') ==
-    ((Num 7 .* x .* Num 8 .* (F (Sin x))) ./ ((x .+ Num 1) .^ Num 22))
+testMM1' = (show $ chisel mm1') == "{((7x(8))sin(x)cos(x)) / ((x + 1)^22)}"
+testMM2' = (show $ chisel mm2') == "{((7x(8))sin(x)) / ((x + 1)^22)}"
+testMM3' = (show $ chisel mm3') == "{(7x(8)) / ((x + 1)^22)}"
+testMM4' = (show $ chisel mm4') == "{(7(8)) / (x^22)}"
+testMM5' = (show $ chisel mm5') == "{((7)sin(x)cos(x)(8)) / (x^22)}"
+testMM6' = (show $ chisel mm6') == "{((7)sin(x)(x^2)) / (x^22)}"
 
-testMM3' = (chisel mm3') ==
-    ((Num 7 .* x .* Num 8) ./ ((x .+ Num 1) .^ Num 22))
+testMM' = testMM1' && testMM2' && testMM3' && testMM4' && testMM5' && testMM6'
 
-testMM4' = (chisel mm4') ==
-    ((Num 7 .* Num 8) ./ (x .^ Num 22))
-
-testMM5' = (chisel mm5') ==
-    ((Num 7 .* (F (Sin x)) .* (F (Cos x)) .* Num 8) ./ (x .^ Num 22))
-
-testMM6' = (chisel mm6') ==
-    ((Num 7 .* (F (Sin x)) .* x .^ Num 2) ./ (x .^ Num 22))
-
-testAllMM' = testMM1' && testMM2' && testMM3' && testMM4' && testMM5' && testMM6'
 
 -- div div
 dd1' = ((Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num 22)))) ./ ((F (Sin x)) .- (F (Cos x)))
@@ -1712,22 +1740,13 @@ dd3' = ((Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num 22))))
 dd4' = (Num 7 .+ x .* Num 8) ./ (x .^ Num (-22))
 dd5' = ((Num 7 .+ x .* Num 8) ./ (x .^ (Neg (Num 22)))) ./ ((F (Sin x)) .* (F (Cos x)) .* x .* Num 2)
 
-testDD1' = (chisel dd1') ==
-    (((Num 7 .+ x .* Num 8) .* x .^ Num 22) ./ (Num 1 .* ((F (Sin x)) .- (F (Cos x)))))
+testDD1' = (show $ chisel dd1') == "{((7 + x(8))(x^22)) / (sin(x) - cos(x))}"
+testDD2' = (show $ chisel dd2') == "{((7 + x(8))(x^22))/sin(x)}"
+testDD3' = (show $ chisel dd3') == "(7 + x(8))(x^22)"
+testDD4' = (show $ chisel dd4') == "(7 + x(8))(x^22)"
+testDD5' = (show $ chisel dd5') == "{((7 + x(8))(x^22)) / (sin(x)cos(x)x(2))}"
 
-testDD2' = (chisel dd2') ==
-    (((Num 7 .+ x .* Num 8) .* x .^ Num 22) ./ (Num 1 .* (F (Sin x))))
-
-testDD3' = (chisel dd3') ==
-    ( (Num 7 .+ x .* Num 8) .* x .^ Num 22)
-
-testDD4' = (chisel dd4') ==
-    ((Num 7 .+ x .* Num 8) .* x .^ Num 22)
-
-testDD5' = (chisel dd5') ==
-    ( ((Num 7 .+ x .* Num 8) .* x .^ Num 22) ./ (Num 1 .* ((F (Sin x)) .* (F (Cos x)) .* x .* Num 2)) )
-
-testAllDD' = testDD1' && testDD2' && testDD3' && testDD4' && testDD5'
+testDD' = testDD1' && testDD2' && testDD3' && testDD4' && testDD5'
 
 
 -- mul div
@@ -1739,30 +1758,16 @@ md5' = Num 7 .* Num 8 ./ (x .^ (Neg (Num 22)))
 md6' = Num 7 ./ (x .^ Num (-22))
 md7' = x .^ Num (-22)
 
+testMD1' = (show $ chisel md1') == "(7x(8))sin(x)cos(x)tan(x)((x + 1)^22)"
+testMD2' = (show $ chisel md2') == "(7x(8))sin(x)cos(x)((x + 1)^22)"
+testMD3' = (show $ chisel md3') == "(7x(8))sin(x)((x + 1)^22)"
+testMD4' = (show $ chisel md4') == "7x(8)((x + 1)^22)"
+testMD5' = (show $ chisel md5') == "7(8)(x^22)"
+testMD6' = (show $ chisel md6') == "7x^22"
+testMD7' = (show $ chisel md7') == "{(1) / (x^22)}"
 
-testMD1' = (chisel md1') ==
-    (Num 7 .* x .* Num 8 .* (F (Sin x)) .* ((F (Cos x)) .* (F (Tan x))) .* (x .+ Num 1) .^ Num 22)
+testMD' = testMD1' && testMD2' && testMD3' && testMD4' && testMD5' && testMD6' && testMD7'
 
-testMD2' = (chisel md2') ==
-    (Num 7 .* x .* Num 8 .* (F (Sin x)) .* (F (Cos x)) .* (x .+ Num 1) .^ Num 22)
-
-testMD3' = (chisel md3') ==
-    (Num 7 .* x .* Num 8 .* (F (Sin x)) .* (x .+ Num 1) .^ Num 22)
-
-testMD4' = (chisel md4') ==
-    (Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num 22)
-
-testMD5' = (chisel md5') ==
-    (Num 7 .* Num 8 .* x .^ Num 22)
-
-testMD6' = (chisel md6') ==
-    (Num 7 .* x .^ Num 22)
-
-testMD7' = (chisel md7') ==
-    (Num 1 ./ (x .^ Num 22))
-
-
-testAllMD' = testMD1' && testMD2' && testMD3' && testMD4' && testMD5' && testMD6' && testMD7'
 
 -- div mul
 dm1' = (Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num (-22)) ./ ( (F (Sin x)) .* (F (Cos x)))
@@ -1771,24 +1776,14 @@ dm3' = (Num 8 .* (x .+ Num 1) .^ (Neg (Num 22))) ./ ( (F (Sin x)) .* (F (Cos x))
 dm4' = ((x .+ Num 1) .^ Neg (Num 22)) ./ ( (F (Sin x)) .* (F (Cos x)))
 dm5' = ((x .+ Num 1) .^ (Neg (Num 22))) ./ ( (F (Sin x)) )
 
+testDM1' = (show $ chisel dm1') == "{({(7x(8)) / ((x + 1)^22)}) / (sin(x)cos(x))}"
+testDM2' = (show $ chisel dm2') == "{({(7x(8)) / ((x + 1)^22)})/sin(x)}"
+testDM3' = (show $ chisel dm3') == "{({(8) / ((x + 1)^22)}) / (sin(x)cos(x))}"
+testDM4' = (show $ chisel dm4') == "{({(1) / ((x + 1)^22)}) / (sin(x)cos(x))}"
+testDM5' = (show $ chisel dm5') == "{({(1) / ((x + 1)^22)})/sin(x)}"
 
-testDM1' = (chisel dm1') ==
-    ( (Num 7 .* x .* Num 8) ./ ( (x .+ Num 1) .^ Num 22 .* (F (Sin x) .* F (Cos x))))
+testDM' = testDM1' && testDM2' && testDM3' && testDM4' && testDM5'
 
-testDM2' = (chisel dm2') ==
-    ( (Num 7 .* x .* Num 8) ./ ( (x .+ Num 1) .^ Num 22 .* F (Sin x) ))
-
-testDM3' = (chisel dm3') ==
-    ( (Num 8) ./ ( (x .+ Num 1) .^ Num 22 .* (F (Sin x) .* F (Cos x))))
-
-testDM4' = (chisel dm4') ==
-    ( Num 1 ./ ( (x .+ Num 1) .^ Num 22 .* (F (Sin x) .* F (Cos x))))
-
-testDM5' = (chisel dm5') ==
-    ( Num 1 ./ ( (x .+ Num 1) .^ Num 22 .* F (Sin x) ))
-
-
-testAllDM' = testDM1' && testDM2' && testDM3' && testDM4' && testDM5'
 
 -- trivial
 mm1 = Num 7 .* x .* Num 8 .* (x .+ Num 1) .^ Num 22 .* (F (Sin x)) .* (F (Cos x))
