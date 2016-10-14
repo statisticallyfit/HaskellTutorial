@@ -436,7 +436,7 @@ simplifyExpr expr = ps' .+ fs'
     where
     (ps, fs) = partition isMono (splitAS expr)
     (gs, ggs) = partition hasOnlyOneFunction fs
-    ps' = rebuildAS $ decodifyPolyA $ codifyPoly ps
+    ps' = rebuildAS $ decodifyPoly $ codifyPoly ps
     gs' = rebuildAS $ map decodifySingleFunction $ codifySingleFunctions gs
     ggs' = simplifyFunctions ggs
     fs' = gs' .+ ggs'
@@ -553,46 +553,72 @@ True
 -}
 
 -- note gets the coefficient and power of the monomial.
-getCoefPow :: Expr -> (Int, Int)
-getCoefPow (Pow (Var _) (Num p)) = (1, p)
-getCoefPow (Mul (Num c) (Pow (Var _) (Num p))) = (c, p)
-getCoefPow (Var _) = (1, 1)
-getCoefPow (Num n) = (n, 0) -- note this is pow 0 of x, won't be applied to the Num n.
-getCoefPow _ = error "not a monomial"
+-- precondition: input needs to be a mono
+getCoefPowPair :: Expr -> (Int, Int)
+getCoefPowPair (Var _) = (1, 1)
+getCoefPowPair (Num n) = (n, 0) -- note this is pow 0 of x, won't be applied to the Num n.
+getCoefPowPair (Mul (Num n) (Var _)) = (n, 1)
+getCoefPowPair (Mul (Neg (Num n)) (Var _)) = (-n, 1)
+getCoefPowPair (Mul (Num n) (Neg (Var _))) = (-n, 1)
+getCoefPowPair (Mul (Neg (Num n)) (Neg (Var _))) = (n, 1)
+getCoefPowPair (Pow (Var _) (Num p)) = (1, p)
+getCoefPowPair (Pow (Var _) (Neg (Num p))) = (1, -p)
+getCoefPowPair (Pow (Neg (Var _)) (Num p)) = (-1, p)
+getCoefPowPair (Pow (Neg (Var _)) (Neg (Num p))) = (-1, -p)
+getCoefPowPair (Mul (Num c) (Pow (Var _) (Num p))) = (c, p)
+getCoefPowPair (Mul (Num c) (Pow (Var _) (Neg (Num p)))) = (c, -p)
+getCoefPowPair (Mul (Neg (Num c)) (Pow (Var _) (Num p))) = (-c, p)
+getCoefPowPair (Mul (Neg (Num c)) (Pow (Var _) (Neg (Num p)))) = (-c, -p)
+getCoefPowPair (Neg e) = putNegFirst (getCoefPowPair e)
+    where putNegFirst (n,p) = (-n, p)
 
--- HELP error TODO when passed argument 2x 
+
 -- note takes a single monomial and converts it to coded form
--- precondition: input must have no function, must be either the form (2x^6) or (x^7) or 2
--- or negative each combination above.
--- precondition: monomial must have no negative powers, must have been sent to chisel beforehand.
-codifyMono :: Op -> Expr -> Code
-codifyMono op expr = Poly $ zs ++ [c]
+-- precondition: no neg powers, output of chisel, AND must be monomial.
+codifyMono :: Expr -> Code
+codifyMono expr = Poly $ zs ++ [c]
     where
-    -- numForZs = if (op == AddOp || op == SubOp) then 0 else 1
-    (c, p) = getCoefPow expr
+    (c, p) = getCoefPowPair expr
     zs = replicate p 0
 
 -- note takes list of polynomials and makes it into Group type Poly [...]
 -- so 7x^2 + 3x^2 + 3x + 4x + 1 is [1, (3+4), (7+3)]
-codifyPolyA :: [Expr] -> Code
-codifyPolyA ps = foldl1 addPoly (map (codifyMono AddOp) ps)
+codifyPolyA :: Expr -> Code
+codifyPolyA expr = foldl1 addPoly (map codifyMono ps)
+    where ps = splitAS expr
 
 
 -- precondition: takes chisel output so has no negpowers. There is no division (assume) just mul.
 -- Ignore expressions that are of form (x+1), just use the monomials.
-codifyPolyM :: [Expr] -> Code
-codifyPolyM ps = foldl1 mulPoly (map (codifyMono MulOp) ps)
+codifyPolyM :: Expr -> Code
+codifyPolyM expr = foldl1 mulPoly (map codifyMono ps)
+    where ps = split MulOp expr
 
 
 -- TODO START HERE TOMORROW
 -- precondition: takes chisel output which isDiv and which has no other div in the numerator
 -- and denominator and no negpowers
 {-
-codifyPolyD :: [Expr] -> Code
-codifyPolyD ps
+codifyPolyD :: Expr -> Code
+codifyPolyD expr = divPoly (codifyPolyM upper) (codifyPolyM lower)
+    where
+    lower = getLower (split DivOp expr)
+    upper = getUpper (split DivOp expr)
 -}
 
 
+decodifyPoly :: Code -> [Expr]
+decodifyPoly (Poly ps) = map clean polynomials
+    where
+    ns = map Num ps
+    xs = replicate (length ps) x
+    pows = map Num $ [0 .. (length ps - 1)]
+    xs' = map simplifyComplete $ zipWith Pow xs pows
+    ps' = map negExplicit $ zipWith Mul ns xs'
+    polynomials = [clean (head ps')] ++ tail ps'
+
+    negExplicit (m@(Mul (Num n) p@(Pow _ _))) = if (n < 0) then (Neg $ (Num (-1*n)) .* p) else m
+    negExplicit e = e
 
 {-
 codifyAddPoly [] = Poly []
@@ -636,18 +662,7 @@ decodifyPoly (Poly ps) = polynomials
 -}
 
 
-decodifyPolyA :: Code -> [Expr]
-decodifyPolyA (Poly ps) = {-map simplifyComplete-} polynomials
-    where
-    ns = map Num ps
-    xs = replicate (length ps) x
-    pows = map Num $ [0 .. (length ps - 1)]
-    xs' = map simplifyComplete $ zipWith Pow xs pows
-    ps' = map negExplicit $ zipWith Mul ns xs'
-    polynomials = [clean (head ps')] ++ tail ps'
 
-    negExplicit (m@(Mul (Num n) p@(Pow _ _))) = if (n < 0) then (Neg $ (Num (-1*n)) .* p) else m
-    negExplicit e = e
 
 --addCodes :: Code -> Code -> Code
 {-
@@ -822,7 +837,7 @@ isNum _ = False
 
 getNum :: Expr -> Int
 getNum (Num n) = n
-getNum (Neg (Num n)) = n
+getNum (Neg (Num n)) = -n
 
 isNegNum :: Expr -> Bool
 isNegNum (Neg (Num n)) = True
