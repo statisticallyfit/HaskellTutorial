@@ -6,9 +6,10 @@ import Test.QuickCheck.Classes
 import Control.Monad hiding (join)
 import Control.Applicative
 import Data.Char
-import Numeric
+import Numeric -- math library
 import Data.Maybe
 import Data.List
+import Data.Ratio
 
 
 data Function a
@@ -95,39 +96,49 @@ instance Show Expr where
     show (Mul p@(Pow _ _) f@(F _)) = "(" ++ show p ++ ")" ++ show f
     show (Mul (Num n) p@(Pow _ _)) = show n ++ show p
     show (Mul np@(Mul (Num n) p@(Pow _ _)) other) = "(" ++ show np ++ ")(" ++ show other ++ ")"
-
     show (Mul (Mul other p@(Pow _ _)) f@(F _))
         | many other = "(" ++ show other ++ ")(" ++ show p ++ ")" ++ show f
         | otherwise = show other ++ "(" ++ show p ++ ")" ++ show f
         where
         many e = (not $ isMono e) || (length $ splitAS e) > 1 || (length $ split MulOp e) > 1
-
     show (Mul (Mul (Num n) pow@(Mul b (Pow _ _))) c)
         = "(" ++ show n ++ ")" ++ show pow ++ "(" ++ show b ++ ")"
     show (Mul (Mul a pow@(Mul b (Pow _ _))) c) = show a ++ show pow ++ "(" ++ show b ++ ")"
     show (Mul maybeMono (F f))
         | isMono maybeMono = "(" ++ show maybeMono ++ ")" ++ show f
         | otherwise = show maybeMono ++ show f
-    show (Mul m1@(Mul _ _) m2@(Mul _ _))
-        | many m1 && many m2 = "(" ++ show m1 ++ ") (" ++ show m2 ++ ")"
-        | many m1 = "(" ++ show m1 ++ ") " ++ show m2
-        | many m2 = show m1 ++ " (" ++ show m2 ++ ")"
-        | otherwise = show m1 ++ show m2
-        where many m = (length $ splitAS m) > 1
     show (Mul e1 ng@(Neg (Num n)))
         = if (n >= 0)
         then (show e1 ++ "(-" ++ show n ++ ")")
         else (show e1 ++ "(-(-" ++ show (-1*n) ++ "))")
-
-    show (Mul e1 e2)
+    -- HELP next few cases are trying to envelop the add expr in brackets:
+    -- let e = (Num 3 .* Num 4 .* x .^ Num 7 .+ x .^ Num (-8)) .* (F (Tan x))
+    show (Mul e1@(Add _ _) e2) = "(" ++ show e1 ++ ")" ++ e2'
+        where
+        many e = isPow e || isSeparable e
+        e2' = if (many e2) then ("(" ++ show e2 ++ ")") else (show e2)
+    show (Mul e1 e2@(Add _ _)) = e1' ++ "(" ++ show e2 ++ ")"
+        where
+        many e = isPow e || isSeparable e
+        e1' = if (many e1) then ("(" ++ show e1 ++ ")") else (show e1)
+    show (Mul (Mul e1@(Add _ _) e2) e3) = "(" ++ show e1 ++ ")" ++ e2' ++ e3'
+        where
+        many e = isPow e || isSeparable e
+        e2' = if (many e2) then ("(" ++ show e2 ++ ")") else (show e2)
+        e3' = if (many e3) then ("(" ++ show e3 ++ ")") else (show e3)
+    show (Mul (Mul e1 e2@(Add _ _)) e3) = e1' ++ "(" ++ show e2 ++ ")" ++ e3'
+        where
+        many e = isPow e || isSeparable e
+        e1' = if (many e1) then ("(" ++ show e1 ++ ")") else (show e1)
+        e3' = if (many e3) then ("(" ++ show e3 ++ ")") else (show e3)
+    show (Mul e1 e2)  -- = "(" ++ show e1 ++ ")(" ++ show e2 ++ ")"
         | many1 && many2 = "(" ++ show e1 ++ ")(" ++ show e2 ++ ")"
         | many1 = "(" ++ show e1 ++ ")" ++ show e2
         | many2 = show e1 ++ "(" ++ show e2 ++ ")"
         | otherwise = show e1 ++ show e2
         where
-        many1 = isPow e1 || many e1
-        many2 = isPow e2 || isNum e2 || many e2
-        many e = (length $ splitAS e) > 1
+        many1 = isPow e1 || isSeparable e1
+        many2 = isPow e2 || isNum e2 || isSeparable e2
 
     show (Div e1 e2)
         | few e1 && few e2 = surround $ show e1 ++ "/" ++ show e2
@@ -168,6 +179,8 @@ instance Show Expr where
     show (Neg f@(F _)) = "-" ++ show f
     show (Neg (Var x)) = "-" ++ x
     show (Neg e) = "-(" ++ show e ++ ")"
+
+--Mul (Add (Mul (Mul (Num 3) (Num 4)) (Pow (Var "x") (Num 7))) (Pow (Var "x") (Num (-8)))) (F (Tan x))
 
 -- TODO how to fmap this?
 instance Show a => Show (Function a) where
@@ -255,10 +268,10 @@ e21 = Num 3 .* x .^ Num 2 .* Num 4 .* x .^ Num (-3) .+ Num 5 .* x .-
 e22 = (Num 3 .* x .^ Num (-2) .* Num 4 .* x .^ Num 3 .+ Num 5 .* x .^ Num 4 .* (x .+ Num 1) .^ Num 6) ./
     (x .+ Num 1)
 e23 = (Num 3 .* x .^ Num (-2) .* Num 4 .* x .^ Num 3 .+ Num 5 .* x .^ Num 4 .* (x .+ Num 1) .^ Num 6) ./
-    (Num 8 .* x .^ Num 3)
+    (Num 8 .* x .^ Num 3) .* (F (Sin (Num 2 .* x)))
 e24 = (Num 3 .* x .^ Num (-2) .* Num 4 .* x .^ Num 3 .+
     Num 3 .* x .^ Num (-8) .* Num 5 .* x .^ Num 4 .* (x .+ Num 1) .^ Num 6) ./
-    (Num 8 .* x .^ Num 3)
+    (Num 8 .* x .^ Num 3)  .* (F (Tan (Num (-3) .* x .^ Num 2)))
 ---------------------------------------------------------------------------------------------
 
 
@@ -363,8 +376,8 @@ splitSub (Sub e1 e2)
 splitM :: Expr -> [Expr]
 splitM e
     | isMul e = splitMul e
-    | isDiv e && hasMul e = if (not $ isMul expl) then [expl] else (split MulOp expl)
-    -- | hasAdd e || hasSub e = [e] -- note respecting order of operations
+    | isSeparable e = [e] -- note order of operations
+    | isDiv e && hasMul e = if (not $ isMul expl) then [e] else (split MulOp expl)
     | hasMul e = init lefties ++ (newRight e lefties)
     | isNeg e = handleNeg MulOp e
     | not $ isVarNumFunc e = [e]
@@ -382,8 +395,8 @@ splitMul (Mul e1 e2)
 splitD :: Expr -> [Expr]
 splitD e
     | isDiv e = splitDiv e
+    | isSeparable e = [e] -- note order of operations
     | isMul e && hasDiv e = if (not $ isDiv expl) then [expl] else (split DivOp expl)
-    -- | hasAdd e || hasSub e = [e] -- note respecting order of operations
     | hasDiv e = init lefties ++ (newRight e lefties)
     | isNeg e = handleNeg DivOp e
     | not $ isVarNumFunc e = [e]
@@ -508,7 +521,7 @@ findLoc f
 
 -- note takes a codeified polynomial, or trig or invtrig... and adds the two codified things.
 -- note todo currently just impleneted for codified polynomial
--- postcondition: get somethning like (4x^5)(8x^2)sinx^6 and
+-- postcondition: get somethning like (4x^5)(8x^2)sinx^6 and e24.
 {-
 codifySingleFunction :: Expr -> Code
 codifySingleFunction expr
@@ -592,15 +605,27 @@ codifyMono expr = Poly $ zs ++ [c]
     (c, p) = getCoefPowPair expr
     zs = replicate p 0
 
+{-
+codifyPoly :: Expr -> Code
+codifyPoly e
+    | isSeparable e = codifyPolyA e
+    | hasDiv e && (isDiv expDiv) = codifyPolyD expDiv
+    | hasDiv e && (isMul expDiv) = codifyPolyM expDiv
+    | otherwise = codifyPolyM expDiv
+    where
+    expDiv = makeDivExplicit e
+-}
+
 -- note takes list of polynomials and makes it into Group type Poly [...]
 -- so 7x^2 + 3x^2 + 3x + 4x + 1 is [1, (3+4), (7+3)]
 codifyPolyA :: Expr -> Code
-codifyPolyA expr = foldl1 addPoly (map codifyMono ps)
+codifyPolyA expr = foldl1 addPoly (map codifyPolyM ps)
     where ps = splitAS expr
 
 
 -- precondition: takes chisel output so has no negpowers. There is no division (assume) just mul.
 -- Ignore expressions that are of form (x+1), just use the monomials.
+-- testing there is always only one element in the array.
 codifyPolyM :: Expr -> Code
 codifyPolyM expr = foldl1 mulPoly (map codifyMono ps)
     where ps = split MulOp expr
@@ -612,67 +637,26 @@ codifyPolyM expr = foldl1 mulPoly (map codifyMono ps)
 -- is only possible in divpoly if denom has no add/sub.
 {-
 codifyPolyD :: Expr -> Code
-codifyPolyD expr = divPoly (codifyPolyM upper) (codifyPolyM lower)
+codifyPolyD expr = divPoly upper' lower'
     where
     lower = getLower (split DivOp expr)
     upper = getUpper (split DivOp expr)
+    upper' = if (isSeparable upper) then (codifyPolyA upper) else (codifyPolyM upper)
+    lower' = if (isSeparable lower) then (codifyPolyA lower) else (codifyPolyM lower)
 -}
 
-
-
 decodifyPoly :: Code -> [Expr]
-decodifyPoly (Poly ps) = map clean polynomials
+decodifyPoly (Poly ps) = filter (\x -> not $ x == Num 0) (map clean polynomials)
     where
     ns = map Num ps
     xs = replicate (length ps) x
     pows = map Num $ [0 .. (length ps - 1)]
-    xs' = map simplifyComplete $ zipWith Pow xs pows
+    xs' = map clean $ zipWith Pow xs pows
     ps' = map negExplicit $ zipWith Mul ns xs'
     polynomials = [clean (head ps')] ++ tail ps'
 
-    negExplicit (m@(Mul (Num n) p@(Pow _ _))) = if (n < 0) then (Neg $ (Num (-1*n)) .* p) else m
+    negExplicit (m@(Mul (Num n) p@(Pow _ _))) = if (n < 0) then (Neg ((Num (-1*n)) .* p)) else m
     negExplicit e = e
-
-{-
-codifyAddPoly [] = Poly []
-codifyAddPoly ps = Poly $ foldl1 (zipWith (+)) $ addZeroes $ codify ps
-    where -- note poly expects no forms like 7x / 4x^3 in the list element position
-    addZeroes cs = map (\xs -> xs ++ replicate (maxCodeLen - length xs) 0) cs
-    codify ps = map poly (map simplify ps)
-    maxCodeLen = foldl1 max $ map length (codify ps)
-    poly (Var x) = [0, 1]
-    poly (Num n) = [n]
-    poly (F func) = error "no functions allowed in makePoly"
-    -- poly (Pow x (Neg (Num p))) TODO HELP
-    poly (Pow x (Num p)) = replicate p 0 ++ [1]
-    poly (Mul (Neg (Num n)) (Pow x (Num p))) = replicate p 0 ++ [-n]
-    poly (Mul (Neg (Num n)) x) = [0, -n]
-    poly (Mul (Num n) (Pow x (Num p))) = replicate p 0 ++ [n]
-    poly (Mul (Num n) x) = [0, n]
--}
-
-
-{-
-TODO *** resintate this - don't need a specific decoder for every operation
-IDEA
-
-
-
--- not done yet, just copied content from addsub decodifier
--- assumes that we are decoding a polynomial whose elements are multiplied.
-decodifyMulPoly :: Code -> [Expr]
-decodifyPoly (Poly ps) = polynomials
-    where
-    ns = map Num ps
-    xs = replicate (length ps) x
-    pows = map Num $ [0 .. (length ps - 1)]
-    xs' = map simplifyComplete $ zipWith Pow xs pows
-    ps' = map negExplicit $ zipWith Mul ns xs'
-    polynomials = [simplify (head ps')] ++ tail ps'
-
-    negExplicit (m@(Mul (Num n) p@(Pow _ _))) = if (n < 0) then (Neg $ (Num (-1*n)) .* p) else m
-    negExplicit e = e
--}
 
 
 
@@ -709,17 +693,17 @@ put index n xs
     where (front, back) = splitAt index xs
           newBack = if null back then [] else (tail back)
 
-elongate :: Int -> [Int] -> [Int]
-elongate toLen xs = xs ++ replicate (toLen - (length xs)) 0
+elongate :: [Int] -> [Int] -> ([Int], [Int])
+elongate xs ys = (xs ++ (replicate (toLen - (length xs)) 0),
+                  ys ++ (replicate (toLen - (length ys)) 0))
+    where toLen = max (length xs) (length ys)
 
 
 -- Note all these functions with poly below assume the ps inside the Poly are added.
 addPoly :: Code -> Code -> Code
 addPoly (Poly ps) (Poly qs) = Poly (zipWith (+) ps' qs')
     where
-    maxLen = max (length ps) (length qs)
-    ps' = elongate maxLen ps
-    qs' = elongate maxLen qs
+    (ps', qs') = elongate ps qs
 
 subPoly :: Code -> Code -> Code
 subPoly (Poly ps) (Poly qs) = Poly (zipWith (-) ps qs)
@@ -749,24 +733,34 @@ mulOnePoly n p ms = foldl (zipWith (+)) zs cs
         | otherwise = mul' n p (q + 1) ms (acc ++ [(n * m, p + q)])
 
 
--- precondition: takes non-div expression whcih has no negpowers.
--- Can have add/sub in numberator though, but just mul in denominator.
+-- precondition: takes two polys and returns nothing if deom is separable. But ok if denom is glued.
+-- We can tell if denom is separable because if mul then there is only one nonzero element.
+-- note because we return from frunction if any numer ind are < denom ind, we don't worry about
+-- returning negative pow in divOnePoly
 {-
-divPoly :: Group -> Group -> Group
-divPoly (Poly ps) (Poly qs)
-    | moreThanOneTerm = error "more than one added term in bottom; cannot divide"
-    | otherwise =
+divPoly :: Code -> Code -> Maybe Code
+divPoly (Poly ns) (Poly ms)
+    | denomHasMoreThanOneTerm || someNumPowsLessThanDenomPows = Nothing
+    | otherwise = Just $ -- TODO maybe hav eno div in result (just string o polys)
     where
-    moreThanOneTerm = length $ filter (\x -> not (x == 0)) qs > 1
--- TODO paused on this because need fraction.
-divOnePoly :: Int -> Int -> [Int] -> [Int]
-divOnePoly n p ms =
-    where
-    div' n p q m acc
-        |
+    notZero x = not (x == Num 0)
+    denomHasMoreThanOneTerm = (length $ filter notZero) ms) > 1
+    someNumPowsLessThanDenomPows = any (== True) $ map (\pow -> pow < dp) nps
+    (dp:_) = findIndices notZero ms
+    (d:_) = filter (\x -> not (x == Num 0)) ms
+    nps = findIndices notZero ns
+    npPairs = zip (elongate ns) (elongate nps)
+    numDenPows = map (divOnePoly (d, dp)) npPairs
+    divOnePoly (den, dPow) (num, nPow) = (num', den', nPow - dPow)
+        where ratio = num % den
+              num' = numerator ratio
+              den' = denominator ratio
 -}
 
-
+-- TODO note above: make a toCOmmonDenom function that takes two (1,5,0) (2,3,0) (e.g.) and
+-- returns (3,15,0) (10,15,0) => (13, 15, 0)
+-- precondition: only the third element in tuple (the power of x) must be the same for both.
+-- otherwise no need for ocmmon denominator.
 
 
 
@@ -1143,12 +1137,15 @@ rebuildAS :: [Expr] -> Expr
 rebuildAS es = foldl1 f es
     where f acc x
             | isNeg x = (Sub acc (getNeg x))
-            | x == Num 0 = acc
             | otherwise = Add acc x
 
 rebuild :: Op -> [Expr] -> Expr
+{-
 rebuild AddOp es = foldl1 (\acc x -> if (x == Num 0) then acc else (Add acc x)) es
 rebuild SubOp es = foldl1 (\acc x -> if (x == Num 0) then acc else (Sub acc x)) es
+-}
+rebuild AddOp es = foldl1 (\acc x -> Add acc x) es
+rebuild SubOp es = foldl1 (\acc x -> Sub acc x) es
 rebuild MulOp es = foldl1 (\acc x -> Mul acc x) es
 rebuild DivOp es = foldl1 (\acc x -> Div acc x) es
 rebuild PowOp es = foldl1 (\acc x -> Pow acc x) es
@@ -1163,11 +1160,11 @@ rebuild PowOp es = foldl1 (\acc x -> Pow acc x) es
 -- note says if expression is a single polynomial term like 5x (monomial)
 isMono :: Expr -> Bool
 isMono e
-    | hasFunction e || ((length $ splitAS e) > 1) = False
+    | hasFunction e || isSeparable e = False
     | otherwise = foldl f True s'
     where
     -- e' = simplifyComplete e
-    s' = map simplifyComplete $ split MulOp e -- was e' , changed since got sent to infinite loop.
+    s' = map clean $ split MulOp e -- was e' , changed since got sent to infinite loop.
     f = (\acc x -> acc && (isNum x || isVar x || isPolyPow x))
     isPolyPow (Pow (Var _) (Neg (Num n))) = True
     isPolyPow (Pow (Var _) (Num n)) = True
@@ -1235,8 +1232,52 @@ extractFunction _ = error "not a function"
 -}
 
 
+isSeparable :: Expr -> Bool
+isSeparable expr = (length $ splitAS expr) > 1
+
+-- note identifies what was the operation to which functino was attached.
+-- precondition: needs to have one function only and expression must not be separable.
+{-
+functionOp :: Expr -> Op
+functionOp expr = funcOp (Nothing, Nothing) expr
+    where
+    funcOp (o1, o2) (Num n) = (get o1, get o2)
+    funcOp (o1, o2) (Var x) = (get o1, get o2)
+    funcOp (o1, o2) (Neg e) = funcOp (o1, o2) e
+    funcOp (o1, o2) (F f) = (get o1, get o2)
+    funcOp (o1, o2) (Pow _ _) = (get o1, get o2)
+    funcOp (o1, o2) (Mul (F f) _) = MulOp
+    funcOp (o1, o2) (Mul _ (F f)) = MulOp
+    funcOp (o1, o2) (Div (F f) _) = DivOp
+    funcOp (o1, o2) (Div _ (F f)) = DivOp
+    funcOp (o1, o2) (Add e1 e2) = (get $ funcOp (o1, o2) e1, get $ funcOp (o1, o2) e2)
+    funcOp (o1, o2) (Sub e1 e2) = (get $ funcOp (o1, o2) e1, get $ funcOp (o1, o2) e2)
+    funcOp (o1, o2) (Mul e1 e2) = (get $ funcOp (o1, o2) e1, get $ funcOp (o1, o2) e2)
+    funcOp (o1, o2) (Div e1 e2) = (get $ funcOp (o1, o2) e1, get $ funcOp (o1, o2) e2)
+    get op = if (isNothing) then "" else (show (fromJust op))
+-}
+
+-- note returns the expression with the function removed. (pluck out)
+-- precondition: expression must not be separable.
+-- postcondition: removes all functions
+-- important (but meant to be used just to take out the function
+-- in expressions like x^2(tanx) so that we can do chisel on the first poly part. Then put
+-- them back together.
+pluckFunction :: Expr -> Expr
+pluckFunction (Num n) = Num n
+pluckFunction (Var x) = Var x
+pluckFunction (Neg e) = Neg $ pluckFunction e
+pluckFunction (F f) = Num 1
+pluckFunction (Add e1 e2) = pluckFunction e1 .+ pluckFunction e2
+pluckFunction (Sub e1 e2) = pluckFunction e1 .- pluckFunction e2
+pluckFunction (Mul e1 e2) = pluckFunction e1 .* pluckFunction e2
+pluckFunction (Div e1 e2) = pluckFunction e1 ./ pluckFunction e2
+pluckFunction p@(Pow _ _) = p
+
+
 -- postcondition: converts negative pow to positive by changing to div or mul.
 chisel :: Expr -> Expr
+chisel (Mul e (F f)) = chisel e .* (F $ fmap chisel f) -- TODO other way to handle this?
 chisel expr
     | (length $ splitAS expr) > 1 = error "expr must not have exterior added/subtracted terms"
     | expr' == expr = makeDivExplicit expr
@@ -1294,6 +1335,27 @@ chisel expr
     chiseler p@(Pow base (Num n))
         | n < 0 = Num 1 ./ ((chiseler base) .^ (Num (-1*n)))
         | otherwise = (chiseler base) .^ (Num n)
+
+    -- note the mul-covered cases (above must is of form (Mul (case here) e)
+    chiseler (Mul (Mul a (Pow base (Neg (Num n)))) side)
+        | n >= 0 = Div (chiseler a .* chiseler side) (Pow (chiseler base) (Num n))
+        | otherwise = (chiseler a) .* (chiseler base) .^ (Num (-1*n)) .* (chiseler side)
+    chiseler (Mul (Mul a (Pow base (Num n))) side)
+        | n < 0 = Div (chiseler a .* chiseler side) (Pow (chiseler base) (Num (-1*n)))
+        | otherwise = (chiseler a) .* (chiseler base) .^ Num n .* (chiseler side)
+    chiseler (Mul (Div a (Pow base (Neg (Num n)))) side)
+        | n >= 0 = Mul (chiseler a) (Pow (chiseler base) (Num n)) .* (chiseler side)
+        | otherwise = Div (chiseler a .* chiseler side) (Pow (chiseler base) (Num (-1*n)))
+    chiseler (Mul (Div a (Pow base (Num n))) side)
+        | n < 0 = (chiseler a) .* (chiseler base) .^ Num (-1*n) .* (chiseler side)
+        | otherwise = Div (chiseler a .* chiseler side) (Pow (chiseler base) (Num n))
+
+    chiseler (Mul (Pow base (Neg (Num n))) side)
+        | n >= 0 = (chiseler side) ./ ((chiseler base) .^ Num n)
+        | otherwise = (chiseler base) .^ Num (-1*n) .* (chiseler side)
+    chiseler (Mul (Pow base (Num n)) side)
+        | n < 0 = (chiseler side) ./ ((chiseler base) .^ (Num (-1*n)))
+        | otherwise = (chiseler base) .^ (Num n) .* (chiseler side)
 
 
     chiseler (Add e1 e2) = Add (chiseler e1) (chiseler e2)
@@ -1413,7 +1475,7 @@ clean expr
     cln (Num n) = Num n
     cln (Var x) = Var x
     cln (F f) = F $ fmap cln f
-    cln (Neg e) = cln e
+    cln (Neg e) = Neg $ cln e
     cln (Add (Num 0) e2) = cln e2
     cln (Add e1 (Num 0)) = cln e1
     cln (Sub (Num 0) e2) = Neg $ cln e2
