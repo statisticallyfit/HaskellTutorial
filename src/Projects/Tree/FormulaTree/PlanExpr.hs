@@ -680,7 +680,7 @@ add (a@(c1,e1,x1),b@(c2,e2,x2)) = if x1 == x2 then (Just (c1 .+ c2,e1,x1), Nothi
 hs = zip list list
 js = map add hs
 clean' (x,y,z) = (clean x, y, z)
-ms = map (\(a, b) -> if (isJust a && isNothing b) then (Just $ clean' $ fromJust a, Nothing) else (a,b)) js
+ks = map (\(a, b) -> if (isJust a && isNothing b) then (Just $ clean' $ fromJust a, Nothing) else (a,b)) js
 --g (a@(c1,e1,x1), b@(c2,e2,x2)) = if (x1 == x2) then (c1 .+ c2,e1,x1) else (a,b)
 
 
@@ -737,31 +737,38 @@ mulOnePoly n p ms = foldl (zipWith (+)) zs cs
 -- We can tell if denom is separable because if mul then there is only one nonzero element.
 -- note because we return from frunction if any numer ind are < denom ind, we don't worry about
 -- returning negative pow in divOnePoly
-{-
-divPoly :: Code -> Code -> Maybe Code
+{-divPoly :: Code -> Code -> Maybe Code
 divPoly (Poly ns) (Poly ms)
     | denomHasMoreThanOneTerm || someNumPowsLessThanDenomPows = Nothing
-    | otherwise = Just $ -- TODO maybe hav eno div in result (just string o polys)
-    where
-    notZero x = not (x == 0)
-    denomHasMoreThanOneTerm = (length $ filter notZero) ms) > 1
-    someNumPowsLessThanDenomPows = any (== True) $ map (\pow -> pow < dp) nps
-    (dp:_) = findIndices notZero ms
-    (d:_) = ms !! dp
-    ps = findIndices notZero ns -- the expoonent of the variables of the nums (coeffs).
-    npPairs = zip (elongate ns) (elongate ps)
-    ndpTriples = map (divOnePoly (d, dp)) npPairs
-    ndpTriples' = cleanUpTriples ndpTriples
-    allDenoms = map (\(_,d,_) -> d) ndpTriples'
-    newDenom = foldl leastCommonMultiple (Just 1) allDenoms
-    -- TODO continue here to div by the left scaling thing. 
--}
+    | otherwise = Just $ Poly $ polynomial -- TODO maybe hav eno div in result (just string o polys)
+    where-}
+ns = [0,0,9, 38, -1, 8, 24]
+ms = [0,0,8]
+notZero x = not (x == 0)
+denomHasMoreThanOneTerm = (length $ filter notZero ms) > 1
+someNumPowsLessThanDenomPows = any (== True) $ map (\pow -> pow < dp) ps
+(dp:_) = findIndices notZero ms
+d = ms !! dp
+ns' = filter notZero ns
+ps = findIndices notZero ns -- the expoonent of the variables of the nums (coeffs).
+nsPs = elongate ns' ps
+npPairs = zip (fst nsPs) (snd nsPs)
+ndpTriples = map (divOnePoly (d, dp)) npPairs
+ndpTriples' = cleanUpTriples ndpTriples
+allDenoms = map (\(_,d,_) -> d) ndpTriples'
+lcmNewDenom = foldl leastCommonMultiple 1 allDenoms
+factors = map (\d -> (lcmNewDenom `div` d)) allDenoms
+npPairs' = map (\((n,_,p), f) -> (n * f, p)) (zip ndpTriples' factors)
+maxPow = maximum $ map snd npPairs'
+zs = replicate (maxPow + 1) 0
+polynomial = foldl1 (zipWith (+)) (map (\(n,p) -> put p n zs) npPairs')
+
+
 divOnePoly :: (Int, Int) -> (Int, Int) -> (Int, Int, Int)
 divOnePoly (den, dPow) (num, nPow) = (num', den', nPow - dPow)
     where ratio = num % den
           num' = numerator ratio
           den' = denominator ratio
-
 
 
 cleanUpTriples :: [(Int,Int,Int)] -> [(Int, Int, Int)]
@@ -782,15 +789,14 @@ cleanUpTriples triples = triples''
 toCommonDenom :: ((Int,Int), (Int,Int)) -> ((Int,Int), (Int,Int))
 toCommonDenom ((n1,d1), (n2,d2)) = ((n1', lcm), (n2', lcm))
     where
-    (Just lcm) = leastCommonMultiple (Just d1) d2
+    lcm = leastCommonMultiple d1 d2
     n1' = n1 * (lcm `div` d1)
     n2' = n2 * (lcm `div` d2)
 
+
 -- note first arg doesn't have to be maybe just made it so that we can use it with foldl.
-leastCommonMultiple :: Maybe Int -> Int -> Maybe Int
-leastCommonMultiple (Just 0) _ = Nothing
-leastCommonMultiple _ 0 = Nothing
-leastCommonMultiple (Just a) b = Just $ lcm a' b' c
+leastCommonMultiple :: Int -> Int -> Int
+leastCommonMultiple a b = lcm a' b' c
     where
     (a', b') = (abs a, abs b)
     c = a' * b'
