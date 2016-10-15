@@ -743,26 +743,60 @@ divPoly (Poly ns) (Poly ms)
     | denomHasMoreThanOneTerm || someNumPowsLessThanDenomPows = Nothing
     | otherwise = Just $ -- TODO maybe hav eno div in result (just string o polys)
     where
-    notZero x = not (x == Num 0)
+    notZero x = not (x == 0)
     denomHasMoreThanOneTerm = (length $ filter notZero) ms) > 1
     someNumPowsLessThanDenomPows = any (== True) $ map (\pow -> pow < dp) nps
     (dp:_) = findIndices notZero ms
-    (d:_) = filter (\x -> not (x == Num 0)) ms
-    nps = findIndices notZero ns
-    npPairs = zip (elongate ns) (elongate nps)
-    numDenPows = map (divOnePoly (d, dp)) npPairs
-    divOnePoly (den, dPow) (num, nPow) = (num', den', nPow - dPow)
-        where ratio = num % den
-              num' = numerator ratio
-              den' = denominator ratio
+    (d:_) = ms !! dp
+    ps = findIndices notZero ns -- the expoonent of the variables of the nums (coeffs).
+    npPairs = zip (elongate ns) (elongate ps)
+    ndpTriples = map (divOnePoly (d, dp)) npPairs
+    ndpTriples' = cleanUpTriples ndpTriples
+    allDenoms = map (\(_,d,_) -> d) ndpTriples'
+    newDenom = foldl leastCommonMultiple (Just 1) allDenoms
+    -- TODO continue here to div by the left scaling thing. 
 -}
+divOnePoly :: (Int, Int) -> (Int, Int) -> (Int, Int, Int)
+divOnePoly (den, dPow) (num, nPow) = (num', den', nPow - dPow)
+    where ratio = num % den
+          num' = numerator ratio
+          den' = denominator ratio
 
--- TODO note above: make a toCOmmonDenom function that takes two (1,5,0) (2,3,0) (e.g.) and
--- returns (3,15,0) (10,15,0) => (13, 15, 0)
--- precondition: only the third element in tuple (the power of x) must be the same for both.
--- otherwise no need for ocmmon denominator.
 
 
+cleanUpTriples :: [(Int,Int,Int)] -> [(Int, Int, Int)]
+cleanUpTriples triples = triples''
+    where
+    order (_,_,p1) (_,_,p2) = if (p1 == p2) then EQ else if (p1 > p2) then GT else LT
+    orderB (_,_,p1) (_,_,p2) = p1 == p2
+    groups = groupBy orderB (sortBy order triples)
+    triples' = map (\tripList -> foldl combine (head tripList) (tail tripList)) groups
+    triples'' = filter (\(n,_,_) -> not (n == 0)) triples'
+    combine (n1,d1,p1) (n2,d2,p2) = (n, d, p1)
+        where
+        (n, d) = (numerator newFrac, denominator newFrac)
+        newFrac = (n1' + n2') % d1'
+        ((n1',d1'), (n2',d2')) = toCommonDenom ((n1,d1), (n2,d2))
+
+
+toCommonDenom :: ((Int,Int), (Int,Int)) -> ((Int,Int), (Int,Int))
+toCommonDenom ((n1,d1), (n2,d2)) = ((n1', lcm), (n2', lcm))
+    where
+    (Just lcm) = leastCommonMultiple (Just d1) d2
+    n1' = n1 * (lcm `div` d1)
+    n2' = n2 * (lcm `div` d2)
+
+-- note first arg doesn't have to be maybe just made it so that we can use it with foldl.
+leastCommonMultiple :: Maybe Int -> Int -> Maybe Int
+leastCommonMultiple (Just 0) _ = Nothing
+leastCommonMultiple _ 0 = Nothing
+leastCommonMultiple (Just a) b = Just $ lcm a' b' c
+    where
+    (a', b') = (abs a, abs b)
+    c = a' * b'
+    lcm a b c
+        | not (a == b) = if (a > b) then (lcm (a-b) b c) else (lcm a (b-a) c)
+        | otherwise = fromInteger $ numerator $ toRational $ abs (c `div` a) -- convert to get int type
 
 
 
