@@ -26,14 +26,15 @@ data Function a
 
 data Op = AddOp | SubOp | MulOp | DivOp | PowOp deriving (Eq)
 
+type Rate = Ratio Int
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
-    | Pow Expr Expr | Neg Expr | Num Int | Var String | F (Function Expr)
+    | Pow Expr Expr | Neg Expr | Num Int | Fraction Rate | Var String | F (Function Expr)
     deriving (Eq)
 
 type Coeff = Int
 type Description = (Expr, Expr, Expr)
 
-data Code = Poly [Coeff] | PolyDiv [Coeff] [Coeff] | Trig [Description] | InvTrig [Description]
+data Code = Poly [Rate] | Trig [Description] | InvTrig [Description]
     | Hyperbolic [Description] | InvHyp [Description] | Logarithmic [Description]
     deriving (Eq, Show)
 
@@ -85,6 +86,10 @@ instance Show Op where
 instance Show Expr where
     show (Var x) = x
     show (Num n) = show n
+    show (Fraction ratio)
+        | numerator ratio == 0 = show 0
+        | denominator ratio == 1 = show (numerator ratio)
+        | otherwise = (show (numerator ratio)) ++ "/" ++ (show (denominator ratio))
     show (Neg (Num n))
         = if (n < 0)
         then ("-(" ++ show n ++ ")")
@@ -597,13 +602,17 @@ getCoefPowPair (Neg e) = putNegFirst (getCoefPowPair e)
     where putNegFirst (n,p) = (-n, p)
 
 
+makeRate :: Int -> Rate
+makeRate n = n % 1
+
+
 -- note takes a single monomial and converts it to coded form
 -- precondition: no neg powers, output of chisel, AND must be monomial.
 codifyMono :: Expr -> Code
-codifyMono expr = Poly $ zs ++ [c]
+codifyMono expr = Poly $ zs ++ [makeRate c]
     where
     (c, p) = getCoefPowPair expr
-    zs = replicate p 0
+    zs = map makeRate $ replicate p 0
 
 {-
 codifyPoly :: Expr -> Code
@@ -648,7 +657,7 @@ codifyPolyD expr = divPoly upper' lower'
 decodifyPoly :: Code -> [Expr]
 decodifyPoly (Poly ps) = filter (\x -> not $ x == Num 0) (map clean polynomials)
     where
-    ns = map Num ps
+    ns = map Fraction ps
     xs = replicate (length ps) x
     pows = map Num $ [0 .. (length ps - 1)]
     xs' = map clean $ zipWith Pow xs pows
@@ -693,9 +702,9 @@ put index n xs
     where (front, back) = splitAt index xs
           newBack = if null back then [] else (tail back)
 
-elongate :: [Int] -> [Int] -> ([Int], [Int])
-elongate xs ys = (xs ++ (replicate (toLen - (length xs)) 0),
-                  ys ++ (replicate (toLen - (length ys)) 0))
+elongate :: [a] -> [a] -> a -> ([a], [a])
+elongate xs ys toElongWith = (xs ++ (replicate (toLen - (length xs)) toElongWith),
+                  ys ++ (replicate (toLen - (length ys)) toElongWith))
     where toLen = max (length xs) (length ys)
 
 
@@ -703,7 +712,7 @@ elongate xs ys = (xs ++ (replicate (toLen - (length xs)) 0),
 addPoly :: Code -> Code -> Code
 addPoly (Poly ps) (Poly qs) = Poly (zipWith (+) ps' qs')
     where
-    (ps', qs') = elongate ps qs
+    (ps', qs') = elongate ps qs (makeRate 0)
 
 subPoly :: Code -> Code -> Code
 subPoly (Poly ps) (Poly qs) = Poly (zipWith (-) ps qs)
@@ -742,7 +751,7 @@ divPoly (Poly ns) (Poly ms)
     | denomHasMoreThanOneTerm || someNumPowsLessThanDenomPows = Nothing
     | otherwise = Just $ Poly $ polynomial -- TODO maybe hav eno div in result (just string o polys)
     where-}
-ns = [0,0,9, 38, -1, 8, 24]
+ns = [0,0,28, 38, -16, 18, 24]
 ms = [0,0,8]
 notZero x = not (x == 0)
 denomHasMoreThanOneTerm = (length $ filter notZero ms) > 1
@@ -754,22 +763,28 @@ ps = findIndices notZero ns -- the expoonent of the variables of the nums (coeff
 nsPs = elongate ns' ps
 npPairs = zip (fst nsPs) (snd nsPs)
 ndpTriples = map (divOnePoly (d, dp)) npPairs
-ndpTriples' = cleanUpTriples ndpTriples
-allDenoms = map (\(_,d,_) -> d) ndpTriples'
+maxPow = maximum $ map snd ndpTriples
+zs = map Fraction $ replicate (maxPow + 1) 0
+fs = map (\(f,p) -> put p f zs) ndpTriples
+-- polynomial = foldl1 addPoly fs
+{-
+allDenoms = map (\(_,d,_) -> d) ndpTriples
 lcmNewDenom = foldl leastCommonMultiple 1 allDenoms
 factors = map (\d -> (lcmNewDenom `div` d)) allDenoms
-npPairs' = map (\((n,_,p), f) -> (n * f, p)) (zip ndpTriples' factors)
+npPairs' = map (\((n,_,p), f) -> (n * f, p)) (zip ndpTriples factors)
 maxPow = maximum $ map snd npPairs'
 zs = replicate (maxPow + 1) 0
 polynomial = foldl1 (zipWith (+)) (map (\(n,p) -> put p n zs) npPairs')
+-}
 
 
-divOnePoly :: (Int, Int) -> (Int, Int) -> (Int, Int, Int)
-divOnePoly (den, dPow) (num, nPow) = (num', den', nPow - dPow)
-    where ratio = num % den
+divOnePoly :: (Int, Int) -> (Int, Int) -> (Expr, Int)
+divOnePoly (den, dPow) (num, nPow) = (Fraction $ num % den, nPow - dPow)
+{-    where ratio = num % den
           num' = numerator ratio
-          den' = denominator ratio
+          den' = denominator ratio-}
 
+{-
 
 cleanUpTriples :: [(Int,Int,Int)] -> [(Int, Int, Int)]
 cleanUpTriples triples = triples''
@@ -784,6 +799,7 @@ cleanUpTriples triples = triples''
         (n, d) = (numerator newFrac, denominator newFrac)
         newFrac = (n1' + n2') % d1'
         ((n1',d1'), (n2',d2')) = toCommonDenom ((n1,d1), (n2,d2))
+-}
 
 
 toCommonDenom :: ((Int,Int), (Int,Int)) -> ((Int,Int), (Int,Int))
