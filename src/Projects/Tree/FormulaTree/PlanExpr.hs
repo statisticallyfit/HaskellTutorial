@@ -79,6 +79,14 @@ instance Show Op where
     show DivOp = "(/)"
     show PowOp = "(^)"
 
+
+instance Show Fraction where
+    show (Rate ratio)
+        | numerator ratio == 0 = show 0
+        | denominator ratio == 1 = show (numerator ratio)
+        | otherwise = (show (numerator ratio)) ++ "/" ++ (show (denominator ratio))
+
+
 -- TODO idea: count num elements and then decide whether ot put brackets.
 -- Example: x^6 * 4 is shown as 4x^6 while 4 * (x+3) is shown as 4(x+3)
 -- idea: glued things are wrapped each.
