@@ -1,15 +1,17 @@
+{-# LANGUAGE FlexibleContexts #-}
 module ExprPlan where
 
-import Test.QuickCheck -- (Arbitrary, arbitrary, elements)
+{-import Test.QuickCheck -- (Arbitrary, arbitrary, elements)
 import Test.QuickCheck.Checkers
-import Test.QuickCheck.Classes
+import Test.QuickCheck.Classes-}
 import Control.Monad hiding (join)
 import Control.Applicative
 import Data.Char
 import Numeric -- math library
 import Data.Maybe
 import Data.List
-import Data.Ratio
+import Data.Ratio hiding (show)
+
 
 
 data Function a
@@ -26,18 +28,29 @@ data Function a
 
 data Op = AddOp | SubOp | MulOp | DivOp | PowOp deriving (Eq)
 
-type Rate = Ratio Int
+type RationalNum = Ratio Int
+data Fraction = Rate RationalNum deriving (Eq)
+
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
-    | Pow Expr Expr | Neg Expr | Num Int | Fraction Rate | Var String | F (Function Expr)
+    | Pow Expr Expr | Neg Expr | Num Int | Frac Fraction | Var String | F (Function Expr)
     deriving (Eq)
 
 type Coeff = Int
 type Description = (Expr, Expr, Expr)
 
-data Code = Poly [Rate] | Trig [Description] | InvTrig [Description]
+data Code = Poly [Fraction] | Trig [Description] | InvTrig [Description]
     | Hyperbolic [Description] | InvHyp [Description] | Logarithmic [Description]
     deriving (Eq, Show)
 
+
+
+instance Num Fraction where
+    negate (Rate ratio) = Rate $ negate ratio
+    (Rate r1) + (Rate r2) = Rate $ r1 + r2 -- liftA2 (+)
+    (Rate r1) * (Rate r2) = Rate $ r1 * r2
+    fromInteger num = Rate $ (fromInteger num) % 1
+    abs (Rate ratio) = Rate $ abs ratio
+    signum (Rate ratio) = Rate $ signum ratio
 
 
 instance Functor Function where
@@ -94,10 +107,7 @@ instance Show Fraction where
 instance Show Expr where
     show (Var x) = x
     show (Num n) = show n
-    show (Fraction ratio)
-        | numerator ratio == 0 = show 0
-        | denominator ratio == 1 = show (numerator ratio)
-        | otherwise = (show (numerator ratio)) ++ "/" ++ (show (denominator ratio))
+    show (Frac fraction) = show fraction
     show (Neg (Num n))
         = if (n < 0)
         then ("-(" ++ show n ++ ")")
@@ -610,17 +620,17 @@ getCoefPowPair (Neg e) = putNegFirst (getCoefPowPair e)
     where putNegFirst (n,p) = (-n, p)
 
 
-makeRate :: Int -> Rate
-makeRate n = n % 1
+makeFraction :: Int -> Fraction
+makeFraction n = Rate $ n % 1
 
 
 -- note takes a single monomial and converts it to coded form
 -- precondition: no neg powers, output of chisel, AND must be monomial.
 codifyMono :: Expr -> Code
-codifyMono expr = Poly $ zs ++ [makeRate c]
+codifyMono expr = Poly $ zs ++ [makeFraction c]
     where
     (c, p) = getCoefPowPair expr
-    zs = map makeRate $ replicate p 0
+    zs = map makeFraction $ replicate p 0
 
 {-
 codifyPoly :: Expr -> Code
@@ -635,17 +645,21 @@ codifyPoly e
 
 -- note takes list of polynomials and makes it into Group type Poly [...]
 -- so 7x^2 + 3x^2 + 3x + 4x + 1 is [1, (3+4), (7+3)]
+{-
 codifyPolyA :: Expr -> Code
 codifyPolyA expr = foldl1 addPoly (map codifyPolyM ps)
     where ps = splitAS expr
+-}
 
 
 -- precondition: takes chisel output so has no negpowers. There is no division (assume) just mul.
 -- Ignore expressions that are of form (x+1), just use the monomials.
 -- testing there is always only one element in the array.
+{-
 codifyPolyM :: Expr -> Code
 codifyPolyM expr = foldl1 mulPoly (map codifyMono ps)
     where ps = split MulOp expr
+-}
 
 
 -- TODO START HERE TOMORROW
@@ -662,17 +676,19 @@ codifyPolyD expr = divPoly upper' lower'
     lower' = if (isSeparable lower) then (codifyPolyA lower) else (codifyPolyM lower)
 -}
 
-decodifyPoly :: Code -> [Expr]
+decodifyPoly :: Ord Fraction => Code -> [Expr]
 decodifyPoly (Poly ps) = filter (\x -> not $ x == Num 0) (map clean polynomials)
     where
-    ns = map Fraction ps
-    xs = replicate (length ps) x
-    pows = map Num $ [0 .. (length ps - 1)]
+    ns = map Frac ps
+    xs = replicate (length ns) x
+    pows = map Num $ [0 .. (length ns - 1)]
     xs' = map clean $ zipWith Pow xs pows
-    ps' = map negExplicit $ zipWith Mul ns xs'
-    polynomials = [clean (head ps')] ++ tail ps'
+    ns' = map negExplicit $ zipWith Mul ns xs'
+    polynomials = [clean (head ns')] ++ tail ns'
 
-    negExplicit (m@(Mul (Num n) p@(Pow _ _))) = if (n < 0) then (Neg ((Num (-1*n)) .* p)) else m
+    negOne = (-1 % 1)
+    negExplicit (m@(Mul (Frac (Rate n)) p@(Pow _ _)))
+        = if (n < 0) then (Neg ((Frac (Rate $ negOne * n)) .* p)) else m
     negExplicit e = e
 
 
@@ -711,8 +727,8 @@ put index n xs
           newBack = if null back then [] else (tail back)
 
 elongate :: [a] -> [a] -> a -> ([a], [a])
-elongate xs ys toElongWith = (xs ++ (replicate (toLen - (length xs)) toElongWith),
-                  ys ++ (replicate (toLen - (length ys)) toElongWith))
+elongate xs ys toElongateWith = (xs ++ (replicate (toLen - (length xs)) toElongateWith),
+                  ys ++ (replicate (toLen - (length ys)) toElongateWith))
     where toLen = max (length xs) (length ys)
 
 
@@ -720,94 +736,72 @@ elongate xs ys toElongWith = (xs ++ (replicate (toLen - (length xs)) toElongWith
 addPoly :: Code -> Code -> Code
 addPoly (Poly ps) (Poly qs) = Poly (zipWith (+) ps' qs')
     where
-    (ps', qs') = elongate ps qs (makeRate 0)
+    (ps', qs') = elongate ps qs (makeFraction 0)
 
 subPoly :: Code -> Code -> Code
-subPoly (Poly ps) (Poly qs) = Poly (zipWith (-) ps qs)
+subPoly (Poly ps) (Poly qs) = Poly (zipWith (-) ps' qs')
+    where (ps', qs') = elongate ps qs (makeFraction 0)
+
 
 mulPoly :: Code -> Code -> Code
-mulPoly (Poly ps) (Poly qs) = Poly $ foldl1 (zipWith (+)) gs'
+mulPoly (Poly ps) (Poly qs) = foldl1 addPoly products'
     where
-    ts = zip ps [0..(length ps - 1)]
-    gs = map (\(n, p) -> mulOnePoly n p qs) ts
-    gs' = map (\xs -> xs ++ replicate (maxPolyPow - length xs) 0) gs
-    maxPolyPow = maximum $ map length gs
+    ts = zip ps [0..(length ps - 1)] -- ps can be rate type, but pows must be int type.
+    maxPow = maximum $ map (\(Poly ps) -> length ps) products
+    products = map (\(n, p) -> mulOnePoly n p qs) ts
+    products' = map Poly $ map (\(Poly ps) -> ps ++ replicate (maxPow - length ps) 0) products
+
 
 -- note n = coeff of poly, p = pow of poly with coeff n, q = pow of multiplied poly (accumulated)
 -- (m:ms) = elements of other polynomial (added), acc = accumulated multiplications (is a list of
 -- tuples that holds first the new coeff value and second the power of this coeff.
-mulOnePoly :: Int -> Int -> [Int] -> [Int]
-mulOnePoly n p ms = foldl (zipWith (+)) zs cs
+-- note Rate constructor holds RationalNum type which shadows Ratio Int
+mulOnePoly :: Fraction -> Int -> [Fraction] -> Code
+mulOnePoly (Rate n) p ms = foldl1 addPoly (map Poly cs)
     where
-    cs = map (\(c,p) -> put p c zs) ts
-    zs = replicate (highestPow + 1) 0
-    ts = mul' n p 0 ms []
-    highestPow = maximum $ map snd ts
+    ms' = map (\(Rate m) -> m) ms
+    ts = mul' n p 0 ms' []
+    ts' = map (\(f,s) -> (Rate f, s)) ts
+    maxPow = maximum $ map snd ts
+    zzs = replicate (maxPow + 1) 0
+    cs = map (\(c,p) -> put p c zzs) ts'
     mul' _ _ _ [] acc = acc
     mul' 0 _ _ _ acc = [(0, 0)] ++ acc
     mul' n p q (m:ms) acc
         | n * m == 0 = mul' n p (q + 1) ms acc
         | otherwise = mul' n p (q + 1) ms (acc ++ [(n * m, p + q)])
 
+pps = [Rate (4 % 5), Rate 2, Rate 1, Rate (-8), Rate (1 % 9)]
+qqs = [Rate (5 % 4), Rate 9, Rate 0, Rate 1, Rate 4, Rate (-15 % 8), Rate 20]
+
 
 -- precondition: takes two polys and returns nothing if deom is separable. But ok if denom is glued.
 -- We can tell if denom is separable because if mul then there is only one nonzero element.
 -- note because we return from frunction if any numer ind are < denom ind, we don't worry about
 -- returning negative pow in divOnePoly
-{-divPoly :: Code -> Code -> Maybe Code
+divPoly :: Code -> Code -> Maybe Code
 divPoly (Poly ns) (Poly ms)
     | denomHasMoreThanOneTerm || someNumPowsLessThanDenomPows = Nothing
-    | otherwise = Just $ Poly $ polynomial -- TODO maybe hav eno div in result (just string o polys)
-    where-}
-ns = [0,0,28, 38, -16, 18, 24]
-ms = [0,0,8]
-notZero x = not (x == 0)
-denomHasMoreThanOneTerm = (length $ filter notZero ms) > 1
-someNumPowsLessThanDenomPows = any (== True) $ map (\pow -> pow < dp) ps
-(dp:_) = findIndices notZero ms
-d = ms !! dp
-ns' = filter notZero ns
-ps = findIndices notZero ns -- the expoonent of the variables of the nums (coeffs).
-nsPs = elongate ns' ps
-npPairs = zip (fst nsPs) (snd nsPs)
-ndpTriples = map (divOnePoly (d, dp)) npPairs
-maxPow = maximum $ map snd ndpTriples
-zs = map Fraction $ replicate (maxPow + 1) 0
-fs = map (\(f,p) -> put p f zs) ndpTriples
--- polynomial = foldl1 addPoly fs
-{-
-allDenoms = map (\(_,d,_) -> d) ndpTriples
-lcmNewDenom = foldl leastCommonMultiple 1 allDenoms
-factors = map (\d -> (lcmNewDenom `div` d)) allDenoms
-npPairs' = map (\((n,_,p), f) -> (n * f, p)) (zip ndpTriples factors)
-maxPow = maximum $ map snd npPairs'
-zs = replicate (maxPow + 1) 0
-polynomial = foldl1 (zipWith (+)) (map (\(n,p) -> put p n zs) npPairs')
--}
-
-
-divOnePoly :: (Int, Int) -> (Int, Int) -> (Expr, Int)
-divOnePoly (den, dPow) (num, nPow) = (Fraction $ num % den, nPow - dPow)
-{-    where ratio = num % den
-          num' = numerator ratio
-          den' = denominator ratio-}
-
-{-
-
-cleanUpTriples :: [(Int,Int,Int)] -> [(Int, Int, Int)]
-cleanUpTriples triples = triples''
+    | otherwise = Just $ foldl1 addPoly quotients
     where
-    order (_,_,p1) (_,_,p2) = if (p1 == p2) then EQ else if (p1 > p2) then GT else LT
-    orderB (_,_,p1) (_,_,p2) = p1 == p2
-    groups = groupBy orderB (sortBy order triples)
-    triples' = map (\tripList -> foldl combine (head tripList) (tail tripList)) groups
-    triples'' = filter (\(n,_,_) -> not (n == 0)) triples'
-    combine (n1,d1,p1) (n2,d2,p2) = (n, d, p1)
-        where
-        (n, d) = (numerator newFrac, denominator newFrac)
-        newFrac = (n1' + n2') % d1'
-        ((n1',d1'), (n2',d2')) = toCommonDenom ((n1,d1), (n2,d2))
--}
+    notZero x = not (x == (Rate 0))
+    denomHasMoreThanOneTerm = (length $ filter notZero ms) > 1
+    someNumPowsLessThanDenomPows = any (== True) $ map (\pow -> pow < dp) ps
+    dp = head $ findIndices notZero ms
+    d = ms !! dp
+    ns' = filter notZero ns
+    ps = findIndices notZero ns -- the expoonent of the variables of the nums (coeffs).
+    -- nsPs = elongate ns' (map makeRate ps) (makeRate 0) -- ps aren't rates, but need to satisfy func arg type
+    npPairs = zip ns' ps
+    ndpTriples = map (divOnePoly (d, dp)) npPairs
+    maxPow = maximum $ map snd ndpTriples
+    zs = map makeFraction $ replicate (maxPow + 1) 0
+    quotients = map Poly $ map (\(f,p) -> put p f zs) ndpTriples
+
+
+divOnePoly :: (Fraction, Int) -> (Fraction, Int) -> (Fraction, Int)
+divOnePoly (Rate den, dPow) (Rate num, nPow) = (Rate $ (a * b) % (c * d), nPow - dPow)
+    where (a, b, c, d) = (numerator num, denominator num, numerator den, denominator den)
 
 
 toCommonDenom :: ((Int,Int), (Int,Int)) -> ((Int,Int), (Int,Int))
