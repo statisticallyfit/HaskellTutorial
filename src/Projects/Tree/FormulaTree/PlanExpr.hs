@@ -52,6 +52,8 @@ instance Num Fraction where
     abs (Rate ratio) = Rate $ abs ratio
     signum (Rate ratio) = Rate $ signum ratio
 
+instance Ord Fraction where
+    compare (Rate r1) (Rate r2) = compare r1 r2
 
 instance Functor Function where
     fmap f (Sin x) = Sin (f x)
@@ -108,14 +110,12 @@ instance Show Expr where
     show (Var x) = x
     show (Num n) = show n
     show (Frac fraction) = show fraction
-    show (Neg (Num n))
-        = if (n < 0)
-        then ("-(" ++ show n ++ ")")
-        else ("-" ++ show n)
+    show (Neg (Num n)) = if (n < 0) then ("-(" ++ show n ++ ")") else ("-" ++ show n)
     show (F func) = show func
     show (Add e1 e2) = show e1 ++ " + " ++ show e2
     show (Sub e1 e2) = show e1 ++ " - " ++ show e2
 
+    show (Mul (Frac frac) other) = "(" ++ show frac ++ ")" ++ show other
     show (Mul p@(Pow _ _) f@(F _)) = "(" ++ show p ++ ")" ++ show f
     show (Mul (Num n) p@(Pow _ _)) = show n ++ show p
     show (Mul np@(Mul (Num n) p@(Pow _ _)) other) = "(" ++ show np ++ ")(" ++ show other ++ ")"
@@ -163,6 +163,8 @@ instance Show Expr where
         many1 = isPow e1 || isSeparable e1
         many2 = isPow e2 || isNum e2 || isSeparable e2
 
+    show (Div (Num n) (Num m)) = show n ++ "/" ++ show m
+    show (Div (Frac f1) (Frac f2)) = "(" ++ show f1 ++ ")/(" ++ show f2 ++ ")"
     show (Div e1 e2)
         | few e1 && few e2 = surround $ show e1 ++ "/" ++ show e2
         | few e1 = surround $ show e1 ++ "/(" ++ show e2 ++ ")"
@@ -170,7 +172,8 @@ instance Show Expr where
         | otherwise = surround $ "(" ++ show e1 ++ ") / (" ++ show e2 ++ ")"
         where
         surround eStr = "{" ++ eStr ++ "}"
-        few e = (isVar e || isNum e || (not $ isMono e)) && ((not $ isNumNeg e) && (not $ isNegNum e)
+        few e = (isVar e || isNum e || (not $ isMono e))
+            && ((not $ isNumOrFracNeg e) && (not $ isNegNumOrFrac e)
             && (hasOnlyOneFunction e) && ((length $ split MulOp e) == 1))
 
     show (Pow e1 (Num n))
@@ -359,6 +362,7 @@ splitAS expr = concatMap (split SubOp) (split AddOp expr)
 split :: Op -> Expr -> [Expr]
 split _ (Var x) = [Var x]
 split _ (Num n) = [Num n]
+split _ (Frac f) = [Frac f]
 split _ (F f) = [F f]
 split op (Neg e) = handleNeg op (Neg e)
 split op expr = pickMethod op expr
@@ -542,12 +546,12 @@ findLoc f
     | otherwise = error "unknown expression-function"
 
 
--- note takes a codeified polynomial, or trig or invtrig... and adds the two codified things.
--- note todo currently just impleneted for codified polynomial
--- postcondition: get somethning like (4x^5)(8x^2)sinx^6 and e24.
+
+-- postcondition: get somethning like (4x^5)(8x^2)sinx^6 and e24 and returns simplified version
+-- of the polynomial or const at the front of the single function.
 {-
-codifySingleFunction :: Expr -> Code
-codifySingleFunction expr
+codifyPolyWithFunction :: Expr -> Code
+codifyPolyWithFunction expr
     | isTrig f = Trig codes
     | isInvTrig f = InvTrig codes
     | isHyp f = Hyperbolic codes
@@ -559,7 +563,7 @@ codifySingleFunction expr
     dmp = chisel (rebuild MulOp ps)
     ps' = if (isDiv dmp) then (codifyPolyD dmp) else (codifyPolyM dmp)
     (low, upper) = if (isDiv ps') then (getLower ps', getUpper ps') else ps'
-    coef = rebuild MulOp $ decodifyMulPoly $ foldl1 mulPoly (map (\p -> codifyAddPoly [p]) ps')
+    coef = rebuild MulOp $ decodifyPoly $ foldl1 mulPoly (map (\p -> codifyPoly [p]) ps')
     -- note now actually making it a code (always 6 spots since: sin,cos,tan,csc,sec,cot are 6)
     -- but there are 3 for log zs
     descr = (coef, getPow f, getArg f)
@@ -567,8 +571,18 @@ codifySingleFunction expr
     zsLog = replicate 3 (Num 0, Num 0, Num 0)
     codes = if (isLogFamily f) then (put (findLoc f) descr zsLog) else (put (findLoc f) descr zs)
 -}
-
-
+-- precondition: must take only expression of the form:
+-- 1) {(4x^3)/sin(2x)}(4)x(8)
+-- OR
+-- 2) (4x^3)sin(2x)(4)x(8)
+{-separateFuncFromPoly :: Expr -> (Expr, Expr)
+separateFuncFromPoly expr
+    | isDiv expr' = (psD, fD)
+    | otherwise = (psM, fM)
+    where
+    expr' = if (hasDiv expr) then (makeDivExplicit expr) else expr
+    [psD, fD] = split DivOp expr'
+    [psM, fM] = split MulOp expr'-}
 {-
 TODO continue tomorrow here !!!! @ !!!!!
 Need to make a divPoly function for cases like (x + x^2 + 3x^2(4x^7)(5x^3)) / x^7
@@ -601,21 +615,22 @@ True
 
 -- note gets the coefficient and power of the monomial.
 -- precondition: input needs to be a mono
-getCoefPowPair :: Expr -> (Int, Int)
-getCoefPowPair (Var _) = (1, 1)
-getCoefPowPair (Num n) = (n, 0) -- note this is pow 0 of x, won't be applied to the Num n.
-getCoefPowPair (Mul (Num n) (Var _)) = (n, 1)
-getCoefPowPair (Mul (Neg (Num n)) (Var _)) = (-n, 1)
-getCoefPowPair (Mul (Num n) (Neg (Var _))) = (-n, 1)
-getCoefPowPair (Mul (Neg (Num n)) (Neg (Var _))) = (n, 1)
-getCoefPowPair (Pow (Var _) (Num p)) = (1, p)
-getCoefPowPair (Pow (Var _) (Neg (Num p))) = (1, -p)
-getCoefPowPair (Pow (Neg (Var _)) (Num p)) = (-1, p)
-getCoefPowPair (Pow (Neg (Var _)) (Neg (Num p))) = (-1, -p)
-getCoefPowPair (Mul (Num c) (Pow (Var _) (Num p))) = (c, p)
-getCoefPowPair (Mul (Num c) (Pow (Var _) (Neg (Num p)))) = (c, -p)
-getCoefPowPair (Mul (Neg (Num c)) (Pow (Var _) (Num p))) = (-c, p)
-getCoefPowPair (Mul (Neg (Num c)) (Pow (Var _) (Neg (Num p)))) = (-c, -p)
+getCoefPowPair :: Expr -> (Fraction, Int)
+getCoefPowPair (Var _) = (makeFraction $ 1, 1)
+getCoefPowPair (Frac f) = (f, 0)
+getCoefPowPair (Num n) = (makeFraction $ n, 0) -- note this is pow 0 of x, won't be applied to the Num n.
+getCoefPowPair (Mul (Num n) (Var _)) = (makeFraction $ n, 1)
+getCoefPowPair (Mul (Neg (Num n)) (Var _)) = (makeFraction $ -n, 1)
+getCoefPowPair (Mul (Num n) (Neg (Var _))) = (makeFraction $ -n, 1)
+getCoefPowPair (Mul (Neg (Num n)) (Neg (Var _))) = (makeFraction $ n, 1)
+getCoefPowPair (Pow (Var _) (Num p)) = (makeFraction $ 1, p)
+getCoefPowPair (Pow (Var _) (Neg (Num p))) = (makeFraction $ 1, -p)
+getCoefPowPair (Pow (Neg (Var _)) (Num p)) = (makeFraction $ -1, p)
+getCoefPowPair (Pow (Neg (Var _)) (Neg (Num p))) = (makeFraction $ -1, -p)
+getCoefPowPair (Mul (Num c) (Pow (Var _) (Num p))) = (makeFraction $ c, p)
+getCoefPowPair (Mul (Num c) (Pow (Var _) (Neg (Num p)))) = (makeFraction $ c, -p)
+getCoefPowPair (Mul (Neg (Num c)) (Pow (Var _) (Num p))) = (makeFraction $ -c, p)
+getCoefPowPair (Mul (Neg (Num c)) (Pow (Var _) (Neg (Num p)))) = (makeFraction $ -c, -p)
 getCoefPowPair (Neg e) = putNegFirst (getCoefPowPair e)
     where putNegFirst (n,p) = (-n, p)
 
@@ -627,54 +642,48 @@ makeFraction n = Rate $ n % 1
 -- note takes a single monomial and converts it to coded form
 -- precondition: no neg powers, output of chisel, AND must be monomial.
 codifyMono :: Expr -> Code
-codifyMono expr = Poly $ zs ++ [makeFraction c]
+codifyMono expr = Poly $ zs ++ [c]
     where
     (c, p) = getCoefPowPair expr
     zs = map makeFraction $ replicate p 0
 
-{-
-codifyPoly :: Expr -> Code
+
+codifyPoly :: Expr -> Maybe Code
 codifyPoly e
-    | isSeparable e = codifyPolyA e
+    | isSeparable e = Just $ codifyPolyA e
     | hasDiv e && (isDiv expDiv) = codifyPolyD expDiv
-    | hasDiv e && (isMul expDiv) = codifyPolyM expDiv
-    | otherwise = codifyPolyM expDiv
+    | hasDiv e && (isMul expDiv) = Just $ codifyPolyM expDiv
+    | otherwise = Just $ codifyPolyM expDiv
     where
     expDiv = makeDivExplicit e
--}
+
 
 -- note takes list of polynomials and makes it into Group type Poly [...]
 -- so 7x^2 + 3x^2 + 3x + 4x + 1 is [1, (3+4), (7+3)]
-{-
 codifyPolyA :: Expr -> Code
 codifyPolyA expr = foldl1 addPoly (map codifyPolyM ps)
     where ps = splitAS expr
--}
 
 
 -- precondition: takes chisel output so has no negpowers. There is no division (assume) just mul.
 -- Ignore expressions that are of form (x+1), just use the monomials.
 -- testing there is always only one element in the array.
-{-
 codifyPolyM :: Expr -> Code
 codifyPolyM expr = foldl1 mulPoly (map codifyMono ps)
     where ps = split MulOp expr
--}
 
 
 -- TODO START HERE TOMORROW
 -- precondition: takes chisel output which isDiv and which has no other div in the numerator
 -- and denominator and no negpowers. Can have add/sub in numberator though, but simplification
 -- is only possible in divpoly if denom has no add/sub.
-{-
-codifyPolyD :: Expr -> Code
+codifyPolyD :: Expr -> Maybe Code
 codifyPolyD expr = divPoly upper' lower'
     where
-    lower = getLower (split DivOp expr)
-    upper = getUpper (split DivOp expr)
+    (lower, upper) = (getLower expr, getUpper expr)
     upper' = if (isSeparable upper) then (codifyPolyA upper) else (codifyPolyM upper)
     lower' = if (isSeparable lower) then (codifyPolyA lower) else (codifyPolyM lower)
--}
+
 
 decodifyPoly :: Ord Fraction => Code -> [Expr]
 decodifyPoly (Poly ps) = filter (\x -> not $ x == Num 0) (map clean polynomials)
@@ -771,8 +780,10 @@ mulOnePoly (Rate n) p ms = foldl1 addPoly (map Poly cs)
         | n * m == 0 = mul' n p (q + 1) ms acc
         | otherwise = mul' n p (q + 1) ms (acc ++ [(n * m, p + q)])
 
+{- TODO were used for testing
 pps = [Rate (4 % 5), Rate 2, Rate 1, Rate (-8), Rate (1 % 9)]
 qqs = [Rate (5 % 4), Rate 9, Rate 0, Rate 1, Rate 4, Rate (-15 % 8), Rate 20]
+-}
 
 
 -- precondition: takes two polys and returns nothing if deom is separable. But ok if denom is glued.
@@ -901,17 +912,23 @@ isNum :: Expr -> Bool
 isNum (Num _) = True
 isNum _ = False
 
+isFrac :: Expr -> Bool
+isFrac (Frac _) = True
+isFrac _ = False
+
 getNum :: Expr -> Int
 getNum (Num n) = n
 getNum (Neg (Num n)) = -n
 
-isNegNum :: Expr -> Bool
-isNegNum (Neg (Num n)) = True
-isNegNum _ = False
+isNegNumOrFrac :: Expr -> Bool
+isNegNumOrFrac (Neg (Num _)) = True
+isNegNumOrFrac (Neg (Frac _)) = True
+isNegNumOrFrac _ = False
 
-isNumNeg :: Expr -> Bool
-isNumNeg (Num n) = n < 0
-isNumNeg _ = False
+isNumOrFracNeg :: Expr -> Bool
+isNumOrFracNeg (Num n) = n < 0
+isNumOrFracNeg (Frac f) = f < 0
+isNumOrFracNeg _ = False
 
 isVar :: Expr -> Bool
 isVar (Var _) = True
@@ -1077,6 +1094,7 @@ hasAdd :: Expr -> Bool
 hasAdd (Var _) = False
 hasAdd (Add _ _) = True
 hasAdd (Num _) = False
+hasAdd (Frac _) = False
 hasAdd (Neg e) = hasAdd e
 hasAdd (F f) = False
 hasAdd (Sub e1 e2) = hasAdd e1 || hasAdd e2
@@ -1088,6 +1106,7 @@ hasSub :: Expr -> Bool
 hasSub (Var _) = False
 hasSub (Sub _ _) = True
 hasSub (Num _) = False
+hasSub (Frac _) = False
 hasSub (Neg e) = hasSub e
 hasSub (F f) = False
 hasSub (Add e1 e2) = hasSub e1 || hasSub e2
@@ -1099,6 +1118,7 @@ hasMul :: Expr -> Bool
 hasMul (Var _) = False
 hasMul (Mul _ _) = True
 hasMul (Num _) = False
+hasMul (Frac _) = False
 hasMul (Neg e) = hasMul e
 hasMul (F f) = False
 hasMul (Add e1 e2) = hasMul e1 || hasMul e2
@@ -1110,6 +1130,7 @@ hasDiv :: Expr -> Bool
 hasDiv (Var _) = False
 hasDiv (Div _ _) = True
 hasDiv (Num _) = False
+hasDiv (Frac _) = False
 hasDiv (Neg e) = hasDiv e
 hasDiv (F f) = False
 hasDiv (Add e1 e2) = hasDiv e1 || hasDiv e2
@@ -1121,6 +1142,7 @@ hasFunction :: Expr -> Bool
 hasFunction (Var _) = False
 hasFunction (F _) = True
 hasFunction (Num _) = False
+hasFunction (Frac _) = False
 hasFunction (Neg e) = hasDiv e
 hasFunction (Add e1 e2) = hasFunction e1 || hasFunction e2
 hasFunction (Sub e1 e2) = hasFunction e1 || hasFunction e2
@@ -1132,7 +1154,8 @@ hasFunction (Pow e1 e2) = hasFunction e1 || hasFunction e2
 hasNeg :: Expr -> Bool
 hasNeg (Var _) = False
 hasNeg (F _) = False
-hasNeg (Num n) = if (n < 0) then True else False
+hasNeg (Num n) = n < 0
+hasNeg (Frac f) = f < 0
 hasNeg (Neg _) = True
 hasNeg (Add e1 e2) = hasNeg e1 || hasNeg e2
 hasNeg (Sub e1 e2) = hasNeg e1 || hasFunction e2
@@ -1144,8 +1167,13 @@ hasNeg (Pow e1 e2) = hasNeg e1 || hasNeg e2
 hasNegPow :: Expr -> Bool
 hasNegPow (Var _) = False
 hasNegPow (F _) = False
-hasNegPow (Num n) = if (n < 0) then True else False
-hasNegPow (Neg _) = True
+hasNegPow (Num _) = False
+hasNegPow (Frac _) = False
+hasNegPow (Pow _ (Neg (Num n))) = n > 0
+hasNegPow (Pow _ (Num n)) = n > 0
+hasNegPow (Pow _ (Neg (Frac f))) = f > 0
+hasNegPow (Pow _ (Frac f)) = f > 0
+hasNegPow (Neg e) = hasNegPow e
 hasNegPow (Add e1 e2) = hasNegPow e1 || hasNegPow e2
 hasNegPow (Sub e1 e2) = hasNegPow e1 || hasNegPow e2
 hasNegPow (Mul e1 e2) = hasNegPow e1 || hasNegPow e2
@@ -1167,6 +1195,7 @@ numTerms expr = length $ divid
 left :: Expr -> Expr
 left (Var x) = Var x
 left (Num n) = Num n
+left (Frac f) = Frac f
 left (F f) = F f
 left (Neg e) = Neg (left e)
 left (Add e1 e2) = e1
@@ -1179,6 +1208,7 @@ left (Pow e1 e2) = e1
 right :: Expr -> Expr
 right (Var x) = Var x
 right (Num n) = Num n
+right (Frac f) = Frac f
 right (F f) = F f
 right (Neg e) = Neg (right e)
 right (Add e1 e2) = e2
@@ -1321,29 +1351,48 @@ functionOp expr = funcOp (Nothing, Nothing) expr
 -- important (but meant to be used just to take out the function
 -- in expressions like x^2(tanx) so that we can do chisel on the first poly part. Then put
 -- them back together.
-pluckFunction :: Expr -> Expr
-pluckFunction (Num n) = Num n
-pluckFunction (Var x) = Var x
-pluckFunction (Neg e) = Neg $ pluckFunction e
-pluckFunction (F f) = Num 1
-pluckFunction (Add e1 e2) = pluckFunction e1 .+ pluckFunction e2
-pluckFunction (Sub e1 e2) = pluckFunction e1 .- pluckFunction e2
-pluckFunction (Mul e1 e2) = pluckFunction e1 .* pluckFunction e2
-pluckFunction (Div e1 e2) = pluckFunction e1 ./ pluckFunction e2
-pluckFunction p@(Pow _ _) = p
+-- TODO is it possible to change state (return expr without function) and at the same time to
+-- return a value? (Want to return changed function as well as removed function in one go...?)
+-- NOTE need to separate func from poly in x^2 sinx HELP TODO . START HERE TOMORROW @@@
+unjoinPolyFunc :: Expr -> (Expr, Maybe Expr)
+unjoinPolyFunc expr = (pluck expr, head $ getFunc expr)
+    where
+    getFunc (Num _) = [Nothing]
+    getFunc (Frac _) = [Nothing]
+    getFunc (Var _) = [Nothing]
+    getFunc (Neg e) = getFunc e
+    getFunc (F f) = [Just $ F f]
+    getFunc e
+        | isPow e1 && isPow e2 = [Nothing]
+        | isPow e1 = getFunc e2
+        | isPow e2 = getFunc e1
+        | otherwise = getFunc e1 ++ getFunc e2
+        where (e1, e2) = (left e, right e)
+
+    pluck (Num n) = Num n
+    pluck (Frac f) = Frac f
+    pluck (Var x) = Var x
+    pluck (Neg e) = Neg $ pluck e
+    pluck (F f) = Num 1
+    pluck (Add e1 e2) = pluck e1 .+ pluck e2
+    pluck (Sub e1 e2) = pluck e1 .- pluck e2
+    pluck (Mul e1 e2) = pluck e1 .* pluck e2
+    pluck (Div e1 e2) = pluck e1 ./ pluck e2
+    pluck p@(Pow _ _) = p
 
 
 -- postcondition: converts negative pow to positive by changing to div or mul.
 chisel :: Expr -> Expr
-chisel (Mul e (F f)) = chisel e .* (F $ fmap chisel f) -- TODO other way to handle this?
+-- chisel (Mul e (F f)) = chisel e .* (F $ fmap chisel f) -- TODO other way to handle this? pluckfunc?
 chisel expr
     | (length $ splitAS expr) > 1 = error "expr must not have exterior added/subtracted terms"
-    | expr' == expr = makeDivExplicit expr
+    | expr' == expr = clean $ makeDivExplicit expr
     | otherwise = chisel expr'
     where
     expr' = if (hasDiv expr) then (chiseler (makeDivExplicit expr)) else (chiseler expr)
     chiseler (Num n) = Num n
     chiseler (Var x) = Var x
+    chiseler (Frac f) = Frac f
     chiseler (Neg e) = Neg $ chiseler e
     chiseler (F f) = F f  -- TODO functor here to map inside and chisel the function args.
 
@@ -1436,6 +1485,7 @@ makeDivExplicit expr
     where
     expr' = explicit expr
     explicit (Num n) = Num n
+    explicit (Frac f) = Frac f
     explicit (Var x) = Var x
     explicit (F f) = F f
     explicit (Neg e) = Neg $ explicit e
@@ -1462,6 +1512,7 @@ makeMulExplicit expr
     where
     expr' = explicit expr
     explicit (Num n) = Num n
+    explicit (Frac f) = Frac f
     explicit (Var x) = Var x
     explicit (F f) = F f
     explicit (Neg e) = Neg $ explicit e
@@ -1530,45 +1581,63 @@ clean expr
     | otherwise = cln expr'
     where
     expr' = cln expr
+    fracZero = Frac (Rate 0)
+    fracOne = Frac (Rate 1)
     cln (Num n) = Num n
+    cln (Frac f) = Frac f
     cln (Var x) = Var x
     cln (F f) = F $ fmap cln f
     cln (Neg e) = Neg $ cln e
+    cln (Add (Frac (Rate 0)) e2) = cln e2
     cln (Add (Num 0) e2) = cln e2
+    cln (Add e1 (Frac (Rate 0))) = cln e1
     cln (Add e1 (Num 0)) = cln e1
+    cln (Sub (Frac (Rate 0)) e2) = Neg $ cln e2
     cln (Sub (Num 0) e2) = Neg $ cln e2
+    cln (Sub e1 (Frac (Rate 0))) = cln e1
     cln (Sub e1 (Num 0)) = cln e1
+    cln (Mul (Frac (Rate 1)) e2) = cln e2
     cln (Mul (Num 1) e2) = cln e2
+    cln (Mul e1 (Frac (Rate 1))) = cln e1
     cln (Mul e1 (Num 1)) = cln e1
+    cln (Mul (Frac (Rate 0)) e2) = Num 0
     cln (Mul (Num 0) e2) = Num 0
+    cln (Mul e1 (Frac (Rate 0))) = Num 0
     cln (Mul e1 (Num 0)) = Num 0
+    cln (Div e1 (Frac (Rate 0))) = error "div by zero"
     cln (Div e1 (Num 0)) = error "div by zero"
+    cln (Div (Frac (Rate 0)) e2) = Num 0
     cln (Div (Num 0) e2) = Num 0
+    cln (Div e1 (Frac (Rate 1))) = cln e1
     cln (Div e1 (Num 1)) = cln e1
+    cln (Pow e1 (Frac (Rate 0))) = Num 1
     cln (Pow e1 (Num 0)) = Num 1
+    cln (Pow e1 (Frac (Rate 1))) = cln e1
     cln (Pow e1 (Num 1)) = cln e1 --- TODO do power rules next
+    cln (Pow (Frac (Rate 0)) e2) = Num 0
     cln (Pow (Num 0) e2) = Num 0
+    cln (Pow (Frac (Rate 1)) e2) = Num 1
     cln (Pow (Num 1) e2) = Num 1
     cln (Add e1 e2)
         | (num e1 && num e2) = (Num $ (getNum e1) + (getNum e2))
         | otherwise = cln e1 .+ cln e2
-        where num x = isNegNum x || isNumNeg x || isNum x
+        where num x = isNegNumOrFrac x || isNumOrFracNeg x || isNum x
     cln (Sub e1 e2)
         | (num e1 && num e2) = (Num $ (getNum e1) - (getNum e2))
         | otherwise = cln e1 .- cln e2
-        where num x = isNegNum x || isNumNeg x || isNum x
+        where num x = isNegNumOrFrac x || isNumOrFracNeg x || isNum x
     cln (Mul e1 e2)
         | (num e1 && num e2) = (Num $ (getNum e1) * (getNum e2))
         | otherwise = cln e1 .* cln e2
-        where num x = isNegNum x || isNumNeg x || isNum x
+        where num x = isNegNumOrFrac x || isNumOrFracNeg x || isNum x
     cln (Div e1 e2)
         | (num e1 && num e2) = (Num $ (getNum e1) `div` (getNum e2))
         | otherwise = cln e1 ./ cln e2
-        where num x = isNegNum x || isNumNeg x || isNum x
+        where num x = isNegNumOrFrac x || isNumOrFracNeg x || isNum x
     cln (Pow e1 e2)
         | (num e1 && num e2) = (Num $ (getNum e1) ^ (getNum e2))
         | otherwise = cln e1 .^ cln e2
-        where num x = isNegNum x || isNumNeg x || isNum x
+        where num x = isNegNumOrFrac x || isNumOrFracNeg x || isNum x
 
 
 -- TODO major help why doesn't 4(x+3) simplify to 4x + 12, why 4x + (4)(3)?? ?
@@ -1577,6 +1646,7 @@ clean expr
 simplify :: Expr -> Expr
 simplify (Var x) = Var x
 simplify (Num n) = Num n
+simplify (Frac f) = Frac f
 simplify (F f) = F $ fmap simplify f
 
 -- TODO may not need these cases once I do operations on expression holders of arrays.
@@ -1626,7 +1696,7 @@ simplify m@(Mul (Mul (Num a) (Pow x (Num p)))
             | negNum a && isNum b = Neg a .* b .* simplify rest
             | isNum a && negNum b = Neg a .* b .* simplify rest
             | otherwise = simplify a .* simplify b .* simplify rest
-            where negNum x = isNegNum x || isNumNeg x
+            where negNum x = isNegNumOrFrac x || isNumOrFracNeg x
 
 
         -- TODO after poly stuff fix this so that we simplify functions (go to simpFuncs partition)
@@ -1846,7 +1916,7 @@ mm6' = Num 7 .* x .^ (Num (-22)) .* (F (Sin x)) .* x .^ Num 2
 testMM1' = (show $ chisel mm1') == "{((7x(8))sin(x)cos(x)) / ((x + 1)^22)}"
 testMM2' = (show $ chisel mm2') == "{((7x(8))sin(x)) / ((x + 1)^22)}"
 testMM3' = (show $ chisel mm3') == "{(7x(8)) / ((x + 1)^22)}"
-testMM4' = (show $ chisel mm4') == "{(7(8)) / (x^22)}"
+testMM4' = (show $ chisel mm4') == "{(56) / (x^22)}"
 testMM5' = (show $ chisel mm5') == "{((7)sin(x)cos(x)(8)) / (x^22)}"
 testMM6' = (show $ chisel mm6') == "{((7)sin(x)(x^2)) / (x^22)}"
 
@@ -1882,7 +1952,7 @@ testMD1' = (show $ chisel md1') == "(7x(8))sin(x)cos(x)tan(x)((x + 1)^22)"
 testMD2' = (show $ chisel md2') == "(7x(8))sin(x)cos(x)((x + 1)^22)"
 testMD3' = (show $ chisel md3') == "(7x(8))sin(x)((x + 1)^22)"
 testMD4' = (show $ chisel md4') == "7x(8)((x + 1)^22)"
-testMD5' = (show $ chisel md5') == "7(8)(x^22)"
+testMD5' = (show $ chisel md5') == "56x^22"
 testMD6' = (show $ chisel md6') == "7x^22"
 testMD7' = (show $ chisel md7') == "{(1) / (x^22)}"
 
@@ -1896,11 +1966,11 @@ dm3' = (Num 8 .* (x .+ Num 1) .^ (Neg (Num 22))) ./ ( (F (Sin x)) .* (F (Cos x))
 dm4' = ((x .+ Num 1) .^ Neg (Num 22)) ./ ( (F (Sin x)) .* (F (Cos x)))
 dm5' = ((x .+ Num 1) .^ (Neg (Num 22))) ./ ( (F (Sin x)) )
 
-testDM1' = (show $ chisel dm1') == "{({(7x(8)) / ((x + 1)^22)}) / (sin(x)cos(x))}"
-testDM2' = (show $ chisel dm2') == "{({(7x(8)) / ((x + 1)^22)})/sin(x)}"
-testDM3' = (show $ chisel dm3') == "{({(8) / ((x + 1)^22)}) / (sin(x)cos(x))}"
-testDM4' = (show $ chisel dm4') == "{({(1) / ((x + 1)^22)}) / (sin(x)cos(x))}"
-testDM5' = (show $ chisel dm5') == "{({(1) / ((x + 1)^22)})/sin(x)}"
+testDM1' = (show $ chisel dm1') == "{(7x(8)) / (((x + 1)^22)sin(x)cos(x))}"
+testDM2' = (show $ chisel dm2') == "{(7x(8)) / (((x + 1)^22)sin(x))}"
+testDM3' = (show $ chisel dm3') == "{(8) / (((x + 1)^22)sin(x)cos(x))}"
+testDM4' = (show $ chisel dm4') == "{(1) / (((x + 1)^22)sin(x)cos(x))}"
+testDM5' = (show $ chisel dm5') == "{(1) / (((x + 1)^22)sin(x))}"
 
 testDM' = testDM1' && testDM2' && testDM3' && testDM4' && testDM5'
 
