@@ -312,6 +312,9 @@ pf4 = (Num 4 .* (x .* F (Cos x)) .^ Num 11 .+ Num 9 .* x) ./ (Num 4 .* x .+ Num 
 pf5 = (Num 4 .* x .+ Num 33 .* x .^ Num (-8)) ./ (Num 4 .* (x .* F (Cos x)) .^ Num 11 .+ Num 9 .* x)
 pf6 = (Num 4 .* x .- Num 33 .* x .^ Num (-8)) ./ (Num 4 .* (x .* F (Cos x)) .^ Num 11 .+ Num 9 .* x)
 pf7 = (Num 4 .* x .- Num (-33) .* x .^ Num (-8)) ./ (Num 4 .* (x .* F (Cos x)) .^ Num 11 .+ Num 9 .* x)
+-- testing meltpoly func how it does with inner functions inside powers.
+pfhard = (x .^ Num 2) ./ (Num 5 .* x .* (Num 4 .* x .+ F (Sin x)) .^ Num 7)
+pfharder = (x .^ Num 2) ./ (Num 5 .* x .* (Num 4 .* x .+ (F (Sin x) .- Num 8) .^ Num 22) .^ Num 7)
 ---------------------------------------------------------------------------------------------
 
 
@@ -558,9 +561,12 @@ unjoinPolyFunc expr = (chisel $ pluck expr, head $ getFunc expr)
 
 
 -- postcondition: get somethning like (4x^5)(8x^2)sinx^6 and e24 and returns simplified version
--- of the polynomial or const at the front of the single function.
+-- of the polynomial or const at the front of the single function
+-- NOTE if the expr given is (x^2) / (sin x) structure then it's sent to handlePolyFunc
+-- which simplifies the different parts.
 -- note always 6 spots for zs since: sin,cos,tan,csc,sec,cot are 6 and similarly 3 for log,ln,e.
-{-meltPolyFunc :: Expr -> Expr
+{-
+meltPolyFunc :: Expr -> Expr
 meltPolyFunc expr
     | isTrig f = Trig codes
     | isInvTrig f = InvTrig codes
@@ -568,7 +574,7 @@ meltPolyFunc expr
     | isInvHyp f = InvHyp codes
     | isLogar f = Logarithmic codes
     where
-    (poly, func) = unjoinPolyFunc expr
+
     coef = decodifyPoly $ codifyPoly poly
     f = if (isPow func) then (getBase func) else func
     descr = (coef, getPow func, getArg f)
@@ -577,17 +583,24 @@ meltPolyFunc expr
     codes = if (isLogFamily f) then (put (findLoc f) descr zsLog) else (put (findLoc f) descr zs)
 -}
 
--- precondition: gets something like e27 which has structure: (top) / (bottom * func ^ 7)
+
+-- precondition: gets something like e27 or pfhard which has structure: (top) / (bottom * func ^ 7)
 -- Simplifies this reasonably without separating func from poly until necessary.
 handlePolyFunc :: Expr -> Expr
 handlePolyFunc expr
-    | isDiv expr' = Div upper' lower'
-    | otherwise = meltPolyFunc expr' 
+    | isDiv expr' = handleDiv expr'
+    | otherwise = handleMul expr'
     where
     expr' = chisel expr
-    (lower, upper) = (getLower expr', getUpper expr')
-    lower' = if (hasOnlyOneFunction lower) then (meltPolyFunc lower) else (meltPoly lower)
-    upper' = if (hasOnlyOneFunction upper) then (meltPolyFunc upper) else (meltPoly lower)
+    handleDiv e = Div upper' lower'
+        where
+        (lower, upper) = (getLower e, getUpper e)
+        lower' = if (hasOnlyOneFunction lower) then (meltPolyFunc lower) else (meltPoly lower)
+        upper' = if (hasOnlyOneFunction upper) then (meltPolyFunc upper) else (meltPoly lower)
+    handleMul e = Mul (decodifyPoly $ codifyPoly poly) (func) -- TODO clear up function exprs pfhard
+        where
+        (poly, func) = unjoinPolyFunc e
+
 
 
 
