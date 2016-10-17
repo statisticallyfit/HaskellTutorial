@@ -35,8 +35,8 @@
       <file leaf-file-name="PlanExpr.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6481481">
-              <caret line="1342" column="62" selection-start-line="1342" selection-start-column="62" selection-end-line="1342" selection-end-column="62" />
+            <state vertical-scroll-proportion="0.53367">
+              <caret line="1628" column="65" selection-start-line="1628" selection-start-column="65" selection-end-line="1628" selection-end-column="65" />
               <folding />
             </state>
           </provider>
@@ -662,12 +662,12 @@
       <workItem from="1476619209545" duration="689000" />
       <workItem from="1476620582670" duration="847000" />
       <workItem from="1476621522420" duration="10921000" />
-      <workItem from="1476682488341" duration="8678000" />
+      <workItem from="1476682488341" duration="19946000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="403743000" />
+    <option name="totallyTimeSpent" value="415011000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="52" width="969" height="761" extended-state="0" />
@@ -1075,8 +1075,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6481481">
-          <caret line="1342" column="62" selection-start-line="1342" selection-start-column="62" selection-end-line="1342" selection-end-column="62" />
+        <state vertical-scroll-proportion="0.53367">
+          <caret line="1628" column="65" selection-start-line="1628" selection-start-column="65" selection-end-line="1628" selection-end-column="65" />
           <folding />
         </state>
       </provider>

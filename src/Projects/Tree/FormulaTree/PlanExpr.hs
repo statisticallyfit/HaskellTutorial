@@ -85,8 +85,6 @@ instance Functor Function where
     fmap f (Log base x) = Log (f base) (f x)
 
 
-
-
 instance Show Op where
     show AddOp = "(+)"
     show SubOp = "(-)"
@@ -94,13 +92,11 @@ instance Show Op where
     show DivOp = "(/)"
     show PowOp = "(^)"
 
-
 instance Show Fraction where
     show (Rate ratio)
         | numerator ratio == 0 = show 0
         | denominator ratio == 1 = show (numerator ratio)
         | otherwise = (show (numerator ratio)) ++ "/" ++ (show (denominator ratio))
-
 
 -- TODO idea: count num elements and then decide whether ot put brackets.
 -- Example: x^6 * 4 is shown as 4x^6 while 4 * (x+3) is shown as 4(x+3)
@@ -206,6 +202,9 @@ instance Show Expr where
     show (Neg (Var x)) = "-" ++ x
     show (Neg e) = "-(" ++ show e ++ ")"
 
+
+
+
 --Mul (Add (Mul (Mul (Num 3) (Num 4)) (Pow (Var "x") (Num 7))) (Pow (Var "x") (Num (-8)))) (F (Tan x))
 
 -- TODO how to fmap this?
@@ -308,6 +307,11 @@ e27 = (Num 4 .* x .+ Num 5 .* x .* Num 6 .* x .^ Num 8) ./
 -- testing meltpolyfunc
 pf1 = (Num 4 .* x  .- Num 5 .* x .^ (x ./ (Num 3 .+ Num 2))) .* (F (Sin x)) .* Num 8 .* x
 pf2 = (Num 4 .* x .+ Num 33 .* x .^ Num (-8)) ./ (Num 4 .* x .* F (Cos x) .+ Num 9 .* x)
+pf3 = (Num 4 .* x .* F (Cos x) .+ Num 9 .* x) ./ (Num 4 .* x .+ Num 33 .* x .^ Num (-8))
+pf4 = (Num 4 .* (x .* F (Cos x)) .^ Num 11 .+ Num 9 .* x) ./ (Num 4 .* x .+ Num 33 .* x .^ Num (-8))
+pf5 = (Num 4 .* x .+ Num 33 .* x .^ Num (-8)) ./ (Num 4 .* (x .* F (Cos x)) .^ Num 11 .+ Num 9 .* x)
+pf6 = (Num 4 .* x .- Num 33 .* x .^ Num (-8)) ./ (Num 4 .* (x .* F (Cos x)) .^ Num 11 .+ Num 9 .* x)
+pf7 = (Num 4 .* x .- Num (-33) .* x .^ Num (-8)) ./ (Num 4 .* (x .* F (Cos x)) .^ Num 11 .+ Num 9 .* x)
 ---------------------------------------------------------------------------------------------
 
 
@@ -697,15 +701,16 @@ codifyPolyD expr
     div = divPoly upper' lower'
 
 
-decodifyPoly :: Ord Fraction => Code -> Expr
-decodifyPoly (Poly ps) = rebuildAS $ filter (\x -> not $ x == Num 0) (map clean polynomials)
+decodifyPoly :: Code -> Expr
+decodifyPoly (Poly ps) = rebuildAS $ filter notZero (map clean polynomials)
     where
+    notZero x = (not (x == Num 0))
     ns = map Frac ps
     xs = replicate (length ns) x
     pows = map Num $ [0 .. (length ns - 1)]
-    xs' = map clean $ zipWith Pow xs pows
-    ns' = map negExplicit $ zipWith Mul ns xs'
-    polynomials = [clean (head ns')] ++ tail ns'
+    xs' = zipWith Pow xs pows
+    nxs = zipWith Mul ns xs'
+    polynomials = filter notZero $ map (clean . negExplicit) nxs
 
     negOne = (-1 % 1)
     negExplicit (m@(Mul (Frac (Rate n)) p@(Pow _ _)))
@@ -927,13 +932,17 @@ isNum :: Expr -> Bool
 isNum (Num _) = True
 isNum _ = False
 
+getNum :: Expr -> Int
+getNum (Num n) = n
+getNum (Neg (Num n)) = -n
+
 isFrac :: Expr -> Bool
 isFrac (Frac _) = True
 isFrac _ = False
 
-getNum :: Expr -> Int
-getNum (Num n) = n
-getNum (Neg (Num n)) = -n
+getFrac :: Expr -> Fraction
+getFrac (Frac f) = f
+getFrac (Neg (Frac f)) = -f
 
 isNegNumOrFrac :: Expr -> Bool
 isNegNumOrFrac (Neg (Num _)) = True
@@ -1234,13 +1243,13 @@ right (Pow e1 e2) = e2
 
 
 
-
 -- rebuilds with add sub signs.
 rebuildAS :: [Expr] -> Expr
 rebuildAS es = foldl1 f es
-    where f acc x
-            | isNeg x = (Sub acc (getNeg x))
-            | otherwise = Add acc x
+    where
+    f acc x
+        | isNeg x = (Sub acc (getNeg x))
+        | otherwise = Add acc x
 
 rebuild :: Op -> [Expr] -> Expr
 {-
@@ -1322,16 +1331,27 @@ isSeparable :: Expr -> Bool
 isSeparable expr = (length $ splitAS expr) > 1
 
 
+isSepToChisel :: Expr -> Bool
+isSepToChisel (Add a (Pow b (Num p))) = True
+isSepToChisel (Add (Pow b (Num p)) a) = True
+isSepToChisel (Add a (Mul (Num n) (Pow b (Num p)))) = True
+isSepToChisel (Add (Mul (Num n) (Pow b (Num p))) a) = True
+isSepToChisel (Sub a (Pow b (Num p))) = True
+isSepToChisel (Sub (Pow b (Num p)) a) = True
+isSepToChisel (Sub a (Mul (Num n) (Pow b (Num p)))) = True
+isSepToChisel (Sub (Mul (Num n) (Pow b (Num p))) a) = True
+
 
 -- chisel (Mul e (F f)) = chisel e .* (F $ fmap chisel f) -- TODO other way to handle this? pluckfunc?
 -- ---> NOTE help check again but seems to work fine now (above)
 -- postcondition: converts negative pow to positive by changing to div or mul.
 chisel :: Expr -> Expr
-chisel expr
-    | (length $ splitAS expr) > 1 = error "expr must not have exterior added/subtracted terms"
+chisel e
+    -- | (length $ splitAS expr) > 1 = error "expr must not have exterior added/subtracted terms"
     | expr' == expr = clean $ makeDivExplicit expr
     | otherwise = chisel expr'
     where
+    expr = clean e
     expr' = if (hasDiv expr) then (chiseler (makeDivExplicit expr)) else (chiseler expr)
     chiseler (Num n) = Num n
     chiseler (Var x) = Var x
@@ -1339,14 +1359,47 @@ chisel expr
     chiseler (Neg e) = Neg $ chiseler e
     chiseler (F f) = F f  -- TODO functor here to map inside and chisel the function args.
 
-    --- note the (4x + 8x^(-22)) simplification cases
-    -- TODO first go to clean to handle neg cases. NOTE DO NOW
+    --- note the (4x + 8x^(-22)) simplification cases (with neg been pushed to outside
+    -- for non-nums and pushed inside for nums)
+    chiseler (Add a (Pow b (Num p)))
+        | p < 0 = Div (chiseler a .* chiseler b .^ Num (-1*p) .+ Num 1) (chiseler b .^ Num (-1*p))
+        | otherwise = chiseler a .+ (chiseler b .^ (Num p))
+    chiseler (Add a (Mul (Num n) (Pow b (Num p))))
+        | p < 0 = Div (chiseler a .* (chiseler b .^ Num (-1*p)) .+ Num n) (chiseler b .^ Num (-1*p))
+        | otherwise = chiseler a .+ (Num n .* (chiseler b .^ Num p))
+    {-chiseler (Div (Add a (Mul (Num n) (Pow b (Num p)))) e2)
+        | p < 0
+            = (Div (chiseler a .* (chiseler b .^ Num (-1*p)) .+ Num n)
+            (chiseler b .^ Num (-1*p)))  ./  (chiseler e2)
+        | otherwise = chiseler a .+ (Num n .* (chiseler b .^ Num p))
+-}
+    chiseler (Add (Pow b (Num p)) a)
+        | p < 0 = Div (chiseler a .* chiseler b .^ Num (-1*p) .+ Num 1) (chiseler b .^ Num (-1*p))
+        | otherwise = (chiseler b .^ Num p) .+ chiseler a
+    chiseler (Add (Mul (Num n) (Pow b (Num p))) a)
+        | p < 0 = Div (chiseler a .* (chiseler b .^ Num (-1*p)) .+ Num n) (chiseler b .^ Num (-1*p))
+        | otherwise = (Num n .* (chiseler b .^ Num p)) .+ chiseler a
+
+    chiseler (Sub a (Pow b (Num p)))
+        | p < 0 = Div (chiseler a .* chiseler b .^ Num (-1*p) .- Num 1) (chiseler b .^ Num (-1*p))
+        | otherwise = chiseler a .- (chiseler b .^ (Num p))
+    chiseler (Sub a (Mul (Num n) (Pow b (Num p))))
+        | p < 0 = Div (chiseler a .* (chiseler b .^ Num (-1*p)) .- Num n) (chiseler b .^ Num (-1*p))
+        | otherwise = chiseler a .- (Num n .* (chiseler b .^ Num p))
+
+    chiseler (Sub (Pow b (Num p)) a)
+        | p < 0 = Div (chiseler a .* chiseler b .^ Num (-1*p) .- Num 1) (chiseler b .^ Num (-1*p))
+        | otherwise = (chiseler b .^ Num p) .- chiseler a
+    chiseler (Sub (Mul (Num n) (Pow b (Num p))) a)
+        | p < 0 = Div (chiseler a .* (chiseler b .^ Num (-1*p)) .- Num n) (chiseler b .^ Num (-1*p))
+        | otherwise = (Num n .* (chiseler b .^ Num p)) .- chiseler a
+
 
     --- note: the ((n/m)/p) simplification cases
     chiseler (Div (Div a b) (Div c d)) = Div (chiseler a .* chiseler d) (chiseler b .* chiseler c)
     chiseler (Div (Div a b) other) = Div (chiseler a) (chiseler b .* chiseler other)
     chiseler (Div other (Div c d)) = Div (chiseler other .* chiseler d) (chiseler c)
-    chiseler (Div (Add a b) c)
+    {-chiseler (Div (Add a b) c)
         | isDiv a' && isDiv b'
             = Div (Add (getUpper a') (getUpper b')) (getLower a' .* getLower b' .* c')
         | isDiv a' = Div (Add (getUpper a') b') (getLower a' .* c')
@@ -1365,27 +1418,27 @@ chisel expr
         where
         a' = chiseler a
         b' = chiseler b
-        c' = chiseler c
+        c' = chiseler c -}
     ------ note the pow cases.
     -- note keeping these despite making div explicit  because result is (7 * 1) / pow
     -- instead of (7 / pow) and we get the latter if we use the below  (for mm3')
-    chiseler m@(Mul a (Pow base (Neg (Num n))))
+    chiseler (Mul a (Pow base (Neg (Num n))))
         | n >= 0 = Div (chiseler a) (Pow (chiseler base) (Num n))
         | otherwise = Mul (chiseler a) (Pow (chiseler base) (Num (-1*n)))
-    chiseler m@((Mul a (Pow base (Num n))))
+    chiseler ((Mul a (Pow base (Num n))))
         | n < 0 = Div (chiseler a) (Pow (chiseler base) (Num (-1*n)))
         | otherwise = (chiseler a) .* (chiseler base) .^ Num n
-    chiseler d@(Div a (Pow base (Neg (Num n))))
+    chiseler (Div a (Pow base (Neg (Num n))))
         | n >= 0 = Mul (chiseler a) (Pow (chiseler base) (Num n))
         | otherwise = Div (chiseler a) (Pow (chiseler base) (Num (-1*n)))
-    chiseler d@(Div a (Pow base (Num n)))
+    chiseler (Div a (Pow base (Num n)))
         | n < 0 = (chiseler a) .* (chiseler base) .^ Num (-1*n)
         | otherwise = Div (chiseler a) (Pow (chiseler base) (Num n))
 
-    chiseler p@(Pow base (Neg (Num n)))
+    chiseler (Pow base (Neg (Num n)))
         | n >= 0 = Num 1 ./ ((chiseler base) .^ Num n)
         | otherwise = (chiseler base) .^ Num (-1*n)
-    chiseler p@(Pow base (Num n))
+    chiseler (Pow base (Num n))
         | n < 0 = Num 1 ./ ((chiseler base) .^ (Num (-1*n)))
         | otherwise = (chiseler base) .^ (Num n)
 
@@ -1568,9 +1621,32 @@ clean expr
     cln (Neg (Num n)) = Num (-n)
     cln (Neg (Frac f)) = Frac (-f)
     cln (Neg (Neg e)) = cln e
+
+    cln (Add (Neg a) (Neg b)) = Neg $ cln a .+ cln b
+    cln (Add a (Neg b)) = cln a .- cln b
+    cln (Add (Neg a) b) = Neg $ cln a .- cln b
+
+-- TODO HELP later do this tedious work of simpliying negatives. 
+    -- cln (Sub a (Num n)) = if n < 0 then (cln a .+ Num (-1*n)) else (cln a .- Num n)
+{-    cln (Sub a b)
+        | isNegNumOrFrac a -}
+    cln (Sub (Neg a) (Neg b)) = Neg $ cln a .- cln b
+    cln (Sub a (Neg b)) = cln a .+ cln b
+    cln (Sub (Neg a) b) = Neg $ cln a .+ cln b
+
+    cln (Mul (Neg a) (Neg b)) = cln a .* cln b
+    cln (Mul (Neg a) b) = Neg $ cln a .* cln b
+    cln (Mul a (Neg b)) = Neg $ cln a .* cln b
+
+    cln (Div (Neg a) (Neg b)) = cln a ./ cln b
+    cln (Div (Neg a) b) = Neg $ cln a ./ cln b
+    cln (Div a (Neg b)) = Neg $ cln a ./ cln b
+
+    cln (Neg e) = Neg $ cln e
+    {-
     cln (Neg (Mul e1 e2)) = Mul (cln (Neg e1)) (cln e2)
     cln (Neg (Div e1 e2)) = Div (cln (Neg e1)) (cln e2)
-    cln (Neg (Pow base expo)) = Neg $ (cln base) .^ (cln expo)
+    cln (Neg (Pow base expo)) = Neg $ (cln base) .^ (cln expo)-}
     -- cln (Neg e) = Neg $ cln e
 
     cln (Add e1 e2) = cln e1 .+ cln e2
