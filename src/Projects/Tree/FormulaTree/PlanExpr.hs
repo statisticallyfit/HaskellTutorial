@@ -301,6 +301,13 @@ e24 = (Num 3 .* x .^ Num (-2) .* Num 4 .* x .^ Num 3 .+
 -- note test unjoin polyfunc
 e25 = Num 4 .* x .^ Num 7 .* x .* Num 8 ./ (Num 4 .* x .* F (Sin x)) .^ Num 4 .* x .* Num 3
 e26 = Num 4 .* x .^ Num 7 .* x .* Num 8 ./ (Num 4 .* x) .* F (Sin x) .^ Num 4 .* x .* Num 3
+-- note test unjoiner and codifypolyfunc
+e27 = (Num 4 .* x .+ Num 5 .* x .* Num 6 .* x .^ Num 8) ./
+    (Num 5 .* x .* ((Num 4 .* x .+ Num 3 .* F (Sin x)) .^ Num 7))
+
+-- testing meltpolyfunc
+pf1 = (Num 4 .* x  .- Num 5 .* x .^ (x ./ (Num 3 .+ Num 2))) .* (F (Sin x)) .* Num 8 .* x
+pf2 = (Num 4 .* x .+ Num 33 .* x .^ Num (-8)) ./ (Num 4 .* x .* F (Cos x) .+ Num 9 .* x)
 ---------------------------------------------------------------------------------------------
 
 
@@ -549,7 +556,7 @@ unjoinPolyFunc expr = (chisel $ pluck expr, head $ getFunc expr)
 -- postcondition: get somethning like (4x^5)(8x^2)sinx^6 and e24 and returns simplified version
 -- of the polynomial or const at the front of the single function.
 -- note always 6 spots for zs since: sin,cos,tan,csc,sec,cot are 6 and similarly 3 for log,ln,e.
-meltPolyFunc :: Expr -> Expr
+{-meltPolyFunc :: Expr -> Expr
 meltPolyFunc expr
     | isTrig f = Trig codes
     | isInvTrig f = InvTrig codes
@@ -564,6 +571,13 @@ meltPolyFunc expr
     zs = map Num $ replicate 6 0
     zsLog = map Num $ replicate 3 0
     codes = if (isLogFamily f) then (put (findLoc f) descr zsLog) else (put (findLoc f) descr zs)
+-}
+
+-- precondition: gets something like e27 which has structure: (top) / (bottom * func ^ 7)
+-- Simplifies this reasonably without separating func from poly until necessary.
+{-handlePolyFunc :: Expr ->
+handlePolyFunc expr-}
+
 
 {-
 TODO continue tomorrow here !!!! @ !!!!!
