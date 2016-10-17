@@ -298,6 +298,9 @@ e23 = (Num 3 .* x .^ Num (-2) .* Num 4 .* x .^ Num 3 .+ Num 5 .* x .^ Num 4 .* (
 e24 = (Num 3 .* x .^ Num (-2) .* Num 4 .* x .^ Num 3 .+
     Num 3 .* x .^ Num (-8) .* Num 5 .* x .^ Num 4 .* (x .+ Num 1) .^ Num 6) ./
     (Num 8 .* x .^ Num 3)  .* (F (Tan (Num (-3) .* x .^ Num 2)))
+-- note test unjoin polyfunc
+e25 = Num 4 .* x .^ Num 7 .* x .* Num 8 ./ (Num 4 .* x .* F (Sin x)) .^ Num 4 .* x .* Num 3
+e26 = Num 4 .* x .^ Num 7 .* x .* Num 8 ./ (Num 4 .* x) .* F (Sin x) .^ Num 4 .* x .* Num 3
 ---------------------------------------------------------------------------------------------
 
 
@@ -487,51 +490,18 @@ simplifyExpr expr = ps' .+ fs'
     --- TODO remember to chisel!
     (ps, fs) = partition isMono (splitAS expr)
     (gs, ggs) = partition hasOnlyOneFunction fs
-    ps' = rebuildAS $ decodifyPoly $ codifyPoly ps
+    (ggs
+    ps' = rebuildAS $ decodifyPoly $ codifyPoly (rebuildAS ps)
     gs' = rebuildAS $ map decodifySingleFunction $ codifySingleFunctions gs
-    ggs' = simplifyFunctions ggs
+    ggs' = rebuildAS $ map simplifyFunctions ggs
     fs' = gs' .+ ggs'
 -}
 
 
 
-
-{-exprToCode :: Expr -> Code
-exprToCode expr = Code $ filter (not . emptyGroup) [poly, trig, invTrig, hyp, invHyp, logs]
-    where
-    ss = split expr
-    poly = codifyPoly $ filter isPoly ss
-    trig = codifyOther $ filter isTrig ss
-    invTrig = codifyOther $ filter isTrig ss
-    hyp = codifyOther $ filter isTrig ss
-    invHyp = codifyOther $ filter isTrig ss
-    logs = codifyOther $ filter isTrig ss
-
-    emptyGroup (Poly ps) = null ps
-    emptyGroup (Trig ts) = null ts
-    emptyGroup (InvTrig is) = null is
-    emptyGroup (Hyperbolic hs) = null hs
-    emptyGroup (InvHyp is) = null is
-    emptyGroup (Logarithmic ls) = null ls-}
-
--- note
--- precondition: an expression like 3sec^2x + sinx * cosx * tanx + x^2tan^2(x) will be separated
--- from the glued and non-glued expressions. THen this function is passed the non-glued expressions,
--- whereas the glued expressions like sinxcosxtanx will get passed to simplifyFunction then both
--- come together in a simplifier function that  rebuilds the two expression lists.
--- precondition: so in short, this functino is not prepared for things like sinx * cos x * tan x
-{-
-codifyOther :: [Expr] -> Group
-codifyOther [] = Tr
--}
-
--- TODO simplifier function that uses codifyOther and exprToCode must pass the sinxcosxtanx
--- as trailing thread then rebuild the nonglued expressions with the above glued expressions
--- similar to rebuild split thing.  Remember to learn to separate by calling "hasMoreThanOneFunc"
-
-
 -- example: if functino is in "cos" family (arccos, arccosH, cos, cosh), then it gets put in certain
 -- location: sin, cos,tan, csc, sec, cot
+-- precondition: takes either pow expression with function or simple function expr.
 findLoc :: Expr -> Int
 findLoc f
     | isSinFamily f = 0
@@ -543,46 +513,58 @@ findLoc f
     | isE f = 0
     | isLn f = 1
     | isLog f = 2
-    | otherwise = error "unknown expression-function"
+
+
+
+-- precondition: expression must not be separable and must have JUST ONE function.
+-- postcondition: returns (poly part glued, function)
+-- TODO is it possible to change state (return expr without function) and at the same time to
+-- return a value? (Want to return changed function as well as removed function in one go...?)
+unjoinPolyFunc :: Expr -> (Expr, Expr)
+unjoinPolyFunc expr = (chisel $ pluck expr, head $ getFunc expr)
+    where
+    getFunc (Num _) = []
+    getFunc (Frac _) = []
+    getFunc (Var _) = []
+    getFunc (Neg e) = getFunc e
+    getFunc (F f) = [F f]
+    getFunc p@(Pow (F f) _) = [p]
+    getFunc (Pow base expo) = fmap (\result -> Pow result expo) (getFunc base)
+    getFunc e = getFunc (left e) ++ getFunc (right e)
+
+    pluck (Num n) = Num n
+    pluck (Frac f) = Frac f
+    pluck (Var x) = Var x
+    pluck (Neg e) = Neg $ pluck e
+    pluck (F f) = Num 1
+    pluck (Add e1 e2) = pluck e1 .+ pluck e2
+    pluck (Sub e1 e2) = pluck e1 .- pluck e2
+    pluck (Mul e1 e2) = pluck e1 .* pluck e2
+    pluck (Div e1 e2) = pluck e1 ./ pluck e2
+    pluck (Pow (F f) _) = Num 1 -- would be zero but expr is not separable so use 1 as id to mult.
+    pluck (Pow base expo) = (pluck base) .^ expo
 
 
 
 -- postcondition: get somethning like (4x^5)(8x^2)sinx^6 and e24 and returns simplified version
 -- of the polynomial or const at the front of the single function.
-{-
-codifyPolyWithFunction :: Expr -> Code
-codifyPolyWithFunction expr
+-- note always 6 spots for zs since: sin,cos,tan,csc,sec,cot are 6 and similarly 3 for log,ln,e.
+meltPolyFunc :: Expr -> Expr
+meltPolyFunc expr
     | isTrig f = Trig codes
     | isInvTrig f = InvTrig codes
     | isHyp f = Hyperbolic codes
     | isInvHyp f = InvHyp codes
     | isLogar f = Logarithmic codes
     where
-    -- note simplifying the polynomial part
-    (ps, (f:_)) = partition isMono (split MulOp expr)
-    dmp = chisel (rebuild MulOp ps)
-    ps' = if (isDiv dmp) then (codifyPolyD dmp) else (codifyPolyM dmp)
-    (low, upper) = if (isDiv ps') then (getLower ps', getUpper ps') else ps'
-    coef = rebuild MulOp $ decodifyPoly $ foldl1 mulPoly (map (\p -> codifyPoly [p]) ps')
-    -- note now actually making it a code (always 6 spots since: sin,cos,tan,csc,sec,cot are 6)
-    -- but there are 3 for log zs
-    descr = (coef, getPow f, getArg f)
-    zs = replicate 6 (Num 0, Num 0, Num 0)
-    zsLog = replicate 3 (Num 0, Num 0, Num 0)
+    (poly, func) = unjoinPolyFunc expr
+    coef = decodifyPoly $ codifyPoly poly
+    f = if (isPow func) then (getBase func) else func
+    descr = (coef, getPow func, getArg f)
+    zs = map Num $ replicate 6 0
+    zsLog = map Num $ replicate 3 0
     codes = if (isLogFamily f) then (put (findLoc f) descr zsLog) else (put (findLoc f) descr zs)
--}
--- precondition: must take only expression of the form:
--- 1) {(4x^3)/sin(2x)}(4)x(8)
--- OR
--- 2) (4x^3)sin(2x)(4)x(8)
-{-separateFuncFromPoly :: Expr -> (Expr, Expr)
-separateFuncFromPoly expr
-    | isDiv expr' = (psD, fD)
-    | otherwise = (psM, fM)
-    where
-    expr' = if (hasDiv expr) then (makeDivExplicit expr) else expr
-    [psD, fD] = split DivOp expr'
-    [psM, fM] = split MulOp expr'-}
+
 {-
 TODO continue tomorrow here !!!! @ !!!!!
 Need to make a divPoly function for cases like (x + x^2 + 3x^2(4x^7)(5x^3)) / x^7
@@ -639,6 +621,16 @@ makeFraction :: Int -> Fraction
 makeFraction n = Rate $ n % 1
 
 
+-- precondition: gets an expression and returns simplified version (expr must have only polys)
+meltPoly :: Expr -> Expr
+meltPoly expr
+    | isNothing mCode = fromJust mExpr
+    | otherwise = decodifyPoly (fromJust mCode)
+    where
+    (mCode, mExpr) = codifyPoly expr
+
+
+
 -- note takes a single monomial and converts it to coded form
 -- precondition: no neg powers, output of chisel, AND must be monomial.
 codifyMono :: Expr -> Code
@@ -648,14 +640,17 @@ codifyMono expr = Poly $ zs ++ [c]
     zs = map makeFraction $ replicate p 0
 
 
-codifyPoly :: Expr -> Maybe Code
+-- postcondition: returns (nothing, chiseled expr) if expr was div and had separable bottom
+-- and returns (code, nothing) if succeeded to simplify.
+codifyPoly :: Expr -> (Maybe Code, Maybe Expr)
 codifyPoly e
-    | isSeparable e = Just $ codifyPolyA e
-    | hasDiv e && (isDiv expDiv) = codifyPolyD expDiv
-    | hasDiv e && (isMul expDiv) = Just $ codifyPolyM expDiv
-    | otherwise = Just $ codifyPolyM expDiv
+    | isSeparable e = (Just $ codifyPolyA e, Nothing)
+    | hasDiv e && (isDiv expDiv) = (mCode, mExpr)
+    | hasDiv e && (isMul expDiv) = (Just $ codifyPolyM expDiv, Nothing)
+    | otherwise = (Just $ codifyPolyM expDiv, Nothing)
     where
     expDiv = makeDivExplicit e
+    (mCode, mExpr) = codifyPolyD expDiv
 
 
 -- note takes list of polynomials and makes it into Group type Poly [...]
@@ -677,16 +672,19 @@ codifyPolyM expr = foldl1 mulPoly (map codifyMono ps)
 -- precondition: takes chisel output which isDiv and which has no other div in the numerator
 -- and denominator and no negpowers. Can have add/sub in numberator though, but simplification
 -- is only possible in divpoly if denom has no add/sub.
-codifyPolyD :: Expr -> Maybe Code
-codifyPolyD expr = divPoly upper' lower'
+codifyPolyD :: Expr -> (Maybe Code, Maybe Expr)
+codifyPolyD expr
+    | isNothing div = (Nothing, Just $ Div (decodifyPoly upper') (decodifyPoly lower'))
+    | otherwise = (div, Nothing)
     where
     (lower, upper) = (getLower expr, getUpper expr)
     upper' = if (isSeparable upper) then (codifyPolyA upper) else (codifyPolyM upper)
     lower' = if (isSeparable lower) then (codifyPolyA lower) else (codifyPolyM lower)
+    div = divPoly upper' lower'
 
 
-decodifyPoly :: Ord Fraction => Code -> [Expr]
-decodifyPoly (Poly ps) = filter (\x -> not $ x == Num 0) (map clean polynomials)
+decodifyPoly :: Ord Fraction => Code -> Expr
+decodifyPoly (Poly ps) = rebuildAS $ filter (\x -> not $ x == Num 0) (map clean polynomials)
     where
     ns = map Frac ps
     xs = replicate (length ns) x
@@ -907,6 +905,9 @@ isPow _ = False
 getPow :: Expr -> Expr
 getPow (Pow base expo) = expo
 getPow expr = Num 1 -- if not an actual power, then expo is 1
+
+getBase :: Expr -> Expr
+getBase (Pow base _) = base
 
 isNum :: Expr -> Bool
 isNum (Num _) = True
@@ -1303,87 +1304,15 @@ hasOnlyOneFunction expr = (oneFunc 0 expr) == 1
     oneFunc count (Pow e1 e2) = oneFunc count e1 + oneFunc count e2
 
 
-{-
--- precondition: expression must have no add or sub and must have at least one function.
--- postcondition: takes out first function it finds, leaving the expression otherwise the same.
--- note only meant to deal with functions like x^2 sin(x) ^ (3x) or sinx ^ tan x but not sinxtanx
-extractFunction :: Expr -> Expr
-extractFunction (Mul (F f) (F g)) = Mul (Num 1) (F g)
-extractFunction (Mul (F f) e) = Mul (Num 1) e
-extractFunction (Mul e (F g)) = Mul e (Num 1)
-extractFunction (Div (F f) (F g)) = Div (Num 1) (F g)
-extractFunction (Div (F f) e) = Div (Num 1) e
-extractFunction (Div e (F g)) = Div e (Num 1)
-extractFunction (Pow (F f) (F g))
-extractFunction (Neg (F f)) = Num (-1) -- here putting into play strong assuming of no add and no sub.
-extractFunction _ = error "not a function"
--}
-
-
 isSeparable :: Expr -> Bool
 isSeparable expr = (length $ splitAS expr) > 1
 
--- note identifies what was the operation to which functino was attached.
--- precondition: needs to have one function only and expression must not be separable.
-{-
-functionOp :: Expr -> Op
-functionOp expr = funcOp (Nothing, Nothing) expr
-    where
-    funcOp (o1, o2) (Num n) = (get o1, get o2)
-    funcOp (o1, o2) (Var x) = (get o1, get o2)
-    funcOp (o1, o2) (Neg e) = funcOp (o1, o2) e
-    funcOp (o1, o2) (F f) = (get o1, get o2)
-    funcOp (o1, o2) (Pow _ _) = (get o1, get o2)
-    funcOp (o1, o2) (Mul (F f) _) = MulOp
-    funcOp (o1, o2) (Mul _ (F f)) = MulOp
-    funcOp (o1, o2) (Div (F f) _) = DivOp
-    funcOp (o1, o2) (Div _ (F f)) = DivOp
-    funcOp (o1, o2) (Add e1 e2) = (get $ funcOp (o1, o2) e1, get $ funcOp (o1, o2) e2)
-    funcOp (o1, o2) (Sub e1 e2) = (get $ funcOp (o1, o2) e1, get $ funcOp (o1, o2) e2)
-    funcOp (o1, o2) (Mul e1 e2) = (get $ funcOp (o1, o2) e1, get $ funcOp (o1, o2) e2)
-    funcOp (o1, o2) (Div e1 e2) = (get $ funcOp (o1, o2) e1, get $ funcOp (o1, o2) e2)
-    get op = if (isNothing) then "" else (show (fromJust op))
--}
-
--- note returns the expression with the function removed. (pluck out)
--- precondition: expression must not be separable.
--- postcondition: removes all functions
--- important (but meant to be used just to take out the function
--- in expressions like x^2(tanx) so that we can do chisel on the first poly part. Then put
--- them back together.
--- TODO is it possible to change state (return expr without function) and at the same time to
--- return a value? (Want to return changed function as well as removed function in one go...?)
--- NOTE need to separate func from poly in x^2 sinx HELP TODO . START HERE TOMORROW @@@
-unjoinPolyFunc :: Expr -> (Expr, Maybe Expr)
-unjoinPolyFunc expr = (pluck expr, head $ getFunc expr)
-    where
-    getFunc (Num _) = [Nothing]
-    getFunc (Frac _) = [Nothing]
-    getFunc (Var _) = [Nothing]
-    getFunc (Neg e) = getFunc e
-    getFunc (F f) = [Just $ F f]
-    getFunc e
-        | isPow e1 && isPow e2 = [Nothing]
-        | isPow e1 = getFunc e2
-        | isPow e2 = getFunc e1
-        | otherwise = getFunc e1 ++ getFunc e2
-        where (e1, e2) = (left e, right e)
-
-    pluck (Num n) = Num n
-    pluck (Frac f) = Frac f
-    pluck (Var x) = Var x
-    pluck (Neg e) = Neg $ pluck e
-    pluck (F f) = Num 1
-    pluck (Add e1 e2) = pluck e1 .+ pluck e2
-    pluck (Sub e1 e2) = pluck e1 .- pluck e2
-    pluck (Mul e1 e2) = pluck e1 .* pluck e2
-    pluck (Div e1 e2) = pluck e1 ./ pluck e2
-    pluck p@(Pow _ _) = p
 
 
+-- chisel (Mul e (F f)) = chisel e .* (F $ fmap chisel f) -- TODO other way to handle this? pluckfunc?
+-- ---> NOTE help check again but seems to work fine now (above)
 -- postcondition: converts negative pow to positive by changing to div or mul.
 chisel :: Expr -> Expr
--- chisel (Mul e (F f)) = chisel e .* (F $ fmap chisel f) -- TODO other way to handle this? pluckfunc?
 chisel expr
     | (length $ splitAS expr) > 1 = error "expr must not have exterior added/subtracted terms"
     | expr' == expr = clean $ makeDivExplicit expr
