@@ -579,8 +579,17 @@ meltPolyFunc expr
 
 -- precondition: gets something like e27 which has structure: (top) / (bottom * func ^ 7)
 -- Simplifies this reasonably without separating func from poly until necessary.
-{-handlePolyFunc :: Expr ->
-handlePolyFunc expr-}
+handlePolyFunc :: Expr -> Expr
+handlePolyFunc expr
+    | isDiv expr' = Div upper' lower'
+    | otherwise = meltPolyFunc expr' 
+    where
+    expr' = chisel expr
+    (lower, upper) = (getLower expr', getUpper expr')
+    lower' = if (hasOnlyOneFunction lower) then (meltPolyFunc lower) else (meltPoly lower)
+    upper' = if (hasOnlyOneFunction upper) then (meltPolyFunc upper) else (meltPoly lower)
+
+
 
 
 {-
@@ -639,7 +648,8 @@ makeFraction :: Int -> Fraction
 makeFraction n = Rate $ n % 1
 
 
--- precondition: gets an expression and returns simplified version (expr must have only polys)
+-- precondition: gets an expression with only polys
+-- postcondition: returns simplified version
 meltPoly :: Expr -> Expr
 meltPoly expr
     | isNothing mCode = fromJust mExpr
@@ -1331,16 +1341,6 @@ isSeparable :: Expr -> Bool
 isSeparable expr = (length $ splitAS expr) > 1
 
 
-isSepToChisel :: Expr -> Bool
-isSepToChisel (Add a (Pow b (Num p))) = True
-isSepToChisel (Add (Pow b (Num p)) a) = True
-isSepToChisel (Add a (Mul (Num n) (Pow b (Num p)))) = True
-isSepToChisel (Add (Mul (Num n) (Pow b (Num p))) a) = True
-isSepToChisel (Sub a (Pow b (Num p))) = True
-isSepToChisel (Sub (Pow b (Num p)) a) = True
-isSepToChisel (Sub a (Mul (Num n) (Pow b (Num p)))) = True
-isSepToChisel (Sub (Mul (Num n) (Pow b (Num p))) a) = True
-
 
 -- chisel (Mul e (F f)) = chisel e .* (F $ fmap chisel f) -- TODO other way to handle this? pluckfunc?
 -- ---> NOTE help check again but seems to work fine now (above)
@@ -1626,7 +1626,7 @@ clean expr
     cln (Add a (Neg b)) = cln a .- cln b
     cln (Add (Neg a) b) = Neg $ cln a .- cln b
 
--- TODO HELP later do this tedious work of simpliying negatives. 
+-- TODO HELP later do this tedious work of simpliying negatives.
     -- cln (Sub a (Num n)) = if n < 0 then (cln a .+ Num (-1*n)) else (cln a .- Num n)
 {-    cln (Sub a b)
         | isNegNumOrFrac a -}
@@ -1935,7 +1935,7 @@ mm6' = Num 7 .* x .^ (Num (-22)) .* (F (Sin x)) .* x .^ Num 2
 testMM1' = (show $ chisel mm1') == "{((7x(8))sin(x)cos(x)) / ((x + 1)^22)}"
 testMM2' = (show $ chisel mm2') == "{((7x(8))sin(x)) / ((x + 1)^22)}"
 testMM3' = (show $ chisel mm3') == "{(7x(8)) / ((x + 1)^22)}"
-testMM4' = (show $ chisel mm4') == "{(56) / (x^22)}"
+testMM4' = (show $ chisel mm4') == "{(7(8)) / (x^22)}"
 testMM5' = (show $ chisel mm5') == "{((7)sin(x)cos(x)(8)) / (x^22)}"
 testMM6' = (show $ chisel mm6') == "{((7)sin(x)(x^2)) / (x^22)}"
 
@@ -1971,7 +1971,7 @@ testMD1' = (show $ chisel md1') == "(7x(8))sin(x)cos(x)tan(x)((x + 1)^22)"
 testMD2' = (show $ chisel md2') == "(7x(8))sin(x)cos(x)((x + 1)^22)"
 testMD3' = (show $ chisel md3') == "(7x(8))sin(x)((x + 1)^22)"
 testMD4' = (show $ chisel md4') == "7x(8)((x + 1)^22)"
-testMD5' = (show $ chisel md5') == "56x^22"
+testMD5' = (show $ chisel md5') == "7(8)(x^22)"
 testMD6' = (show $ chisel md6') == "7x^22"
 testMD7' = (show $ chisel md7') == "{(1) / (x^22)}"
 
