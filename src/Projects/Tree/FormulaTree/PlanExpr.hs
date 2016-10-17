@@ -497,9 +497,8 @@ newRight e ls
 -- For those that do have more than 1 func: send to functionsimplifier.
 -- TODO help filtering is incorrect here. Learn to allow things like x^2 sinx through the filter as well
 -- not just pure trig or hyp .. functions.
-{-
 simplifyExpr :: Expr -> Expr
-simplifyExpr expr = ps' .+ fs'
+simplifyExpr expr = expr {-ps' .+ fs'
     where
     --- TODO remember to chisel!
     (ps, fs) = partition isMono (splitAS expr)
@@ -510,7 +509,6 @@ simplifyExpr expr = ps' .+ fs'
     ggs' = rebuildAS $ map simplifyFunctions ggs
     fs' = gs' .+ ggs'
 -}
-
 
 
 -- example: if functino is in "cos" family (arccos, arccosH, cos, cosh), then it gets put in certain
@@ -527,7 +525,6 @@ findLoc f
     | isE f = 0
     | isLn f = 1
     | isLog f = 2
-
 
 
 -- precondition: expression must not be separable and must have JUST ONE function.
@@ -560,30 +557,27 @@ unjoinPolyFunc expr = (chisel $ pluck expr, head $ getFunc expr)
 
 
 
--- postcondition: get somethning like (4x^5)(8x^2)sinx^6 and e24 and returns simplified version
--- of the polynomial or const at the front of the single function
--- NOTE if the expr given is (x^2) / (sin x) structure then it's sent to handlePolyFunc
--- which simplifies the different parts.
--- note always 6 spots for zs since: sin,cos,tan,csc,sec,cot are 6 and similarly 3 for log,ln,e.
-{-
-meltPolyFunc :: Expr -> Expr
-meltPolyFunc expr
+-- precondition: gets something like x^3*8x^4*sin^(8x) (3+x) with the function never being on
+-- hte bottom as denom in division.
+-- postcondition: simplified polynomials at front in code and function arg,coef,pow in code.
+codifyPolyFunc :: Expr -> Code
+codifyPolyFunc expr
     | isTrig f = Trig codes
     | isInvTrig f = InvTrig codes
     | isHyp f = Hyperbolic codes
     | isInvHyp f = InvHyp codes
     | isLogar f = Logarithmic codes
     where
-
-    coef = decodifyPoly $ codifyPoly poly
-    f = if (isPow func) then (getBase func) else func
-    descr = (coef, getPow func, getArg f)
-    zs = map Num $ replicate 6 0
-    zsLog = map Num $ replicate 3 0
+    (poly, func) = unjoinPolyFunc expr
+    (mCode, mExpr) = codifyPoly poly
+    coef = if(isNothing mCode) then (fromJust mExpr) else (decodifyPoly $ fromJust mCode)
+    f = getBase func
+    descr = (coef, simplifyExpr $ getPow func, simplifyExpr $ getArg f)
+    zs = replicate 6 (Num 0, Num 0, Num 0)
+    zsLog = replicate 3 (Num 0, Num 0, Num 0)
     codes = if (isLogFamily f) then (put (findLoc f) descr zsLog) else (put (findLoc f) descr zs)
--}
 
-
+{-
 -- precondition: gets something like e27 or pfhard which has structure: (top) / (bottom * func ^ 7)
 -- Simplifies this reasonably without separating func from poly until necessary.
 handlePolyFunc :: Expr -> Expr
@@ -600,40 +594,9 @@ handlePolyFunc expr
     handleMul e = Mul (decodifyPoly $ codifyPoly poly) (func) -- TODO clear up function exprs pfhard
         where
         (poly, func) = unjoinPolyFunc e
-
-
-
-
-
-{-
-TODO continue tomorrow here !!!! @ !!!!!
-Need to make a divPoly function for cases like (x + x^2 + 3x^2(4x^7)(5x^3)) / x^7
-*ExprPlan> let (ps, (f:_)) = partition isMono (split MulOp e16)
-*ExprPlan> ps
-[2,8,2,x^(-7),3,x]
-*ExprPlan> f
-sin(x^(-8))
-*ExprPlan> let temp = rebuild MulOp ps
-*ExprPlan> temp
-2(8)(2)(x^(-7))(3)x
-*ExprPlan> hasNegPow it
-True
-*ExprPlan> makeDivExplicit tempPs
-
-<interactive>:855:17:
-    Not in scope: `tempPs'
-    Perhaps you meant `temp' (line 852)
-*ExprPlan> makeDivExplicit temp
- [(2(8)(2)(3)x) / (x^7)]
-*ExprPlan> split MulOp it
-[2,8,2,3,x, [(1) / (x^7)] ]
-*ExprPlan> makeDivExplicit temp
- [(2(8)(2)(3)x) / (x^7)]
-*ExprPlan> split DivOp it
-[2(8)(2)(3)x,x^7]
-*ExprPlan>
-
 -}
+
+
 
 -- note gets the coefficient and power of the monomial.
 -- precondition: input needs to be a mono
@@ -660,7 +623,6 @@ getCoefPowPair (Neg e) = putNegFirst (getCoefPowPair e)
 makeFraction :: Int -> Fraction
 makeFraction n = Rate $ n % 1
 
-
 -- precondition: gets an expression with only polys
 -- postcondition: returns simplified version
 meltPoly :: Expr -> Expr
@@ -669,7 +631,6 @@ meltPoly expr
     | otherwise = decodifyPoly (fromJust mCode)
     where
     (mCode, mExpr) = codifyPoly expr
-
 
 
 -- note takes a single monomial and converts it to coded form
@@ -743,27 +704,34 @@ decodifyPoly (Poly ps) = rebuildAS $ filter notZero (map clean polynomials)
 
 
 
---addCodes :: Code -> Code -> Code
-{-
-addSingleFunctions (Trig ts) (Trig us) = simplifiedMaybes
-    where
-    add (a@(c1,p1,x1), b@(c2,p2,x2)) =
-        if (x1 == x2 && p1 == p2) then (Just (c1 .+ c2, p1, x1), Nothing)
-        else (Just a, Just b)
-    simpFirst (x,y,z) = (simplify x, y, z)
-    simpMaybe (a,b) =
-        if (isJust a && isNothing b) then (Just $ simpFirst $ fromJust a, Nothing)
-        else (a,b)
-    simplifiedMaybes = map simpMaybe $ map add (zip h1' h2')
--}
+{-addCodes :: Code -> Code -> ([Code], [Maybe Code])
+addCodes (Trig ts) (Trig us) = (Trig ts', Trig $ prepMaybeCodes us')
+    where-}
+add a@(c1,p1,x1) b@(c2,p2,x2)
+    | (x1 == x2 && p1 == p2) = ((c1 .+ c2, p1, x1), Nothing)
+    | otherwise = (a, Just b)
+simpMaybe expr@((c,p,x), maybe)
+    | isNothing maybe = ((simplifyExpr c, p, x), Nothing)
+    | otherwise = expr
+simplifiedMaybes = map simpMaybe $ zipWith add ts us
+(ts', us') = unzip simplifiedMaybes
+prepMaybeCodes ms
+    | all isNothing ms = Nothing
+    | otherwise =
+    where -- converting nothings to zero 
+    ms' = map (\x -> if (isNothing) then (Just (Num 0, Num 0, Num 0)) else x) ms
+    logDecoder
 
-list = map numify [(4,1,x), (3,1,x), (1,7,(Num 2) .* x .^ Num 5), (2,2,x),(1,1,x), (7,7,Num 7 .* x)]
-add (a@(c1,e1,x1),b@(c2,e2,x2)) = if x1 == x2 then (Just (c1 .+ c2,e1,x1), Nothing) else (Just a, Just b)
-hs = zip list list
-js = map add hs
-clean' (x,y,z) = (clean x, y, z)
-ks = map (\(a, b) -> if (isJust a && isNothing b) then (Just $ clean' $ fromJust a, Nothing) else (a,b)) js
---g (a@(c1,e1,x1), b@(c2,e2,x2)) = if (x1 == x2) then (c1 .+ c2,e1,x1) else (a,b)
+
+
+ts = map numify [(4,1,x), (3,1,x), (1,7,(Num 2) .* x .^ Num 5), (2,2,x),(1,1,x), (7,7,Num 7 .* x)]
+us = ts
+
+
+latch zs = map (\((c,e,u), f) -> c .* (push u f) .^ e) (map (\((tup, f)) -> (numify tup, f)) zs)
+numify (c,e,u) = (Num c, Num e, u)
+
+
 
 
 
@@ -906,10 +874,6 @@ groupToExpr (Logarithmic ls) = map simplify $ latch (zip ls fs)
 -}
 
 
-latch zs = map (\((c,e,u), f) -> c .* (push u f) .^ e) (map (\((tup, f)) -> (numify tup, f)) zs)
-numify (c,e,u) = (Num c, Num e, u)
-
-
 
 
 
@@ -950,6 +914,7 @@ getPow expr = Num 1 -- if not an actual power, then expo is 1
 
 getBase :: Expr -> Expr
 getBase (Pow base _) = base
+getBase e = e
 
 isNum :: Expr -> Bool
 isNum (Num _) = True
