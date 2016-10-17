@@ -1339,6 +1339,9 @@ chisel expr
     chiseler (Neg e) = Neg $ chiseler e
     chiseler (F f) = F f  -- TODO functor here to map inside and chisel the function args.
 
+    --- note the (4x + 8x^(-22)) simplification cases
+    -- TODO first go to clean to handle neg cases. NOTE DO NOW
+
     --- note: the ((n/m)/p) simplification cases
     chiseler (Div (Div a b) (Div c d)) = Div (chiseler a .* chiseler d) (chiseler b .* chiseler c)
     chiseler (Div (Div a b) other) = Div (chiseler a) (chiseler b .* chiseler other)
@@ -1530,7 +1533,6 @@ clean expr
     cln (Frac f) = Frac f
     cln (Var x) = Var x
     cln (F f) = F $ fmap cln f
-    cln (Neg e) = Neg $ cln e
     cln (Add (Frac (Rate 0)) e2) = cln e2
     cln (Add (Num 0) e2) = cln e2
     cln (Add e1 (Frac (Rate 0))) = cln e1
@@ -1561,27 +1563,25 @@ clean expr
     cln (Pow (Num 0) e2) = Num 0
     cln (Pow (Frac (Rate 1)) e2) = Num 1
     cln (Pow (Num 1) e2) = Num 1
-    cln (Add e1 e2)
-        | (num e1 && num e2) = (Num $ (getNum e1) + (getNum e2))
+
+    -- note the neg pusher cases
+    cln (Neg (Num n)) = Num (-n)
+    cln (Neg (Frac f)) = Frac (-f)
+    cln (Neg (Neg e)) = cln e
+    cln (Neg (Mul e1 e2)) = Mul (cln (Neg e1)) (cln e2)
+    cln (Neg (Div e1 e2)) = Div (cln (Neg e1)) (cln e2)
+    cln (Neg (Pow base expo)) = Neg $ (cln base) .^ (cln expo)
+    -- cln (Neg e) = Neg $ cln e
+
+    cln (Add e1 e2) = cln e1 .+ cln e2
+    cln (Sub e1 e2) = cln e1 .- cln e2
+    cln (Mul e1 e2) = cln e1 .* cln e2
+    cln (Div e1 e2) = cln e1 ./ cln e2
+    cln (Pow e1 e2) = cln e1 .^ cln e2
+    {-    | (num e1 && num e2) = (Num $ (getNum e1) + (getNum e2))
         | otherwise = cln e1 .+ cln e2
         where num x = isNegNumOrFrac x || isNumOrFracNeg x || isNum x
-    cln (Sub e1 e2)
-        | (num e1 && num e2) = (Num $ (getNum e1) - (getNum e2))
-        | otherwise = cln e1 .- cln e2
-        where num x = isNegNumOrFrac x || isNumOrFracNeg x || isNum x
-    cln (Mul e1 e2)
-        | (num e1 && num e2) = (Num $ (getNum e1) * (getNum e2))
-        | otherwise = cln e1 .* cln e2
-        where num x = isNegNumOrFrac x || isNumOrFracNeg x || isNum x
-    cln (Div e1 e2)
-        | (num e1 && num e2) = (Num $ (getNum e1) `div` (getNum e2))
-        | otherwise = cln e1 ./ cln e2
-        where num x = isNegNumOrFrac x || isNumOrFracNeg x || isNum x
-    cln (Pow e1 e2)
-        | (num e1 && num e2) = (Num $ (getNum e1) ^ (getNum e2))
-        | otherwise = cln e1 .^ cln e2
-        where num x = isNegNumOrFrac x || isNumOrFracNeg x || isNum x
-
+    -}
 
 -- TODO major help why doesn't 4(x+3) simplify to 4x + 12, why 4x + (4)(3)?? ?
 -- TODO probably because this has gotten too old - perhaps ther eis a case that goes ahead of the
