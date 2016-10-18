@@ -109,7 +109,9 @@ instance Show Expr where
     show (Neg (Num n)) = if (n < 0) then ("-(" ++ show n ++ ")") else ("-" ++ show n)
     show (F func) = show func
     show (Add e1 e2) = show e1 ++ " + " ++ show e2
-    show (Sub e1 e2) = show e1 ++ " - " ++ show e2
+    show (Sub e1 e2)
+        | isSeparable e2 = show e1 ++ " - [" ++ show e2 ++ "]"
+        | otherwise = show e1 ++ " - " ++ show e2
 
     show (Mul (Num n) (F f)) = show n ++ show f
     show (Mul (Frac (Rate n)) (F f))
@@ -131,9 +133,10 @@ instance Show Expr where
     show (Mul (Mul (Num n) pow@(Mul b (Pow _ _))) c)
         = "(" ++ show n ++ ")" ++ show pow ++ "(" ++ show b ++ ")"
     show (Mul (Mul a pow@(Mul b (Pow _ _))) c) = show a ++ show pow ++ "(" ++ show b ++ ")"
-    show (Mul maybeMono (F f))
-        | isMono maybeMono = "(" ++ show maybeMono ++ ")" ++ show f
-        | otherwise = show maybeMono ++ show f
+    show (Mul other (F f))
+        | many other = "(" ++ show other ++ ")" ++ show f
+        | otherwise = show other ++ show f
+        where many e = isSeparable e || isMono e || isPow e
     show (Mul e1 ng@(Neg (Num n)))
         = if (n >= 0)
         then (show e1 ++ "(-" ++ show n ++ ")")
@@ -488,6 +491,7 @@ newRight e ls
     | isMul e = [(last ls) .* foldl1 Mul (split MulOp (right e))]
     | isDiv e = [(last ls) ./ foldl1 Div (split DivOp (right e))]
     | isPow e = [(last ls) .^ foldl1 Pow (split PowOp (right e))]
+    | otherwise = [e]
 
 
 ---------------------------------------------------------
@@ -803,6 +807,14 @@ handlePolyFunc expr
         (poly, func) = unjoinPolyFunc e
 -}
 
+-- precondition: takes something like  x^3*8x^4*sin^(8x) (3+x) (many of them that are separable)
+-- with the function never being onthe bottom as denom in division.
+-- postcondition: returns simplified version of it and rebuildsAS
+-- note gets input from distribute function in simplifyExpr.
+meltPolyFunc :: Expr -> Expr
+meltPolyFunc expr = rebuildAS es'
+    where es = splitAS (distribute expr)
+          es' = map (decodePolyFunc . codifyPolyFunc) es
 
 
 -- precondition: gets something like x^3*8x^4*sin^(8x) (3+x) with the function never being on
@@ -852,8 +864,23 @@ polyFuncDecoder n ts = rebuildAS $ map clean fs'
     findFuncFamily 3 = map F [Arcsinh x, Arccosh x, Arctanh x, Arccsch x, Arcsech x, Arccoth x]
     findFuncFamily 4 = map F [E x, Ln x, Log x x]
 
-    negExplicit (Num n) = if n < 0 then (Neg (Num (-1*n))) else (Num n)
-    negExplicit f@(Frac (Rate n)) = if n < 0 then (Neg (Frac $ Rate (-1*n))) else f
+    {-negExplicit (Num n) = if n < 0 then (Neg (Num (-1*n))) else (Num n)
+    negExplicit f@(Frac (Rate n)) = if n < 0 then (Neg (Frac $ Rate (-1*n))) else f-}
+
+-- brings the neg out to the front
+negExplicit :: Expr -> Expr
+negExplicit e@(Num n) = if n < 0 then (Neg (Num (-1*n))) else e
+negExplicit e@(Frac (Rate n)) = if n < 0 then (Neg (Frac (Rate (-1*n)))) else e
+negExplicit e@(F f) = e
+negExplicit e@(Var x) = e
+negExplicit (Neg (Neg n)) = negExplicit n
+negExplicit (Neg n) = Neg $ negExplicit n
+negExplicit e@(Add a b) = Add (negExplicit a) (negExplicit b)
+negExplicit e@(Sub a b) = Sub (negExplicit a) (negExplicit b)
+negExplicit e@(Mul a b) = Mul (negExplicit a) (negExplicit b)
+negExplicit e@(Div a b) = Div (negExplicit a) (negExplicit b)
+negExplicit e@(Pow a b) = Pow (negExplicit a) (negExplicit b)
+
 
 {-note was used for testing decodepolyfunc
 ts = map numify [(-4,1,x), (3,1,x), (1,7,(Num 2) .* x .^ Num 5), (-2,2,x),(1,1,x), (7,7,Num 7 .* x)]
@@ -1411,6 +1438,7 @@ hasManyFunctions expr = (countFunc 0 expr) > 1
 countFunc :: Int -> Expr -> Int
 countFunc c (Num n) = c
 countFunc c (Var x) = c
+countFunc c (Frac f) = c
 countFunc c (F f) = c + 1
 countFunc c (Neg e) = countFunc c e
 countFunc c (Add e1 e2) = countFunc c e1 + countFunc c e2
@@ -1701,6 +1729,35 @@ isFunction _ = False
 push :: Expr -> Expr -> Expr
 push newExpr (F f) = F $ fmap (\oldExpr -> newExpr) f
 
+
+-- postcondition:
+-- 1) distributes minus signs
+-- 2) distributes neg signs
+-- 3) distributes (separable) * (separable)
+distribute :: Expr -> Expr
+distribute expr
+    | expr' == expr = expr
+    | otherwise = distribute expr'
+    where
+    expr' = dist expr
+    dist (Num n) = Num n
+    dist (Frac f) = Frac f
+    dist (Var x) = Var x
+    dist (F f) = F f
+    dist (Neg e)
+        | isAdd e = (dist (Neg a)) .- (dist b)
+        | isSub e = (dist (Neg a)) .+ (dist b)
+        | otherwise = Neg (dist e)
+        where (a, b) = (left e, right e)
+    dist (Sub a (Sub b c)) = (dist a .- dist b) .+ (dist c)
+    dist (Sub a (Add b c)) = (dist a .- dist b) .- (dist c)
+    dist (Add a (Sub b c)) = (dist a .+ dist b) .- (dist c)
+    dist (Add a (Add b c)) = (dist a .+ dist b) .+ (dist c)
+    dist (Add a b) = Add (dist a) (dist b)
+    dist (Sub a b) = Sub (dist a) (dist b)
+    dist (Mul a b) = Mul (dist a) (dist b)
+    dist (Div a b) = Div (dist a) (dist b)
+    dist (Pow a b) = Pow (dist a) (dist b)
 
 
 clean :: Expr -> Expr
