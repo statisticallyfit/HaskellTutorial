@@ -506,14 +506,15 @@ newRight e ls
 -- TODO help filtering is incorrect here. Learn to allow things like x^2 sinx through the filter as well
 -- not just pure trig or hyp .. functions.
 simplifyExpr :: Expr -> Expr
-simplifyExpr expr = expr {-ps' .+ fs'
+simplifyExpr e = e {-ps' .+ fs'
     where
+    expr = chisel e
     --- TODO remember to chisel!
     (ps, fs) = partition isMono (splitAS expr)
     (gs, ggs) = partition hasOnlyOneFunction fs
     (ggs
-    ps' = decodifyPoly $ codifyPoly (rebuildAS ps)
-    gs' = rebuildAS $ map decodifySingleFunction $ codifySingleFunctions gs
+    ps' = decodePoly $ codifyPoly (rebuildAS ps)
+    gs' = rebuildAS $ map decodePolyFunc $ codifyPolyFunc gs
     ggs' = rebuildAS $ map simplifyFunctions ggs
     fs' = gs' .+ ggs'
 -}
@@ -578,7 +579,7 @@ codifyPolyFunc expr
     where
     (poly, func) = unjoinPolyFunc expr
     (mCode, mExpr) = codifyPoly poly
-    coef = if(isNothing mCode) then (fromJust mExpr) else (decodifyPoly $ fromJust mCode)
+    coef = if(isNothing mCode) then (fromJust mExpr) else (decodePoly $ fromJust mCode)
     f = getBase func
     descr = (coef, simplifyExpr $ getPow func, simplifyExpr $ getArg f)
     zs = replicate 6 (Num 0, Num 0, Num 0)
@@ -599,7 +600,7 @@ handlePolyFunc expr
         (lower, upper) = (getLower e, getUpper e)
         lower' = if (hasOnlyOneFunction lower) then (meltPolyFunc lower) else (meltPoly lower)
         upper' = if (hasOnlyOneFunction upper) then (meltPolyFunc upper) else (meltPoly lower)
-    handleMul e = Mul (decodifyPoly $ codifyPoly poly) (func) -- TODO clear up function exprs pfhard
+    handleMul e = Mul (decodePoly $ codifyPoly poly) (func) -- TODO clear up function exprs pfhard
         where
         (poly, func) = unjoinPolyFunc e
 -}
@@ -636,7 +637,7 @@ makeFraction n = Rate $ n % 1
 meltPoly :: Expr -> Expr
 meltPoly expr
     | isNothing mCode = fromJust mExpr
-    | otherwise = decodifyPoly (fromJust mCode)
+    | otherwise = decodePoly (fromJust mCode)
     where
     (mCode, mExpr) = codifyPoly expr
 
@@ -684,7 +685,7 @@ codifyPolyM expr = foldl1 mulPoly (map codifyMono ps)
 -- is only possible in divpoly if denom has no add/sub.
 codifyPolyD :: Expr -> (Maybe Code, Maybe Expr)
 codifyPolyD expr
-    | isNothing div = (Nothing, Just $ Div (decodifyPoly upper') (decodifyPoly lower'))
+    | isNothing div = (Nothing, Just $ Div (decodePoly upper') (decodePoly lower'))
     | otherwise = (div, Nothing)
     where
     (lower, upper) = (getLower expr, getUpper expr)
@@ -693,8 +694,8 @@ codifyPolyD expr
     div = divPoly upper' lower'
 
 
-decodifyPoly :: Code -> Expr
-decodifyPoly (Poly ps) = rebuildAS $ filter notZero (map clean polynomials)
+decodePoly :: Code -> Expr
+decodePoly (Poly ps) = rebuildAS $ filter notZero (map clean polynomials)
     where
     notZero x = (not (x == Num 0))
     ns = map Frac ps
@@ -808,7 +809,7 @@ polyFuncDecoder n ts = rebuildAS $ map clean fs'
     negExplicit f@(Frac (Rate n)) = if n < 0 then (Neg (Frac $ Rate (-1*n))) else f
 
 
-{-note was used for testing decodepolyfunc 
+{-note was used for testing decodepolyfunc
 ts = map numify [(-4,1,x), (3,1,x), (1,7,(Num 2) .* x .^ Num 5), (-2,2,x),(1,1,x), (7,7,Num 7 .* x)]
 us = ts-}
 
@@ -837,8 +838,8 @@ elongate xs ys toElongateWith = (xs ++ (replicate (toLen - (length xs)) toElonga
 -- Note all these functions with poly below assume the ps inside the Poly are added.
 addPoly :: Code -> Code -> Code
 addPoly (Poly ps) (Poly qs) = Poly (zipWith (+) ps' qs')
-    where
-    (ps', qs') = elongate ps qs (makeFraction 0)
+    where (ps', qs') = elongate ps qs (makeFraction 0)
+
 
 subPoly :: Code -> Code -> Code
 subPoly (Poly ps) (Poly qs) = Poly (zipWith (-) ps' qs')
