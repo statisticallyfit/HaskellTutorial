@@ -512,7 +512,7 @@ simplifyExpr expr = expr {-ps' .+ fs'
     (ps, fs) = partition isMono (splitAS expr)
     (gs, ggs) = partition hasOnlyOneFunction fs
     (ggs
-    ps' = rebuildAS $ decodifyPoly $ codifyPoly (rebuildAS ps)
+    ps' = decodifyPoly $ codifyPoly (rebuildAS ps)
     gs' = rebuildAS $ map decodifySingleFunction $ codifySingleFunctions gs
     ggs' = rebuildAS $ map simplifyFunctions ggs
     fs' = gs' .+ ggs'
@@ -711,81 +711,106 @@ decodifyPoly (Poly ps) = rebuildAS $ filter notZero (map clean polynomials)
 
 
 
-
-{-addCodes :: Code -> Code -> Expr   -- ([Code], [Maybe Code])
-addCodes (Trig ts) (Trig us) = (Trig ts', Trig $ prepMaybeCodes us')
-    where-}
-add a@(c1,p1,x1) b@(c2,p2,x2)
-    | (x1 == x2 && p1 == p2) = ((c1 .+ c2, p1, x1), Nothing)
-    | otherwise = (a, Just b)
-simpMaybe expr@((c,p,x), maybe)
-    | isNothing maybe = ((simplifyExpr c, p, x), Nothing)
-    | otherwise = expr
-simplifiedMaybes = map simpMaybe $ zipWith add ts us
-(ts', us') = unzip simplifiedMaybes
-{-
-prepMaybeCodes ms
-    | all isNothing ms = Nothing
-    | otherwise =
-    where -- converting nothings to zero
-    ms' = map (\x -> if (isNothing) then (Just (Num 0, Num 0, Num 0)) else x) ms
-    logDecoder
--}
+-- note just like addCodesM except can be used with foldl
+-- addCodes :: Code -> Code
 
 
-
-decodeTrig :: Code -> Expr
-decodeTrig (Trig ts) = rebuildAS $ map clean trigs'
+-- postcondition: if the pows and args are equal then we add the coeffs.
+addCodesM :: [Description] -> [Description] -> ([Description], [Description])
+addCodesM ts us = (ts', prepMaybeCodes us')
     where
-    args = map (\(_,_,x) -> x) ts
-    coefs = map (\(c,_,_) -> c) ts
-    pows = map (\(_,p,_) -> p) ts
-    trigs = map F [Sin x, Cos x, Tan x, Csc x, Sec x, Cot x]
-    trigs' = zipWith Mul coefs (zipWith Pow (zipWith push args trigs) pows)
+    add a@(c1,p1,x1) b@(c2,p2,x2)
+        | (x1 == x2 && p1 == p2) = ((c1 .+ c2, p1, x1), Nothing)
+        | otherwise = (a, Just b)
+    simpMaybe expr@((c,p,x), maybe)
+        | isNothing maybe = ((simplifyExpr c, p, x), Nothing)
+        | otherwise = expr
+    simplifiedMaybes = map simpMaybe $ zipWith add ts us
+    (ts', us') = unzip simplifiedMaybes
+    prepMaybeCodes ms = ms''
+        where
+        ms' = map (\m -> if isNothing m then (Just (Num 0, Num 0, Num 0)) else m) ms
+        ms'' = catMaybes ms' -- (removing all the justs and leaving args)
 
-decodeInvTrig :: Code -> Expr
-decodeInvTrig (InvTrig is) = rebuildAS $ map clean invTrigs'
+
+
+-- postcondition: if the args are equal then we mul coeffs and add pows.
+mulCodesM :: [Description] -> [Description] -> ([Description], [Description])
+mulCodesM ts us = (ts', prepMaybeCodes us')
     where
-    args = map (\(_,_,x) -> x) is
-    coefs = map (\(c,_,_) -> c) is
-    pows = map (\(_,p,_) -> p) is
-    invTrigs = map F [Arcsin x, Arccos x, Arctan x, Arccsc x, Arcsec x, Arccot x]
-    invTrigs' = zipWith Mul coefs (zipWith Pow (zipWith push args invTrigs) pows)
+    mul a@(c1,p1,x1) b@(c2,p2,x2)
+        | (x1 == x2) = ((c1 .* c2, p1 .+ p2, x1), Nothing)
+        | otherwise = (a, Just b)
+    simpMaybe expr@((c,p,x), maybe)
+        | isNothing maybe = ((simplifyExpr c, p, x), Nothing)
+        | otherwise = expr
+    simplifiedMaybes = map simpMaybe $ zipWith mul ts us
+    (ts', us') = unzip simplifiedMaybes
+    prepMaybeCodes ms = ms''
+        where
+        ms' = map (\m -> if isNothing m then (Just (Num 0, Num 0, Num 0)) else m) ms
+        ms'' = catMaybes ms' -- (removing all the justs and leaving args)
 
-decodeHyp :: Code -> Expr
-decodeHyp (Hyperbolic hs) = rebuildAS $ map clean hyps'
+
+
+-- postcondition: if the args are equal then we div coeffs and subtract pows.
+-- note help why doesn't this work:
+    -- | (x1 == x2) && (numOrFrac c1 c2) = ((Frac $ Rate zn, p1 .- p2, x1), Nothing)
+divCodesM :: [Description] -> [Description] -> ([Description], [Description])
+divCodesM ts us = (ts', prepMaybeCodes us')
     where
-    args = map (\(_,_,x) -> x) hs
-    coefs = map (\(c,_,_) -> c) hs
-    pows = map (\(_,p,_) -> p) hs
-    hyps = map F [Sinh x, Cosh x, Tanh x, Csch x, Sech x, Coth x]
-    hyps' = zipWith Mul coefs (zipWith Pow (zipWith push args hyps) pows)
+    divd a@(c1,p1,x1) b@(c2,p2,x2)
+        | x1 == x2 = ((c1 ./ c2, p1 .- p2, x1), Nothing)
+        | otherwise = (a, Just b)
+        where numOrFrac x y = (isNum x || isFrac x) && (isNum y || isFrac y)
+              (Rate xn) = getNumOrFrac x
+              (Rate yn) = getNumOrFrac y
+              zn = ((numerator xn) * (denominator yn)) % ((denominator xn) * (numerator yn))
+    simpMaybe expr@((c,p,x), maybe)
+        | isNothing maybe = ((simplifyExpr c, p, x), Nothing)
+        | otherwise = expr
+    simplifiedMaybes = map simpMaybe $ zipWith divd ts us
+    (ts', us') = unzip simplifiedMaybes
+    prepMaybeCodes ms = ms''
+        where
+        ms' = map (\m -> if isNothing m then (Just (Num 0, Num 0, Num 0)) else m) ms
+        ms'' = catMaybes ms' -- (removing all the justs and leaving args)
 
-decodeInvHyp :: Code -> Expr
-decodeInvHyp (InvHyp is) = rebuildAS $ map clean invHyps'
+
+
+
+decodePolyFunc :: Code -> Expr
+decodePolyFunc (Trig ts) = polyFuncDecoder 0 ts
+decodePolyFunc (InvTrig ts) = polyFuncDecoder 1 ts
+decodePolyFunc (Hyperbolic hs) = polyFuncDecoder 2 hs
+decodePolyFunc (InvHyp hs) = polyFuncDecoder 3 hs
+decodePolyFunc (Logarithmic ls) = polyFuncDecoder 4 ls
+
+
+-- note the Int is a code: 0 = Trig, 1  = InvTrig, 2 = Hyperbolic, 3 =InvHyp, 4 = Logarithmic.
+polyFuncDecoder :: Int -> [Description] -> Expr
+polyFuncDecoder n ts = rebuildAS $ map clean fs'
     where
-    args = map (\(_,_,x) -> x) is
-    coefs = map (\(c,_,_) -> c) is
-    pows = map (\(_,p,_) -> p) is
-    invHyps = map F [Arcsinh x, Arccosh x, Arctanh x, Arccsch x, Arcsech x, Arccoth x]
-    invHyps' = zipWith Mul coefs (zipWith Pow (zipWith push args invHyps) pows)
+    ts' = filter (\(c,_,_) -> (not (c == Num 0)) && (not (c == Frac (Rate 0)))) ts
+    args = map (\(_,_,x) -> x) ts'
+    coefs = map negExplicit $ map (\(c,_,_) -> c) ts'
+    pows = map (\(_,p,_) -> p) ts'
+    fs = findFuncFamily n
+    fs' = zipWith Mul coefs (zipWith Pow (zipWith push args fs) pows)
 
--- note length of ls must be at 3 exactly
- -- HELP TODO hwo to treat log() separately so that we get different base and arg? 
-decodeLogs :: Code -> Expr
-decodeLogs (Logarithmic ls) = rebuildAS $ map clean logs'
-    where
-    args = map (\(_,_,x) -> x) ls
-    coefs = map (\(c,_,_) -> c) ls
-    pows = map (\(_,p,_) -> p) ls
-    logs = map F [E x, Ln x, Log x x]
-    logs' = zipWith Mul coefs (zipWith Pow (zipWith push args logs) pows)
+    findFuncFamily 0 = map F [Sin x, Cos x, Tan x, Csc x, Sec x, Cot x]
+    findFuncFamily 1 = map F [Arcsin x, Arccos x, Arctan x, Arccsc x, Arcsec x, Arccot x]
+    findFuncFamily 2 = map F [Sinh x, Cosh x, Tanh x, Csch x, Sech x, Coth x]
+    findFuncFamily 3 = map F [Arcsinh x, Arccosh x, Arctanh x, Arccsch x, Arcsech x, Arccoth x]
+    findFuncFamily 4 = map F [E x, Ln x, Log x x]
 
+    negExplicit (Num n) = if n < 0 then (Neg (Num (-1*n))) else (Num n)
+    negExplicit f@(Frac (Rate n)) = if n < 0 then (Neg (Frac $ Rate (-1*n))) else f
 
 
-
-ts = map numify [(4,1,x), (3,1,x), (1,7,(Num 2) .* x .^ Num 5), (2,2,x),(1,1,x), (7,7,Num 7 .* x)]
-us = ts
+{-note was used for testing decodepolyfunc 
+ts = map numify [(-4,1,x), (3,1,x), (1,7,(Num 2) .* x .^ Num 5), (-2,2,x),(1,1,x), (7,7,Num 7 .* x)]
+us = ts-}
 
 
 latch zs = map (\((c,e,u), f) -> c .* (push u f) .^ e) (map (\((tup, f)) -> (numify tup, f)) zs)
@@ -978,6 +1003,7 @@ getBase e = e
 
 isNum :: Expr -> Bool
 isNum (Num _) = True
+isNum (Neg (Num _)) = True
 isNum _ = False
 
 getNum :: Expr -> Int
@@ -986,11 +1012,17 @@ getNum (Neg (Num n)) = -n
 
 isFrac :: Expr -> Bool
 isFrac (Frac _) = True
+isFrac (Neg (Frac _)) = True
 isFrac _ = False
 
 getFrac :: Expr -> Fraction
 getFrac (Frac f) = f
 getFrac (Neg (Frac f)) = -f
+
+getNumOrFrac :: Expr -> Fraction
+getNumOrFrac expr
+    | isNum expr  = Rate $ (getNum expr) % 1
+    | isFrac expr = getFrac expr
 
 isNegNumOrFrac :: Expr -> Bool
 isNegNumOrFrac (Neg (Num _)) = True
