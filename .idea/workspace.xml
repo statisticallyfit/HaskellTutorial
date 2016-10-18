@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bc679e25-6068-417c-8b02-1d7896297961" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Rose.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Rose.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -36,8 +36,8 @@
       <file leaf-file-name="PlanExpr.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6786941">
-              <caret line="876" column="12" selection-start-line="876" selection-start-column="12" selection-end-line="876" selection-end-column="12" />
+            <state vertical-scroll-proportion="0.45017183">
+              <caret line="859" column="47" selection-start-line="859" selection-start-column="47" selection-end-line="859" selection-end-column="47" />
               <folding />
             </state>
           </provider>
@@ -778,12 +778,12 @@
       <workItem from="1476620582670" duration="847000" />
       <workItem from="1476621522420" duration="10921000" />
       <workItem from="1476682488341" duration="29656000" />
-      <workItem from="1476769617181" duration="20318000" />
+      <workItem from="1476769617181" duration="26664000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="445039000" />
+    <option name="totallyTimeSpent" value="451385000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="52" width="969" height="749" extended-state="0" />
@@ -1192,8 +1192,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6786941">
-          <caret line="876" column="12" selection-start-line="876" selection-start-column="12" selection-end-line="876" selection-end-column="12" />
+        <state vertical-scroll-proportion="0.45017183">
+          <caret line="859" column="47" selection-start-line="859" selection-start-column="47" selection-end-line="859" selection-end-column="47" />
           <folding />
         </state>
       </provider>

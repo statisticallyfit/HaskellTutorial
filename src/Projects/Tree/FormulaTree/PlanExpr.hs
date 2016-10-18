@@ -216,6 +216,7 @@ instance Show Expr where
 
 
 
+
 --Mul (Add (Mul (Mul (Num 3) (Num 4)) (Pow (Var "x") (Num 7))) (Pow (Var "x") (Num (-8)))) (F (Tan x))
 
 -- TODO how to fmap this?
@@ -323,6 +324,14 @@ pf4 = (Num 4 .* (x .* F (Cos x)) .^ Num 11 .+ Num 9 .* x) ./ (Num 4 .* x .+ Num 
 pf5 = (Num 4 .* x .+ Num 33 .* x .^ Num (-8)) ./ (Num 4 .* (x .* F (Cos x)) .^ Num 11 .+ Num 9 .* x)
 pf6 = (Num 4 .* x .- Num 33 .* x .^ Num (-8)) ./ (Num 4 .* (x .* F (Cos x)) .^ Num 11 .+ Num 9 .* x)
 pf7 = (Num 4 .* x .- Num (-33) .* x .^ Num (-8)) ./ (Num 4 .* (x .* F (Cos x)) .^ Num 11 .+ Num 9 .* x)
+
+e = x .* Num 3 .* Num 2 .* x .^ Num 9 .* (F (Sin x)) .+
+    Num (-2) .* x .* Num 8 .* ((F (Sin x)) .^ (x .^ Num 2)) .-
+    (Num 2 .* x .* Num 8 .* ((F (Sin x)) .^ (x .^ Num 2)) .-
+    Num 2 .* Num 7 .* x .* Num 3 .* Num 2 .* x .^ Num 9 .* (F (Sin x)) .-
+    (Num 8 .* F (Cos x) .-
+    (Num 3 .+ x) .* (F (Cos x)) ) )
+
 -- testing meltpoly func how it does with inner functions inside powers.
 pfhard = (x .^ Num 2) ./ (Num 5 .* x .* (Num 4 .* x .+ F (Sin x)) .^ Num 7)
 pfharder = (x .^ Num 2) ./ (Num 5 .* x .* (Num 4 .* x .+ (F (Sin x) .- Num 8) .^ Num 22) .^ Num 7)
@@ -355,7 +364,7 @@ assuming arg was X for both. same for div
 ---
 
 Clean up with sweep Num
-
+ALSO: order: distribute, negExplicit, then clean the simplified expr and input to simplifyExpr function
 
 
 ** Also make function called rearrange or organize that transforms:
@@ -387,6 +396,7 @@ splitAS expr = concatMap (split SubOp) (split AddOp expr)
 -- split MulOp e5   ==>    [-(4),-x,-(2),-y] which is not correct
 -- but we can do instead:
 -- split SubOp e5   ==>    [-4x,-2y]
+-- precondition: must take output from distribute (doesn't work on unflattened or unstacked exprs)
 split :: Op -> Expr -> [Expr]
 split _ (Var x) = [Var x]
 split _ (Num n) = [Num n]
@@ -658,10 +668,6 @@ decodePoly (Poly ps) = rebuildAS $ filter notZero (map clean polynomials)
     nxs = zipWith Mul ns xs'
     polynomials = filter notZero $ map (clean . negExplicit) nxs
 
-    negOne = (-1 % 1)
-    negExplicit (m@(Mul (Frac (Rate n)) p@(Pow _ _)))
-        = if (n < 0) then (Neg ((Frac (Rate $ negOne * n)) .* p)) else m
-    negExplicit e = e
 
 
 -- Note all these functions with poly below assume the ps inside the Poly are added.
@@ -813,8 +819,46 @@ handlePolyFunc expr
 -- note gets input from distribute function in simplifyExpr.
 meltPolyFunc :: Expr -> Expr
 meltPolyFunc expr = rebuildAS es'
-    where es = splitAS (distribute expr)
+    where es = splitAS (clean $ negExplicit $ distribute expr) -- TODO have this seq in simpExpr not here
           es' = map (decodePolyFunc . codifyPolyFunc) es
+
+-- note takes list of [Trig [..], InvTrig [], Trig []...] and gathers all same family
+-- functions and adds them up.
+-- Returns list because we many have same family func left that are not addable.
+{-
+addCodes :: [Code] -> [Code]
+addCodes
+
+-- note given [Trig [], Trig[]] but with Trig part removed.
+adder :: [[Description]]
+-}
+
+{-
+adder :: [Code] ->
+adder [] = []
+adder cs
+    where
+    codeWrap = code (head cs)
+    cs' = map ()
+-}
+
+
+
+gather :: [Code] -> [[Code]]
+gather [] = [[]]
+gather codes = gather' [] [] [] [] [] codes
+    where
+    gather' ts its hs ihs ls [] = [ts] ++ [its] ++ [hs] ++ [ihs] ++ [ls]
+    gather' ts its hs ihs ls (xs@(Trig _) : rest)
+        = gather' (ts ++ [xs]) its hs ihs ls rest
+    gather' ts its hs ihs ls (xs@(InvTrig _) : rest)
+        = gather' ts (its ++ [xs]) hs ihs ls rest
+    gather' ts its hs ihs ls (xs@(Hyperbolic _) : rest)
+        = gather' ts its (hs ++ [xs]) ihs ls rest
+    gather' ts its hs ihs ls (xs@(InvHyp _) : rest)
+        = gather' ts its hs (ihs ++ [xs]) ls rest
+    gather' ts its hs ihs ls (xs@(Logarithmic _) : rest)
+        = gather' ts its hs ihs (ls ++ [xs]) rest
 
 
 -- precondition: gets something like x^3*8x^4*sin^(8x) (3+x) with the function never being on
@@ -829,8 +873,7 @@ codifyPolyFunc expr
     | isLogar f = Logarithmic codes
     where
     (poly, func) = unjoinPolyFunc expr
-    (mCode, mExpr) = codifyPoly poly
-    coef = if(isNothing mCode) then (fromJust mExpr) else (decodePoly $ fromJust mCode)
+    coef = meltPoly poly
     f = getBase func
     descr = (coef, simplifyExpr $ getPow func, simplifyExpr $ getArg f)
     zs = replicate 6 (Num 0, Num 0, Num 0)
@@ -864,22 +907,30 @@ polyFuncDecoder n ts = rebuildAS $ map clean fs'
     findFuncFamily 3 = map F [Arcsinh x, Arccosh x, Arctanh x, Arccsch x, Arcsech x, Arccoth x]
     findFuncFamily 4 = map F [E x, Ln x, Log x x]
 
-    {-negExplicit (Num n) = if n < 0 then (Neg (Num (-1*n))) else (Num n)
-    negExplicit f@(Frac (Rate n)) = if n < 0 then (Neg (Frac $ Rate (-1*n))) else f-}
+
 
 -- brings the neg out to the front
 negExplicit :: Expr -> Expr
-negExplicit e@(Num n) = if n < 0 then (Neg (Num (-1*n))) else e
-negExplicit e@(Frac (Rate n)) = if n < 0 then (Neg (Frac (Rate (-1*n)))) else e
-negExplicit e@(F f) = e
-negExplicit e@(Var x) = e
-negExplicit (Neg (Neg n)) = negExplicit n
-negExplicit (Neg n) = Neg $ negExplicit n
-negExplicit e@(Add a b) = Add (negExplicit a) (negExplicit b)
-negExplicit e@(Sub a b) = Sub (negExplicit a) (negExplicit b)
-negExplicit e@(Mul a b) = Mul (negExplicit a) (negExplicit b)
-negExplicit e@(Div a b) = Div (negExplicit a) (negExplicit b)
-negExplicit e@(Pow a b) = Pow (negExplicit a) (negExplicit b)
+negExplicit expr
+    | expr' == expr = expr
+    | otherwise = negExplicit expr'
+    where
+    expr' = neg expr
+    neg e@(Num n) = if n < 0 then (Neg (Num (-1*n))) else e
+    neg e@(Frac (Rate n)) = if n < 0 then (Neg (Frac (Rate (-1*n)))) else e
+    neg e@(F f) = e
+    neg e@(Var x) = e
+    neg (Neg (Neg n)) = neg n
+    neg (Neg n) = Neg $ neg n
+    neg (Mul (Neg a) b) = Neg $ (neg a) .* (neg b)
+    neg (Mul a (Neg b)) = Neg $ (neg a) .* (neg b)
+    neg (Div (Neg a) b) = Neg $ (neg a) ./ (neg b)
+    neg (Div a (Neg b)) = Neg $ (neg a) ./ (neg b)
+    neg e@(Add a b) = Add (neg a) (neg b)
+    neg e@(Sub a b) = Sub (neg a) (neg b)
+    neg e@(Mul a b) = Mul (neg a) (neg b)
+    neg e@(Div a b) = Div (neg a) (neg b)
+    neg e@(Pow a b) = Pow (neg a) (neg b)
 
 
 {-note was used for testing decodepolyfunc
@@ -888,38 +939,75 @@ us = ts-}
 
 
 
+
+getCode :: Code -> Int
+getCode (Trig _) = 0
+getCode (InvTrig _) = 1
+getCode (Hyperbolic _) = 2
+getCode (InvHyp _) = 3
+getCode (Logarithmic _) = 4
+
+
+unwrapCode :: Code -> [Description]
+unwrapCode (Trig ts) = ts
+unwrapCode (InvTrig ts) = ts
+unwrapCode (Hyperbolic ts) = ts
+unwrapCode (InvHyp ts) = ts
+unwrapCode (Logarithmic ts) = ts
+
+
+
 -- postcondition: if the pows and args are equal then we add the coeffs.
-addCodesM :: [Description] -> [Description] -> ([Description], [Description])
-addCodesM ts us = (ts', prepMaybeCodes us')
+addCodesM :: Code -> Code -> (Code, Code)
+addCodesM ts us
+    | code == 0 = (Trig ts'', Trig $ prepMaybeCodes us'')
+    | code == 1 = (InvTrig ts'', InvTrig $ prepMaybeCodes us'')
+    | code == 2 = (Hyperbolic ts'', Hyperbolic $ prepMaybeCodes us'')
+    | code == 3 = (InvHyp ts'', InvHyp $ prepMaybeCodes us'')
+    | code == 4 = (Logarithmic ts'', Logarithmic $ prepMaybeCodes us'')
     where
+    code = getCode ts
     add a@(c1,p1,x1) b@(c2,p2,x2)
         | (x1 == x2 && p1 == p2) = ((c1 .+ c2, p1, x1), Nothing)
         | otherwise = (a, Just b)
     simpMaybe expr@((c,p,x), maybe)
         | isNothing maybe = ((simplifyExpr c, p, x), Nothing)
         | otherwise = expr
-    simplifiedMaybes = map simpMaybe $ zipWith add ts us
-    (ts', us') = unzip simplifiedMaybes
-    prepMaybeCodes ms = ms''
+    (ts', us') = (unwrapCode ts, unwrapCode us)
+    simplifiedMaybes = map simpMaybe $ zipWith add ts' us'
+    (ts'', us'') = unzip simplifiedMaybes
+    prepMaybeCodes ms
+        | all isNothing ms = []
+        | otherwise = ms''
         where
         ms' = map (\m -> if isNothing m then (Just (Num 0, Num 0, Num 0)) else m) ms
         ms'' = catMaybes ms' -- (removing all the justs and leaving args)
 
 
-
+-- note no need to simplifyExpr to the x, just to c, and p because the x is simplified
+-- before being passed here, in the codifyPolyFunc.
 -- postcondition: if the args are equal then we mul coeffs and add pows.
-mulCodesM :: [Description] -> [Description] -> ([Description], [Description])
-mulCodesM ts us = (ts', prepMaybeCodes us')
+mulCodesM :: Code -> Code -> (Code, Code)
+mulCodesM ts us
+    | code == 0 = (Trig ts'', Trig $ prepMaybeCodes us'')
+    | code == 1 = (InvTrig ts'', InvTrig $ prepMaybeCodes us'')
+    | code == 2 = (Hyperbolic ts'', Hyperbolic $ prepMaybeCodes us'')
+    | code == 3 = (InvHyp ts'', InvHyp $ prepMaybeCodes us'')
+    | code == 4 = (Logarithmic ts'', Logarithmic $ prepMaybeCodes us'')
     where
+    code = getCode ts
     mul a@(c1,p1,x1) b@(c2,p2,x2)
         | (x1 == x2) = ((c1 .* c2, p1 .+ p2, x1), Nothing)
         | otherwise = (a, Just b)
     simpMaybe expr@((c,p,x), maybe)
-        | isNothing maybe = ((simplifyExpr c, p, x), Nothing)
+        | isNothing maybe = ((simplifyExpr c, simplifyExpr p, x), Nothing)
         | otherwise = expr
-    simplifiedMaybes = map simpMaybe $ zipWith mul ts us
-    (ts', us') = unzip simplifiedMaybes
-    prepMaybeCodes ms = ms''
+    (ts', us') = (unwrapCode ts, unwrapCode us)
+    simplifiedMaybes = map simpMaybe $ zipWith mul ts' us'
+    (ts'', us'') = unzip simplifiedMaybes
+    prepMaybeCodes ms
+        | all isNothing ms = []
+        | otherwise = ms''
         where
         ms' = map (\m -> if isNothing m then (Just (Num 0, Num 0, Num 0)) else m) ms
         ms'' = catMaybes ms' -- (removing all the justs and leaving args)
@@ -929,22 +1017,27 @@ mulCodesM ts us = (ts', prepMaybeCodes us')
 -- postcondition: if the args are equal then we div coeffs and subtract pows.
 -- note help why doesn't this work:
     -- | (x1 == x2) && (numOrFrac c1 c2) = ((Frac $ Rate zn, p1 .- p2, x1), Nothing)
-divCodesM :: [Description] -> [Description] -> ([Description], [Description])
-divCodesM ts us = (ts', prepMaybeCodes us')
+divCodesM :: Code -> Code -> (Code, Code)
+divCodesM ts us
+    | code == 0 = (Trig ts'', Trig $ prepMaybeCodes us'')
+    | code == 1 = (InvTrig ts'', InvTrig $ prepMaybeCodes us'')
+    | code == 2 = (Hyperbolic ts'', Hyperbolic $ prepMaybeCodes us'')
+    | code == 3 = (InvHyp ts'', InvHyp $ prepMaybeCodes us'')
+    | code == 4 = (Logarithmic ts'', Logarithmic $ prepMaybeCodes us'')
     where
-    divd a@(c1,p1,x1) b@(c2,p2,x2)
-        | x1 == x2 = ((c1 ./ c2, p1 .- p2, x1), Nothing)
+    code = getCode ts
+    div a@(c1,p1,x1) b@(c2,p2,x2)
+        | (x1 == x2) = ((c1 ./ c2, p1 .- p2, x1), Nothing)
         | otherwise = (a, Just b)
-        where numOrFrac x y = (isNum x || isFrac x) && (isNum y || isFrac y)
-              (Rate xn) = getNumOrFrac x
-              (Rate yn) = getNumOrFrac y
-              zn = ((numerator xn) * (denominator yn)) % ((denominator xn) * (numerator yn))
     simpMaybe expr@((c,p,x), maybe)
-        | isNothing maybe = ((simplifyExpr c, p, x), Nothing)
+        | isNothing maybe = ((simplifyExpr c, simplifyExpr p, x), Nothing)
         | otherwise = expr
-    simplifiedMaybes = map simpMaybe $ zipWith divd ts us
-    (ts', us') = unzip simplifiedMaybes
-    prepMaybeCodes ms = ms''
+    (ts', us') = (unwrapCode ts, unwrapCode us)
+    simplifiedMaybes = map simpMaybe $ zipWith div ts' us'
+    (ts'', us'') = unzip simplifiedMaybes
+    prepMaybeCodes ms
+        | all isNothing ms = []
+        | otherwise = ms''
         where
         ms' = map (\m -> if isNothing m then (Just (Num 0, Num 0, Num 0)) else m) ms
         ms'' = catMaybes ms' -- (removing all the justs and leaving args)
