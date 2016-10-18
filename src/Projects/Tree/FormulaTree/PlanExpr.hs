@@ -509,102 +509,51 @@ simplifyExpr :: Expr -> Expr
 simplifyExpr e = e {-ps' .+ fs'
     where
     expr = chisel e
-    --- TODO remember to chisel!
-    (ps, fs) = partition isMono (splitAS expr)
-    (gs, ggs) = partition hasOnlyOneFunction fs
-    (ggs
-    ps' = decodePoly $ codifyPoly (rebuildAS ps)
-    gs' = rebuildAS $ map decodePolyFunc $ codifyPolyFunc gs
+    es = map chisel (splitAS expr)
+    (ps, other) = partition isMono es
+    (fs, other') = partition (\e -> hasOnlyOneFunction e && (not $ isDiv e)) other
+    rest = other ++ other'
+    ps' = meltPoly (rebuildAS ps)
+    fs' = meltPolyFunc (rebuildAS fs)
     ggs' = rebuildAS $ map simplifyFunctions ggs
     fs' = gs' .+ ggs'
 -}
 
 
--- example: if functino is in "cos" family (arccos, arccosH, cos, cosh), then it gets put in certain
--- location: sin, cos,tan, csc, sec, cot
--- precondition: takes either pow expression with function or simple function expr.
-findLoc :: Expr -> Int
-findLoc f
-    | isSinFamily f = 0
-    | isCosFamily f = 1
-    | isTanFamily f = 2
-    | isCscFamily f = 3
-    | isSecFamily f = 4
-    | isCotFamily f = 5
-    | isE f = 0
-    | isLn f = 1
-    | isLog f = 2
+
+------------------------------ Dealing with Polynomials ---------------------------------
+
+put :: Int -> a -> [a] -> [a]
+put _ n [] = [n]
+put index n xs
+    | index < 0 = error "index is negative "
+    | otherwise = front ++ [n] ++ (tail back)
+    where (front, back) = splitAt index xs
+          newBack = if null back then [] else (tail back)
+
+elongate :: [a] -> [a] -> a -> ([a], [a])
+elongate xs ys toElongateWith = (xs ++ (replicate (toLen - (length xs)) toElongateWith),
+                  ys ++ (replicate (toLen - (length ys)) toElongateWith))
+    where toLen = max (length xs) (length ys)
 
 
--- precondition: expression must not be separable and must have JUST ONE function.
--- postcondition: returns (poly part glued, function)
--- TODO is it possible to change state (return expr without function) and at the same time to
--- return a value? (Want to return changed function as well as removed function in one go...?)
-unjoinPolyFunc :: Expr -> (Expr, Expr)
-unjoinPolyFunc expr = (chisel $ pluck expr, head $ getFunc expr)
+toCommonDenom :: ((Int,Int), (Int,Int)) -> ((Int,Int), (Int,Int))
+toCommonDenom ((n1,d1), (n2,d2)) = ((n1', lcm), (n2', lcm))
     where
-    getFunc (Num _) = []
-    getFunc (Frac _) = []
-    getFunc (Var _) = []
-    getFunc (Neg e) = getFunc e
-    getFunc (F f) = [F f]
-    getFunc p@(Pow (F f) _) = [p]
-    getFunc (Pow base expo) = fmap (\result -> Pow result expo) (getFunc base)
-    getFunc e = getFunc (left e) ++ getFunc (right e)
-
-    pluck (Num n) = Num n
-    pluck (Frac f) = Frac f
-    pluck (Var x) = Var x
-    pluck (Neg e) = Neg $ pluck e
-    pluck (F f) = Num 1
-    pluck (Add e1 e2) = pluck e1 .+ pluck e2
-    pluck (Sub e1 e2) = pluck e1 .- pluck e2
-    pluck (Mul e1 e2) = pluck e1 .* pluck e2
-    pluck (Div e1 e2) = pluck e1 ./ pluck e2
-    pluck (Pow (F f) _) = Num 1 -- would be zero but expr is not separable so use 1 as id to mult.
-    pluck (Pow base expo) = (pluck base) .^ expo
+    lcm = leastCommonMultiple d1 d2
+    n1' = n1 * (lcm `div` d1)
+    n2' = n2 * (lcm `div` d2)
 
 
-
--- precondition: gets something like x^3*8x^4*sin^(8x) (3+x) with the function never being on
--- hte bottom as denom in division.
--- postcondition: simplified polynomials at front in code and function arg,coef,pow in code.
-codifyPolyFunc :: Expr -> Code
-codifyPolyFunc expr
-    | isTrig f = Trig codes
-    | isInvTrig f = InvTrig codes
-    | isHyp f = Hyperbolic codes
-    | isInvHyp f = InvHyp codes
-    | isLogar f = Logarithmic codes
+-- note first arg doesn't have to be maybe just made it so that we can use it with foldl.
+leastCommonMultiple :: Int -> Int -> Int
+leastCommonMultiple a b = lcm a' b' c
     where
-    (poly, func) = unjoinPolyFunc expr
-    (mCode, mExpr) = codifyPoly poly
-    coef = if(isNothing mCode) then (fromJust mExpr) else (decodePoly $ fromJust mCode)
-    f = getBase func
-    descr = (coef, simplifyExpr $ getPow func, simplifyExpr $ getArg f)
-    zs = replicate 6 (Num 0, Num 0, Num 0)
-    zsLog = replicate 3 (Num 0, Num 0, Num 0)
-    codes = if (isLogFamily f) then (put (findLoc f) descr zsLog) else (put (findLoc f) descr zs)
-
-{-
--- precondition: gets something like e27 or pfhard which has structure: (top) / (bottom * func ^ 7)
--- Simplifies this reasonably without separating func from poly until necessary.
-handlePolyFunc :: Expr -> Expr
-handlePolyFunc expr
-    | isDiv expr' = handleDiv expr'
-    | otherwise = handleMul expr'
-    where
-    expr' = chisel expr
-    handleDiv e = Div upper' lower'
-        where
-        (lower, upper) = (getLower e, getUpper e)
-        lower' = if (hasOnlyOneFunction lower) then (meltPolyFunc lower) else (meltPoly lower)
-        upper' = if (hasOnlyOneFunction upper) then (meltPolyFunc upper) else (meltPoly lower)
-    handleMul e = Mul (decodePoly $ codifyPoly poly) (func) -- TODO clear up function exprs pfhard
-        where
-        (poly, func) = unjoinPolyFunc e
--}
-
+    (a', b') = (abs a, abs b)
+    c = a' * b'
+    lcm a b c
+        | not (a == b) = if (a > b) then (lcm (a-b) b c) else (lcm a (b-a) c)
+        | otherwise = fromInteger $ numerator $ toRational $ abs (c `div` a) -- convert to get int type
 
 
 -- note gets the coefficient and power of the monomial.
@@ -642,27 +591,6 @@ meltPoly expr
     (mCode, mExpr) = codifyPoly expr
 
 
--- note takes a single monomial and converts it to coded form
--- precondition: no neg powers, output of chisel, AND must be monomial.
-codifyMono :: Expr -> Code
-codifyMono expr = Poly $ zs ++ [c]
-    where
-    (c, p) = getCoefPowPair expr
-    zs = map makeFraction $ replicate p 0
-
-
--- postcondition: returns (nothing, chiseled expr) if expr was div and had separable bottom
--- and returns (code, nothing) if succeeded to simplify.
-codifyPoly :: Expr -> (Maybe Code, Maybe Expr)
-codifyPoly e
-    | isSeparable e = (Just $ codifyPolyA e, Nothing)
-    | hasDiv e && (isDiv expDiv) = (mCode, mExpr)
-    | hasDiv e && (isMul expDiv) = (Just $ codifyPolyM expDiv, Nothing)
-    | otherwise = (Just $ codifyPolyM expDiv, Nothing)
-    where
-    expDiv = makeDivExplicit e
-    (mCode, mExpr) = codifyPolyD expDiv
-
 
 -- note takes list of polynomials and makes it into Group type Poly [...]
 -- so 7x^2 + 3x^2 + 3x + 4x + 1 is [1, (3+4), (7+3)]
@@ -694,6 +622,27 @@ codifyPolyD expr
     div = divPoly upper' lower'
 
 
+-- note takes a single monomial and converts it to coded form
+-- precondition: no neg powers, output of chisel, AND must be monomial.
+codifyMono :: Expr -> Code
+codifyMono expr = Poly $ zs ++ [c]
+    where
+    (c, p) = getCoefPowPair expr
+    zs = map makeFraction $ replicate p 0
+
+-- postcondition: returns (nothing, chiseled expr) if expr was div and had separable bottom
+-- and returns (code, nothing) if succeeded to simplify.
+codifyPoly :: Expr -> (Maybe Code, Maybe Expr)
+codifyPoly e
+    | isSeparable e = (Just $ codifyPolyA e, Nothing)
+    | hasDiv e && (isDiv expDiv) = (mCode, mExpr)
+    | hasDiv e && (isMul expDiv) = (Just $ codifyPolyM expDiv, Nothing)
+    | otherwise = (Just $ codifyPolyM expDiv, Nothing)
+    where
+    expDiv = makeDivExplicit e
+    (mCode, mExpr) = codifyPolyD expDiv
+
+
 decodePoly :: Code -> Expr
 decodePoly (Poly ps) = rebuildAS $ filter notZero (map clean polynomials)
     where
@@ -709,130 +658,6 @@ decodePoly (Poly ps) = rebuildAS $ filter notZero (map clean polynomials)
     negExplicit (m@(Mul (Frac (Rate n)) p@(Pow _ _)))
         = if (n < 0) then (Neg ((Frac (Rate $ negOne * n)) .* p)) else m
     negExplicit e = e
-
-
-
--- note just like addCodesM except can be used with foldl
--- addCodes :: Code -> Code
-
-
--- postcondition: if the pows and args are equal then we add the coeffs.
-addCodesM :: [Description] -> [Description] -> ([Description], [Description])
-addCodesM ts us = (ts', prepMaybeCodes us')
-    where
-    add a@(c1,p1,x1) b@(c2,p2,x2)
-        | (x1 == x2 && p1 == p2) = ((c1 .+ c2, p1, x1), Nothing)
-        | otherwise = (a, Just b)
-    simpMaybe expr@((c,p,x), maybe)
-        | isNothing maybe = ((simplifyExpr c, p, x), Nothing)
-        | otherwise = expr
-    simplifiedMaybes = map simpMaybe $ zipWith add ts us
-    (ts', us') = unzip simplifiedMaybes
-    prepMaybeCodes ms = ms''
-        where
-        ms' = map (\m -> if isNothing m then (Just (Num 0, Num 0, Num 0)) else m) ms
-        ms'' = catMaybes ms' -- (removing all the justs and leaving args)
-
-
-
--- postcondition: if the args are equal then we mul coeffs and add pows.
-mulCodesM :: [Description] -> [Description] -> ([Description], [Description])
-mulCodesM ts us = (ts', prepMaybeCodes us')
-    where
-    mul a@(c1,p1,x1) b@(c2,p2,x2)
-        | (x1 == x2) = ((c1 .* c2, p1 .+ p2, x1), Nothing)
-        | otherwise = (a, Just b)
-    simpMaybe expr@((c,p,x), maybe)
-        | isNothing maybe = ((simplifyExpr c, p, x), Nothing)
-        | otherwise = expr
-    simplifiedMaybes = map simpMaybe $ zipWith mul ts us
-    (ts', us') = unzip simplifiedMaybes
-    prepMaybeCodes ms = ms''
-        where
-        ms' = map (\m -> if isNothing m then (Just (Num 0, Num 0, Num 0)) else m) ms
-        ms'' = catMaybes ms' -- (removing all the justs and leaving args)
-
-
-
--- postcondition: if the args are equal then we div coeffs and subtract pows.
--- note help why doesn't this work:
-    -- | (x1 == x2) && (numOrFrac c1 c2) = ((Frac $ Rate zn, p1 .- p2, x1), Nothing)
-divCodesM :: [Description] -> [Description] -> ([Description], [Description])
-divCodesM ts us = (ts', prepMaybeCodes us')
-    where
-    divd a@(c1,p1,x1) b@(c2,p2,x2)
-        | x1 == x2 = ((c1 ./ c2, p1 .- p2, x1), Nothing)
-        | otherwise = (a, Just b)
-        where numOrFrac x y = (isNum x || isFrac x) && (isNum y || isFrac y)
-              (Rate xn) = getNumOrFrac x
-              (Rate yn) = getNumOrFrac y
-              zn = ((numerator xn) * (denominator yn)) % ((denominator xn) * (numerator yn))
-    simpMaybe expr@((c,p,x), maybe)
-        | isNothing maybe = ((simplifyExpr c, p, x), Nothing)
-        | otherwise = expr
-    simplifiedMaybes = map simpMaybe $ zipWith divd ts us
-    (ts', us') = unzip simplifiedMaybes
-    prepMaybeCodes ms = ms''
-        where
-        ms' = map (\m -> if isNothing m then (Just (Num 0, Num 0, Num 0)) else m) ms
-        ms'' = catMaybes ms' -- (removing all the justs and leaving args)
-
-
-
-
-decodePolyFunc :: Code -> Expr
-decodePolyFunc (Trig ts) = polyFuncDecoder 0 ts
-decodePolyFunc (InvTrig ts) = polyFuncDecoder 1 ts
-decodePolyFunc (Hyperbolic hs) = polyFuncDecoder 2 hs
-decodePolyFunc (InvHyp hs) = polyFuncDecoder 3 hs
-decodePolyFunc (Logarithmic ls) = polyFuncDecoder 4 ls
-
-
--- note the Int is a code: 0 = Trig, 1  = InvTrig, 2 = Hyperbolic, 3 =InvHyp, 4 = Logarithmic.
-polyFuncDecoder :: Int -> [Description] -> Expr
-polyFuncDecoder n ts = rebuildAS $ map clean fs'
-    where
-    ts' = filter (\(c,_,_) -> (not (c == Num 0)) && (not (c == Frac (Rate 0)))) ts
-    args = map (\(_,_,x) -> x) ts'
-    coefs = map negExplicit $ map (\(c,_,_) -> c) ts'
-    pows = map (\(_,p,_) -> p) ts'
-    fs = findFuncFamily n
-    fs' = zipWith Mul coefs (zipWith Pow (zipWith push args fs) pows)
-
-    findFuncFamily 0 = map F [Sin x, Cos x, Tan x, Csc x, Sec x, Cot x]
-    findFuncFamily 1 = map F [Arcsin x, Arccos x, Arctan x, Arccsc x, Arcsec x, Arccot x]
-    findFuncFamily 2 = map F [Sinh x, Cosh x, Tanh x, Csch x, Sech x, Coth x]
-    findFuncFamily 3 = map F [Arcsinh x, Arccosh x, Arctanh x, Arccsch x, Arcsech x, Arccoth x]
-    findFuncFamily 4 = map F [E x, Ln x, Log x x]
-
-    negExplicit (Num n) = if n < 0 then (Neg (Num (-1*n))) else (Num n)
-    negExplicit f@(Frac (Rate n)) = if n < 0 then (Neg (Frac $ Rate (-1*n))) else f
-
-
-{-note was used for testing decodepolyfunc
-ts = map numify [(-4,1,x), (3,1,x), (1,7,(Num 2) .* x .^ Num 5), (-2,2,x),(1,1,x), (7,7,Num 7 .* x)]
-us = ts-}
-
-
-latch zs = map (\((c,e,u), f) -> c .* (push u f) .^ e) (map (\((tup, f)) -> (numify tup, f)) zs)
-numify (c,e,u) = (Num c, Num e, u)
-
-
-
-
-
-put :: Int -> a -> [a] -> [a]
-put _ n [] = [n]
-put index n xs
-    | index < 0 = error "index is negative "
-    | otherwise = front ++ [n] ++ (tail back)
-    where (front, back) = splitAt index xs
-          newBack = if null back then [] else (tail back)
-
-elongate :: [a] -> [a] -> a -> ([a], [a])
-elongate xs ys toElongateWith = (xs ++ (replicate (toLen - (length xs)) toElongateWith),
-                  ys ++ (replicate (toLen - (length ys)) toElongateWith))
-    where toLen = max (length xs) (length ys)
 
 
 -- Note all these functions with poly below assume the ps inside the Poly are added.
@@ -909,23 +734,203 @@ divOnePoly (Rate den, dPow) (Rate num, nPow) = (Rate $ (a * b) % (c * d), nPow -
     where (a, b, c, d) = (numerator num, denominator num, numerator den, denominator den)
 
 
-toCommonDenom :: ((Int,Int), (Int,Int)) -> ((Int,Int), (Int,Int))
-toCommonDenom ((n1,d1), (n2,d2)) = ((n1', lcm), (n2', lcm))
-    where
-    lcm = leastCommonMultiple d1 d2
-    n1' = n1 * (lcm `div` d1)
-    n2' = n2 * (lcm `div` d2)
+--------------------- Dealing with Poly-Func (single func) ------------------------
 
 
--- note first arg doesn't have to be maybe just made it so that we can use it with foldl.
-leastCommonMultiple :: Int -> Int -> Int
-leastCommonMultiple a b = lcm a' b' c
+
+-- example: if functino is in "cos" family (arccos, arccosH, cos, cosh), then it gets put in certain
+-- location: sin, cos,tan, csc, sec, cot
+-- precondition: takes either pow expression with function or simple function expr.
+findLoc :: Expr -> Int
+findLoc f
+    | isSinFamily f = 0
+    | isCosFamily f = 1
+    | isTanFamily f = 2
+    | isCscFamily f = 3
+    | isSecFamily f = 4
+    | isCotFamily f = 5
+    | isE f = 0
+    | isLn f = 1
+    | isLog f = 2
+
+
+-- precondition: expression must not be separable and must have JUST ONE function.
+-- postcondition: returns (poly part glued, function)
+-- TODO is it possible to change state (return expr without function) and at the same time to
+-- return a value? (Want to return changed function as well as removed function in one go...?)
+unjoinPolyFunc :: Expr -> (Expr, Expr)
+unjoinPolyFunc expr = (chisel $ pluck expr, head $ getFunc expr)
     where
-    (a', b') = (abs a, abs b)
-    c = a' * b'
-    lcm a b c
-        | not (a == b) = if (a > b) then (lcm (a-b) b c) else (lcm a (b-a) c)
-        | otherwise = fromInteger $ numerator $ toRational $ abs (c `div` a) -- convert to get int type
+    getFunc (Num _) = []
+    getFunc (Frac _) = []
+    getFunc (Var _) = []
+    getFunc (Neg e) = getFunc e
+    getFunc (F f) = [F f]
+    getFunc p@(Pow (F f) _) = [p]
+    getFunc (Pow base expo) = fmap (\result -> Pow result expo) (getFunc base)
+    getFunc e = getFunc (left e) ++ getFunc (right e)
+
+    pluck (Num n) = Num n
+    pluck (Frac f) = Frac f
+    pluck (Var x) = Var x
+    pluck (Neg e) = Neg $ pluck e
+    pluck (F f) = Num 1
+    pluck (Add e1 e2) = pluck e1 .+ pluck e2
+    pluck (Sub e1 e2) = pluck e1 .- pluck e2
+    pluck (Mul e1 e2) = pluck e1 .* pluck e2
+    pluck (Div e1 e2) = pluck e1 ./ pluck e2
+    pluck (Pow (F f) _) = Num 1 -- would be zero but expr is not separable so use 1 as id to mult.
+    pluck (Pow base expo) = (pluck base) .^ expo
+
+
+
+{-
+-- precondition: gets something like e27 or pfhard which has structure: (top) / (bottom * func ^ 7)
+-- Simplifies this reasonably without separating func from poly until necessary.
+handlePolyFunc :: Expr -> Expr
+handlePolyFunc expr
+    | isDiv expr' = handleDiv expr'
+    | otherwise = handleMul expr'
+    where
+    expr' = chisel expr
+    handleDiv e = Div upper' lower'
+        where
+        (lower, upper) = (getLower e, getUpper e)
+        lower' = if (hasOnlyOneFunction lower) then (meltPolyFunc lower) else (meltPoly lower)
+        upper' = if (hasOnlyOneFunction upper) then (meltPolyFunc upper) else (meltPoly lower)
+    handleMul e = Mul (decodePoly $ codifyPoly poly) (func) -- TODO clear up function exprs pfhard
+        where
+        (poly, func) = unjoinPolyFunc e
+-}
+
+
+
+-- precondition: gets something like x^3*8x^4*sin^(8x) (3+x) with the function never being on
+-- hte bottom as denom in division.
+-- postcondition: simplified polynomials at front in code and function arg,coef,pow in code.
+codifyPolyFunc :: Expr -> Code
+codifyPolyFunc expr
+    | isTrig f = Trig codes
+    | isInvTrig f = InvTrig codes
+    | isHyp f = Hyperbolic codes
+    | isInvHyp f = InvHyp codes
+    | isLogar f = Logarithmic codes
+    where
+    (poly, func) = unjoinPolyFunc expr
+    (mCode, mExpr) = codifyPoly poly
+    coef = if(isNothing mCode) then (fromJust mExpr) else (decodePoly $ fromJust mCode)
+    f = getBase func
+    descr = (coef, simplifyExpr $ getPow func, simplifyExpr $ getArg f)
+    zs = replicate 6 (Num 0, Num 0, Num 0)
+    zsLog = replicate 3 (Num 0, Num 0, Num 0)
+    codes = if (isLogFamily f) then (put (findLoc f) descr zsLog) else (put (findLoc f) descr zs)
+
+
+
+decodePolyFunc :: Code -> Expr
+decodePolyFunc (Trig ts) = polyFuncDecoder 0 ts
+decodePolyFunc (InvTrig ts) = polyFuncDecoder 1 ts
+decodePolyFunc (Hyperbolic hs) = polyFuncDecoder 2 hs
+decodePolyFunc (InvHyp hs) = polyFuncDecoder 3 hs
+decodePolyFunc (Logarithmic ls) = polyFuncDecoder 4 ls
+
+
+-- note the Int is a code: 0 = Trig, 1  = InvTrig, 2 = Hyperbolic, 3 =InvHyp, 4 = Logarithmic.
+polyFuncDecoder :: Int -> [Description] -> Expr
+polyFuncDecoder n ts = rebuildAS $ map clean fs'
+    where
+    ts' = filter (\(c,_,_) -> (not (c == Num 0)) && (not (c == Frac (Rate 0)))) ts
+    args = map (\(_,_,x) -> x) ts'
+    coefs = map negExplicit $ map (\(c,_,_) -> c) ts'
+    pows = map (\(_,p,_) -> p) ts'
+    fs = findFuncFamily n
+    fs' = zipWith Mul coefs (zipWith Pow (zipWith push args fs) pows)
+
+    findFuncFamily 0 = map F [Sin x, Cos x, Tan x, Csc x, Sec x, Cot x]
+    findFuncFamily 1 = map F [Arcsin x, Arccos x, Arctan x, Arccsc x, Arcsec x, Arccot x]
+    findFuncFamily 2 = map F [Sinh x, Cosh x, Tanh x, Csch x, Sech x, Coth x]
+    findFuncFamily 3 = map F [Arcsinh x, Arccosh x, Arctanh x, Arccsch x, Arcsech x, Arccoth x]
+    findFuncFamily 4 = map F [E x, Ln x, Log x x]
+
+    negExplicit (Num n) = if n < 0 then (Neg (Num (-1*n))) else (Num n)
+    negExplicit f@(Frac (Rate n)) = if n < 0 then (Neg (Frac $ Rate (-1*n))) else f
+
+{-note was used for testing decodepolyfunc
+ts = map numify [(-4,1,x), (3,1,x), (1,7,(Num 2) .* x .^ Num 5), (-2,2,x),(1,1,x), (7,7,Num 7 .* x)]
+us = ts-}
+
+
+
+-- postcondition: if the pows and args are equal then we add the coeffs.
+addCodesM :: [Description] -> [Description] -> ([Description], [Description])
+addCodesM ts us = (ts', prepMaybeCodes us')
+    where
+    add a@(c1,p1,x1) b@(c2,p2,x2)
+        | (x1 == x2 && p1 == p2) = ((c1 .+ c2, p1, x1), Nothing)
+        | otherwise = (a, Just b)
+    simpMaybe expr@((c,p,x), maybe)
+        | isNothing maybe = ((simplifyExpr c, p, x), Nothing)
+        | otherwise = expr
+    simplifiedMaybes = map simpMaybe $ zipWith add ts us
+    (ts', us') = unzip simplifiedMaybes
+    prepMaybeCodes ms = ms''
+        where
+        ms' = map (\m -> if isNothing m then (Just (Num 0, Num 0, Num 0)) else m) ms
+        ms'' = catMaybes ms' -- (removing all the justs and leaving args)
+
+
+
+-- postcondition: if the args are equal then we mul coeffs and add pows.
+mulCodesM :: [Description] -> [Description] -> ([Description], [Description])
+mulCodesM ts us = (ts', prepMaybeCodes us')
+    where
+    mul a@(c1,p1,x1) b@(c2,p2,x2)
+        | (x1 == x2) = ((c1 .* c2, p1 .+ p2, x1), Nothing)
+        | otherwise = (a, Just b)
+    simpMaybe expr@((c,p,x), maybe)
+        | isNothing maybe = ((simplifyExpr c, p, x), Nothing)
+        | otherwise = expr
+    simplifiedMaybes = map simpMaybe $ zipWith mul ts us
+    (ts', us') = unzip simplifiedMaybes
+    prepMaybeCodes ms = ms''
+        where
+        ms' = map (\m -> if isNothing m then (Just (Num 0, Num 0, Num 0)) else m) ms
+        ms'' = catMaybes ms' -- (removing all the justs and leaving args)
+
+
+
+-- postcondition: if the args are equal then we div coeffs and subtract pows.
+-- note help why doesn't this work:
+    -- | (x1 == x2) && (numOrFrac c1 c2) = ((Frac $ Rate zn, p1 .- p2, x1), Nothing)
+divCodesM :: [Description] -> [Description] -> ([Description], [Description])
+divCodesM ts us = (ts', prepMaybeCodes us')
+    where
+    divd a@(c1,p1,x1) b@(c2,p2,x2)
+        | x1 == x2 = ((c1 ./ c2, p1 .- p2, x1), Nothing)
+        | otherwise = (a, Just b)
+        where numOrFrac x y = (isNum x || isFrac x) && (isNum y || isFrac y)
+              (Rate xn) = getNumOrFrac x
+              (Rate yn) = getNumOrFrac y
+              zn = ((numerator xn) * (denominator yn)) % ((denominator xn) * (numerator yn))
+    simpMaybe expr@((c,p,x), maybe)
+        | isNothing maybe = ((simplifyExpr c, p, x), Nothing)
+        | otherwise = expr
+    simplifiedMaybes = map simpMaybe $ zipWith divd ts us
+    (ts', us') = unzip simplifiedMaybes
+    prepMaybeCodes ms = ms''
+        where
+        ms' = map (\m -> if isNothing m then (Just (Num 0, Num 0, Num 0)) else m) ms
+        ms'' = catMaybes ms' -- (removing all the justs and leaving args)
+
+
+
+
+latch zs = map (\((c,e,u), f) -> c .* (push u f) .^ e) (map (\((tup, f)) -> (numify tup, f)) zs)
+numify (c,e,u) = (Num c, Num e, u)
+
+
+
+
 
 
 
@@ -1386,8 +1391,9 @@ isPoly (Mul e1 e2) = isPoly e1 && isPoly e2
 isPoly (Div e1 e2) = isPoly e1 && isPoly e2
 isPoly (Pow e1 e2) = isPoly e1 && isPoly e2-}
 
-isTrig :: Expr -> Bool
-isTrig f = isSin f || isCos f || isTan f || isCsc f || isSec f || isCot f
+
+
+
 
 
 -- note this is passed only glued expressions!
@@ -1395,17 +1401,67 @@ isTrig f = isSin f || isCos f || isTan f || isCsc f || isSec f || isCot f
 -- example (sin (sin x)) = True
 -- example (sinxtanx) = False
 hasOnlyOneFunction :: Expr -> Bool
-hasOnlyOneFunction expr = (oneFunc 0 expr) == 1
+hasOnlyOneFunction expr = (countFunc 0 expr) == 1
+
+hasManyFunctions :: Expr -> Bool
+hasManyFunctions expr = (countFunc 0 expr) > 1
+
+-- note doesn't matter if there is func in expo of a power because even if there is we can
+-- put it in description as a simple expo (expos have have any type of expr)
+countFunc :: Int -> Expr -> Int
+countFunc c (Num n) = c
+countFunc c (Var x) = c
+countFunc c (F f) = c + 1
+countFunc c (Neg e) = countFunc c e
+countFunc c (Add e1 e2) = countFunc c e1 + countFunc c e2
+countFunc c (Sub e1 e2) = countFunc c e1 + countFunc c e2
+countFunc c (Mul e1 e2) = countFunc c e1 + countFunc c e2
+countFunc c (Div e1 e2) = countFunc c e1 + countFunc c e2
+countFunc c (Pow e1 e2) = countFunc c e1 -- + oneFunc count e2
+
+-- note do not count isItem in the exponent of a power because there it doesn't matter as we
+-- use the expo in descrip.
+-- HELP todo not working ebcause it counts Ops way too many times.
+{-count :: (Expr -> Bool) -> Expr -> Int
+count f expr = counter 0 f expr
     where
-    oneFunc count (Num n) = count
-    oneFunc count (Var x) = count
-    oneFunc count (F f) = count + 1
-    oneFunc count (Neg e) = oneFunc count e
-    oneFunc count (Add e1 e2) = oneFunc count e1 + oneFunc count e2
-    oneFunc count (Sub e1 e2) = oneFunc count e1 + oneFunc count e2
-    oneFunc count (Mul e1 e2) = oneFunc count e1 + oneFunc count e2
-    oneFunc count (Div e1 e2) = oneFunc count e1 + oneFunc count e2
-    oneFunc count (Pow e1 e2) = oneFunc count e1 + oneFunc count e2
+    newC c = if (f x) then (c + 1) else c
+    counter c f x@(Num _) = newC c
+    counter c f x@(Frac _) = newC c
+    counter c f x@(Var _) = newC c
+    counter c f x@(F _) = newC c
+    counter c f x@(Neg e) = counter (newC c) f e
+    counter c f x@(Add e1 e2) = counter (newC c) f e1 + counter (newC c) f e2
+    counter c f x@(Sub e1 e2) = counter (newC c) f e1 + counter (newC c) f e2
+    counter c f x@(Mul e1 e2) = counter (newC c) f e1 + counter (newC c) f e2
+    counter c f x@(Div e1 e2) = counter (newC c) f e1 + counter (newC c) f e2
+    counter c f x@(Pow e1 e2) = counter (newC c) f e1 -- + count c' isItem e2-}
+
+
+{-
+count c isItem n@(Num _) = c'
+    where c' = if (isItem n) then (c + 1) else c
+count c isItem f@(Frac _) = c'
+    where c' = if (isItem f) then (c + 1) else c
+count c isItem v@(Var _) = c'
+    where c' = if (isItem v) then (c + 1) else c
+count c isItem f@(F _) = c'
+    where c' = if (isItem f) then (c + 1) else c
+count c isItem n@(Neg e) = count c' isItem e
+    where c' = if (isItem n) then (c + 1) else c
+
+count c isItem a@(Add e1 e2) = count c' isItem e1 + count c' isItem e2
+    where c' = if (isItem a) then (c + 1) else c
+count c isItem s@(Sub e1 e2) = count c' isItem e1 + count c' isItem e2
+    where c' = if (isItem s) then (c + 1) else c
+count c isItem m@(Mul e1 e2) = count c' isItem e1 + count c' isItem e2
+    where c' = if (isItem m) then (c + 1) else c
+count c isItem d@(Div e1 e2) = count c' isItem e1 + count c' isItem e2
+    where c' = if (isItem d) then (c + 1) else c
+count c isItem p@(Pow e1 e2) = count c' isItem e1 -- + count c' isItem e2
+    where c' = if (isItem p) then (c + 1) else c
+-}
+
 
 
 isSeparable :: Expr -> Bool
@@ -1617,6 +1673,8 @@ h1 = c .* h
 h2 = h1 ./ (Num 6 .* x .^ Num 4 .+ Num 8 .- x )
 h3 = (c ./ (Num 6 .* x .^ Num 4 .+ Num 8 .- x)) .* h
 
+isTrig :: Expr -> Bool
+isTrig f = isSin f || isCos f || isTan f || isCsc f || isSec f || isCot f
 
 
 isInvTrig :: Expr -> Bool
