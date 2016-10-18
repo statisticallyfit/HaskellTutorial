@@ -111,7 +111,15 @@ instance Show Expr where
     show (Add e1 e2) = show e1 ++ " + " ++ show e2
     show (Sub e1 e2) = show e1 ++ " - " ++ show e2
 
-    show (Mul (Frac frac) other) = "(" ++ show frac ++ ")" ++ show other
+    show (Mul (Num n) (F f)) = show n ++ show f
+    show (Mul (Frac (Rate n)) (F f))
+        = if (denominator n == 1)
+        then (show n ++ show f)
+        else ("(" ++ show (Rate n) ++ ")" ++ show f)
+    show (Mul (Frac frac@(Rate n)) other)
+        = if (denominator n == 1)
+        then (show frac ++ show other)
+        else ("(" ++ show frac ++ ")" ++ show other)
     show (Mul p@(Pow _ _) f@(F _)) = "(" ++ show p ++ ")" ++ show f
     show (Mul (Num n) p@(Pow _ _)) = show n ++ show p
     show (Mul np@(Mul (Num n) p@(Pow _ _)) other) = "(" ++ show np ++ ")(" ++ show other ++ ")"
@@ -704,7 +712,7 @@ decodifyPoly (Poly ps) = rebuildAS $ filter notZero (map clean polynomials)
 
 
 
-{-addCodes :: Code -> Code -> ([Code], [Maybe Code])
+{-addCodes :: Code -> Code -> Expr   -- ([Code], [Maybe Code])
 addCodes (Trig ts) (Trig us) = (Trig ts', Trig $ prepMaybeCodes us')
     where-}
 add a@(c1,p1,x1) b@(c2,p2,x2)
@@ -715,12 +723,64 @@ simpMaybe expr@((c,p,x), maybe)
     | otherwise = expr
 simplifiedMaybes = map simpMaybe $ zipWith add ts us
 (ts', us') = unzip simplifiedMaybes
+{-
 prepMaybeCodes ms
     | all isNothing ms = Nothing
     | otherwise =
-    where -- converting nothings to zero 
+    where -- converting nothings to zero
     ms' = map (\x -> if (isNothing) then (Just (Num 0, Num 0, Num 0)) else x) ms
     logDecoder
+-}
+
+
+
+decodeTrig :: Code -> Expr
+decodeTrig (Trig ts) = rebuildAS $ map clean trigs'
+    where
+    args = map (\(_,_,x) -> x) ts
+    coefs = map (\(c,_,_) -> c) ts
+    pows = map (\(_,p,_) -> p) ts
+    trigs = map F [Sin x, Cos x, Tan x, Csc x, Sec x, Cot x]
+    trigs' = zipWith Mul coefs (zipWith Pow (zipWith push args trigs) pows)
+
+decodeInvTrig :: Code -> Expr
+decodeInvTrig (InvTrig is) = rebuildAS $ map clean invTrigs'
+    where
+    args = map (\(_,_,x) -> x) is
+    coefs = map (\(c,_,_) -> c) is
+    pows = map (\(_,p,_) -> p) is
+    invTrigs = map F [Arcsin x, Arccos x, Arctan x, Arccsc x, Arcsec x, Arccot x]
+    invTrigs' = zipWith Mul coefs (zipWith Pow (zipWith push args invTrigs) pows)
+
+decodeHyp :: Code -> Expr
+decodeHyp (Hyperbolic hs) = rebuildAS $ map clean hyps'
+    where
+    args = map (\(_,_,x) -> x) hs
+    coefs = map (\(c,_,_) -> c) hs
+    pows = map (\(_,p,_) -> p) hs
+    hyps = map F [Sinh x, Cosh x, Tanh x, Csch x, Sech x, Coth x]
+    hyps' = zipWith Mul coefs (zipWith Pow (zipWith push args hyps) pows)
+
+decodeInvHyp :: Code -> Expr
+decodeInvHyp (InvHyp is) = rebuildAS $ map clean invHyps'
+    where
+    args = map (\(_,_,x) -> x) is
+    coefs = map (\(c,_,_) -> c) is
+    pows = map (\(_,p,_) -> p) is
+    invHyps = map F [Arcsinh x, Arccosh x, Arctanh x, Arccsch x, Arcsech x, Arccoth x]
+    invHyps' = zipWith Mul coefs (zipWith Pow (zipWith push args invHyps) pows)
+
+-- note length of ls must be at 3 exactly
+ -- HELP TODO hwo to treat log() separately so that we get different base and arg? 
+decodeLogs :: Code -> Expr
+decodeLogs (Logarithmic ls) = rebuildAS $ map clean logs'
+    where
+    args = map (\(_,_,x) -> x) ls
+    coefs = map (\(c,_,_) -> c) ls
+    pows = map (\(_,p,_) -> p) ls
+    logs = map F [E x, Ln x, Log x x]
+    logs' = zipWith Mul coefs (zipWith Pow (zipWith push args logs) pows)
+
 
 
 
