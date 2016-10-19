@@ -335,6 +335,33 @@ e = x .* Num 3 .* Num 2 .* x .^ Num 9 .* (F (Sin x)) .+
 -- testing meltpoly func how it does with inner functions inside powers.
 pfhard = (x .^ Num 2) ./ (Num 5 .* x .* (Num 4 .* x .+ F (Sin x)) .^ Num 7)
 pfharder = (x .^ Num 2) ./ (Num 5 .* x .* (Num 4 .* x .+ (F (Sin x) .- Num 8) .^ Num 22) .^ Num 7)
+
+
+-- testing addCodes with adder function
+
+ys1 = [(Num 4,x,x .^ Num 2), (Num 6, Num 5, x .^ Num 3), (Num (-10),x,x .^ Num 2),
+    (Num 2, x, x .^ Num 2), (x .+ Num 1 , Num 5, x .^ Num 3), (Num 22, Num 5, x .^ Num 3)]
+
+ys2 = [(Num (-8),x,x .^ Num 2), (x .^ Num 7 .+ Num 3 .* x .^ Num 2, Num 5, x .^ Num 3),
+    (Num 4, Num 4, x .^ Num 4), (Num 2, x, x .^ Num 2), (Num 1,Num 5,x .^ Num 3),
+    (Num 1, Num 4, x .^ Num 4)]
+
+ys3 = [(Num (-20),x,x .^ Num 2), (Num 5, Num 5, x .^ Num 3), (Num 2, Num 5, x .^ Num 3),
+    (Num 1,Num 4, x .^ Num 4), (Num (-2),Num 4, x .^ Num 4), (Num 19, Num 5, x .^ Num 3)]
+
+ys4 = [(Num 88, x, x .^ Num 2), (Num 90 .+ x .^ Num 3 .- Num 3 .* x .^ Num 33, x, x .^ Num 2),
+    (Num 44, x, x .^ Num 2), (Num 11 .+ x .- x .^ Num 6, Num 5, x .^ Num 3),
+    (Num 12, Num 4, x .^ Num 4), (Num 5, Num 5, x .^ Num 3)]
+
+ys5 = [(Num 7,x,x .^ Num 2), (Num (-54), Num 5, x .^ Num 3), (Num 14, Num 4, x .^ Num 4),
+    (Num 44, Num 4, x .^ Num 4), (Num 3, Num 4, x .^ Num 4), (Num (-8) .* x, Num 5, x .^ Num 3)]
+
+ys = concat $ [map Trig [ys1, ys2, ys3, ys4, ys5]] ++ [map InvHyp [ys3, ys5, ys2]] ++
+    [map Hyperbolic [ys1,ys2, ys5, ys4]] ++ [map Logarithmic [ys5, ys3, ys2, ys1, ys4]] ++
+    [map Trig [ys1, ys5, ys3]]  ++ [map Logarithmic [ys2, ys4, ys2, ys4]] ++
+    [map InvHyp [ys1, ys1, ys2, ys3, ys4, ys4, ys1]]
+
+
 ---------------------------------------------------------------------------------------------
 
 
@@ -365,6 +392,8 @@ assuming arg was X for both. same for div
 
 Clean up with sweep Num
 ALSO: order: distribute, negExplicit, then clean the simplified expr and input to simplifyExpr function
+order for melt polyfunc (so we dont end up with -(16 x + 16x) when in fact we need (-16x + 16x)
+=> negExplicit then distribute then clean.
 
 
 ** Also make function called rearrange or organize that transforms:
@@ -522,17 +551,27 @@ newRight e ls
 simplifyExpr :: Expr -> Expr
 simplifyExpr e = e {-ps' .+ fs'
     where
-    expr = chisel e
+    expr = chisel $ distribute $ chisel $ negExplicit e -- TODO need to put distribute cases (sep)(sep)
     es = map chisel (splitAS expr)
     (ps, other) = partition isMono es
     (fs, other') = partition (\e -> hasOnlyOneFunction e && (not $ isDiv e)) other
-    rest = other ++ other'
+    (ffs, other'') = partition hasManyFunctions (other ++ other')
     ps' = meltPoly (rebuildAS ps)
     fs' = meltPolyFunc (rebuildAS fs)
-    ggs' = rebuildAS $ map simplifyFunctions ggs
+    ffs' = meltFunctions (rebuildAS ffs)
     fs' = gs' .+ ggs'
 -}
 
+------------------------------ Dealing with many functions ---------------------------------
+
+-- note takes many sets of many funcs at a time. So expression can be separable.
+-- note if expr is div (output from chisel) then we apply melt separately
+-- postcondition returns separable function.
+-- meltFunctions :: Expr -> Expr
+
+-- note separates function part from other parts and then simplifies functions.
+-- precondition: expr cannot be separable (has to be glued) so takes one set of many funcs at time.
+-- simplifyFunctions :: Expr -> Expr
 
 
 ------------------------------ Dealing with Polynomials ---------------------------------
@@ -822,8 +861,58 @@ handlePolyFunc expr
 -- note gets input from distribute function in simplifyExpr.
 meltPolyFunc :: Expr -> Expr
 meltPolyFunc expr = rebuildAS es'
-    where es = splitAS (clean $ negExplicit $ distribute expr) -- TODO have this seq in simpExpr not here
-          es' = map (decodePolyFunc . codifyPolyFunc) es
+    where es = splitAS (clean $ distribute $ negExplicit expr) -- TODO have this seq in simpExpr not here
+          es' = map decodePolyFunc $ concat $ addCodes $ map codifyPolyFunc es
+
+
+
+-- precondition: gets something like x^3*8x^4*sin^(8x) (3+x) with the function never being on
+-- hte bottom as denom in division.
+-- postcondition: simplified polynomials at front in code and function arg,coef,pow in code.
+codifyPolyFunc :: Expr -> Code
+codifyPolyFunc expr
+    | isTrig f = Trig codes
+    | isInvTrig f = InvTrig codes
+    | isHyp f = Hyperbolic codes
+    | isInvHyp f = InvHyp codes
+    | isLogar f = Logarithmic codes
+    where
+    (poly, func) = unjoinPolyFunc expr
+    coef = meltPoly poly
+    f = getBase func
+    descr = (coef, simplifyExpr $ getPow func, simplifyExpr $ getArg f)
+    zs = replicate 6 (Num 0, Num 0, Num 0)
+    zsLog = replicate 3 (Num 0, Num 0, Num 0)
+    codes = if (isLogFamily f) then (put (findLoc f) descr zsLog) else (put (findLoc f) descr zs)
+
+
+decodePolyFunc :: Code -> Expr
+decodePolyFunc (Trig ts) = polyFuncDecoder 0 ts
+decodePolyFunc (InvTrig ts) = polyFuncDecoder 1 ts
+decodePolyFunc (Hyperbolic hs) = polyFuncDecoder 2 hs
+decodePolyFunc (InvHyp hs) = polyFuncDecoder 3 hs
+decodePolyFunc (Logarithmic ls) = polyFuncDecoder 4 ls
+
+
+-- note the Int is a code: 0 = Trig, 1  = InvTrig, 2 = Hyperbolic, 3 =InvHyp, 4 = Logarithmic.
+polyFuncDecoder :: Int -> [Description] -> Expr
+polyFuncDecoder n ts = rebuildAS $ map clean fs'
+    where
+    ts' = filter (\(c,_,_) -> (not (c == Num 0)) && (not (c == Frac (Rate 0)))) ts
+    args = map (\(_,_,x) -> x) ts'
+    coefs = map negExplicit $ map (\(c,_,_) -> c) ts'
+    pows = map (\(_,p,_) -> p) ts'
+    fs = findFuncFamily n
+    fs' = zipWith Mul coefs (zipWith Pow (zipWith push args fs) pows)
+
+    findFuncFamily 0 = map F [Sin x, Cos x, Tan x, Csc x, Sec x, Cot x]
+    findFuncFamily 1 = map F [Arcsin x, Arccos x, Arctan x, Arccsc x, Arcsec x, Arccot x]
+    findFuncFamily 2 = map F [Sinh x, Cosh x, Tanh x, Csch x, Sech x, Coth x]
+    findFuncFamily 3 = map F [Arcsinh x, Arccosh x, Arctanh x, Arccsch x, Arcsech x, Arccoth x]
+    findFuncFamily 4 = map F [E x, Ln x, Log x x]
+
+
+
 
 -- note takes list of [Trig [..], InvTrig [], Trig []...] and gathers all same family
 -- functions and adds them up. Gathers them in order: ts, its, hs, ihs, ls.
@@ -832,40 +921,21 @@ addCodes :: [Code] -> [[Code]]
 addCodes codes = map adder (gatherCodes codes)
 
 
-ys1 = [(Num 4,x,x .^ Num 2), (Num 6, Num 5, x .^ Num 3), (Num (-10),x,x .^ Num 2),
-    (Num 2, x, x .^ Num 2), (x .+ Num 1 , Num 5, x .^ Num 3), (Num 22, Num 5, x .^ Num 3)]
-
-ys2 = [(Num (-8),x,x .^ Num 2), (x .^ Num 7 .+ Num 3 .* x .^ Num 2, Num 5, x .^ Num 3),
-    (Num 4, Num 4, x .^ Num 4), (Num 2, x, x .^ Num 2), (Num 1,Num 5,x .^ Num 3),
-    (Num 1, Num 4, x .^ Num 4)]
-
-ys3 = [(Num (-20),x,x .^ Num 2), (Num 5, Num 5, x .^ Num 3), (Num 2, Num 5, x .^ Num 3),
-    (Num 1,Num 4, x .^ Num 4), (Num (-2),Num 4, x .^ Num 4), (Num 19, Num 5, x .^ Num 3)]
-
-ys4 = [(Num 88, x, x .^ Num 2), (Num 90 .+ x .^ Num 3 .- Num 3 .* x .^ Num 33, x, x .^ Num 2),
-    (Num 44, x, x .^ Num 2), (Num 11 .+ x .- x .^ Num 6, Num 5, x .^ Num 3),
-    (Num 12, Num 4, x .^ Num 4), (Num 5, Num 5, x .^ Num 3)]
-
-ys5 = [(Num 7,x,x .^ Num 2), (Num (-54), Num 5, x .^ Num 3), (Num 14, Num 4, x .^ Num 4),
-    (Num 44, Num 4, x .^ Num 4), (Num 3, Num 4, x .^ Num 4), (Num (-8) .* x, Num 5, x .^ Num 3)]
-
-ys = concat $ [map Trig [ys1, ys2, ys3, ys4, ys5]] ++ [map InvHyp [ys3, ys5, ys2]] ++
-    [map Hyperbolic [ys1,ys2, ys5, ys4]] ++ [map Logarithmic [ys5, ys3, ys2, ys1, ys4]] ++
-    [map Trig [ys1, ys5, ys3]]  ++ [map Logarithmic [ys2, ys4, ys2, ys4]] ++
-    [map InvHyp [ys1, ys1, ys2, ys3, ys4, ys4, ys1]]
-
 
 adder :: [Code] -> [Code]
 adder [] = []
-adder cs = map const groups'
+adder cs = map const groups''
     where
     cs' = map unwrapCode cs
     const = getConstr (getCode (head cs))
     groups = map (map (foldl1 add)) (map gatherArgsPows (transpose cs'))
     groups' = transpose $ map (elongate maxLen zeroes) groups
+    groups'' = filter notAllZero groups'
     zeroes = (Num 0, Num 0, Num 0)
     maxLen = maximum $ map length groups
     add (c1,p1,x1) (c2,p2,x2) = (simplifyExpr $ c1 .+ c2, p1,x1)
+    notAllZero xs = not (all (\x -> x == (Num 0, Num 0, Num 0)) xs)
+
 
 
 getConstr :: Int -> ([Description] -> Code)
@@ -903,52 +973,6 @@ gatherCodes codes = gather' [] [] [] [] [] codes
     gather' ts its hs ihs ls (xs@(Logarithmic _) : rest)
         = gather' ts its hs ihs (ls ++ [xs]) rest
 
-
--- precondition: gets something like x^3*8x^4*sin^(8x) (3+x) with the function never being on
--- hte bottom as denom in division.
--- postcondition: simplified polynomials at front in code and function arg,coef,pow in code.
-codifyPolyFunc :: Expr -> Code
-codifyPolyFunc expr
-    | isTrig f = Trig codes
-    | isInvTrig f = InvTrig codes
-    | isHyp f = Hyperbolic codes
-    | isInvHyp f = InvHyp codes
-    | isLogar f = Logarithmic codes
-    where
-    (poly, func) = unjoinPolyFunc expr
-    coef = meltPoly poly
-    f = getBase func
-    descr = (coef, simplifyExpr $ getPow func, simplifyExpr $ getArg f)
-    zs = replicate 6 (Num 0, Num 0, Num 0)
-    zsLog = replicate 3 (Num 0, Num 0, Num 0)
-    codes = if (isLogFamily f) then (put (findLoc f) descr zsLog) else (put (findLoc f) descr zs)
-
-
-
-decodePolyFunc :: Code -> Expr
-decodePolyFunc (Trig ts) = polyFuncDecoder 0 ts
-decodePolyFunc (InvTrig ts) = polyFuncDecoder 1 ts
-decodePolyFunc (Hyperbolic hs) = polyFuncDecoder 2 hs
-decodePolyFunc (InvHyp hs) = polyFuncDecoder 3 hs
-decodePolyFunc (Logarithmic ls) = polyFuncDecoder 4 ls
-
-
--- note the Int is a code: 0 = Trig, 1  = InvTrig, 2 = Hyperbolic, 3 =InvHyp, 4 = Logarithmic.
-polyFuncDecoder :: Int -> [Description] -> Expr
-polyFuncDecoder n ts = rebuildAS $ map clean fs'
-    where
-    ts' = filter (\(c,_,_) -> (not (c == Num 0)) && (not (c == Frac (Rate 0)))) ts
-    args = map (\(_,_,x) -> x) ts'
-    coefs = map negExplicit $ map (\(c,_,_) -> c) ts'
-    pows = map (\(_,p,_) -> p) ts'
-    fs = findFuncFamily n
-    fs' = zipWith Mul coefs (zipWith Pow (zipWith push args fs) pows)
-
-    findFuncFamily 0 = map F [Sin x, Cos x, Tan x, Csc x, Sec x, Cot x]
-    findFuncFamily 1 = map F [Arcsin x, Arccos x, Arctan x, Arccsc x, Arcsec x, Arccot x]
-    findFuncFamily 2 = map F [Sinh x, Cosh x, Tanh x, Csch x, Sech x, Coth x]
-    findFuncFamily 3 = map F [Arcsinh x, Arccosh x, Arctanh x, Arccsch x, Arcsech x, Arccoth x]
-    findFuncFamily 4 = map F [E x, Ln x, Log x x]
 
 
 
