@@ -549,30 +549,38 @@ newRight e ls
 -- TODO help filtering is incorrect here. Learn to allow things like x^2 sinx through the filter as well
 -- not just pure trig or hyp .. functions.
 simplifyExpr :: Expr -> Expr
-simplifyExpr e = e {-ps' .+ fs'
+simplifyExpr e = ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
     where
     expr = chisel $ distribute $ chisel $ negExplicit e -- TODO need to put distribute cases (sep)(sep)
     es = map chisel (splitAS expr)
     (ps, other) = partition isMono es
     (fs, other') = partition (\e -> hasOnlyOneFunction e && (not $ isDiv e)) other
-    (ffs, other'') = partition hasManyFunctions (other ++ other')
+    (ffs, other'') = partition (\e -> hasManyFunctions e && (not $ isDiv e))  (other ++ other')
     ps' = meltPoly (rebuildAS ps)
     fs' = meltPolyFunc (rebuildAS fs)
     ffs' = meltFunctions (rebuildAS ffs)
-    fs' = gs' .+ ggs'
--}
+    (divs, other''') = partition isDiv other''
+    divs' = rebuildAS $ map simplifyDivExpr divs
+
+
+-- note expecting the remains from other'' in above function (must be div)
+-- precondition: get one non-separable div expr at a time.
+simplifyDivExpr :: Expr -> Expr
+simplifyDivExpr expr = simplifyExpr (Div (simplifyExpr up) (simplifyExpr lo))
+    where (up, lo) = (getUpper expr, getLower expr)
 
 ------------------------------ Dealing with many functions ---------------------------------
 
 -- note takes many sets of many funcs at a time. So expression can be separable.
 -- note if expr is div (output from chisel) then we apply melt separately
 -- postcondition returns separable function.
--- meltFunctions :: Expr -> Expr
+meltFunctions :: Expr -> Expr
+meltFunctions e = e
 
 -- note separates function part from other parts and then simplifies functions.
 -- precondition: expr cannot be separable (has to be glued) so takes one set of many funcs at time.
--- simplifyFunctions :: Expr -> Expr
-
+simplifyFunctions :: Expr -> Expr
+simplifyFunctions e = e
 
 ------------------------------ Dealing with Polynomials ---------------------------------
 
