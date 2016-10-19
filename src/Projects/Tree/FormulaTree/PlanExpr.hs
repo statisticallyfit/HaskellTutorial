@@ -32,7 +32,8 @@ type RationalNum = Ratio Int
 data Fraction = Rate RationalNum deriving (Eq)
 
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
-    | Pow Expr Expr | Neg Expr | Num Int | Frac Fraction | Var String | F (Function Expr)
+    | Pow Expr Expr | Neg Expr | Num Int | Frac Fraction | Var String
+    | F (Function Expr) | None
     deriving (Eq)
 
 type Coeff = Int
@@ -103,6 +104,7 @@ instance Show Fraction where
 -- idea: glued things are wrapped each.
 -- NOTE original
 instance Show Expr where
+    show None = ""
     show (Var x) = x
     show (Num n) = show n
     show (Frac fraction) = show fraction
@@ -391,7 +393,7 @@ assuming arg was X for both. same for div
 ---
 
 Clean up with sweep Num
-ALSO: order: distribute, negExplicit, then clean the simplified expr and input to simplifyExpr function
+ALSO: order: distribute, negExplicit, then clean the simplified expr and input to simplify function
 order for melt polyfunc (so we dont end up with -(16 x + 16x) when in fact we need (-16x + 16x)
 => negExplicit then distribute then clean.
 
@@ -427,6 +429,7 @@ splitAS expr = concatMap (split SubOp) (split AddOp expr)
 -- split SubOp e5   ==>    [-4x,-2y]
 -- precondition: must take output from distribute (doesn't work on unflattened or unstacked exprs)
 split :: Op -> Expr -> [Expr]
+split _ None = [None]
 split _ (Var x) = [Var x]
 split _ (Num n) = [Num n]
 split _ (Frac f) = [Frac f]
@@ -548,8 +551,8 @@ newRight e ls
 -- For those that do have more than 1 func: send to functionsimplifier.
 -- TODO help filtering is incorrect here. Learn to allow things like x^2 sinx through the filter as well
 -- not just pure trig or hyp .. functions.
-simplifyExpr :: Expr -> Expr
-simplifyExpr e = ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
+simplify :: Expr -> Expr
+simplify e = ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
     where
     expr = chisel $ distribute $ chisel $ negExplicit e -- TODO need to put distribute cases (sep)(sep)
     es = map chisel (splitAS expr)
@@ -560,13 +563,13 @@ simplifyExpr e = ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
     fs' = meltPolyFunc (rebuildAS fs)
     ffs' = meltFunctions (rebuildAS ffs)
     (divs, other''') = partition isDiv other''
-    divs' = rebuildAS $ map simplifyDivExpr divs
+    divs' = rebuildAS $ map simplifyDiv divs
 
 
 -- note expecting the remains from other'' in above function (must be div)
 -- precondition: get one non-separable div expr at a time.
-simplifyDivExpr :: Expr -> Expr
-simplifyDivExpr expr = simplifyExpr (Div (simplifyExpr up) (simplifyExpr lo))
+simplifyDiv :: Expr -> Expr
+simplifyDiv expr = simplify (Div (simplify up) (simplify lo))
     where (up, lo) = (getUpper expr, getLower expr)
 
 ------------------------------ Dealing with many functions ---------------------------------
@@ -618,6 +621,7 @@ leastCommonMultiple a b = lcm a' b' c
 -- note gets the coefficient and power of the monomial.
 -- precondition: input needs to be a mono
 getCoefPowPair :: Expr -> (Fraction, Int)
+getCoefPowPair None = (makeFraction 0, 0) -- TODO revise?
 getCoefPowPair (Var _) = (makeFraction $ 1, 1)
 getCoefPowPair (Frac f) = (f, 0)
 getCoefPowPair (Num n) = (makeFraction $ n, 0) -- note this is pow 0 of x, won't be applied to the Num n.
@@ -639,6 +643,7 @@ getCoefPowPair (Neg e) = putNegFirst (getCoefPowPair e)
 
 makeFraction :: Int -> Fraction
 makeFraction n = Rate $ n % 1
+
 
 -- precondition: gets an expression with only polys
 -- postcondition: returns simplified version
@@ -821,6 +826,7 @@ findLoc f
 unjoinPolyFunc :: Expr -> (Expr, Expr)
 unjoinPolyFunc expr = (chisel $ pluck expr, head $ getFunc expr)
     where
+    getFunc (None) = []
     getFunc (Num _) = []
     getFunc (Frac _) = []
     getFunc (Var _) = []
@@ -830,6 +836,7 @@ unjoinPolyFunc expr = (chisel $ pluck expr, head $ getFunc expr)
     getFunc (Pow base expo) = fmap (\result -> Pow result expo) (getFunc base)
     getFunc e = getFunc (left e) ++ getFunc (right e)
 
+    pluck None = None
     pluck (Num n) = Num n
     pluck (Frac f) = Frac f
     pluck (Var x) = Var x
@@ -866,7 +873,7 @@ handlePolyFunc expr
 -- precondition: takes something like  x^3*8x^4*sin^(8x) (3+x) (many of them that are separable)
 -- with the function never being onthe bottom as denom in division.
 -- postcondition: returns simplified version of it and rebuildsAS
--- note gets input from distribute function in simplifyExpr.
+-- note gets input from distribute function in simplify.
 meltPolyFunc :: Expr -> Expr
 meltPolyFunc expr = rebuildAS es'
     where es = splitAS (clean $ distribute $ negExplicit expr) -- TODO have this seq in simpExpr not here
@@ -888,7 +895,7 @@ codifyPolyFunc expr
     (poly, func) = unjoinPolyFunc expr
     coef = meltPoly poly
     f = getBase func
-    descr = (coef, simplifyExpr $ getPow func, simplifyExpr $ getArg f)
+    descr = (coef, simplify $ getPow func, simplify $ getArg f)
     zs = replicate 6 (Num 0, Num 0, Num 0)
     zsLog = replicate 3 (Num 0, Num 0, Num 0)
     codes = if (isLogFamily f) then (put (findLoc f) descr zsLog) else (put (findLoc f) descr zs)
@@ -941,7 +948,7 @@ adder cs = map const groups''
     groups'' = filter notAllZero groups'
     zeroes = (Num 0, Num 0, Num 0)
     maxLen = maximum $ map length groups
-    add (c1,p1,x1) (c2,p2,x2) = (simplifyExpr $ c1 .+ c2, p1,x1)
+    add (c1,p1,x1) (c2,p2,x2) = (simplify $ c1 .+ c2, p1,x1)
     notAllZero xs = not (all (\x -> x == (Num 0, Num 0, Num 0)) xs)
 
 
@@ -991,6 +998,7 @@ negExplicit expr
     | otherwise = negExplicit expr'
     where
     expr' = neg expr
+    neg None = None
     neg e@(Num n) = if n < 0 then (Neg (Num (-1*n))) else e
     neg e@(Frac (Rate n)) = if n < 0 then (Neg (Frac (Rate (-1*n)))) else e
     neg e@(F f) = e
@@ -1046,7 +1054,7 @@ addCodesM ts us
         | (x1 == x2 && p1 == p2) = ((c1 .+ c2, p1, x1), Nothing)
         | otherwise = (a, Just b)
     simpMaybe expr@((c,p,x), maybe)
-        | isNothing maybe = ((simplifyExpr c, p, x), Nothing)
+        | isNothing maybe = ((simplify c, p, x), Nothing)
         | otherwise = expr
     (ts', us') = (unwrapCode ts, unwrapCode us)
     simplifiedMaybes = map simpMaybe $ zipWith add ts' us'
@@ -1057,7 +1065,7 @@ addCodesM ts us
         ms'' = catMaybes ms' -- (removing all the justs and leaving args)
 
 
--- note no need to simplifyExpr to the x, just to c, and p because the x is simplified
+-- note no need to simplify to the x, just to c, and p because the x is simplified
 -- before being passed here, in the codifyPolyFunc.
 -- postcondition: if the args are equal then we mul coeffs and add pows.
 mulCodesM :: Code -> Code -> (Code, Code)
@@ -1073,7 +1081,7 @@ mulCodesM ts us
         | (x1 == x2) = ((c1 .* c2, p1 .+ p2, x1), Nothing)
         | otherwise = (a, Just b)
     simpMaybe expr@((c,p,x), maybe)
-        | isNothing maybe = ((simplifyExpr c, simplifyExpr p, x), Nothing)
+        | isNothing maybe = ((simplify c, simplify p, x), Nothing)
         | otherwise = expr
     (ts', us') = (unwrapCode ts, unwrapCode us)
     simplifiedMaybes = map simpMaybe $ zipWith mul ts' us'
@@ -1101,7 +1109,7 @@ divCodesM ts us
         | (x1 == x2) = ((c1 ./ c2, p1 .- p2, x1), Nothing)
         | otherwise = (a, Just b)
     simpMaybe expr@((c,p,x), maybe)
-        | isNothing maybe = ((simplifyExpr c, simplifyExpr p, x), Nothing)
+        | isNothing maybe = ((simplify c, simplify p, x), Nothing)
         | otherwise = expr
     (ts', us') = (unwrapCode ts, unwrapCode us)
     simplifiedMaybes = map simpMaybe $ zipWith div ts' us'
@@ -1390,6 +1398,7 @@ isVarNumFunc (F f) = True
 isVarNumFunc _ = False
 
 hasAdd :: Expr -> Bool
+hasAdd None = False
 hasAdd (Var _) = False
 hasAdd (Add _ _) = True
 hasAdd (Num _) = False
@@ -1402,6 +1411,7 @@ hasAdd (Div e1 e2) = hasAdd e1 || hasAdd e2
 hasAdd (Pow e1 e2) = hasAdd e1 || hasAdd e2
 
 hasSub :: Expr -> Bool
+hasSub None = False
 hasSub (Var _) = False
 hasSub (Sub _ _) = True
 hasSub (Num _) = False
@@ -1414,6 +1424,7 @@ hasSub (Div e1 e2) = hasSub e1 || hasSub e2
 hasSub (Pow e1 e2) = hasSub e1 || hasSub e2
 
 hasMul :: Expr -> Bool
+hasMul None = False
 hasMul (Var _) = False
 hasMul (Mul _ _) = True
 hasMul (Num _) = False
@@ -1426,6 +1437,7 @@ hasMul (Div e1 e2) = hasMul e1 || hasMul e2
 hasMul (Pow e1 e2) = hasMul e1 || hasMul e2
 
 hasDiv :: Expr -> Bool
+hasDiv None = False
 hasDiv (Var _) = False
 hasDiv (Div _ _) = True
 hasDiv (Num _) = False
@@ -1438,6 +1450,7 @@ hasDiv (Mul e1 e2) = hasDiv e1 || hasDiv e2
 hasDiv (Pow e1 e2) = hasDiv e1 || hasDiv e2
 
 hasFunction :: Expr -> Bool
+hasFunction None = False
 hasFunction (Var _) = False
 hasFunction (F _) = True
 hasFunction (Num _) = False
@@ -1451,6 +1464,7 @@ hasFunction (Pow e1 e2) = hasFunction e1 || hasFunction e2
 
 
 hasNeg :: Expr -> Bool
+hasNeg None = False
 hasNeg (Var _) = False
 hasNeg (F _) = False
 hasNeg (Num n) = n < 0
@@ -1464,6 +1478,7 @@ hasNeg (Pow e1 e2) = hasNeg e1 || hasNeg e2
 
 
 hasNegPow :: Expr -> Bool
+hasNegPow None = False
 hasNegPow (Var _) = False
 hasNegPow (F _) = False
 hasNegPow (Num _) = False
@@ -1492,6 +1507,7 @@ numTerms expr = length $ divid
 
 
 left :: Expr -> Expr
+left None = None
 left (Var x) = Var x
 left (Num n) = Num n
 left (Frac f) = Frac f
@@ -1505,6 +1521,7 @@ left (Pow e1 e2) = e1
 
 
 right :: Expr -> Expr
+right None = None
 right (Var x) = Var x
 right (Num n) = Num n
 right (Frac f) = Frac f
@@ -1520,22 +1537,23 @@ right (Pow e1 e2) = e2
 
 -- rebuilds with add sub signs.
 rebuildAS :: [Expr] -> Expr
-rebuildAS es = foldl1 f es
+rebuildAS es = foldl f None es
     where
     f acc x
         | isNeg x = (Sub acc (getNeg x))
         | otherwise = Add acc x
 
-rebuild :: Op -> [Expr] -> Expr
+
 {-
 rebuild AddOp es = foldl1 (\acc x -> if (x == Num 0) then acc else (Add acc x)) es
 rebuild SubOp es = foldl1 (\acc x -> if (x == Num 0) then acc else (Sub acc x)) es
 -}
-rebuild AddOp es = foldl1 (\acc x -> Add acc x) es
-rebuild SubOp es = foldl1 (\acc x -> Sub acc x) es
-rebuild MulOp es = foldl1 (\acc x -> Mul acc x) es
-rebuild DivOp es = foldl1 (\acc x -> Div acc x) es
-rebuild PowOp es = foldl1 (\acc x -> Pow acc x) es
+rebuild :: Op -> [Expr] -> Expr
+rebuild AddOp es = foldl (\acc x -> Add acc x) None es
+rebuild SubOp es = foldl (\acc x -> Sub acc x) None es
+rebuild MulOp es = foldl (\acc x -> Mul acc x) None es
+rebuild DivOp es = foldl (\acc x -> Div acc x) None es
+rebuild PowOp es = foldl (\acc x -> Pow acc x) None es
 
 
 
@@ -1559,6 +1577,8 @@ isMono e
 
 
 -- note says if expression contains no functions and is just a polynomial term like 7x^2 / 6x or just 5x
+isPoly :: Expr -> Bool
+isPoly = not . isFunction
 {-isPoly :: Expr -> Bool
 isPoly expr
     | hasFunction expr = False
@@ -1598,6 +1618,7 @@ hasManyFunctions expr = (countFunc 0 expr) > 1
 -- note doesn't matter if there is func in expo of a power because even if there is we can
 -- put it in description as a simple expo (expos have have any type of expr)
 countFunc :: Int -> Expr -> Int
+countFunc c None = c
 countFunc c (Num n) = c
 countFunc c (Var x) = c
 countFunc c (Frac f) = c
@@ -1670,6 +1691,7 @@ chisel e
     where
     expr = clean e
     expr' = if (hasDiv expr) then (chiseler (makeDivExplicit expr)) else (chiseler expr)
+    chiseler None = None
     chiseler (Num n) = Num n
     chiseler (Var x) = Var x
     chiseler (Frac f) = Frac f
@@ -1800,6 +1822,7 @@ makeDivExplicit expr
     | otherwise = makeDivExplicit expr'
     where
     expr' = explicit expr
+    explicit None = None
     explicit (Num n) = Num n
     explicit (Frac f) = Frac f
     explicit (Var x) = Var x
@@ -1827,6 +1850,7 @@ makeMulExplicit expr
     | otherwise = makeMulExplicit expr'
     where
     expr' = explicit expr
+    explicit None = None
     explicit (Num n) = Num n
     explicit (Frac f) = Frac f
     explicit (Var x) = Var x
@@ -1866,7 +1890,6 @@ h3 = (c ./ (Num 6 .* x .^ Num 4 .+ Num 8 .- x)) .* h
 isTrig :: Expr -> Bool
 isTrig f = isSin f || isCos f || isTan f || isCsc f || isSec f || isCot f
 
-
 isInvTrig :: Expr -> Bool
 isInvTrig f = isArcsin f || isArccos f || isArctan f
     || isArccsc f || isArcsec f || isArccot f
@@ -1890,6 +1913,7 @@ isFunction _ = False
 -- puts an expression inside a function
 push :: Expr -> Expr -> Expr
 push newExpr (F f) = F $ fmap (\oldExpr -> newExpr) f
+psuh _ e = e
 
 
 -- postcondition:
@@ -1902,6 +1926,7 @@ distribute expr
     | otherwise = distribute expr'
     where
     expr' = dist expr
+    dist None = None
     dist (Num n) = Num n
     dist (Frac f) = Frac f
     dist (Var x) = Var x
@@ -1930,6 +1955,7 @@ clean expr
     expr' = cln expr
     fracZero = Frac (Rate 0)
     fracOne = Frac (Rate 1)
+    cln None = None
     cln (Num n) = Num n
     cln (Frac f) = Frac f
     cln (Var x) = Var x
@@ -2010,7 +2036,9 @@ clean expr
 -- TODO major help why doesn't 4(x+3) simplify to 4x + 12, why 4x + (4)(3)?? ?
 -- TODO probably because this has gotten too old - perhaps ther eis a case that goes ahead of the
 -- one that should be entered that keeps it in this ugly state? Fix with printExpr and foldl.
+{-
 simplify :: Expr -> Expr
+simplify None = None
 simplify (Var x) = Var x
 simplify (Num n) = Num n
 simplify (Frac f) = Frac f
@@ -2056,6 +2084,7 @@ simplify m@(Mul (Mul (Num a) (Pow x (Num p)))
                 (Mul (Num b) (Pow y (Num q))))
     = if x == y then (Num $ a * b) .* simplify x .^ (Num $ p + q) else simplify m
 
+-}
 {- TODO is this necessary?
         simplify (Mul a (Mul b rest))
             | isNum a && isNum b = a .* b .* simplify rest
@@ -2079,7 +2108,8 @@ simplify (Mul (F (Sin u)) (F (Cos v)))
             = if u == v then F (Tan u) else (F (Sin $ simplify u)) .* (F (Cos $ simplify v))
         simplify (Mul t1@(F (Tan u)) t2@(F (Tan v)))
             = if u == v then (F (Tan u)) .^ Num 2 else simplify t1 .* simplify t2
-        simplify (Mul (F (Sin u)) (F (Cos v))) -}
+        simplify (Mul (F (Sin u)) (F (Cos v))) -}{-
+
 
 simplify poly@(Mul (Num n) maybePow)
     | n < 0 && isMono poly = Neg $ Mul (Num (-1 * n)) maybePow
@@ -2122,6 +2152,13 @@ simplify (Neg m@(Mul _ _)) = Neg $ simplify m
 simplify (Neg e) = Neg $ simplify e
 
 
+simplifyComplete :: Expr -> Expr
+simplifyComplete expr
+    | s == expr = expr
+    | otherwise = simplifyComplete $ simplify s
+    where s = simplify expr
+-}
+
 
 -- TODO
 -- genius:
@@ -2155,12 +2192,6 @@ glue $ [itemSwept] ++ remainder
     -- TODO e4 breaks at foldl1 because 2 is ignored.. FIX.
 -}
 
-
-simplifyComplete :: Expr -> Expr
-simplifyComplete expr
-    | s == expr = expr
-    | otherwise = simplifyComplete $ simplify s
-    where s = simplify expr
 
 
 sameArgs :: Function Expr -> Function Expr -> Bool
