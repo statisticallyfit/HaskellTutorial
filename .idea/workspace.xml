@@ -36,7 +36,7 @@
         <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.42096218">
-              <caret line="553" column="15" selection-start-line="553" selection-start-column="15" selection-end-line="553" selection-end-column="15" />
+              <caret line="942" column="65" selection-start-line="942" selection-start-column="65" selection-end-line="942" selection-end-column="65" />
               <folding />
             </state>
           </provider>
@@ -778,12 +778,12 @@
       <workItem from="1476621522420" duration="10921000" />
       <workItem from="1476682488341" duration="29656000" />
       <workItem from="1476769617181" duration="26664000" />
-      <workItem from="1476853367081" duration="27599000" />
+      <workItem from="1476853367081" duration="27888000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="478984000" />
+    <option name="totallyTimeSpent" value="479273000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="52" width="989" height="749" extended-state="0" />
@@ -1193,7 +1193,7 @@
     <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.42096218">
-          <caret line="553" column="15" selection-start-line="553" selection-start-column="15" selection-end-line="553" selection-end-column="15" />
+          <caret line="942" column="65" selection-start-line="942" selection-start-column="65" selection-end-line="942" selection-end-column="65" />
           <folding />
         </state>
       </provider>
