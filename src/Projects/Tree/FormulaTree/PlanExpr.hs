@@ -551,7 +551,7 @@ newRight e ls
 simplify :: Expr -> Expr
 simplify e = prepExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
     where
-    prepExpr = chisel . distribute . chisel . negExplicit
+    prepExpr = distribute . chisel . negExplicit
     expr = prepExpr e -- TODO need to put distribute cases (sep)(sep)
     es = map chisel (splitAS expr)
     (ps, other) = partition isMono es
@@ -941,16 +941,17 @@ addCodes codes = map adder (gatherCodes codes)
 
 adder :: [Code] -> [Code]
 adder [] = []
-adder cs = map const groups''
+adder cs = map const groups'''
     where
     cs' = map unwrapCode cs
     const = getConstr (getCode (head cs))
     groups = map (map (foldl1 add)) (map gatherArgsPows (transpose cs'))
     groups' = transpose $ map (elongate maxLen zeroes) groups
     groups'' = filter notAllZero groups'
+    groups''' = map (map (\(c,p,x) -> (simplify c, p, x))) groups''
     zeroes = (Num 0, Num 0, Num 0)
     maxLen = maximum $ map length groups
-    add (c1,p1,x1) (c2,p2,x2) = (simplify $ c1 .+ c2, p1,x1)
+    add (c1,p1,x1) (c2,p2,x2) = (c1 .+ c2, p1,x1)
     notAllZero xs = not (all (\x -> x == (Num 0, Num 0, Num 0)) xs)
 
 
