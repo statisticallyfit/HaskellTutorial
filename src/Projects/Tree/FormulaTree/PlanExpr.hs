@@ -823,30 +823,36 @@ meltPolyFunc expr = rebuildAS es'
           es' = map (decodePolyFunc . codifyPolyFunc) es
 
 -- note takes list of [Trig [..], InvTrig [], Trig []...] and gathers all same family
--- functions and adds them up.
+-- functions and adds them up. Gathers them in order: ts, its, hs, ihs, ls.
 -- Returns list because we many have same family func left that are not addable.
 {-
-addCodes :: [Code] -> [Code]
-addCodes
-
--- note given [Trig [], Trig[]] but with Trig part removed.
-adder :: [[Description]]
--}
-
-{-
-adder :: [Code] ->
-adder [] = []
-adder cs
+addCodes :: [Code] -> [[Code]]
+addCodes codes
     where
-    codeWrap = code (head cs)
-    cs' = map ()
+    groups = gatherCodes codes
+    groups' = map (map unwrapCode) groups
+    groups'' = map adder groups'
 -}
 
 
+adder :: [Description] -> [Description]
+adder cs = transpose (map add (gatherArgsPows (transpose cs)))
+    where add (c1,p1,x1) (c2,p2,x2) = (simplifyExpr $ c1 .+ c2, p1,x1)
 
-gather :: [Code] -> [[Code]]
-gather [] = [[]]
-gather codes = gather' [] [] [] [] [] codes
+
+gatherArgsPows :: [Description] -> [[Description]]
+gatherArgsPows ds = filter (not . null) $ gather [[]] ds
+    where
+    gatherOne (c,p,x) ds = partition (\(c',p',x') -> p == p' && x == x') ds
+
+    gather acc [] = acc
+    gather acc (d:ds) = gather (acc ++ [like]) other
+        where (like, other) = gatherOne d ds
+
+
+gatherCodes :: [Code] -> [[Code]]
+gatherCodes [] = [[]]
+gatherCodes codes = gather' [] [] [] [] [] codes
     where
     gather' ts its hs ihs ls [] = [ts] ++ [its] ++ [hs] ++ [ihs] ++ [ls]
     gather' ts its hs ihs ls (xs@(Trig _) : rest)
@@ -976,9 +982,7 @@ addCodesM ts us
     (ts', us') = (unwrapCode ts, unwrapCode us)
     simplifiedMaybes = map simpMaybe $ zipWith add ts' us'
     (ts'', us'') = unzip simplifiedMaybes
-    prepMaybeCodes ms
-        | all isNothing ms = []
-        | otherwise = ms''
+    prepMaybeCodes ms = ms''
         where
         ms' = map (\m -> if isNothing m then (Just (Num 0, Num 0, Num 0)) else m) ms
         ms'' = catMaybes ms' -- (removing all the justs and leaving args)
@@ -1005,9 +1009,7 @@ mulCodesM ts us
     (ts', us') = (unwrapCode ts, unwrapCode us)
     simplifiedMaybes = map simpMaybe $ zipWith mul ts' us'
     (ts'', us'') = unzip simplifiedMaybes
-    prepMaybeCodes ms
-        | all isNothing ms = []
-        | otherwise = ms''
+    prepMaybeCodes ms = ms''
         where
         ms' = map (\m -> if isNothing m then (Just (Num 0, Num 0, Num 0)) else m) ms
         ms'' = catMaybes ms' -- (removing all the justs and leaving args)
@@ -1035,9 +1037,7 @@ divCodesM ts us
     (ts', us') = (unwrapCode ts, unwrapCode us)
     simplifiedMaybes = map simpMaybe $ zipWith div ts' us'
     (ts'', us'') = unzip simplifiedMaybes
-    prepMaybeCodes ms
-        | all isNothing ms = []
-        | otherwise = ms''
+    prepMaybeCodes ms = ms''
         where
         ms' = map (\m -> if isNothing m then (Just (Num 0, Num 0, Num 0)) else m) ms
         ms'' = catMaybes ms' -- (removing all the justs and leaving args)
