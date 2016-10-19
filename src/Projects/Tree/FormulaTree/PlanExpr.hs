@@ -545,10 +545,8 @@ put index n xs
     where (front, back) = splitAt index xs
           newBack = if null back then [] else (tail back)
 
-elongate :: [a] -> [a] -> a -> ([a], [a])
-elongate xs ys toElongateWith = (xs ++ (replicate (toLen - (length xs)) toElongateWith),
-                  ys ++ (replicate (toLen - (length ys)) toElongateWith))
-    where toLen = max (length xs) (length ys)
+elongate :: Int -> a -> [a] -> [a]
+elongate len item xs = xs ++ (replicate (len - (length xs)) item)
 
 
 toCommonDenom :: ((Int,Int), (Int,Int)) -> ((Int,Int), (Int,Int))
@@ -673,12 +671,18 @@ decodePoly (Poly ps) = rebuildAS $ filter notZero (map clean polynomials)
 -- Note all these functions with poly below assume the ps inside the Poly are added.
 addPoly :: Code -> Code -> Code
 addPoly (Poly ps) (Poly qs) = Poly (zipWith (+) ps' qs')
-    where (ps', qs') = elongate ps qs (makeFraction 0)
+    where
+    len = max (length ps) (length qs)
+    fracZero = makeFraction 0
+    (ps', qs') = (elongate len fracZero ps, elongate len fracZero qs)
 
 
 subPoly :: Code -> Code -> Code
 subPoly (Poly ps) (Poly qs) = Poly (zipWith (-) ps' qs')
-    where (ps', qs') = elongate ps qs (makeFraction 0)
+    where
+    len = max (length ps) (length qs)
+    fracZero = makeFraction 0
+    (ps', qs') = (elongate len fracZero ps, elongate len fracZero qs)
 
 
 mulPoly :: Code -> Code -> Code
@@ -731,7 +735,6 @@ divPoly (Poly ns) (Poly ms)
     d = ms !! dp
     ns' = filter notZero ns
     ps = findIndices notZero ns -- the expoonent of the variables of the nums (coeffs).
-    -- nsPs = elongate ns' (map makeRate ps) (makeRate 0) -- ps aren't rates, but need to satisfy func arg type
     npPairs = zip ns' ps
     ndpTriples = map (divOnePoly (d, dp)) npPairs
     maxPow = maximum $ map snd ndpTriples
@@ -825,19 +828,53 @@ meltPolyFunc expr = rebuildAS es'
 -- note takes list of [Trig [..], InvTrig [], Trig []...] and gathers all same family
 -- functions and adds them up. Gathers them in order: ts, its, hs, ihs, ls.
 -- Returns list because we many have same family func left that are not addable.
-{-
 addCodes :: [Code] -> [[Code]]
-addCodes codes
+addCodes codes = map adder (gatherCodes codes)
+
+
+ys1 = [(Num 4,x,x .^ Num 2), (Num 6, Num 5, x .^ Num 3), (Num (-10),x,x .^ Num 2),
+    (Num 2, x, x .^ Num 2), (x .+ Num 1 , Num 5, x .^ Num 3), (Num 22, Num 5, x .^ Num 3)]
+
+ys2 = [(Num (-8),x,x .^ Num 2), (x .^ Num 7 .+ Num 3 .* x .^ Num 2, Num 5, x .^ Num 3),
+    (Num 4, Num 4, x .^ Num 4), (Num 2, x, x .^ Num 2), (Num 1,Num 5,x .^ Num 3),
+    (Num 1, Num 4, x .^ Num 4)]
+
+ys3 = [(Num (-20),x,x .^ Num 2), (Num 5, Num 5, x .^ Num 3), (Num 2, Num 5, x .^ Num 3),
+    (Num 1,Num 4, x .^ Num 4), (Num (-2),Num 4, x .^ Num 4), (Num 19, Num 5, x .^ Num 3)]
+
+ys4 = [(Num 88, x, x .^ Num 2), (Num 90 .+ x .^ Num 3 .- Num 3 .* x .^ Num 33, x, x .^ Num 2),
+    (Num 44, x, x .^ Num 2), (Num 11 .+ x .- x .^ Num 6, Num 5, x .^ Num 3),
+    (Num 12, Num 4, x .^ Num 4), (Num 5, Num 5, x .^ Num 3)]
+
+ys5 = [(Num 7,x,x .^ Num 2), (Num (-54), Num 5, x .^ Num 3), (Num 14, Num 4, x .^ Num 4),
+    (Num 44, Num 4, x .^ Num 4), (Num 3, Num 4, x .^ Num 4), (Num (-8) .* x, Num 5, x .^ Num 3)]
+
+ys = concat $ [map Trig [ys1, ys2, ys3, ys4, ys5]] ++ [map InvHyp [ys3, ys5, ys2]] ++
+    [map Hyperbolic [ys1,ys2, ys5, ys4]] ++ [map Logarithmic [ys5, ys3, ys2, ys1, ys4]] ++
+    [map Trig [ys1, ys5, ys3]]  ++ [map Logarithmic [ys2, ys4, ys2, ys4]] ++
+    [map InvHyp [ys1, ys1, ys2, ys3, ys4, ys4, ys1]]
+
+
+adder :: [Code] -> [Code]
+adder [] = []
+adder cs = map const groups'
     where
-    groups = gatherCodes codes
-    groups' = map (map unwrapCode) groups
-    groups'' = map adder groups'
--}
+    cs' = map unwrapCode cs
+    const = getConstr (getCode (head cs))
+    groups = map (map (foldl1 add)) (map gatherArgsPows (transpose cs'))
+    groups' = transpose $ map (elongate maxLen zeroes) groups
+    zeroes = (Num 0, Num 0, Num 0)
+    maxLen = maximum $ map length groups
+    add (c1,p1,x1) (c2,p2,x2) = (simplifyExpr $ c1 .+ c2, p1,x1)
 
 
-adder :: [Description] -> [Description]
-adder cs = transpose (map add (gatherArgsPows (transpose cs)))
-    where add (c1,p1,x1) (c2,p2,x2) = (simplifyExpr $ c1 .+ c2, p1,x1)
+getConstr :: Int -> ([Description] -> Code)
+getConstr 0 = Trig
+getConstr 1 = InvTrig
+getConstr 2 = Hyperbolic
+getConstr 3 = InvHyp
+getConstr 4 = Logarithmic
+
 
 
 gatherArgsPows :: [Description] -> [[Description]]
@@ -846,7 +883,7 @@ gatherArgsPows ds = filter (not . null) $ gather [[]] ds
     gatherOne (c,p,x) ds = partition (\(c',p',x') -> p == p' && x == x') ds
 
     gather acc [] = acc
-    gather acc (d:ds) = gather (acc ++ [like]) other
+    gather acc (d:ds) = gather (acc ++ [concat [[d], like]]) other
         where (like, other) = gatherOne d ds
 
 
