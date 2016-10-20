@@ -547,14 +547,14 @@ newRight e ls
 -- TODO help filtering is incorrect here. Learn to allow things like x^2 sinx through the filter as well
 -- not just pure trig or hyp .. functions.
 simplify :: Expr -> Expr
-simplify e = prepExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
+simplify expr = prepExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
     where
-    prepExpr = distribute . chisel . negExplicit
-    expr = prepExpr e -- TODO need to put distribute cases (sep)(sep)
-    es = map chisel (splitAS expr)
+    -- TODO need to put distribute cases (sep)(sep)
+    prepExpr = chisel . distribute . negExplicit . chisel
+    es = map chisel (splitAS (prep expr))
     (ps, other) = partition isMono es
     (fs, other') = partition (\e -> hasOnlyOneFunction e && (not $ isDiv e)) other
-    (ffs, other'') = partition (\e -> hasManyFunctions e && (not $ isDiv e))  (other ++ other')
+    (ffs, other'') = partition (\e -> hasManyFunctions e && (not $ isDiv e))  other'
     (divs, other''') = partition isDiv other''
 
     psI = if (null ps) then [Num 0] else ps
@@ -565,6 +565,24 @@ simplify e = prepExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
     fs' = meltPolyFunc (rebuildAS fsI)
     ffs' = meltFunctions (rebuildAS ffsI)
     divs' = rebuildAS $ map simplifyDiv divs
+
+
+expr = e4
+prepExpr = chisel . distribute . negExplicit . chisel
+es = map chisel (splitAS (prep expr))
+(ps, other) = partition isMono es
+(fs, other') = partition (\e -> hasOnlyOneFunction e && (not $ isDiv e)) other
+(ffs, other'') = partition (\e -> hasManyFunctions e && (not $ isDiv e))  other'
+(divs, other''') = partition isDiv other''
+
+psI = if (null ps) then [Num 0] else ps
+fsI = if (null fs) then [Num 0] else fs
+ffsI = if (null ffs) then [Num 0] else ffs
+
+ps' = meltPoly (rebuildAS psI)
+fs' = meltPolyFunc (rebuildAS fsI)
+ffs' = meltFunctions (rebuildAS ffsI)
+divs' = rebuildAS $ map simplifyDiv divs
 
 
 -- note expecting the remains from other'' in above function (must be div)
@@ -913,10 +931,10 @@ decodePolyFunc (Logarithmic ls) = polyFuncDecoder 4 ls
 polyFuncDecoder :: Int -> [Description] -> Expr
 polyFuncDecoder n ts = rebuildAS $ map clean fs'
     where
-    ts' = filter (\(c,_,_) -> (not (c == Num 0)) && (not (c == Frac (Rate 0)))) ts
-    args = map (\(_,_,x) -> x) ts'
-    coefs = map negExplicit $ map (\(c,_,_) -> c) ts'
-    pows = map (\(_,p,_) -> p) ts'
+    -- ts' = filter (\(c,_,_) -> (not (c == Num 0)) && (not (c == Frac (Rate 0)))) ts
+    args = map (\(_,_,x) -> x) ts
+    coefs = {-map negExplicit $ -}map (\(c,_,_) -> c) ts
+    pows = map (\(_,p,_) -> p) ts
     fs = findFuncFamily n
     fs' = zipWith Mul coefs (zipWith Pow (zipWith push args fs) pows)
 
@@ -1028,10 +1046,22 @@ negExplicit expr
     neg e@(Var x) = e
     neg (Neg (Neg n)) = neg n
     neg (Neg n) = Neg $ neg n
-    neg (Mul (Neg a) b) = Neg $ (neg a) .* (neg b)
-    neg (Mul a (Neg b)) = Neg $ (neg a) .* (neg b)
-    neg (Div (Neg a) b) = Neg $ (neg a) ./ (neg b)
-    neg (Div a (Neg b)) = Neg $ (neg a) ./ (neg b)
+
+    -- Note tehse are removed from clean() and put here temporarily.
+    neg (Add (Neg a) (Neg b)) = Neg $ neg a .+ neg b
+    neg (Add a (Neg b)) = neg a .- neg b
+    neg (Add (Neg a) b) = Neg $ neg a .- neg b
+    neg (Sub (Neg a) (Neg b)) = Neg $ neg a .- neg b
+    neg (Sub a (Neg b)) = neg a .+ neg b
+    neg (Sub (Neg a) b) = Neg $ neg a .+ neg b
+    -- note like above from clean and put here.
+    neg (Mul (Neg a) (Neg b)) = neg a .* neg b
+    neg (Mul (Neg a) b) = Neg $ neg a .* neg b
+    neg (Mul a (Neg b)) = Neg $ neg a .* neg b
+    neg (Div (Neg a) (Neg b)) = neg a ./ neg b
+    neg (Div (Neg a) b) = Neg $ neg a ./ neg b
+    neg (Div a (Neg b)) = Neg $ neg a ./ neg b
+
     neg e@(Add a b) = Add (neg a) (neg b)
     neg e@(Sub a b) = Sub (neg a) (neg b)
     neg e@(Mul a b) = Mul (neg a) (neg b)
@@ -1559,7 +1589,7 @@ rebuildAS :: [Expr] -> Expr
 rebuildAS es = clean $ foldl f (Num 0) es
     where
     f acc x
-        | isNeg x = (Sub acc (getNeg x))
+        | (not (acc == (Num 0))) && isNeg x = (Sub acc (getNeg x))
         | otherwise = Add acc x
 
 
@@ -2007,43 +2037,14 @@ clean expr
     cln (Neg (Num n)) = Num (-n)
     cln (Neg (Frac f)) = Frac (-f)
     cln (Neg (Neg e)) = cln e
-
-    cln (Add (Neg a) (Neg b)) = Neg $ cln a .+ cln b
-    cln (Add a (Neg b)) = cln a .- cln b
-    cln (Add (Neg a) b) = Neg $ cln a .- cln b
-
--- TODO HELP later do this tedious work of simpliying negatives.
-    -- cln (Sub a (Num n)) = if n < 0 then (cln a .+ Num (-1*n)) else (cln a .- Num n)
-{-    cln (Sub a b)
-        | isNegNumOrFrac a -}
-    cln (Sub (Neg a) (Neg b)) = Neg $ cln a .- cln b
-    cln (Sub a (Neg b)) = cln a .+ cln b
-    cln (Sub (Neg a) b) = Neg $ cln a .+ cln b
-
-    cln (Mul (Neg a) (Neg b)) = cln a .* cln b
-    cln (Mul (Neg a) b) = Neg $ cln a .* cln b
-    cln (Mul a (Neg b)) = Neg $ cln a .* cln b
-
-    cln (Div (Neg a) (Neg b)) = cln a ./ cln b
-    cln (Div (Neg a) b) = Neg $ cln a ./ cln b
-    cln (Div a (Neg b)) = Neg $ cln a ./ cln b
-
     cln (Neg e) = Neg $ cln e
-    {-
-    cln (Neg (Mul e1 e2)) = Mul (cln (Neg e1)) (cln e2)
-    cln (Neg (Div e1 e2)) = Div (cln (Neg e1)) (cln e2)
-    cln (Neg (Pow base expo)) = Neg $ (cln base) .^ (cln expo)-}
-    -- cln (Neg e) = Neg $ cln e
 
     cln (Add e1 e2) = cln e1 .+ cln e2
     cln (Sub e1 e2) = cln e1 .- cln e2
     cln (Mul e1 e2) = cln e1 .* cln e2
     cln (Div e1 e2) = cln e1 ./ cln e2
     cln (Pow e1 e2) = cln e1 .^ cln e2
-    {-    | (num e1 && num e2) = (Num $ (getNum e1) + (getNum e2))
-        | otherwise = cln e1 .+ cln e2
-        where num x = isNegNumOrFrac x || isNumOrFracNeg x || isNum x
-    -}
+
 
 -- TODO major help why doesn't 4(x+3) simplify to 4x + 12, why 4x + (4)(3)?? ?
 -- TODO probably because this has gotten too old - perhaps ther eis a case that goes ahead of the
