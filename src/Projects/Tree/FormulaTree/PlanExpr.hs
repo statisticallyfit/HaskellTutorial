@@ -114,10 +114,10 @@ instance Show Expr where
         | otherwise = show e1 ++ " - " ++ show e2
 
     show (Mul (Num n) (F f)) = show n ++ show f
-    show (Mul (Frac (Rate n)) (F f))
+    show (Mul frac@(Frac (Rate n)) (F f))
         = if (denominator n == 1)
-        then (show n ++ show f)
-        else ("(" ++ show (Rate n) ++ ")" ++ show f)
+        then (show frac ++ show f)
+        else ("(" ++ show frac ++ ")" ++ show f)
     show (Mul (Frac frac@(Rate n)) other)
         = if (denominator n == 1)
         then (show frac ++ show other)
@@ -212,7 +212,6 @@ instance Show Expr where
     show (Neg f@(F _)) = "-" ++ show f
     show (Neg (Var x)) = "-" ++ x
     show (Neg e) = "-(" ++ show e ++ ")"
-
 
 
 --Mul (Add (Mul (Mul (Num 3) (Num 4)) (Pow (Var "x") (Num 7))) (Pow (Var "x") (Num (-8)))) (F (Tan x))
@@ -533,19 +532,13 @@ newRight e ls
 
 ---------------------------------------------------------
 
--- note converts expression to code
--- first splits expr at the plus / minus signs and then categorizes each element as either
--- function or polynomial term. Puts them into code accordingly.
--- example If we have 7x^2 and 3x^2 in the same expr, then we have: Poly [0,0,(7+3)
--- NOTE TODO if we have 3sec^2 x + sinxcosxtanx + x^2 tan x then
--- we split: [3sec^2 x, sinxcosxtanx, x^2tan x]
--- THen decide: map (decide if more than one function) over this
--- then if not we send partition those that have more than one function and those that do not.
--- For those that do not: send to simplify or rearrangeconst and to codifying to be simplified
--- in case of repeat things, like we can have 4sec^2x that we must add to get 7sec^2x...
--- For those that do have more than 1 func: send to functionsimplifier.
--- TODO help filtering is incorrect here. Learn to allow things like x^2 sinx through the filter as well
--- not just pure trig or hyp .. functions.
+-- errors: TODO
+-- 1) separate and differentiate different char args in the var constructor.
+-- 2) convert all div(num)(num) into frac(num)(num)
+-- 3) represent RootPolys where pow = frac 1/3.
+-- 4) handle each div
+-- 5) handle non divs that need to be simplified: (x + 1)^3 (factor out when expo
+-- is no bigger than 5, so 5 and under. If greater leave it as is.
 simplify :: Expr -> Expr
 simplify expr = prepExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
     where
@@ -567,13 +560,16 @@ simplify expr = prepExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
     divs' = rebuildAS $ map simplifyDiv divs
 
 
-expr = e4
+identifyNegDiv e = if isNeg e then (isDiv (getNeg e)) else False
+
+expr = e7
 prepExpr = chisel . distribute . negExplicit . chisel
 es = map chisel (splitAS (prep expr))
 (ps, other) = partition isMono es
 (fs, other') = partition (\e -> hasOnlyOneFunction e && (not $ isDiv e)) other
+
 (ffs, other'') = partition (\e -> hasManyFunctions e && (not $ isDiv e))  other'
-(divs, other''') = partition isDiv other''
+(divs, other''') = partition (\e -> isDiv e || identifyNegDiv e) other''
 
 psI = if (null ps) then [Num 0] else ps
 fsI = if (null fs) then [Num 0] else fs
@@ -587,8 +583,10 @@ divs' = rebuildAS $ map simplifyDiv divs
 
 -- note expecting the remains from other'' in above function (must be div)
 -- precondition: get one non-separable div expr at a time.
+-- HELP goes into infinite loop ebcause of simplify at the front - FIX TODO
 simplifyDiv :: Expr -> Expr
-simplifyDiv expr = simplify (Div (simplify up) (simplify lo))
+simplifyDiv (Neg expr) = Neg $ simplifyDiv expr
+simplifyDiv expr = {-simplify-} (Div (simplify up) (simplify lo))
     where (up, lo) = (getUpper expr, getLower expr)
 
 ------------------------------ Dealing with many functions ---------------------------------
@@ -640,10 +638,20 @@ leastCommonMultiple a b = lcm a' b' c
 
 -- note gets the coefficient and power of the monomial.
 -- precondition: input needs to be a mono
-getCoefPowPair :: Expr -> (Fraction, Int)
-getCoefPowPair (Var _) = (makeFraction $ 1, 1)
-getCoefPowPair (Frac f) = (f, 0)
-getCoefPowPair (Num n) = (makeFraction $ n, 0) -- note this is pow 0 of x, won't be applied to the Num n.
+getCoefPowPair :: Expr -> (Fraction, Fraction)
+getCoefPowPair (Var _) = (makeFraction 1, makeFraction 1)
+getCoefPowPair (Frac f) = (f, makeFraction 0)
+getCoefPowPair (Num n) = (makeFraction n, makeFraction 0) -- note this is pow 0 of x, won't be applied to the Num n.
+getCoefPowPair (Neg e) = putNegFirst (getCoefPowPair e)
+    where putNegFirst (n,p) = (-n, p)
+getCoefPowPair expr = (coefFrac, powFrac)
+    where
+    ((coef:_), (pow:_)) = partition (not . isPow) (split MulOp (meltPoly expr))
+    expo = getPow pow
+    coefFrac = if isFrac coef then (getFrac coef) else (makeFraction (getNum coef))
+    powFrac = if isFrac expo then (getFrac expo) else (makeFraction (getNum expo))
+
+{-
 getCoefPowPair (Mul (Num n) (Var _)) = (makeFraction $ n, 1)
 getCoefPowPair (Mul (Neg (Num n)) (Var _)) = (makeFraction $ -n, 1)
 getCoefPowPair (Mul (Num n) (Neg (Var _))) = (makeFraction $ -n, 1)
@@ -656,8 +664,10 @@ getCoefPowPair (Mul (Num c) (Pow (Var _) (Num p))) = (makeFraction $ c, p)
 getCoefPowPair (Mul (Num c) (Pow (Var _) (Neg (Num p)))) = (makeFraction $ c, -p)
 getCoefPowPair (Mul (Neg (Num c)) (Pow (Var _) (Num p))) = (makeFraction $ -c, p)
 getCoefPowPair (Mul (Neg (Num c)) (Pow (Var _) (Neg (Num p)))) = (makeFraction $ -c, -p)
-getCoefPowPair (Neg e) = putNegFirst (getCoefPowPair e)
-    where putNegFirst (n,p) = (-n, p)
+-}
+
+
+
 
 
 makeFraction :: Int -> Fraction
@@ -711,7 +721,9 @@ codifyMono :: Expr -> Code
 codifyMono expr = Poly $ zs ++ [c]
     where
     (c, p) = getCoefPowPair expr
-    zs = map makeFraction $ replicate p 0
+    Rate p' = p
+    numer = numerator p'
+    zs = map makeFraction $ replicate numer 0
 
 -- postcondition: returns (nothing, chiseled expr) if expr was div and had separable bottom
 -- and returns (code, nothing) if succeeded to simplify.
@@ -917,6 +929,20 @@ codifyPolyFunc expr
     zs = replicate 6 (Num 0, Num 0, Num 0)
     zsLog = replicate 3 (Num 0, Num 0, Num 0)
     codes = if (isLogFamily f) then (put (findLoc f) descr zsLog) else (put (findLoc f) descr zs)
+
+
+
+
+
+
+cs = concat $ addCodes (map codifyPolyFunc (splitAS (prepExpr e4)))
+(Trig ts) = head cs
+gs = map F [Sin x, Cos x, Tan x, Csc x, Sec x, Cot x]
+args = map (\(_,_,x) -> x) ts
+pows = map (\(_,p,_) -> p) ts
+coefs = map (\(c,_,_) -> c) ts
+gs' = zipWith Mul coefs (zipWith Pow (zipWith push args gs) pows)
+
 
 
 decodePolyFunc :: Code -> Expr
@@ -1250,12 +1276,14 @@ isPow (Pow _ _) = True
 isPow _ = False
 
 getPow :: Expr -> Expr
-getPow (Pow base expo) = expo
+getPow (Pow _ expo) = expo
+getPow (Neg (Pow _ expo)) = expo
 getPow expr = Num 1 -- if not an actual power, then expo is 1
 
 getBase :: Expr -> Expr
 getBase (Pow base _) = base
-getBase e = e
+getBase (Neg (Pow base _)) = base
+getBase expr = expr
 
 isNum :: Expr -> Bool
 isNum (Num _) = True
@@ -1963,7 +1991,8 @@ psuh _ e = e
 -- postcondition:
 -- 1) distributes minus signs
 -- 2) distributes neg signs
--- 3) distributes (separable) * (separable)
+-- 3) distributes (separable) * (separable): (x + 1)^3 replic (x+1)(x+1)(x+1) and is passed
+-- to distribute case (Mul a (Mul b c)) where a, b, c are separable and Mul a b  [sep].
 distribute :: Expr -> Expr
 distribute expr
     | expr' == expr = expr
@@ -1974,6 +2003,8 @@ distribute expr
     dist (Frac f) = Frac f
     dist (Var x) = Var x
     dist (F f) = F f
+    dist (Neg (Num n)) = Num (-n)
+    dist (Neg (Frac f)) = Frac (-f)
     dist (Neg e)
         | isAdd e = (dist (Neg a)) .- (dist b)
         | isSub e = (dist (Neg a)) .+ (dist b)
@@ -2018,6 +2049,7 @@ clean expr
     cln (Mul (Num 0) e2) = Num 0
     cln (Mul e1 (Frac (Rate 0))) = Num 0
     cln (Mul e1 (Num 0)) = Num 0
+    cln (Div (Num n) (Num m)) = Frac (Rate (n % m))
     cln (Div e1 (Frac (Rate 0))) = error "div by zero"
     cln (Div e1 (Num 0)) = error "div by zero"
     cln (Div (Frac (Rate 0)) e2) = Num 0
