@@ -215,8 +215,6 @@ instance Show Expr where
 
 
 
-
-
 --Mul (Add (Mul (Mul (Num 3) (Num 4)) (Pow (Var "x") (Num 7))) (Pow (Var "x") (Num (-8)))) (F (Tan x))
 
 -- TODO how to fmap this?
@@ -940,18 +938,27 @@ addCodes codes = map adder (gatherCodes codes)
 
 -- testing
 
-xs = concat $ map unwrapCode $ concat $ addCodes (fst (splitAt (length ys `div` 5) ys))
+as = concat $ addCodes (fst (splitAt (length ys `div` 5) ys))
+xs = concat $ map unwrapCode $ concat $ addCodes ys'
+
+ys' = (fst (splitAt (length ys `div` 5) ys))
+cs' = map unwrapCode ys'
+add (c1,p1,x1) (c2,p2,x2) = (c1 .+ c2, p1,x1)
+groups = map (map (foldl1 add)) (map gatherArgsPows (transpose cs'))
+groups' = transpose $ map (elongate (maximum $ map length groups) (Num 0, Num 0, Num 0)) groups
+notAllZero xs = not (all (\x -> x == (Num 0, Num 0, Num 0)) xs)
+groups'' = map (map (\(c,p,x) -> (simplify c,p,x))) (filter notAllZero groups')
+
 
 adder :: [Code] -> [Code]
 adder [] = []
 adder cs = map const groups''
     where
     cs' = map unwrapCode cs
-    const = getConstr (getCode (head cs))
     groups = map (map (foldl1 add)) (map gatherArgsPows (transpose cs'))
     groups' = transpose $ map (elongate maxLen zeroes) groups
-    groups'' = filter notAllZero groups'
-    -- groups''' = map (map (\(c,p,x) -> (simplify c, p, x))) groups''
+    groups'' = map (map (\(c,p,x) -> (simplify c,p,x))) (filter notAllZero groups')
+    const = getConstr (getCode (head cs))
     zeroes = (Num 0, Num 0, Num 0)
     maxLen = maximum $ map length groups
     add (c1,p1,x1) (c2,p2,x2) = (c1 .+ c2, p1,x1)
@@ -1561,6 +1568,7 @@ rebuild PowOp es = clean $ foldl (\acc x -> Pow acc x) (Num 0) es
 -- need to use sweep constants (make sweep so that
 -- note says if expression is a single polynomial term like 5x (monomial)
 isMono :: Expr -> Bool
+isMono (Neg e) = isMono e
 isMono e
     | hasFunction e || isSeparable e = False
     | otherwise = foldl f True s'
