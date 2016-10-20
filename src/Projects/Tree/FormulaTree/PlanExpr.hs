@@ -416,7 +416,6 @@ splitAS :: Expr -> [Expr]
 splitAS expr = concatMap (split SubOp) (split AddOp expr)
 
 
-
 -- note must be used wisely or else order of operations won't be used.
 -- for example:
 -- split MulOp e5   ==>    [-(4),-x,-(2),-y] which is not correct
@@ -564,7 +563,7 @@ identifyNegDiv e = if isNeg e then (isDiv (getNeg e)) else False
 expr = e7
 prepExpr = chisel . distribute . negExplicit . chisel
 es = map chisel (splitAS (prep expr))
-(ps, other) = partition (\e -> isMono e || isPoly e) es
+(ps, other) = partition isPoly es
 (fs, other') = partition (\e -> hasOnlyOneFunction e && (not $ isDiv e)) other
 
 (ffs, other'') = partition (\e -> hasManyFunctions e && (not $ isDiv e))  other'
@@ -669,6 +668,7 @@ meltPoly expr
 codifyPolyA :: Expr -> Code
 codifyPolyA expr = foldl1 addPoly (map codifyPolyM ps)
     where ps = splitAS expr
+          -- f p = if (isDiv p) then (codifyPolyD p) else
 
 
 -- precondition: takes chisel output so has no negpowers. There is no division (assume) just mul.
@@ -706,15 +706,17 @@ codifyMono expr = Poly $ zs ++ [c]
 
 -- postcondition: returns (nothing, chiseled expr) if expr was div and had separable bottom
 -- and returns (code, nothing) if succeeded to simplify.
+-- map codifyPolyD divs ++ map codifyPolyM muls
+-- TODO start here tomorrow! must fix this so that we don't get error in getNum and
+-- that codifyPolyA handles divs.
 codifyPoly :: Expr -> (Maybe Code, Maybe Expr)
 codifyPoly e
     | isSeparable e = (Just $ codifyPolyA e, Nothing)
-    | hasDiv e && (isDiv expDiv) = (mCode, mExpr)
+    | hasDiv e && (isDiv expDiv) = codifyPolyD expDiv
     | hasDiv e && (isMul expDiv) = (Just $ codifyPolyM expDiv, Nothing)
     | otherwise = (Just $ codifyPolyM expDiv, Nothing)
     where
-    expDiv = makeDivExplicit e
-    (mCode, mExpr) = codifyPolyD expDiv
+    expDiv = chisel e
 
 
 decodePoly :: Code -> Expr
