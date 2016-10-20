@@ -534,10 +534,9 @@ newRight e ls
 
 -- errors: TODO
 -- 1) separate and differentiate different char args in the var constructor.
--- 2) convert all div(num)(num) into frac(num)(num)
--- 3) represent RootPolys where pow = frac 1/3.
--- 4) handle each div
--- 5) handle non divs that need to be simplified: (x + 1)^3 (factor out when expo
+-- 2) represent RootPolys where pow = frac 1/3.
+-- 3) handle each div
+-- 4) handle non divs that need to be simplified: (x + 1)^3 (factor out when expo
 -- is no bigger than 5, so 5 and under. If greater leave it as is.
 simplify :: Expr -> Expr
 simplify expr = prepExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
@@ -565,7 +564,7 @@ identifyNegDiv e = if isNeg e then (isDiv (getNeg e)) else False
 expr = e7
 prepExpr = chisel . distribute . negExplicit . chisel
 es = map chisel (splitAS (prep expr))
-(ps, other) = partition isMono es
+(ps, other) = partition (\e -> isMono e || isPoly e) es
 (fs, other') = partition (\e -> hasOnlyOneFunction e && (not $ isDiv e)) other
 
 (ffs, other'') = partition (\e -> hasManyFunctions e && (not $ isDiv e))  other'
@@ -639,34 +638,14 @@ leastCommonMultiple a b = lcm a' b' c
 -- note gets the coefficient and power of the monomial.
 -- precondition: input needs to be a mono
 getCoefPowPair :: Expr -> (Fraction, Fraction)
-getCoefPowPair (Var _) = (makeFraction 1, makeFraction 1)
-getCoefPowPair (Frac f) = (f, makeFraction 0)
-getCoefPowPair (Num n) = (makeFraction n, makeFraction 0) -- note this is pow 0 of x, won't be applied to the Num n.
 getCoefPowPair (Neg e) = putNegFirst (getCoefPowPair e)
     where putNegFirst (n,p) = (-n, p)
-getCoefPowPair expr = (coefFrac, powFrac)
+getCoefPowPair expr = (coef, pow)
     where
-    ((coef:_), (pow:_)) = partition (not . isPow) (split MulOp (meltPoly expr))
-    expo = getPow pow
-    coefFrac = if isFrac coef then (getFrac coef) else (makeFraction (getNum coef))
-    powFrac = if isFrac expo then (getFrac expo) else (makeFraction (getNum expo))
-
-{-
-getCoefPowPair (Mul (Num n) (Var _)) = (makeFraction $ n, 1)
-getCoefPowPair (Mul (Neg (Num n)) (Var _)) = (makeFraction $ -n, 1)
-getCoefPowPair (Mul (Num n) (Neg (Var _))) = (makeFraction $ -n, 1)
-getCoefPowPair (Mul (Neg (Num n)) (Neg (Var _))) = (makeFraction $ n, 1)
-getCoefPowPair (Pow (Var _) (Num p)) = (makeFraction $ 1, p)
-getCoefPowPair (Pow (Var _) (Neg (Num p))) = (makeFraction $ 1, -p)
-getCoefPowPair (Pow (Neg (Var _)) (Num p)) = (makeFraction $ -1, p)
-getCoefPowPair (Pow (Neg (Var _)) (Neg (Num p))) = (makeFraction $ -1, -p)
-getCoefPowPair (Mul (Num c) (Pow (Var _) (Num p))) = (makeFraction $ c, p)
-getCoefPowPair (Mul (Num c) (Pow (Var _) (Neg (Num p)))) = (makeFraction $ c, -p)
-getCoefPowPair (Mul (Neg (Num c)) (Pow (Var _) (Num p))) = (makeFraction $ -c, p)
-getCoefPowPair (Mul (Neg (Num c)) (Pow (Var _) (Neg (Num p)))) = (makeFraction $ -c, -p)
--}
-
-
+    (cs, ps) = partition (not . isPow) (split MulOp expr)
+    pow = makeFraction $ sum $ map (\(Num n) -> n) (map getPow ps)
+    coef = if (all isFrac cs) then (sum (map getFrac cs))
+        else (makeFraction $ product (map getNum cs))
 
 
 
@@ -1644,7 +1623,7 @@ isMono e
     where
     -- e' = simplifyComplete e
     s' = map clean $ split MulOp e -- was e' , changed since got sent to infinite loop.
-    f = (\acc x -> acc && (isNum x || isFrac x|| isVar x || isPolyPow x))
+    f = (\acc x -> acc && (isNum x || isFrac x || isVar x || isPolyPow x))
     isPolyPow (Pow (Var _) (Neg (Num n))) = True
     isPolyPow (Pow (Var _) (Num n)) = True
     isPolyPow (Pow (Var _) (Neg (Frac f))) = True
@@ -1654,7 +1633,7 @@ isMono e
 
 -- note says if expression contains no functions and is just a polynomial term like 7x^2 / 6x or just 5x
 isPoly :: Expr -> Bool
-isPoly = not . isFunction
+isPoly e = (not $ isFunction e) || (all isMono (splitAS e))
 {-isPoly :: Expr -> Bool
 isPoly expr
     | hasFunction expr = False
