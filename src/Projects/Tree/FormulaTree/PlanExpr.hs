@@ -937,9 +937,10 @@ addCodes codes = map adder (gatherCodes codes)
 
 
 -- testing
-
+{-
 as = concat $ addCodes (fst (splitAt (length ys `div` 5) ys))
 xs = concat $ map unwrapCode $ concat $ addCodes ys'
+
 
 ys' = (fst (splitAt (length ys `div` 5) ys))
 cs' = map unwrapCode ys'
@@ -948,6 +949,16 @@ groups = map (map (foldl1 add)) (map gatherArgsPows (transpose cs'))
 groups' = transpose $ map (elongate (maximum $ map length groups) (Num 0, Num 0, Num 0)) groups
 notAllZero xs = not (all (\x -> x == (Num 0, Num 0, Num 0)) xs)
 groups'' = map (map (\(c,p,x) -> (simplify c,p,x))) (filter notAllZero groups')
+-}
+
+prep = chisel . distribute . negExplicit
+fsc = map codifyPolyFunc (map prep (splitAS (prep e)))
+cs' = map unwrapCode fsc
+add (c1,p1,x1) (c2,p2,x2) = (c1 .+ c2, p1,x1)
+groups = map (map (foldl1 add)) (map gatherArgsPows (transpose cs'))
+groups' = transpose $ map (elongate (maximum $ map length groups) (Num 0, Num 0, Num 0)) groups
+notAllZero xs = not (all (\x -> x == (Num 0, Num 0, Num 0)) xs)
+groups'' = filter notAllZero $ map (map (\(c,p,x) -> (simplify c,p,x))) groups'
 
 
 adder :: [Code] -> [Code]
@@ -957,7 +968,7 @@ adder cs = map const groups''
     cs' = map unwrapCode cs
     groups = map (map (foldl1 add)) (map gatherArgsPows (transpose cs'))
     groups' = transpose $ map (elongate maxLen zeroes) groups
-    groups'' = map (map (\(c,p,x) -> (simplify c,p,x))) (filter notAllZero groups')
+    groups'' = filter notAllZero $ map (map (\(c,p,x) -> (simplify c,p,x))) groups'
     const = getConstr (getCode (head cs))
     zeroes = (Num 0, Num 0, Num 0)
     maxLen = maximum $ map length groups
@@ -1575,9 +1586,11 @@ isMono e
     where
     -- e' = simplifyComplete e
     s' = map clean $ split MulOp e -- was e' , changed since got sent to infinite loop.
-    f = (\acc x -> acc && (isNum x || isVar x || isPolyPow x))
+    f = (\acc x -> acc && (isNum x || isFrac x|| isVar x || isPolyPow x))
     isPolyPow (Pow (Var _) (Neg (Num n))) = True
     isPolyPow (Pow (Var _) (Num n)) = True
+    isPolyPow (Pow (Var _) (Neg (Frac f))) = True
+    isPolyPow (Pow (Var _) (Frac f)) = True
     isPolyPow _ = False
 
 

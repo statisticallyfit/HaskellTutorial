@@ -35,8 +35,8 @@
       <file leaf-file-name="PlanExpr.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.64552844">
-              <caret line="959" column="4" selection-start-line="959" selection-start-column="4" selection-end-line="959" selection-end-column="4" />
+            <state vertical-scroll-proportion="0.67317075">
+              <caret line="970" column="4" selection-start-line="970" selection-start-column="4" selection-end-line="970" selection-end-column="4" />
               <folding />
             </state>
           </provider>
@@ -779,12 +779,12 @@
       <workItem from="1476682488341" duration="29656000" />
       <workItem from="1476769617181" duration="26664000" />
       <workItem from="1476853367081" duration="27888000" />
-      <workItem from="1476941443102" duration="1973000" />
+      <workItem from="1476941443102" duration="3782000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="481246000" />
+    <option name="totallyTimeSpent" value="483055000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="52" width="989" height="749" extended-state="0" />
@@ -830,7 +830,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="22" />
+      <option name="time" value="23" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -1193,8 +1193,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.64552844">
-          <caret line="959" column="4" selection-start-line="959" selection-start-column="4" selection-end-line="959" selection-end-column="4" />
+        <state vertical-scroll-proportion="0.67317075">
+          <caret line="970" column="4" selection-start-line="970" selection-start-column="4" selection-end-line="970" selection-end-column="4" />
           <folding />
         </state>
       </provider>
