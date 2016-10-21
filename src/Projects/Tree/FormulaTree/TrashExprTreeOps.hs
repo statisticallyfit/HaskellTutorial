@@ -439,3 +439,133 @@ instance Show Expr where
 
 -- TODO do show instance for odd and even:
 -- Mul (Mul (Num 2) (Pow X (Num 3))) (Pow X (Num 6))
+
+
+
+
+
+
+-- TODO major help why doesn't 4(x+3) simplify to 4x + 12, why 4x + (4)(3)?? ?
+-- TODO probably because this has gotten too old - perhaps ther eis a case that goes ahead of the
+-- one that should be entered that keeps it in this ugly state? Fix with printExpr and foldl.
+{-
+simplify :: Expr -> Expr
+simplify (Var x) = Var x
+simplify (Num n) = Num n
+simplify (Frac f) = Frac f
+simplify (F f) = F $ fmap simplify f
+
+-- TODO may not need these cases once I do operations on expression holders of arrays.
+simplify (Add (Num n) (Num m)) = Num $ n + m
+simplify (Add (Mul (Num a) (Num b)) (Mul (Num c) (Num d))) = Num $ a * b + c + d
+simplify (Add (Mul (Num a) x) (Mul (Num b) y))
+    = if x == y then (Num (a + b) .* simplify x) else ((Num a) .* simplify x .+ (Num b) .* simplify y)
+simplify (Add (Mul (Num a) x) (Mul y (Num b))) = simplify ((Num a) .* x .+ (Num b) .* y)
+simplify (Add (Mul x (Num a)) (Mul (Num b) y)) = simplify ((Num a) .* x .+ (Num b) .* y)
+simplify (Add (Mul x (Num a)) (Mul y (Num b))) = simplify ((Num a) .* x .+ (Num b) .* y)
+simplify (Add rest (Mul (Num n) (Num m))) = simplify rest .+ (Num $ n * m)
+simplify (Add (Neg e1) (Neg e2)) = simplify (Neg e1) .- simplify e2
+simplify (Add (Neg e1) e2) = simplify (Neg e1) .+ simplify e2
+simplify (Add e1 (Neg e2)) = simplify e1 .- simplify e2
+simplify (Add x y) = if x == y then (Num 2 .* simplify x) else (simplify x .+ simplify y)
+
+simplify (Sub (Num n) (Num m)) = Num $ n - m
+simplify (Sub (Mul (Num a) (Num b)) (Mul (Num c) (Num d))) = Num $ a * b - c + d
+simplify (Sub (Mul (Num a) x) (Mul (Num b) y))
+    = if x == y then (Num (a - b) .* simplify x) else ((Num a) .* simplify x .- (Num b) .* simplify y)
+simplify (Sub (Mul (Num a) x) (Mul y (Num b))) = simplify ((Num a) .* simplify x .- (Num b) .* simplify y)
+simplify (Sub (Mul x (Num a)) (Mul (Num b) y)) = simplify ((Num a) .* simplify x .- (Num b) .* simplify y)
+simplify (Sub (Mul x (Num a)) (Mul y (Num b))) = simplify ((Num a) .* simplify x .- (Num b) .* simplify y)
+simplify (Sub (Neg e1) (Neg e2)) = simplify e1 .+ simplify e2
+simplify (Sub (Neg e1) e2) = simplify (Neg e1) .- simplify e2
+simplify (Sub e1 (Neg e2)) = simplify e1 .+ simplify e2
+simplify (Sub x y) = if x == y then (Num 0) else (simplify x .- simplify y)
+
+simplify (Mul (Num 1) e2) = simplify e2
+simplify (Mul e1 (Num 1)) = simplify e1
+simplify (Mul (Num 0) e2) = Num 0
+simplify (Mul e1 (Num 0)) = Num 0
+simplify (Mul (Num n) (Num m)) = Num $ n * m
+simplify (Mul u (Num n)) = Num n .* simplify u
+simplify (Mul (Neg u) (Neg v)) = simplify u .* simplify v
+simplify (Mul (Neg u) v) = Neg (simplify u .* simplify v)
+simplify (Mul u (Neg v)) = Neg (simplify u .* simplify v)
+simplify (Mul e1 (Add x y)) = simplify e1 .* simplify x .+ simplify e1 .* simplify y
+simplify m@(Mul (Mul (Num a) (Pow x (Num p)))
+                (Mul (Num b) (Pow y (Num q))))
+    = if x == y then (Num $ a * b) .* simplify x .^ (Num $ p + q) else simplify m
+
+-}
+{- TODO is this necessary?
+        simplify (Mul a (Mul b rest))
+            | isNum a && isNum b = a .* b .* simplify rest
+            | negNum a && negNum b = a .* b .* simplify rest
+            | negNum a && isNum b = Neg a .* b .* simplify rest
+            | isNum a && negNum b = Neg a .* b .* simplify rest
+            | otherwise = simplify a .* simplify b .* simplify rest
+            where negNum x = isNegNumOrFrac x || isNumOrFracNeg x
+
+
+        -- TODO after poly stuff fix this so that we simplify functions (go to simpFuncs partition)
+
+
+        simplify (Mul (Mul (Mul rest f@(F _)) g@(F _)) h@(F _)) = simplify rest .* simplifyFunctions (f .* g .* h)
+        simplify (Mul (Mul rest f@(F _)) g@(F _)) = simplify rest .* simplifyFunctions (f .* g)
+
+
+        -- TODO now these functions are ready to go into the function simplifier (sin * cos * tan)
+
+simplify (Mul (F (Sin u)) (F (Cos v)))
+            = if u == v then F (Tan u) else (F (Sin $ simplify u)) .* (F (Cos $ simplify v))
+        simplify (Mul t1@(F (Tan u)) t2@(F (Tan v)))
+            = if u == v then (F (Tan u)) .^ Num 2 else simplify t1 .* simplify t2
+        simplify (Mul (F (Sin u)) (F (Cos v))) -}{-
+
+
+simplify poly@(Mul (Num n) maybePow)
+    | n < 0 && isMono poly = Neg $ Mul (Num (-1 * n)) maybePow
+    | n > 0 && isMono poly = poly
+    | n < 0 = Mul (Neg (Num (-1*n))) maybePow
+    | otherwise = Mul (Num n) (simplify maybePow)
+simplify (Mul other (Div a b)) = Div (other .* a) b
+simplify (Mul x y) = if x == y then simplify x .^ (Num 2) else simplify x .* simplify y
+
+simplify (Div (Num 0) (Num 0)) = error "0/0 not possible"
+simplify (Div (Num n) (Num m)) = Num $ n `div` m
+simplify (Div (Num 0) e2) = Num 0
+simplify (Div (Neg e1) (Neg e2)) = simplify $ simplify e1 ./ simplify e2
+simplify (Div (Neg e1) e2) = Neg (simplify e1 ./ simplify e2)
+simplify (Div e1 (Neg e2)) = Neg (simplify e1 ./ simplify e2)
+simplify (Div e1 (Num 0)) = error "divide by zero!"
+simplify (Div e1 (Num 1)) = simplify e1
+simplify d@(Div (Mul (Num a) (Pow x (Num p)))
+                (Mul (Num b) (Pow y (Num q))))
+    = if x == y then (Num $ a `div` b) .* simplify x .^ (Num $ p - q) else simplify d
+simplify (Div x y) = if x == y then (Num 1) else simplify x ./ simplify y
+
+simplify (Pow (Num n) (Num m)) = Num $ n ^ m
+simplify (Pow (Neg e1) (Neg e2)) = Num 1 ./ ((simplify (Neg e1)) .^ (simplify e2))
+simplify (Pow (Neg e1) (Num p)) = if (even p) then (simplify e1 .^ Num p)
+    else ((simplify (Neg e1)) .^ Num p)
+simplify (Pow e1 (Neg e2)) = Num 1 ./ (simplify e1 .^ simplify e2)
+simplify (Pow e (Num 0)) = Num 1
+simplify (Pow (Num 0) e) = Num 0
+simplify (Pow (Num 1) e) = Num 1
+simplify (Pow e (Num 1)) = simplify e --- TODO do power rules next
+simplify (Pow x y) = simplify x .^ simplify y
+
+-- simplify (Neg (Num n)) = Num (-n)
+simplify (Neg (Neg e)) = simplify e
+simplify (Neg a@(Add e1 e2)) = simplify (Neg e1) .- simplify e2
+simplify (Neg s@(Sub e1 e2)) = simplify (Neg e1) .+ simplify e2
+simplify (Neg (Mul (Num n) x)) = Num (-n) .* simplify x
+simplify (Neg m@(Mul _ _)) = Neg $ simplify m
+simplify (Neg e) = Neg $ simplify e
+
+
+simplifyComplete :: Expr -> Expr
+simplifyComplete expr
+    | s == expr = expr
+    | otherwise = simplifyComplete $ simplify s
+    where s = simplify expr
+-}

@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="bc679e25-6068-417c-8b02-1d7896297961" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/TrashExprTreeOps.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/TrashExprTreeOps.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -35,8 +36,8 @@
       <file leaf-file-name="PlanExpr.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="1.1683849">
-              <caret line="757" column="0" selection-start-line="757" selection-start-column="0" selection-end-line="757" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.36426118">
+              <caret line="564" column="19" selection-start-line="564" selection-start-column="19" selection-end-line="564" selection-end-column="19" />
               <folding />
             </state>
           </provider>
@@ -92,13 +93,13 @@
         <option value="$PROJECT_DIR$/HaskellTutorial.cabal" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/TrySimplify.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/BinarySearchTree/BSTOps.hs" />
-        <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/TrashExprTreeOps.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/RoseExpr.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/ExprTreeOps.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Expr.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/ExprPlan.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Test.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Rose.hs" />
+        <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/TrashExprTreeOps.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs" />
       </list>
     </option>
@@ -146,8 +147,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
       <pane id="PackagesPane" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -780,12 +781,12 @@
       <workItem from="1476769617181" duration="26664000" />
       <workItem from="1476853367081" duration="27888000" />
       <workItem from="1476941443102" duration="21316000" />
-      <workItem from="1477027969353" duration="10061000" />
+      <workItem from="1477027969353" duration="18899000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="510650000" />
+    <option name="totallyTimeSpent" value="519488000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="52" width="989" height="749" extended-state="0" />
@@ -1106,13 +1107,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/TrashExprTreeOps.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="422" column="68" selection-start-line="422" selection-start-column="68" selection-end-line="422" selection-end-column="68" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeOps.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1177,6 +1171,13 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Expr.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-6.6030927">
+          <caret line="754" column="37" selection-start-line="754" selection-start-column="32" selection-end-line="754" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Rose.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1185,17 +1186,18 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Expr.hs">
+    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/TrashExprTreeOps.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-6.6030927">
-          <caret line="754" column="37" selection-start-line="754" selection-start-column="32" selection-end-line="754" selection-end-column="37" />
+        <state vertical-scroll-proportion="0.9414634">
+          <caret line="571" column="0" selection-start-line="571" selection-start-column="0" selection-end-line="571" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.1683849">
-          <caret line="757" column="0" selection-start-line="757" selection-start-column="0" selection-end-line="757" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.36426118">
+          <caret line="564" column="19" selection-start-line="564" selection-start-column="19" selection-end-line="564" selection-end-column="19" />
           <folding />
         </state>
       </provider>
