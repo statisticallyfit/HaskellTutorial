@@ -643,7 +643,7 @@ getCoefPowPair expr = (coef, pow)
     where
     (cs, ps) = partition (not . isPow) (split MulOp expr)
     pow = sum $ map getMakeFrac (map getPow ps)
-    coef = if (all isFrac cs) then (sum (map getFrac cs))
+    coef = if (null cs) then 1 else if (all isFrac cs) then (sum (map getFrac cs))
         else (makeFraction $ product (map getNum cs))
     getMakeFrac n = if (isFrac n) then (getFrac n) else (makeFraction $ getNum n)
 
@@ -740,6 +740,11 @@ codifyPoly e
     mulsCode = foldl1 addPoly (mulsCodeFromMul ++ mulsCodeFromDiv)
     divsExprFromDiv = rebuildAS $ catMaybes $ snd $ unzip emPairs
 
+ee = Num 7 .* x .^ Num 2 .- Num (-3) .* Num 5 .* x .^ Num 8 .+ e7
+ee7 = chisel $ distribute $ negExplicit ee
+
+
+{-
 exprs = splitAS expr
 (divsd, muls) = partition (\e -> isDiv e || identifyNegDiv e) exprs
 (emPairs, cmPairs) = partition (\(cm,em) -> isJust em) (map codifyPolyD divsd)
@@ -747,18 +752,8 @@ mulsCodeFromMul = map codifyMono muls
 mulsCodeFromDiv = catMaybes $ fst $ unzip cmPairs
 mulsCode = foldl1 addPoly (mulsCodeFromMul ++ mulsCodeFromDiv)
 divsExprFromDiv = rebuildAS $ catMaybes $ snd $ unzip emPairs
-
-{-
-
-expDiv = chisel e
-es = splitAS expDiv
-(divs, muls) = partition isDiv es
-(divPairs, mulPairs) = partition (\(cm,em) -> isJust em) (map codifyPolyD divs)
-divs' = catMaybes $ unzip divPairs
-muls' = catMaybes $ unzip mulPairs
-addedMul = foldl1 addPoly (map codifyPolyM $ muls ++ muls')
-addedDivExp = rebuildAS divs'
 -}
+
 
 
 decodePoly :: Code -> Expr
