@@ -543,7 +543,7 @@ simplify expr = prepExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
     -- TODO need to put distribute cases (sep)(sep)
     prepExpr = chisel . distribute . negExplicit . chisel
     es = map chisel (splitAS (prep expr))
-    (ps, other) = partition isMono es
+    (ps, other) = partition isPoly es
     (fs, other') = partition (\e -> hasOnlyOneFunction e && (not $ isDiv e)) other
     (ffs, other'') = partition (\e -> hasManyFunctions e && (not $ isDiv e))  other'
     (divs, other''') = partition isDiv other''
@@ -560,7 +560,7 @@ simplify expr = prepExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
 
 identifyNegDiv e = if isNeg e then (isDiv (getNeg e)) else False
 
-expr = e7
+expr = prepExpr e7
 prepExpr = chisel . distribute . negExplicit . chisel
 es = map chisel (splitAS (prep expr))
 (ps, other) = partition isPoly es
@@ -642,9 +642,10 @@ getCoefPowPair (Neg e) = putNegFirst (getCoefPowPair e)
 getCoefPowPair expr = (coef, pow)
     where
     (cs, ps) = partition (not . isPow) (split MulOp expr)
-    pow = makeFraction $ sum $ map (\(Num n) -> n) (map getPow ps)
+    pow = sum $ map getMakeFrac (map getPow ps)
     coef = if (all isFrac cs) then (sum (map getFrac cs))
         else (makeFraction $ product (map getNum cs))
+    getMakeFrac n = if (isFrac n) then (getFrac n) else (makeFraction $ getNum n)
 
 
 
@@ -660,6 +661,18 @@ meltPoly expr
     | otherwise = decodePoly (fromJust mCode)
     where
     (mCode, mExpr) = codifyPoly expr
+
+
+
+-- note takes a single monomial and converts it to coded form
+-- precondition: no neg powers, output of chisel, AND must be monomial.
+codifyMono :: Expr -> Code
+codifyMono expr = Poly $ zs ++ [c]
+    where
+    (c, p) = getCoefPowPair expr
+    Rate p' = p
+    numer = numerator p'
+    zs = map makeFraction $ replicate numer 0
 
 
 
@@ -688,35 +701,64 @@ codifyPolyD expr
     | isNothing div = (Nothing, Just $ Div (decodePoly upper') (decodePoly lower'))
     | otherwise = (div, Nothing)
     where
-    (lower, upper) = (getLower expr, getUpper expr)
-    upper' = if (isSeparable upper) then (codifyPolyA upper) else (codifyPolyM upper)
-    lower' = if (isSeparable lower) then (codifyPolyA lower) else (codifyPolyM lower)
+    lower = if (isNeg expr) then (getNeg $ getLower expr) else (getLower expr)
+    upper = getUpper expr -- since we want to keep minus
+    upper' = if (isSeparable upper) then (codifyPolyA upper) else (codifyMono upper)
+    lower' = if (isSeparable lower) then (codifyPolyA lower) else (codifyMono lower)
     div = divPoly upper' lower'
 
+    {-
+    (uppCode, uppExpr) = if (isSeparable upper) then (codifyPoly upper) else (mono upper)
+    (lowCode, lowExpr) = if (isSeparable lower) then (codifyPoly lower) else (mono lower)
+    mono e = (Just (codifyMono e), Nothing)
+    -}
 
--- note takes a single monomial and converts it to coded form
--- precondition: no neg powers, output of chisel, AND must be monomial.
-codifyMono :: Expr -> Code
-codifyMono expr = Poly $ zs ++ [c]
-    where
-    (c, p) = getCoefPowPair expr
-    Rate p' = p
-    numer = numerator p'
-    zs = map makeFraction $ replicate numer 0
+dive = (splitAS (chisel $ distribute $ negExplicit e7)) !! 0
+
 
 -- postcondition: returns (nothing, chiseled expr) if expr was div and had separable bottom
 -- and returns (code, nothing) if succeeded to simplify.
 -- map codifyPolyD divs ++ map codifyPolyM muls
 -- TODO start here tomorrow! must fix this so that we don't get error in getNum and
 -- that codifyPolyA handles divs.
+-- -- (Just $ foldl1 addPoly (map codifyPolyA es), Nothing)
+-- (Just addedMul, Just addedDivExp)
 codifyPoly :: Expr -> (Maybe Code, Maybe Expr)
 codifyPoly e
-    | isSeparable e = (Just $ codifyPolyA e, Nothing)
+    | isSeparable e && (all isMul es) = (Just $ foldl1 addPoly $ map codifyMono es, Nothing)
+    | isSeparable e = (Just mulsCode, Just divsExprFromDiv)
     | hasDiv e && (isDiv expDiv) = codifyPolyD expDiv
     | hasDiv e && (isMul expDiv) = (Just $ codifyPolyM expDiv, Nothing)
     | otherwise = (Just $ codifyPolyM expDiv, Nothing)
     where
     expDiv = chisel e
+    es = splitAS expDiv
+    (divs, muls) = partition (\e -> isDiv e || identifyNegDiv e) es
+    (emPairs, cmPairs) = partition (\(cm,em) -> isJust em) (map codifyPolyD divs)
+    mulsCodeFromMul = map codifyMono muls
+    mulsCodeFromDiv = catMaybes $ fst $ unzip cmPairs
+    mulsCode = foldl1 addPoly (mulsCodeFromMul ++ mulsCodeFromDiv)
+    divsExprFromDiv = rebuildAS $ catMaybes $ snd $ unzip emPairs
+
+exprs = splitAS expr
+(divsd, muls) = partition (\e -> isDiv e || identifyNegDiv e) exprs
+(emPairs, cmPairs) = partition (\(cm,em) -> isJust em) (map codifyPolyD divsd)
+mulsCodeFromMul = map codifyMono muls
+mulsCodeFromDiv = catMaybes $ fst $ unzip cmPairs
+mulsCode = foldl1 addPoly (mulsCodeFromMul ++ mulsCodeFromDiv)
+divsExprFromDiv = rebuildAS $ catMaybes $ snd $ unzip emPairs
+
+{-
+
+expDiv = chisel e
+es = splitAS expDiv
+(divs, muls) = partition isDiv es
+(divPairs, mulPairs) = partition (\(cm,em) -> isJust em) (map codifyPolyD divs)
+divs' = catMaybes $ unzip divPairs
+muls' = catMaybes $ unzip mulPairs
+addedMul = foldl1 addPoly (map codifyPolyM $ muls ++ muls')
+addedDivExp = rebuildAS divs'
+-}
 
 
 decodePoly :: Code -> Expr
@@ -763,7 +805,7 @@ mulPoly (Poly ps) (Poly qs) = foldl1 addPoly products'
 -- tuples that holds first the new coeff value and second the power of this coeff.
 -- note Rate constructor holds RationalNum type which shadows Ratio Int
 mulOnePoly :: Fraction -> Int -> [Fraction] -> Code
-mulOnePoly (Rate n) p ms = foldl1 addPoly (map Poly cs)
+mulOnePoly (Rate n) p ms = foldl addPoly (Poly [makeFraction 0]) polyCs
     where
     ms' = map (\(Rate m) -> m) ms
     ts = mul' n p 0 ms' []
@@ -771,6 +813,7 @@ mulOnePoly (Rate n) p ms = foldl1 addPoly (map Poly cs)
     maxPow = maximum $ map snd ts
     zzs = replicate (maxPow + 1) 0
     cs = map (\(c,p) -> put p c zzs) ts'
+    polyCs = map Poly cs
     mul' _ _ _ [] acc = acc
     mul' 0 _ _ _ acc = [(0, 0)] ++ acc
     mul' n p q (m:ms) acc
@@ -1246,11 +1289,13 @@ isDiv _ = False
 
 getUpper :: Expr -> Expr
 getUpper (Div numer _) = numer
-getUpper _ = error "not div expr in getUpper"
+getUpper (Neg (Div numer _)) = Neg numer
+getUpper _ = error "no div expr in getUpper"
 
 getLower :: Expr -> Expr
 getLower (Div _ denom) = denom
-getLower _ = error "not div expr in getLower"
+getLower (Neg (Div _ denom)) = Neg $ denom
+getLower _ = error "no div expr in getLower"
 
 isPow :: Expr -> Bool
 isPow (Pow _ _) = True
