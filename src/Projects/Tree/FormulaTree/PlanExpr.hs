@@ -559,21 +559,21 @@ simplify expr = finishExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
     ps' = meltPoly (rebuildAS psI)
     fs' = meltPolyFunc (rebuildAS fsI)
     ffs' = meltFunctions (rebuildAS ffsI)
-    divs' = rebuildAS $ map simplifyDiv divs
+    divs' = rebuildAS $ map divSimplify divs
 
 
 identifyNegDiv e = if isNeg e then (isDiv (getNeg e)) else False
 
-expr = prepExpr e16
+expr = prepExpr e18
 prepExpr = chisel . distribute . negExplicit . chisel
 finishExpr = chisel . negExplicit . distribute
 exprs = map chisel (splitAS expr)
-(es, other) = partition isExponential exprs
-(ps, other') = partition isPoly other
-(fs, other'') = partition (\e -> hasOnlyOneFunction e && (not $ isDiv e)) other'
+(es, other0) = partition isExponential exprs
+(ps, other1) = partition isPoly other0
+(fs, other2) = partition (\e -> hasOnlyOneFunction e && (not $ isDiv e)) other1
 
-(ffs, other''') = partition (\e -> hasManyFunctions e && (not $ isDiv e))  other''
-(divs, other'''') = partition (\e -> isDiv e || identifyNegDiv e) other'''
+(ffs, other3) = partition (\e -> hasManyFunctions e && (not $ isDiv e))  other2
+(divs, other4) = partition (\e -> isDiv e || identifyNegDiv e) other3
 
 esI = if (null es) then [Num 0] else es
 psI = if (null ps) then [Num 0] else ps
@@ -584,16 +584,16 @@ es' = meltExpon (rebuildAS esI)
 ps' = meltPoly (rebuildAS psI)
 fs' = meltPolyFunc (rebuildAS fsI)
 ffs' = meltFunctions (rebuildAS ffsI)
-divs' = rebuildAS $ map simplifyDiv divs
+divs' = rebuildAS $ map divSimplify divs
 
 
 -- note expecting the remains from other'' in above function (must be div)
 -- precondition: get one non-separable div expr at a time.
 -- HELP goes into infinite loop ebcause of simplify at the front - FIX TODO
-simplifyDiv :: Expr -> Expr
-simplifyDiv (Neg expr) = Neg $ simplifyDiv expr
-simplifyDiv expr = {-simplify-} (Div (simplify up) (simplify lo))
-    where (up, lo) = (getUpper expr, getLower expr)
+divSimplify :: Expr -> Expr
+divSimplify (Neg expr) = Neg $ divSimplify expr
+divSimplify expr = {-simplify-} (Div (simplify up) (simplify lo))
+    where (Div up lo) = expr
 
 ------------------------------ Dealing with many functions ---------------------------------
 
@@ -1875,6 +1875,15 @@ chisel e
     chiseler (Div (Div a b) (Div c d)) = Div (chiseler a .* chiseler d) (chiseler b .* chiseler c)
     chiseler (Div (Div a b) other) = Div (chiseler a) (chiseler b .* chiseler other)
     chiseler (Div other (Div c d)) = Div (chiseler other .* chiseler d) (chiseler c)
+
+    --- note div power simplify (x+1)^3/(x+1) = (x+1)^2
+    chiseler (Div p1@(Pow a (Num n)) p2@(Pow b (Num m)))
+        | a == b && (not $ isMono p1) && (not $ isMono p2) = Pow (chiseler a) (Num (n-m))
+        | otherwise = Div (chiseler p1) (chiseler p2)
+
+    chiseler (Div p1@(Pow a (Num n)) b)
+        | a == b && (not $ isMono p1) && (not $ isMono b) = Pow (chiseler a) (Num (n-1))
+        | otherwise = Div (chiseler p1) (chiseler b)
     {-chiseler (Div (Add a b) c)
         | isDiv a' && isDiv b'
             = Div (Add (getUpper a') (getUpper b')) (getLower a' .* getLower b' .* c')
@@ -2077,10 +2086,14 @@ distribute expr
         | isDiv e = (dist (Neg a)) ./ (dist b)
         | otherwise = Neg $ dist e
         where (a, b) = (left e, right e)
+    --- note the negative distribute cases
     dist (Sub a (Sub b c)) = (dist a .- dist b) .+ (dist c)
     dist (Sub a (Add b c)) = (dist a .- dist b) .- (dist c)
     dist (Add a (Sub b c)) = (dist a .+ dist b) .- (dist c)
     dist (Add a (Add b c)) = (dist a .+ dist b) .+ (dist c)
+    --- note the (x+1)(x+2) distribute cases
+    dist (Mul a b)
+        | isSeparable a && isSeparable b = 
     dist (Add a b) = Add (dist a) (dist b)
     dist (Sub a b) = Sub (dist a) (dist b)
     dist (Mul a b) = Mul (dist a) (dist b)
