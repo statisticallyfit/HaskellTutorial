@@ -200,9 +200,9 @@ instance Show Expr where
     show (Pow x d@(Div e1 e2)) = show x ++ "^" ++ show d
     show (Pow e1 e2)
         | isSeparable e1 && isSeparable e2 = "(" ++ show e1 ++ ")^(" ++ show e2 ++ ")"
-        | isSeparable e1 = "(" ++ show e1 ++ ")" ++ show e2
-        | isSeparable e2 = show e1 ++ "(" ++ show e2 ++ ")"
-        | otherwise = show e1 ++ show e2
+        | isSeparable e1 = "(" ++ show e1 ++ ")^" ++ show e2
+        | isSeparable e2 = show e1 ++ "^(" ++ show e2 ++ ")"
+        | otherwise = show e1 ++ "^" ++ show e2
 
     show (Neg m@(Mul _ _)) = "-" ++ show m
     show (Neg d@(Div _ _)) = "-" ++ show d
@@ -356,7 +356,8 @@ ys = concat $ [map Trig [ys1, ys2, ys3, ys4, ys5]] ++ [map InvHyp [ys3, ys5, ys2
     [map Trig [ys1, ys5, ys3]]  ++ [map Logarithmic [ys2, ys4, ys2, ys4]] ++
     [map InvHyp [ys1, ys1, ys2, ys3, ys4, ys4, ys1]]
 
-
+--- testing meltExpon
+e28 = (Pow (Neg (Num 3)) (x .+ Num 1 .+ Num 3 .+ Num 2 .* x))
 ---------------------------------------------------------------------------------------------
 
 
@@ -539,6 +540,7 @@ newRight e ls
 -- poly functions deal only with Nums not fractions, and polyroot to deal with fractions.
 simplify :: Expr -> Expr
 simplify (Pow base expo) = Pow (simplify base) (simplify expo)
+simplify (F f) = F $ fmap simplify f
 simplify expr = finishExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
     where
     -- TODO need to put distribute cases (sep)(sep)
@@ -562,20 +564,23 @@ simplify expr = finishExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
 
 identifyNegDiv e = if isNeg e then (isDiv (getNeg e)) else False
 
-expr = prepExpr e15
+expr = prepExpr e16
 prepExpr = chisel . distribute . negExplicit . chisel
 finishExpr = chisel . negExplicit . distribute
-es = map chisel (splitAS expr)
-(ps, other) = partition isPoly es
-(fs, other') = partition (\e -> hasOnlyOneFunction e && (not $ isDiv e)) other
+exprs = map chisel (splitAS expr)
+(es, other) = partition isExponential exprs
+(ps, other') = partition isPoly other
+(fs, other'') = partition (\e -> hasOnlyOneFunction e && (not $ isDiv e)) other'
 
-(ffs, other'') = partition (\e -> hasManyFunctions e && (not $ isDiv e))  other'
-(divs, other''') = partition (\e -> isDiv e || identifyNegDiv e) other''
+(ffs, other''') = partition (\e -> hasManyFunctions e && (not $ isDiv e))  other''
+(divs, other'''') = partition (\e -> isDiv e || identifyNegDiv e) other'''
 
+esI = if (null es) then [Num 0] else es
 psI = if (null ps) then [Num 0] else ps
 fsI = if (null fs) then [Num 0] else fs
 ffsI = if (null ffs) then [Num 0] else ffs
 
+es' = meltExpon (rebuildAS esI)
 ps' = meltPoly (rebuildAS psI)
 fs' = meltPolyFunc (rebuildAS fsI)
 ffs' = meltFunctions (rebuildAS ffsI)
@@ -662,6 +667,10 @@ getMakeFrac n = if (isFrac n) then (getFrac n) else (makeFraction $ getNum n)
 
 makeFraction :: Int -> Fraction
 makeFraction n = Rate $ n % 1
+
+
+meltExpon :: Expr -> Expr
+meltExpon (Pow constBase expo) = Pow constBase (simplify expo)
 
 
 -- precondition: gets an expression with only polys
@@ -1691,7 +1700,24 @@ splitAll expr = (concatMap (split DivOp) divs) ++ muls
 -- note says if expression contains no functions and is just a polynomial term like 7x^2 / 6x or just 5x
 -- needs to get input from chisel where either fully div or fully mul.
 isPoly :: Expr -> Bool
-isPoly e = (not $ hasFunction e) || (all isMono (splitAll e))
+isPoly e = ((not $ hasFunction e) || (all isMono (splitAll e))) && (not $ isExponential e)
+
+
+-- returns true if exponential function (fixed base raised to variable power: a^x)
+isExponential :: Expr -> Bool
+isExponential (Neg e) = isExponential e
+isExponential (Pow base expo) = isConstant base && isVariable expo
+isExponential _ = False
+
+isConstant :: Expr -> Bool
+isConstant (Neg e) = isConstant e
+isConstant (Frac f) = True
+isConstant (Num n) = True
+isConstant _ = False
+
+isVariable :: Expr -> Bool
+isVariable = not . isConstant
+
 {-isPoly :: Expr -> Bool
 isPoly expr
     | hasFunction expr = False
