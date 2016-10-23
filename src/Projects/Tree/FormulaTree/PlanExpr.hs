@@ -538,6 +538,8 @@ newRight e ls
 -- is no bigger than 5, so 5 and under. If greater leave it as is.
 -- 5) START HERE TOMORROW TODO: make polyroot instance of code and make all current
 -- poly functions deal only with Nums not fractions, and polyroot to deal with fractions.
+-- 6) if result has only polynomials or powers then return the highest polynomials first
+-- then nums then powers. 
 simplify :: Expr -> Expr
 simplify (Pow base expo) = Pow (simplify base) (simplify expo)
 simplify (F f) = F $ fmap simplify f
@@ -2093,13 +2095,27 @@ distribute expr
     dist (Add a (Add b c)) = (dist a .+ dist b) .+ (dist c)
     --- note the (x+1)(x+2) distribute cases
     dist (Mul a b)
-        | isSeparable a && isSeparable b = 
+        | isSeparable a && isSeparable b = zipperAll as bs
+        | isSeparable a = zipperAll as [dist b]
+        | isSeparable b = zipperAll [dist a] bs
+        | otherwise = dist a .* dist b
+        where
+        as = splitAS (dist a)
+        bs = splitAS (dist b)
+        zipper ys x = zipWith Mul (replicate (length ys) x) ys
+        zipperAll xs ys = simplify $ rebuildAS $ map simplify $ concatMap (zipper xs) ys
     dist (Add a b) = Add (dist a) (dist b)
     dist (Sub a b) = Sub (dist a) (dist b)
-    dist (Mul a b) = Mul (dist a) (dist b)
+    -- dist (Mul a b) = Mul (dist a) (dist b)
     dist (Div a b) = Div (dist a) (dist b)
     dist (Pow a b) = Pow (dist a) (dist b)
 
+{-zipper :: [Expr] -> Expr -> [Expr]
+zipper ys x = zipWith Mul xs ys
+    where xs = replicate (length ys) x
+
+zipperAll :: [Expr] -> [Expr] -> Expr
+zipperAll xs ys = rebuildAS $ concatMap (zipper ys) xs-}
 
 clean :: Expr -> Expr
 clean expr
