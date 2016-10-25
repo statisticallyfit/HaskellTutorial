@@ -555,7 +555,6 @@ simplify (Pow base expo) = Pow (simplify base) (simplify expo)
 simplify (F f) = F $ fmap simplify f
 simplify expr = finishExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
     where
-    -- TODO need to put distribute cases (sep)(sep)
     prepExpr = chisel . distribute . negExplicit . chisel
     finishExpr = chisel . negExplicit . distribute
     es = map chisel (splitAS (prepExpr expr))
@@ -641,18 +640,24 @@ vars expr = nub $ getVars [] expr
 -- expressions separately.
 -- precondition: expr has already been trhough chisel, distribute, ... so it has no
 -- type of arg like (x+1)(3) but instead will be passed the separate parts 3x and 3.
-{-varMulSplit :: Expr -> Expr
-varMulSplit expr
-    where
-    ms = split MulOp expr-}
+-- precondition
+varMulSplit :: Expr -> Expr
+varMulSplit expr = clean $ rebuild MulOp $ map simplify varGroups
+    where varGroups = map (rebuild MulOp) $ groupByVar $ split MulOp expr
+
 
 vs = splitAS $ x .^ Num 2 .+ Num 5 .* x .^ Num 8 .- Num 2 .* x .+ x .+ y .-
     Num 8 .* y .^ Num 2 .+ x .- Num 2 .* y .+ y .* Num 4 .+ z .+ z .* Num 5 .+ Num 6 .* z .+
     z .- Num 8 .* y .- z .+ z .^ Num 9 .+ x .+ Num 4 .* z .- x .- x .^ Num 7 .+ Num 4 .* y
 
 --- note returns groups of single exprs like x^2 or y or a^3 that have the same vars in them.
-{-groupByVar :: [Expr] -> [Expr]
-groupByVar es -}
+-- precondition: each element in list es has only a single var.
+groupByVar :: [Expr] -> [[Expr]]
+groupByVar es = map (map snd) pairGroups
+    where
+    pairs = zip (map getVarMatch es) es
+    varSorter (v1,e1) (v2,e2) = if (v1 < v2) then LT else if (v1 > v2) then GT else EQ
+    pairGroups = groupBy (\(v1,_) (v2,_) -> v1 == v2) (sortBy varSorter pairs)
 
 --- note returns true if has only one var name
 hasOneVar :: Expr -> Bool
@@ -744,9 +749,10 @@ meltExpon (Pow constBase expo) = Pow constBase (simplify expo)
 meltPoly :: Expr -> Expr
 meltPoly expr
     | isNothing mCode = fromJust mExpr
-    | otherwise = decodePoly (fromJust mCode)
+    | otherwise = decodePoly var (fromJust mCode)
     where
-    (mCode, mExpr) = codifyPoly expr
+    var = head $ vars expr
+    (mCode, mExpr) = codifyPoly expr var
 
 
 
@@ -782,9 +788,9 @@ codifyPolyM expr = foldl1 mulPoly (map codifyMono ps)
 -- precondition: takes chisel output which isDiv and which has no other div in the numerator
 -- and denominator and no negpowers (that's why we can use codifypolyA.
  -- numerator can be separable but simplification only possible if denom not separable.
-codifyPolyD :: Expr -> (Maybe Code, Maybe Expr)
-codifyPolyD expr
-    | isNothing div = (Nothing, Just $ Div (decodePoly upper') (decodePoly lower'))
+codifyPolyD :: Expr -> String -> (Maybe Code, Maybe Expr)
+codifyPolyD expr var
+    | isNothing div = (Nothing, Just $ Div (decodePoly var upper') (decodePoly var lower'))
     | otherwise = (div, Nothing)
     where
     lower = if (isNeg expr) then (getNeg $ getLower expr) else (getLower expr)
@@ -798,11 +804,11 @@ codifyPolyD expr
 -- function so that neg is inside.
 -- postcondition: returns (nothing, chiseled expr) if expr was div and had separable bottom
 -- and returns (code, nothing) if succeeded to simplify.
-codifyPoly :: Expr -> (Maybe Code, Maybe Expr)
-codifyPoly e
+codifyPoly :: Expr -> String -> (Maybe Code, Maybe Expr)
+codifyPoly e var
     | isSeparable e && (all isMono es) = (Just $ foldl1 addPoly $ map codifyMono es, Nothing)
     | isSeparable e = (Just mulsCode, Just divsExprFromDiv)
-    | hasDiv e && (isDiv expDiv) = codifyPolyD expDiv
+    | hasDiv e && (isDiv expDiv) = codifyPolyD expDiv var
     | hasDiv e && (isMul expDiv) = (Just $ codifyPolyM expDiv, Nothing)
     | otherwise = (Just $ codifyPolyM expDiv, Nothing)
     where
@@ -810,7 +816,7 @@ codifyPoly e
     expDiv = chisel e
     es = splitAS expDiv
     (divs, muls) = partition (\e -> isDiv e || identifyNegDiv e) es
-    (emPairs, cmPairs) = partition (\(cm,em) -> isJust em) (map codifyPolyD divs)
+    (emPairs, cmPairs) = partition (\(cm,em) -> isJust em) (map ((flip codifyPolyD) var) divs)
     mulsCodeFromMul = map codifyMono muls
     mulsCodeFromDiv = catMaybes $ fst $ unzip cmPairs
     mulsCode = foldl1 addPoly (mulsCodeFromMul ++ mulsCodeFromDiv)
@@ -833,13 +839,13 @@ divsExprFromDiv = rebuildAS $ catMaybes $ snd $ unzip emPairs
 -}
 
 
-
-decodePoly :: Code -> Expr
-decodePoly (Poly ps) = rebuildAS $ filter notZero (map clean polynomials)
+-- gets passed the var to put in the expression.
+decodePoly :: String -> Code -> Expr
+decodePoly var (Poly ps) = rebuildAS $ filter notZero (map clean polynomials)
     where
     notZero x = (not (x == Num 0))
     ns = map Frac ps
-    xs = replicate (length ns) x
+    xs = replicate (length ns) (Var var)
     pows = map Num $ [0 .. (length ns - 1)]
     xs' = zipWith Pow xs pows
     nxs = zipWith Mul ns xs'
@@ -965,7 +971,7 @@ unjoinPolyFunc expr = (chisel $ pluck expr, head $ getFunc expr)
 
     pluck (Num n) = Num n
     pluck (Frac f) = Frac f
-    pluck (Var x) = Var x
+    pluck (Var v) = Var v
     pluck (Neg e) = Neg $ pluck e
     pluck (F f) = Num 1
     pluck (Add e1 e2) = pluck e1 .+ pluck e2
@@ -1688,7 +1694,7 @@ numTerms expr = length $ divid
 
 
 left :: Expr -> Expr
-left (Var x) = Var x
+left (Var v) = Var v
 left (Num n) = Num n
 left (Frac f) = Frac f
 left (F f) = F f
@@ -1701,7 +1707,7 @@ left (Pow e1 e2) = e1
 
 
 right :: Expr -> Expr
-right (Var x) = Var x
+right (Var v) = Var v
 right (Num n) = Num n
 right (Frac f) = Frac f
 right (F f) = F f
@@ -1731,9 +1737,9 @@ rebuildAS es = clean $ foldl f (Num 0) es
 rebuild :: Op -> [Expr] -> Expr
 rebuild AddOp es = clean $ foldl (\acc x -> Add acc x) (Num 0) es
 rebuild SubOp es = clean $ foldl (\acc x -> Sub acc x) (Num 0) es
-rebuild MulOp es = clean $ foldl (\acc x -> Mul acc x) (Num 0) es
-rebuild DivOp es = clean $ foldl (\acc x -> Div acc x) (Num 0) es
-rebuild PowOp es = clean $ foldl (\acc x -> Pow acc x) (Num 0) es
+rebuild MulOp es = clean $ foldl (\acc x -> Mul acc x) (Num 1) es
+rebuild DivOp es = clean $ foldl (\acc x -> Div acc x) (Num 1) es
+rebuild PowOp es = clean $ foldl (\acc x -> Pow acc x) (Num 1) es
 
 
 
@@ -1824,7 +1830,7 @@ hasManyFunctions expr = (countFunc 0 expr) > 1
 -- put it in description as a simple expo (expos have have any type of expr)
 countFunc :: Int -> Expr -> Int
 countFunc c (Num n) = c
-countFunc c (Var x) = c
+countFunc c (Var v) = c
 countFunc c (Frac f) = c
 countFunc c (F f) = c + 1
 countFunc c (Neg e) = countFunc c e
@@ -2043,7 +2049,7 @@ makeDivExplicit expr
     expr' = explicit expr
     explicit (Num n) = Num n
     explicit (Frac f) = Frac f
-    explicit (Var x) = Var x
+    explicit (Var v) = Var v
     explicit (F f) = F f
     explicit (Neg e) = Neg $ explicit e
     explicit (Mul (Div a b) (Div c d)) = Div (a .* b) (c .* d)
@@ -2070,7 +2076,7 @@ makeMulExplicit expr
     expr' = explicit expr
     explicit (Num n) = Num n
     explicit (Frac f) = Frac f
-    explicit (Var x) = Var x
+    explicit (Var v) = Var v
     explicit (F f) = F f
     explicit (Neg e) = Neg $ explicit e
     {-explicit (Mul (Div a b) (Div c d)) = Mul (a ./ b) (d ./ c)
@@ -2148,7 +2154,7 @@ distribute expr
     expr' = dist expr
     dist (Num n) = Num n
     dist (Frac f) = Frac f
-    dist (Var x) = Var x
+    dist (Var v) = Var v
     dist (F f) = F f
     dist (Neg (Num n)) = Num (-n)
     dist (Neg (Frac f)) = Frac (-f)
@@ -2198,7 +2204,7 @@ clean expr
     fracOne = Frac (Rate 1)
     cln (Num n) = Num n
     cln (Frac f) = Frac f
-    cln (Var x) = Var x
+    cln (Var v) = Var v
     cln (F f) = F $ fmap cln f
     cln (Add (Frac (Rate 0)) e2) = cln e2
     cln (Add (Num 0) e2) = cln e2
