@@ -169,7 +169,7 @@ instance Show Expr where
         | otherwise = show e1 ++ show e2
         where
         many1 = isPow e1 || isSeparable e1
-        many2 = isPow e2 || isNum e2 || isSeparable e2
+        many2 = isPow e2 || isNum e2 || isSeparable e2 || isNeg e2
 
     show (Div (Num n) (Num m)) = show n ++ "/" ++ show m
     show (Div (Frac f1) (Frac f2)) = "(" ++ show f1 ++ ")/(" ++ show f2 ++ ")"
@@ -575,7 +575,7 @@ simplify expr = finishExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
 
 identifyNegDiv e = if isNeg e then (isDiv (getNeg e)) else False
 
-expr = prepExpr e22
+expr = prepExpr (Num 4)
 prepExpr = chisel . distribute . negExplicit . chisel
 finishExpr = chisel . negExplicit . distribute
 exprs = map chisel (splitAS expr)
@@ -636,6 +636,15 @@ vars expr = nub $ getVars [] expr
     getVars acc (Neg e) = getVars acc e
     getVars acc _ = acc
 
+-- expects chiselled input so that the divs have no more divs in denom and numerator.
+genVarSplit :: Expr -> Expr
+genVarSplit expr = rebuildAS (ms ++ ds)
+    where
+    es = splitAS expr
+    (divs, other) = partition isDiv es
+    ms = map varMulSplit other
+    ds = map varDivSplit divs
+
 -- takes an expression that has only Mul in it and simplifies the different var
 -- expressions separately.
 -- precondition: expr has already been trhough chisel, distribute, ... so it has no
@@ -646,6 +655,21 @@ varMulSplit expr = clean $ rebuild MulOp $ map simplify varGroups
     where varGroups = map (rebuild MulOp) $ groupByVar $ split MulOp expr
 
 
+varDivSplit :: Expr -> Expr
+varDivSplit (Div upper lower) = Div (genVarSplit upper) (genVarSplit lower)
+
+
+ee = concatMap (split MulOp) $ splitAS vss
+
+-- note general input to general var split function.
+vss = x .^ Num 2 .+ Num 5 .* x .^ Num 8 .- y .* F (Sin x) .- Num 2 .* x .+ x .+ y .-
+    Num 8 .* y .^ Num 2 .+ x .- Num 2 .* y .+ x .* y .* z .* Num 4 .+ z .+ z .* Num 5 .+
+    Num 6 .* z .+ F (Sin (y .^ Num 2 .* z .* z .^ Num 6 .* Num 3)) .-
+    F (Cos z) .* z .* Num 4 .- z .- Num 8 .* y .- z .+ z .* F (Tan (x .* y)) .+
+    z .^ Num 9 .+ x .* y .^ Num 3 .* z .^ Num 9 .* x .* z .* y .* Num 2 .* Num 7 .+
+    Num 4 .* z .* F (Sin z) .- x .* y .- x .* z .^ Num 7 .+ Num 4 .* y
+
+-- note meant to be interpreted as  mulsplits just for varmulsplit func testing
 vs = splitAS $ x .^ Num 2 .+ Num 5 .* x .^ Num 8 .- Num 2 .* x .+ x .+ y .-
     Num 8 .* y .^ Num 2 .+ x .- Num 2 .* y .+ y .* Num 4 .+ z .+ z .* Num 5 .+ Num 6 .* z .+
     z .- Num 8 .* y .- z .+ z .^ Num 9 .+ x .+ Num 4 .* z .- x .- x .^ Num 7 .+ Num 4 .* y
@@ -653,11 +677,13 @@ vs = splitAS $ x .^ Num 2 .+ Num 5 .* x .^ Num 8 .- Num 2 .* x .+ x .+ y .-
 --- note returns groups of single exprs like x^2 or y or a^3 that have the same vars in them.
 -- precondition: each element in list es has only a single var.
 groupByVar :: [Expr] -> [[Expr]]
-groupByVar es = map (map snd) pairGroups
+groupByVar es = [other] ++ map (map snd) pairGroups
     where
-    pairs = zip (map getVarMatch es) es
+    (other, vs) = partition (\e -> isNum e || isFrac e || isFunction e) es
+    pairs = zip (map getVarMatch vs) vs
     varSorter (v1,e1) (v2,e2) = if (v1 < v2) then LT else if (v1 > v2) then GT else EQ
     pairGroups = groupBy (\(v1,_) (v2,_) -> v1 == v2) (sortBy varSorter pairs)
+
 
 --- note returns true if has only one var name
 hasOneVar :: Expr -> Bool
@@ -667,19 +693,12 @@ hasOneVar expr = (length $ vars expr) == 1
 varMatch :: String -> Expr -> Bool
 varMatch var expr = hasOneVar expr && ((head (vars expr)) == var)
 
---- note get var that matches to the single one in the expr.
--- example: x^2 => "x"
--- example: z => "z"
+--- note get var that matches to the single one in the expr, like x^2 => "x"
 -- precondition: assume each expr is single (has no mul, div,pow,add,or sub). And that
 -- it has only one var, not more than one.
 getVarMatch :: Expr -> String
 getVarMatch expr = head $ filter ((flip varMatch) expr) variables
     where variables = vars expr
-
--- note returns the expression split by different vars. Maybe holds a mix (like x*y)
-{-varSplit :: Expr -> ([Expr], Maybe [Expr])
-varSplit -}
-
 
 
 put :: Int -> a -> [a] -> [a]
@@ -751,7 +770,8 @@ meltPoly expr
     | isNothing mCode = fromJust mExpr
     | otherwise = decodePoly var (fromJust mCode)
     where
-    var = head $ vars expr
+    vs = vars expr
+    var = if (length vs == 1) then (Just (head vs)) else Nothing
     (mCode, mExpr) = codifyPoly expr var
 
 
@@ -788,7 +808,7 @@ codifyPolyM expr = foldl1 mulPoly (map codifyMono ps)
 -- precondition: takes chisel output which isDiv and which has no other div in the numerator
 -- and denominator and no negpowers (that's why we can use codifypolyA.
  -- numerator can be separable but simplification only possible if denom not separable.
-codifyPolyD :: Expr -> String -> (Maybe Code, Maybe Expr)
+codifyPolyD :: Expr -> Maybe String -> (Maybe Code, Maybe Expr)
 codifyPolyD expr var
     | isNothing div = (Nothing, Just $ Div (decodePoly var upper') (decodePoly var lower'))
     | otherwise = (div, Nothing)
@@ -804,7 +824,7 @@ codifyPolyD expr var
 -- function so that neg is inside.
 -- postcondition: returns (nothing, chiseled expr) if expr was div and had separable bottom
 -- and returns (code, nothing) if succeeded to simplify.
-codifyPoly :: Expr -> String -> (Maybe Code, Maybe Expr)
+codifyPoly :: Expr -> Maybe String -> (Maybe Code, Maybe Expr)
 codifyPoly e var
     | isSeparable e && (all isMono es) = (Just $ foldl1 addPoly $ map codifyMono es, Nothing)
     | isSeparable e = (Just mulsCode, Just divsExprFromDiv)
@@ -840,12 +860,14 @@ divsExprFromDiv = rebuildAS $ catMaybes $ snd $ unzip emPairs
 
 
 -- gets passed the var to put in the expression.
-decodePoly :: String -> Code -> Expr
+decodePoly :: Maybe String -> Code -> Expr
 decodePoly var (Poly ps) = rebuildAS $ filter notZero (map clean polynomials)
     where
+    -- note using x because poly is a number and we won't need it anyway.
+    var' = if (isNothing var) then (Var "x") else (Var $ fromJust var)
     notZero x = (not (x == Num 0))
     ns = map Frac ps
-    xs = replicate (length ns) (Var var)
+    xs = replicate (length ns) var'
     pows = map Num $ [0 .. (length ns - 1)]
     xs' = zipWith Pow xs pows
     nxs = zipWith Mul ns xs'
@@ -2129,9 +2151,8 @@ isLogar f = isLog f || isE f || isLn f
 
 isFunction :: Expr -> Bool
 isFunction (F _) = True
+isFunction (Neg (F _)) = True
 isFunction _ = False
-
-
 
 -- puts an expression inside a function
 push :: Expr -> Expr -> Expr
