@@ -10,6 +10,7 @@ import Data.Char
 import Numeric -- math library
 import Data.Maybe
 import Data.List
+-- import Data.List.Unique (unique) -- just use nub
 import Data.Ratio hiding (show)
 
 
@@ -247,6 +248,11 @@ instance Show a => Show (Function a) where
 
 x = Var "x"
 y = Var "y"
+z = Var "z"
+t = Var "t"
+s = Var "s"
+a = Var "a"
+b = Var "b"
 
 infixl 6 .+
 infixl 6 .-
@@ -617,6 +623,60 @@ simplifyFunctions e = e
 
 ------------------------------ Dealing with Polynomials ---------------------------------
 
+-- note gets a list of all var names in an expression
+-- (except for function args and for pow exponent)
+vars :: Expr -> [String]
+vars expr = nub $ getVars [] expr
+    where
+    getVars acc (Var varName) = acc ++ [varName]
+    getVars acc (Add e1 e2) = getVars (getVars acc e1) e2
+    getVars acc (Sub e1 e2) = getVars (getVars acc e1) e2
+    getVars acc (Mul e1 e2) = getVars (getVars acc e1) e2
+    getVars acc (Div e1 e2) = getVars (getVars acc e1) e2
+    getVars acc (Pow base _) = getVars acc base
+    getVars acc (Neg e) = getVars acc e
+    getVars acc _ = acc
+
+-- takes an expression that has only Mul in it and simplifies the different var
+-- expressions separately.
+-- precondition: expr has already been trhough chisel, distribute, ... so it has no
+-- type of arg like (x+1)(3) but instead will be passed the separate parts 3x and 3.
+{-varMulSplit :: Expr -> Expr
+varMulSplit expr
+    where
+    ms = split MulOp expr-}
+
+vs = splitAS $ x .^ Num 2 .+ Num 5 .* x .^ Num 8 .- Num 2 .* x .+ x .+ y .-
+    Num 8 .* y .^ Num 2 .+ x .- Num 2 .* y .+ y .* Num 4 .+ z .+ z .* Num 5 .+ Num 6 .* z .+
+    z .- Num 8 .* y .- z .+ z .^ Num 9 .+ x .+ Num 4 .* z .- x .- x .^ Num 7 .+ Num 4 .* y
+
+--- note returns groups of single exprs like x^2 or y or a^3 that have the same vars in them.
+{-groupByVar :: [Expr] -> [Expr]
+groupByVar es -}
+
+--- note returns true if has only one var name
+hasOneVar :: Expr -> Bool
+hasOneVar expr = (length $ vars expr) == 1
+
+-- note returns true if the var given is the only one in the expr.
+varMatch :: String -> Expr -> Bool
+varMatch var expr = hasOneVar expr && ((head (vars expr)) == var)
+
+--- note get var that matches to the single one in the expr.
+-- example: x^2 => "x"
+-- example: z => "z"
+-- precondition: assume each expr is single (has no mul, div,pow,add,or sub). And that
+-- it has only one var, not more than one.
+getVarMatch :: Expr -> String
+getVarMatch expr = head $ filter ((flip varMatch) expr) variables
+    where variables = vars expr
+
+-- note returns the expression split by different vars. Maybe holds a mix (like x*y)
+{-varSplit :: Expr -> ([Expr], Maybe [Expr])
+varSplit -}
+
+
+
 put :: Int -> a -> [a] -> [a]
 put _ n [] = [n]
 put index n xs
@@ -663,8 +723,8 @@ getCoefPowPair expr = (coef, pow)
     getMakeFrac n = if (isFrac n) then (getFrac n) else (makeFraction $ getNum n)
 
 
-[a,b] = splitAS expr
-(ns, qs) = partition (\e -> not (isPow e || isVar e)) (split MulOp a)
+[a',b'] = splitAS expr
+(ns, qs) = partition (\e -> not (isPow e || isVar e)) (split MulOp a')
 pow = sum $ map getMakeFrac (map getPow qs)
 coef = if (null ns) then 1 else if (all isFrac ns) then (sum (map getFrac ns))
     else (makeFraction $ product (map getNum ns))
