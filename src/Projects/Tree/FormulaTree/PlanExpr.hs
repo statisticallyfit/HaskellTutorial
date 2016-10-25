@@ -432,7 +432,7 @@ split op expr = pickMethod op expr
 
 splitA :: Expr -> [Expr]
 splitA e
-    | isDiv e || isMul e = [e] -- TODO it's a mess here .. fix some other way.
+    | isDiv e || isMul e || isPow e = [e] -- TODO it's a mess here .. fix some other way.
     | isAdd e = splitAdd e
     | hasAdd e = init lefties ++ (newRight e lefties)
     | isNeg e = handleNeg AddOp e
@@ -448,6 +448,7 @@ splitAdd (Add e1 e2)
 
 splitS :: Expr -> [Expr]
 splitS e
+    | isDiv e || isMul e || isPow e = [e]
     | isSub e = splitSub e
     | hasSub e = init lefties ++ (newRight e lefties)
     | isNeg e = handleNeg SubOp e
@@ -465,6 +466,7 @@ splitSub (Sub e1 e2)
 -- TODO fix e12 tomorrow
 splitM :: Expr -> [Expr]
 splitM e
+    | isPow e = [e]
     | isMul e = splitMul e
     | isSeparable e = [e] -- note order of operations
     | isDiv e && hasMul e = if (not $ isMul expl) then [e] else (split MulOp expl)
@@ -484,6 +486,7 @@ splitMul (Mul e1 e2)
 -- NOTE no need to fix e9 so that it divides everywhere no?
 splitD :: Expr -> [Expr]
 splitD e
+    | isPow e = [e]
     | isDiv e = splitDiv e
     | isSeparable e = [e] -- note order of operations
     | isMul e && hasDiv e = if (not $ isDiv expl) then [expl] else (split DivOp expl)
@@ -539,7 +542,8 @@ newRight e ls
 -- 5) START HERE TOMORROW TODO: make polyroot instance of code and make all current
 -- poly functions deal only with Nums not fractions, and polyroot to deal with fractions.
 -- 6) if result has only polynomials or powers then return the highest polynomials first
--- then nums then powers. 
+-- then nums then powers.
+-- 7) make sure to simplify powers correctly for e27 type exprs.
 simplify :: Expr -> Expr
 simplify (Pow base expo) = Pow (simplify base) (simplify expo)
 simplify (F f) = F $ fmap simplify f
@@ -566,7 +570,7 @@ simplify expr = finishExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
 
 identifyNegDiv e = if isNeg e then (isDiv (getNeg e)) else False
 
-expr = prepExpr e18
+expr = prepExpr e22
 prepExpr = chisel . distribute . negExplicit . chisel
 finishExpr = chisel . negExplicit . distribute
 exprs = map chisel (splitAS expr)
@@ -1949,6 +1953,13 @@ chisel e
     chiseler (Mul (Pow base (Num n)) side)
         | n < 0 = (chiseler side) ./ ((chiseler base) .^ (Num (-1*n)))
         | otherwise = (chiseler base) .^ (Num n) .* (chiseler side)
+
+
+    --- note the (a/b + c) = (a + cb)/b cases
+    chiseler (Add (Div a b) c) = Div (chiseler a .+ chiseler b .* chiseler c) (chiseler b)
+    chiseler (Add c (Div a b)) = Div (chiseler c .* chiseler b .+ chiseler a) (chiseler b)
+    chiseler (Sub (Div a b) c) = Div (chiseler a .- chiseler b .* chiseler c) (chiseler b)
+    chiseler (Sub c (Div a b)) = Div (chiseler c .* chiseler b .- chiseler a) (chiseler b)
 
 
     chiseler (Add e1 e2) = Add (chiseler e1) (chiseler e2)
