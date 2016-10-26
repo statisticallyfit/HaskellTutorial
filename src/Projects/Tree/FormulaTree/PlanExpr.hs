@@ -539,6 +539,14 @@ newRight e ls
 
 ---------------------------------------------------------
 
+
+
+simplify' :: Expr -> Expr
+simplify' (Pow base expo) = Pow (genVarSimplify base) (genVarSimplify expo)
+simplify' (F f) = F $ fmap genVarSimplify f
+simplify' expr = genVarSimplify expr
+
+-- precondition: single variable simplification.
 -- errors: TODO
 -- 1) separate and differentiate different char args in the var constructor.
 -- 2) represent RootPolys where pow = frac 1/3.
@@ -637,26 +645,31 @@ vars expr = nub $ getVars [] expr
     getVars acc _ = acc
 
 -- expects chiselled input so that the divs have no more divs in denom and numerator.
-genVarSplit :: Expr -> Expr
-genVarSplit expr = rebuildAS (ms ++ ds)
+genVarSimplify :: Expr -> Expr
+genVarSimplify expr = rebuildAS (ms ++ ds)
     where
     es = splitAS expr
     (divs, other) = partition isDiv es
-    ms = map varMulSplit other
-    ds = map varDivSplit divs
+    ms = map varMulSimplify other
+    ds = map varDivSimplify divs
 
 -- takes an expression that has only Mul in it and simplifies the different var
 -- expressions separately.
 -- precondition: expr has already been trhough chisel, distribute, ... so it has no
 -- type of arg like (x+1)(3) but instead will be passed the separate parts 3x and 3.
--- precondition
-varMulSplit :: Expr -> Expr
-varMulSplit expr = clean $ rebuild MulOp $ map simplify varGroups
-    where varGroups = map (rebuild MulOp) $ groupByVar $ split MulOp expr
+varMulSimplify :: Expr -> Expr
+varMulSimplify expr = clean $ rebuild MulOp $ map (clean . simplify) groups'
+    where
+    groups' = map (rebuild MulOp) ([ns] ++ [fs'] ++ vs)
+    fs' = fmap simplify' fs
+    groups = groupByVar $ split MulOp expr
+    (fs, ns) = (groups !! 0, groups !! 1)
+    vs = if (null $ tail groups) then [] else (tail (tail groups))
 
 
-varDivSplit :: Expr -> Expr
-varDivSplit (Div upper lower) = Div (genVarSplit upper) (genVarSplit lower)
+
+varDivSimplify :: Expr -> Expr
+varDivSimplify (Div upper lower) = Div (genVarSimplify upper) (genVarSimplify lower)
 
 
 ee = concatMap (split MulOp) $ splitAS vss
@@ -675,14 +688,17 @@ vs = splitAS $ x .^ Num 2 .+ Num 5 .* x .^ Num 8 .- Num 2 .* x .+ x .+ y .-
     z .- Num 8 .* y .- z .+ z .^ Num 9 .+ x .+ Num 4 .* z .- x .- x .^ Num 7 .+ Num 4 .* y
 
 --- note returns groups of single exprs like x^2 or y or a^3 that have the same vars in them.
--- precondition: each element in list es has only a single var.
+-- precondition: each element in list es is either (coeff-less monomial, number, or func).
+-- postcondition: returns list of lists where first list is functions, next is nums,
+-- and next is simplified monomials.
 groupByVar :: [Expr] -> [[Expr]]
-groupByVar es = [other] ++ map (map snd) pairGroups
+groupByVar es = [fs] ++ [ns] ++ map (map snd) pairGroups
     where
     (other, vs) = partition (\e -> isNum e || isFrac e || isFunction e) es
     pairs = zip (map getVarMatch vs) vs
     varSorter (v1,e1) (v2,e2) = if (v1 < v2) then LT else if (v1 > v2) then GT else EQ
     pairGroups = groupBy (\(v1,_) (v2,_) -> v1 == v2) (sortBy varSorter pairs)
+    (fs, ns) = partition isFunction other
 
 
 --- note returns true if has only one var name
@@ -2223,6 +2239,18 @@ clean expr
     expr' = cln expr
     fracZero = Frac (Rate 0)
     fracOne = Frac (Rate 1)
+
+    --- note the positioning cases TODO need to add Mul (Mul (Num) (f)) (var or num)
+    -- but not necessary after meltpolyfunc hopefully.
+    cln (Mul (F f) (Var v)) = Var v .* F f
+    cln (Mul (F f) (Neg (Var v))) = Neg (Var v) .* F f
+    cln (Mul (Neg (F f)) (Var v)) = Neg (Var v) .* F f
+    cln (Mul (Neg (F f)) (Neg (Var v))) = Var v .* F f
+    cln (Mul (F f) (Num n)) = Num n .* F f
+    cln (Mul (F f) (Neg (Num n))) = Neg (Num n) .* F f
+    cln (Mul (Neg (F f)) (Num n)) = Neg (Num n) .* F f
+    cln (Mul (Neg (F f)) (Neg (Num n))) = Num n .* F f
+
     cln (Num n) = Num n
     cln (Frac f) = Frac f
     cln (Var v) = Var v
