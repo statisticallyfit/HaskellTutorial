@@ -559,8 +559,8 @@ simplify' expr = genVarSimplify expr
 -- then nums then powers.
 -- 7) make sure to simplify powers correctly for e27 type exprs.
 simplify :: Expr -> Expr
-simplify (Pow base expo) = Pow (simplify base) (simplify expo)
-simplify (F f) = F $ fmap simplify f
+{-simplify (Pow base expo) = Pow (simplify base) (simplify expo)
+simplify (F f) = F $ fmap simplify f-}
 simplify expr = finishExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
     where
     prepExpr = chisel . distribute . negExplicit . chisel
@@ -660,11 +660,11 @@ genVarSimplify expr = rebuildAS (ms ++ ds)
 varMulSimplify :: Expr -> Expr
 varMulSimplify expr = clean $ rebuild MulOp $ map (clean . simplify) groups'
     where
-    groups' = map (rebuild MulOp) ([ns] ++ [fs'] ++ vs)
-    fs' = fmap simplify' fs
     groups = groupByVar $ split MulOp expr
     (fs, ns) = (groups !! 0, groups !! 1)
     vs = if (null $ tail groups) then [] else (tail (tail groups))
+    fs' = fmap simplify' fs
+    groups' = map (rebuild MulOp) ([ns] ++ [fs'] ++ vs)
 
 
 
@@ -2195,18 +2195,14 @@ distribute expr
     dist (F f) = F f
     dist (Neg (Num n)) = Num (-n)
     dist (Neg (Frac f)) = Frac (-f)
-    dist (Neg e)
-        | isAdd e = (dist (Neg a)) .- (dist b)
-        | isSub e = (dist (Neg a)) .+ (dist b)
-        | isMul e = (dist (Neg a)) .* (dist b) --otherwise = Neg (dist e)
-        | isDiv e = (dist (Neg a)) ./ (dist b)
-        | otherwise = Neg $ dist e
-        where (a, b) = (left e, right e)
     --- note the negative distribute cases
     dist (Sub a (Sub b c)) = (dist a .- dist b) .+ (dist c)
     dist (Sub a (Add b c)) = (dist a .- dist b) .- (dist c)
     dist (Add a (Sub b c)) = (dist a .+ dist b) .- (dist c)
     dist (Add a (Add b c)) = (dist a .+ dist b) .+ (dist c)
+    --- note the -cos(x)(4) = cos(x)(-4) distribute cases
+    {-dist (Mul (Neg a) (Num n)) = dist a .* Num (-n)
+    dist (Mul (Num n) (Neg b)) = Num (-n) .* dist b -}
     --- note the (x+1)(x+2) distribute cases
     dist (Mul a b)
         | isSeparable a && isSeparable b = zipperAll as bs
@@ -2218,6 +2214,14 @@ distribute expr
         bs = splitAS (dist b)
         zipper ys x = zipWith Mul (replicate (length ys) x) ys
         zipperAll xs ys = simplify $ rebuildAS $ map simplify $ concatMap (zipper xs) ys
+    -- NOTE TODO check if correct, the previous place of this block was after neg frac. 
+    dist (Neg e)
+        | isAdd e = (dist (Neg a)) .- (dist b)
+        | isSub e = (dist (Neg a)) .+ (dist b)
+        | isMul e = (dist (Neg a)) .* (dist b) --otherwise = Neg (dist e)
+        | isDiv e = (dist (Neg a)) ./ (dist b)
+        | otherwise = Neg $ dist e
+        where (a, b) = (left e, right e)
     dist (Add a b) = Add (dist a) (dist b)
     dist (Sub a b) = Sub (dist a) (dist b)
     -- dist (Mul a b) = Mul (dist a) (dist b)

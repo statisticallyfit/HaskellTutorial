@@ -36,8 +36,8 @@
       <file leaf-file-name="PlanExpr.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.4824281">
-              <caret line="664" column="25" selection-start-line="664" selection-start-column="25" selection-end-line="664" selection-end-column="25" />
+            <state vertical-scroll-proportion="0.6415094">
+              <caret line="2216" column="88" selection-start-line="2216" selection-start-column="88" selection-end-line="2216" selection-end-column="88" />
               <folding />
             </state>
           </provider>
@@ -118,9 +118,9 @@
   </component>
   <component name="ProjectFrameBounds">
     <option name="x" value="67" />
-    <option name="y" value="52" />
+    <option name="y" value="24" />
     <option name="width" value="989" />
-    <option name="height" value="760" />
+    <option name="height" value="778" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -682,15 +682,16 @@
       <workItem from="1477201555152" duration="1668000" />
       <workItem from="1477318392061" duration="11000" />
       <workItem from="1477377447354" duration="16988000" />
-      <workItem from="1477458967325" duration="4657000" />
+      <workItem from="1477458967325" duration="5256000" />
+      <workItem from="1477545955299" duration="1367000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="548468000" />
+    <option name="totallyTimeSpent" value="550434000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="67" y="52" width="989" height="760" extended-state="0" />
+    <frame x="67" y="24" width="989" height="778" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1080,8 +1081,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.4824281">
-          <caret line="664" column="25" selection-start-line="664" selection-start-column="25" selection-end-line="664" selection-end-column="25" />
+        <state vertical-scroll-proportion="0.6415094">
+          <caret line="2216" column="88" selection-start-line="2216" selection-start-column="88" selection-end-line="2216" selection-end-column="88" />
           <folding />
         </state>
       </provider>
