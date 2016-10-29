@@ -2214,7 +2214,7 @@ distribute expr
         bs = splitAS (dist b)
         zipper ys x = zipWith Mul (replicate (length ys) x) ys
         zipperAll xs ys = simplify $ rebuildAS $ map simplify $ concatMap (zipper xs) ys
-    -- NOTE TODO check if correct, the previous place of this block was after neg frac. 
+    -- NOTE TODO check if correct, the previous place of this block was after neg frac.
     dist (Neg e)
         | isAdd e = (dist (Neg a)) .- (dist b)
         | isSub e = (dist (Neg a)) .+ (dist b)
