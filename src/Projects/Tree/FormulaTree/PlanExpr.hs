@@ -546,7 +546,7 @@ simplify' (Pow base expo) = Pow (genVarSimplify base) (genVarSimplify expo)
 simplify' (F f) = F $ fmap genVarSimplify f
 simplify' expr = genVarSimplify expr
 
--- precondition: single variable simplification.
+-- precondition: *** single variable *** simplification.
 -- errors: TODO
 -- 1) separate and differentiate different char args in the var constructor.
 -- 2) represent RootPolys where pow = frac 1/3.
@@ -559,8 +559,6 @@ simplify' expr = genVarSimplify expr
 -- then nums then powers.
 -- 7) make sure to simplify powers correctly for e27 type exprs.
 simplify :: Expr -> Expr
-{-simplify (Pow base expo) = Pow (simplify base) (simplify expo)
-simplify (F f) = F $ fmap simplify f-}
 simplify expr = finishExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
     where
     prepExpr = chisel . distribute . negExplicit . chisel
@@ -659,7 +657,8 @@ genVarSimplify expr = rebuildAS (ms ++ ds)
 -- type of arg like (x+1)(3) but instead will be passed the separate parts 3x and 3.
 varMulSimplify :: Expr -> Expr
 varMulSimplify (Pow base expo) = Pow (genVarSimplify base) (genVarSimplify expo)
-varMulSimplify (Neg e) = Neg $ genVarSimplify e 
+varMulSimplify (F f) = F $ fmap genVarSimplify f
+varMulSimplify (Neg e) = Neg $ genVarSimplify e
 varMulSimplify expr = clean $ rebuild MulOp $ map (clean . simplify) groups'
     where
     groups = groupByVar $ split MulOp expr
