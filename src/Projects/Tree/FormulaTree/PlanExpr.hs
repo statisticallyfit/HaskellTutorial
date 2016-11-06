@@ -658,6 +658,8 @@ genVarSimplify expr = rebuildAS (ms ++ ds)
 -- precondition: expr has already been trhough chisel, distribute, ... so it has no
 -- type of arg like (x+1)(3) but instead will be passed the separate parts 3x and 3.
 varMulSimplify :: Expr -> Expr
+varMulSimplify (Pow base expo) = Pow (genVarSimplify base) (genVarSimplify expo)
+varMulSimplify (Neg e) = Neg $ genVarSimplify e 
 varMulSimplify expr = clean $ rebuild MulOp $ map (clean . simplify) groups'
     where
     groups = groupByVar $ split MulOp expr
@@ -779,7 +781,7 @@ meltExpon :: Expr -> Expr
 meltExpon (Pow constBase expo) = Pow constBase (simplify expo)
 
 
--- precondition: gets an expression with only polys
+-- precondition: gets an expression with only polys of single variable.
 -- postcondition: returns simplified version
 meltPoly :: Expr -> Expr
 meltPoly expr
@@ -820,7 +822,7 @@ codifyPolyM expr = foldl1 mulPoly (map codifyMono ps)
     where ps = split MulOp expr
 
 
--- TODO START HERE TOMORROW
+
 -- precondition: takes chisel output which isDiv and which has no other div in the numerator
 -- and denominator and no negpowers (that's why we can use codifypolyA.
  -- numerator can be separable but simplification only possible if denom not separable.
@@ -2461,7 +2463,7 @@ testMM2' = (show $ chisel mm2') == "{((7x(8))sin(x)) / ((x + 1)^22)}"
 testMM3' = (show $ chisel mm3') == "{(7x(8)) / ((x + 1)^22)}"
 testMM4' = (show $ chisel mm4') == "{(7(8)) / (x^22)}"
 testMM5' = (show $ chisel mm5') == "{(7sin(x)cos(x)(8)) / (x^22)}"
-testMM6' = (show $ chisel mm6') == "(7x^(-22))(sin(x))(x^2)"
+testMM6' = (show $ chisel mm6') == "{(7sin(x)(x^2)) / (x^22)}"
 
 testMM' = testMM1' && testMM2' && testMM3' && testMM4' && testMM5' && testMM6'
 
