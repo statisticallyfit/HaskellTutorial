@@ -548,7 +548,7 @@ simplify' expr = genVarSimplify expr
 
 -- precondition: *** single variable *** simplification.
 -- errors: TODO
--- 1) separate and differentiate different char args in the var constructor.
+-- 1) figure out how to combine the simplifymultivar with simplifysinglevar to make single simplify.
 -- 2) represent RootPolys where pow = frac 1/3.
 -- 3) handle each div
 -- 4) handle non divs that need to be simplified: (x + 1)^3 (factor out when expo
@@ -559,6 +559,7 @@ simplify' expr = genVarSimplify expr
 -- then nums then powers.
 -- 7) make sure to simplify powers correctly for e27 type exprs.
 simplify :: Expr -> Expr
+simplify (F f) = simplify' (F f)
 simplify expr = finishExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
     where
     prepExpr = chisel . distribute . negExplicit . chisel
@@ -579,7 +580,8 @@ simplify expr = finishExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
     divs' = rebuildAS $ map divSimplify divs
 
 
-identifyNegDiv e = if isNeg e then (isDiv (getNeg e)) else False
+isNegDiv :: Expr -> Bool
+isNegDiv e = if isNeg e then (isDiv (getNeg e)) else False
 
 expr = prepExpr (Num 4)
 prepExpr = chisel . distribute . negExplicit . chisel
@@ -590,7 +592,7 @@ exprs = map chisel (splitAS expr)
 (fs, other2) = partition (\e -> hasOnlyOneFunction e && (not $ isDiv e)) other1
 
 (ffs, other3) = partition (\e -> hasManyFunctions e && (not $ isDiv e))  other2
-(divs, other4) = partition (\e -> isDiv e || identifyNegDiv e) other3
+(divs, other4) = partition (\e -> isDiv e || isNegDiv e) other3
 
 esI = if (null es) then [Num 0] else es
 psI = if (null ps) then [Num 0] else ps
@@ -647,7 +649,7 @@ genVarSimplify :: Expr -> Expr
 genVarSimplify expr = rebuildAS (ms ++ ds)
     where
     es = splitAS expr
-    (divs, other) = partition isDiv es
+    (divs, other) = partition (\e -> isDiv e || isNegDiv e) es
     ms = map varMulSimplify other
     ds = map varDivSimplify divs
 
@@ -656,21 +658,26 @@ genVarSimplify expr = rebuildAS (ms ++ ds)
 -- precondition: expr has already been trhough chisel, distribute, ... so it has no
 -- type of arg like (x+1)(3) but instead will be passed the separate parts 3x and 3.
 varMulSimplify :: Expr -> Expr
-varMulSimplify (Pow base expo) = Pow (genVarSimplify base) (genVarSimplify expo)
 varMulSimplify (F f) = F $ fmap genVarSimplify f
 varMulSimplify (Neg e) = Neg $ genVarSimplify e
+varMulSimplify (Pow base expo) = Pow (genVarSimplify base) (genVarSimplify expo)
 varMulSimplify expr = clean $ rebuild MulOp $ map (clean . simplify) groups'
     where
     groups = groupByVar $ split MulOp expr
     (fs, ns) = (groups !! 0, groups !! 1)
     vs = if (null $ tail groups) then [] else (tail (tail groups))
     fs' = fmap simplify' fs
-    groups' = map (rebuild MulOp) ([ns] ++ [fs'] ++ vs)
+    groups' = map (rebuild MulOp) ([ns] ++ vs ++ [fs'])
 
+{-groupies = groupByVar $ split MulOp ((splitAS vss) !! 18)
+(funcs, nums) = (groupies !! 0, groupies !! 1)
+vrs = if (null $ tail groupies) then [] else (tail (tail groupies))
+funcs' = fmap simplify' funcs
+groupies' = map (rebuild MulOp) ([nums] ++ vrs ++ [funcs'])-}
 
 
 varDivSimplify :: Expr -> Expr
-varDivSimplify (Div upper lower) = Div (genVarSimplify upper) (genVarSimplify lower)
+varDivSimplify (Div upper lower) = Div (simplify' upper) (simplify' lower)
 
 
 ee = concatMap (split MulOp) $ splitAS vss
@@ -852,7 +859,7 @@ codifyPoly e var
     (Neg en) = e
     expDiv = chisel e
     es = splitAS expDiv
-    (divs, muls) = partition (\e -> isDiv e || identifyNegDiv e) es
+    (divs, muls) = partition (\e -> isDiv e || isNegDiv e) es
     (emPairs, cmPairs) = partition (\(cm,em) -> isJust em) (map ((flip codifyPolyD) var) divs)
     mulsCodeFromMul = map codifyMono muls
     mulsCodeFromDiv = catMaybes $ fst $ unzip cmPairs
@@ -867,7 +874,7 @@ dive = (splitAS (chisel $ distribute $ negExplicit e7)) !! 0
 
 
 exprs = splitAS $ chisel $ distribute $ negExplicit e7
-(divsd, muls) = partition (\e -> isDiv e || identifyNegDiv e) exprs
+(divsd, muls) = partition (\e -> isDiv e || isNegDiv e) exprs
 (emPairs, cmPairs) = partition (\(cm,em) -> isJust em) (map codifyPolyD divsd)
 mulsCodeFromMul = map codifyMono muls
 mulsCodeFromDiv = catMaybes $ fst $ unzip cmPairs
@@ -1806,7 +1813,7 @@ isMono e
 
 splitAll :: Expr -> [Expr]
 splitAll expr = (concatMap (split DivOp) divs) ++ muls
-    where (divs, muls) = partition (\e -> isDiv e || identifyNegDiv e) (splitAS expr)
+    where (divs, muls) = partition (\e -> isDiv e || isNegDiv e) (splitAS expr)
 
 -- note says if expression contains no functions and is just a polynomial term like 7x^2 / 6x or just 5x
 -- needs to get input from chisel where either fully div or fully mul.
