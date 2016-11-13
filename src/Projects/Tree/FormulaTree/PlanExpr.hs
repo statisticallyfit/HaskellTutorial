@@ -626,6 +626,10 @@ meltFunctions e = e
 -- note separates function part from other parts and then simplifies functions.
 -- precondition: expr cannot be separable (has to be glued) so takes one set of many funcs at time.
 simplifyFunctions :: Expr -> Expr
+simplifyFunctions (F f) = F f
+simplifyFunctions (Mul f g)
+    | sameArgs f g = (fmap simplify' f) .^ Num 2
+    | otherwise = (fmap simplify' f) .* (fmap simplify' g)
 simplifyFunctions e = e
 
 ------------------------------ Dealing with Polynomials ---------------------------------
@@ -2347,10 +2351,19 @@ glue $ [itemSwept] ++ remainder
 
 
 
-sameArgs :: Function Expr -> Function Expr -> Bool
-sameArgs f g
+sameArgs :: Expr -> Expr -> Bool
+sameArgs (F f) (F g)
     | (getArg (F f)) == (getArg (F g)) = True
     | otherwise = False
+sameArgs _ _ = False
+
+
+--- TODO start here next time to finish off simplifyFunctions to identify if same constructor. 
+{-sameF :: Expr -> Expr -> Bool
+sameF (F f) (F g) = all isSin fs || all isCos fs || all isTan fs || all isCsc fs
+    || all isSec fs || all isCot fs || all isArcsin fs || all isArccos fs || all isArctan fs
+    || all isArccsc fs || all isArcsec fs || all isArccot fs || all
+    where fs = [F f, F g]-}
 
 
 getFunction :: Expr -> Function Expr
@@ -2420,35 +2433,7 @@ getArg (Ln u) = u
 getArg (Log u v) = v -- TODO fix so we can get both or handle log separately.
 -}
 
-{-
-TODO idea then after we state how functions should simplify, do foldl1 (simpFunc . MUl) over the list.
-help
 
--- HELP TODO use partition .. ??? how to simplify then?
---      1) first unglue, then partition into lists. Separate functions on one side and other stuff
- on other side.
---      2) plan idea: simplify csc, sec, cot in terms of sin,cos, tan.
---      3) count how many sin, cos then change num tans so that 1 sin*cos = 1 tan
---      4) do the same idea for hyperbolics (but depends on their different equality)
--- note if all functions have the same argument then they are simplified, else returned as is.
--- example takes sin * cos * tan * sec  and returns sin^2 x / cos x
--- example takes sin * cos * tan and reurns tan^2 x
--- note multiplication is left associative so we have (((sin) * cos ) * tan)
--- note don't have to handle things like sin * sin because the mul case in simplify does it.
-simplifyFunctions :: Expr -> Expr
-simplifyFunctions (Mul f@(F (Sin u)) (g@F (Cos v)))
-    | sameArgs f g = F $ Tan u
-    | otherwise = simplify f .* simplify g
-simplifyFunctions (Mul f@(F (Cos u)) (g@F (Sin v)))
-    | sameArgs f g = F $ Tan u
-    | otherwise = simplify f .* simplify g
-simplifyFunctions (Mul f@(F (Sin u)) (g@F (Cos v)))
-    | sameArgs f g = F $ Tan u
-    | otherwise = simplify f .* simplify g
-simplifyFunctions (Mul f@(F (Sin u)) (g@F (Cos v)))
-    | sameArgs f g = F $ Tan u
-    | otherwise = simplify f .* simplify g
--}
 
 
 -- for testing chisel.

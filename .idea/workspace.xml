@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bc679e25-6068-417c-8b02-1d7896297961" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs" afterPath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
@@ -36,8 +35,8 @@
       <file leaf-file-name="PlanExpr.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="1.2508091">
-              <caret line="550" column="100" selection-start-line="550" selection-start-column="100" selection-end-line="550" selection-end-column="100" />
+            <state vertical-scroll-proportion="0.548718">
+              <caret line="2360" column="95" selection-start-line="2360" selection-start-column="95" selection-end-line="2360" selection-end-column="95" />
               <folding />
             </state>
           </provider>
@@ -695,12 +694,12 @@
       <workItem from="1478777838589" duration="30000" />
       <workItem from="1478851583230" duration="36000" />
       <workItem from="1478939176706" duration="32000" />
-      <workItem from="1479052076722" duration="4208000" />
+      <workItem from="1479052076722" duration="5806000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="558907000" />
+    <option name="totallyTimeSpent" value="560505000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="24" width="1057" height="780" extended-state="0" />
@@ -1093,8 +1092,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.2508091">
-          <caret line="550" column="100" selection-start-line="550" selection-start-column="100" selection-end-line="550" selection-end-column="100" />
+        <state vertical-scroll-proportion="0.548718">
+          <caret line="2360" column="95" selection-start-line="2360" selection-start-column="95" selection-end-line="2360" selection-end-column="95" />
           <folding />
         </state>
       </provider>
