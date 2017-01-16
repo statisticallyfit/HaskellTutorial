@@ -44,7 +44,6 @@ data Code = Poly [Fraction] | Trig [Description] | InvTrig [Description]
     deriving (Eq, Show)
 
 
-
 instance Num Fraction where
     negate (Rate ratio) = Rate $ negate ratio
     (Rate r1) + (Rate r2) = Rate $ r1 + r2 -- liftA2 (+)
@@ -55,6 +54,12 @@ instance Num Fraction where
 
 instance Ord Fraction where
     compare (Rate r1) (Rate r2) = compare r1 r2
+
+instance Show Fraction where
+    show (Rate ratio)
+        | numerator ratio == 0 = show 0
+        | denominator ratio == 1 = show (numerator ratio)
+        | otherwise = (show (numerator ratio)) ++ "/" ++ (show (denominator ratio))
 
 instance Functor Function where
     fmap f (Sin x) = Sin (f x)
@@ -93,11 +98,6 @@ instance Show Op where
     show DivOp = "(/)"
     show PowOp = "(^)"
 
-instance Show Fraction where
-    show (Rate ratio)
-        | numerator ratio == 0 = show 0
-        | denominator ratio == 1 = show (numerator ratio)
-        | otherwise = (show (numerator ratio)) ++ "/" ++ (show (denominator ratio))
 
 -- TODO idea: count num elements and then decide whether ot put brackets.
 -- Example: x^6 * 4 is shown as 4x^6 while 4 * (x+3) is shown as 4(x+3)
@@ -370,7 +370,7 @@ e28 = (Pow (Neg (Num 3)) (x .+ Num 1 .+ Num 3 .+ Num 2 .* x))
 {-
 TODO PLAN OVERALL * ~ *
 
-input -> split Add and Sub -> partition -> (poly terms, functions)
+input -> split Add and Sub -> partition -> (poly terms, functions and polyfuncs)
 
 poly terms -> send to addpoly
 
@@ -414,6 +414,9 @@ function = priority 4 (last)
 -- precondition of function rearrange is: glued expr, so no add or sub (only as inner
 like in x(x+1)(9)). Method: use chisel to get Div separate if present.
 
+------------------------- TODOS ------------------------
+* fix distribute to work with x(x+1)^3
+* make no decimals - all the calculations and nums will be fractions (2, 3)
 -}
 
 
@@ -541,10 +544,16 @@ newRight e ls
 
 
 
-simplify' :: Expr -> Expr
-simplify' (Pow base expo) = Pow (genVarSimplify base) (genVarSimplify expo)
-simplify' (F f) = F $ fmap genVarSimplify f
-simplify' expr = genVarSimplify expr
+
+
+-- note expecting the remains from other'' in above function (must be div)
+-- precondition: get one non-separable div expr at a time.
+-- HELP goes into infinite loop ebcause of simplify at the front - FIX TODO
+divSimplify :: Expr -> Expr
+divSimplify (Neg expr) = Neg $ divSimplify expr
+divSimplify expr = {-simplify-} (Div (simplifyExprSingleVar up) (simplifyExprSingleVar lo))
+    where (Div up lo) = expr
+
 
 -- precondition: *** single variable *** simplification.
 -- errors: TODO
@@ -558,12 +567,11 @@ simplify' expr = genVarSimplify expr
 -- 6) if result has only polynomials or powers then return the highest polynomials first
 -- then nums then powers.
 -- 7) make sure to simplify powers correctly for e27 type exprs.
-simplify :: Expr -> Expr
-simplify (F f) = simplify' (F f)
-simplify expr = finishExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
+simplifyExprSingleVar :: Expr -> Expr
+simplifyExprSingleVar (F f) = simplifyExprMultiVar (F f)
+simplifyExprSingleVar expr = finishExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
     where
     prepExpr = chisel . distribute . negExplicit . chisel
-    finishExpr = chisel . negExplicit . distribute
     es = map chisel (splitAS (prepExpr expr))
     (ps, other) = partition isPoly es
     (fs, other') = partition (\e -> hasOnlyOneFunction e && (not $ isDiv e)) other
@@ -579,11 +587,8 @@ simplify expr = finishExpr $ ps' .+ fs' .+ ffs' .+ divs' .+ (rebuildAS other''')
     ffs' = meltFunctions (rebuildAS ffsI)
     divs' = rebuildAS $ map divSimplify divs
 
-
-isNegDiv :: Expr -> Bool
-isNegDiv e = if isNeg e then (isDiv (getNeg e)) else False
-
-expr = prepExpr (Num 4)
+polyRoot = (Num 4 .* x .^ (Num 4 ./ Num 5) .+ Num 3 .* x .^ (Num 3 ./ Num 5))
+expr = prepExpr (Num 4 .* x .^ (Num 4 ./ Num 5) .+ Num 3 .* x .^ (Num 3 ./ Num 5))
 prepExpr = chisel . distribute . negExplicit . chisel
 finishExpr = chisel . negExplicit . distribute
 exprs = map chisel (splitAS expr)
@@ -599,20 +604,50 @@ psI = if (null ps) then [Num 0] else ps
 fsI = if (null fs) then [Num 0] else fs
 ffsI = if (null ffs) then [Num 0] else ffs
 
-es' = meltExpon (rebuildAS esI)
+es' = meltExponent (rebuildAS esI)
 ps' = meltPoly (rebuildAS psI)
 fs' = meltPolyFunc (rebuildAS fsI)
 ffs' = meltFunctions (rebuildAS ffsI)
 divs' = rebuildAS $ map divSimplify divs
 
 
--- note expecting the remains from other'' in above function (must be div)
--- precondition: get one non-separable div expr at a time.
--- HELP goes into infinite loop ebcause of simplify at the front - FIX TODO
-divSimplify :: Expr -> Expr
-divSimplify (Neg expr) = Neg $ divSimplify expr
-divSimplify expr = {-simplify-} (Div (simplify up) (simplify lo))
-    where (Div up lo) = expr
+-- precondition: genvar expects chiseled input so divs have no more divs in denom and numerator
+simplifyExprMultiVar :: Expr -> Expr
+simplifyExprMultiVar (Pow base expo) = Pow (genVarSimplify base) (genVarSimplify expo)
+simplifyExprMultiVar (F f) = F $ fmap genVarSimplify f
+simplifyExprMultiVar expr = genVarSimplify expr
+
+
+genVarSimplify :: Expr -> Expr
+genVarSimplify expr = rebuildAS (ms ++ ds)
+    where
+    (divs, other) = partition isGenDiv (splitAS expr)
+    ms = map varMulSimplify other
+    ds = map varDivSimplify divs
+
+
+-- takes an expression that has only Mul in it and simplifies the different var
+-- expressions separately.
+-- precondition: expr has already been trhough chisel, distribute, ... so it has no
+-- type of arg like (x+1)(3) but instead will be passed the separate parts 3x and 3.
+varMulSimplify :: Expr -> Expr
+varMulSimplify (F f) = F $ fmap genVarSimplify f
+varMulSimplify (Neg e) = Neg $ genVarSimplify e
+varMulSimplify (Pow base expo) = Pow (genVarSimplify base) (genVarSimplify expo)
+varMulSimplify expr = clean $ rebuild MulOp $ map (clean . simplifyExprSingleVar) groups'
+    where
+    groups = groupByVar $ split MulOp expr
+    (fs, ns) = (groups !! 0, groups !! 1)
+    vs = if (null $ tail groups) then [] else (tail (tail groups))
+    fs' = fmap simplifyExprMultiVar fs
+    groups' = map (rebuild MulOp) ([ns] ++ vs ++ [fs'])
+
+
+varDivSimplify :: Expr -> Expr
+varDivSimplify (Div upper lower) = Div (simplifyExprMultiVar upper) (simplifyExprMultiVar lower)
+
+
+
 
 ------------------------------ Dealing with many functions ---------------------------------
 
@@ -625,12 +660,12 @@ meltFunctions e = e
 
 -- note separates function part from other parts and then simplifies functions.
 -- precondition: expr cannot be separable (has to be glued) so takes one set of many funcs at time.
-simplifyFunctions :: Expr -> Expr
+{-simplifyFunctions :: Expr -> Expr
 simplifyFunctions (F f) = F f
 simplifyFunctions (Mul f g)
-    | sameArgs f g = (fmap simplify' f) .^ Num 2
-    | otherwise = (fmap simplify' f) .* (fmap simplify' g)
-simplifyFunctions e = e
+    | sameArgs f g = (fmap simplifyExprMultiVar f) .^ Num 2
+    | otherwise = (fmap simplifyExprMultiVar f) .* (fmap simplifyExprMultiVar g)
+simplifyFunctions e = e-}
 
 ------------------------------ Dealing with Polynomials ---------------------------------
 
@@ -647,41 +682,6 @@ vars expr = nub $ getVars [] expr
     getVars acc (Pow base _) = getVars acc base
     getVars acc (Neg e) = getVars acc e
     getVars acc _ = acc
-
--- expects chiselled input so that the divs have no more divs in denom and numerator.
-genVarSimplify :: Expr -> Expr
-genVarSimplify expr = rebuildAS (ms ++ ds)
-    where
-    es = splitAS expr
-    (divs, other) = partition (\e -> isDiv e || isNegDiv e) es
-    ms = map varMulSimplify other
-    ds = map varDivSimplify divs
-
--- takes an expression that has only Mul in it and simplifies the different var
--- expressions separately.
--- precondition: expr has already been trhough chisel, distribute, ... so it has no
--- type of arg like (x+1)(3) but instead will be passed the separate parts 3x and 3.
-varMulSimplify :: Expr -> Expr
-varMulSimplify (F f) = F $ fmap genVarSimplify f
-varMulSimplify (Neg e) = Neg $ genVarSimplify e
-varMulSimplify (Pow base expo) = Pow (genVarSimplify base) (genVarSimplify expo)
-varMulSimplify expr = clean $ rebuild MulOp $ map (clean . simplify) groups'
-    where
-    groups = groupByVar $ split MulOp expr
-    (fs, ns) = (groups !! 0, groups !! 1)
-    vs = if (null $ tail groups) then [] else (tail (tail groups))
-    fs' = fmap simplify' fs
-    groups' = map (rebuild MulOp) ([ns] ++ vs ++ [fs'])
-
-{-groupies = groupByVar $ split MulOp ((splitAS vss) !! 18)
-(funcs, nums) = (groupies !! 0, groupies !! 1)
-vrs = if (null $ tail groupies) then [] else (tail (tail groupies))
-funcs' = fmap simplify' funcs
-groupies' = map (rebuild MulOp) ([nums] ++ vrs ++ [funcs'])-}
-
-
-varDivSimplify :: Expr -> Expr
-varDivSimplify (Div upper lower) = Div (simplify' upper) (simplify' lower)
 
 
 ee = concatMap (split MulOp) $ splitAS vss
@@ -775,20 +775,14 @@ getCoefPowPair expr = (coef, pow)
     getMakeFrac n = if (isFrac n) then (getFrac n) else (makeFraction $ getNum n)
 
 
-[a',b'] = splitAS expr
-(ns, qs) = partition (\e -> not (isPow e || isVar e)) (split MulOp a')
-pow = sum $ map getMakeFrac (map getPow qs)
-coef = if (null ns) then 1 else if (all isFrac ns) then (sum (map getFrac ns))
-    else (makeFraction $ product (map getNum ns))
-getMakeFrac n = if (isFrac n) then (getFrac n) else (makeFraction $ getNum n)
-
 
 makeFraction :: Int -> Fraction
 makeFraction n = Rate $ n % 1
 
 
-meltExpon :: Expr -> Expr
-meltExpon (Pow constBase expo) = Pow constBase (simplify expo)
+meltExponent :: Expr -> Expr
+meltExponent (Pow constBase expo) = Pow constBase (simplifyExprMultiVar expo)
+meltExponent e = e
 
 
 -- precondition: gets an expression with only polys of single variable.
@@ -1079,31 +1073,10 @@ codifyPolyFunc expr
     (poly, func) = unjoinPolyFunc expr
     coef = meltPoly poly
     f = getBase func
-    descr = (coef, simplify $ getPow func, simplify $ getArg f)
+    descr = (coef, simplifyExprSingleVar $ getPow func, simplifyExprSingleVar $ getArg f)
     zs = replicate 6 (Num 0, Num 0, Num 0)
     zsLog = replicate 3 (Num 0, Num 0, Num 0)
     codes = if (isLogFamily f) then (put (findLoc f) descr zsLog) else (put (findLoc f) descr zs)
-
-(poly, func) = unjoinPolyFunc expr
-co = meltPoly poly
-f = getBase func
-descr = (co, simplify $ getPow func, simplify $ getArg f)
-zs = replicate 6 (Num 0, Num 0, Num 0)
-zsLog = replicate 3 (Num 0, Num 0, Num 0)
-codes = if (isLogFamily f) then (put (findLoc f) descr zsLog) else (put (findLoc f) descr zs)
-
-
-
-
-
-cs = concat $ addCodes (map codifyPolyFunc (splitAS (prepExpr e4)))
-(Trig ts) = head cs
-gs = map F [Sin x, Cos x, Tan x, Csc x, Sec x, Cot x]
-args = map (\(_,_,x) -> x) ts
-pows = map (\(_,p,_) -> p) ts
-coefs = map (\(c,_,_) -> c) ts
-gs' = zipWith Mul coefs (zipWith Pow (zipWith push args gs) pows)
-
 
 
 decodePolyFunc :: Code -> Expr
@@ -1163,7 +1136,7 @@ add (c1,p1,x1) (c2,p2,x2) = (c1 .+ c2, p1,x1)
 groups = map (map (foldl1 add)) (map gatherArgsPows (transpose cs'))
 groups' = transpose $ map (elongate (maximum $ map length groups) (Num 0, Num 0, Num 0)) groups
 notAllZero xs = not (all (\x -> x == (Num 0, Num 0, Num 0)) xs)
-groups'' = filter notAllZero $ map (map (\(c,p,x) -> (simplify c,p,x))) groups'
+groups'' = filter notAllZero $ map (map (\(c,p,x) -> (simplifyExprSingleVar c,p,x))) groups'
 
 
 adder :: [Code] -> [Code]
@@ -1173,7 +1146,7 @@ adder cs = map const groups''
     cs' = map unwrapCode cs
     groups = map (map (foldl1 add)) (map gatherArgsPows (transpose cs'))
     groups' = transpose $ map (elongate maxLen zeroes) groups
-    groups'' = filter notAllZero $ map (map (\(c,p,x) -> (simplify c,p,x))) groups'
+    groups'' = filter notAllZero $ map (map (\(c,p,x) -> (simplifyExprSingleVar c,p,x))) groups'
     const = getConstr (getCode (head cs))
     zeroes = (Num 0, Num 0, Num 0)
     maxLen = maximum $ map length groups
@@ -1294,7 +1267,7 @@ addCodesM ts us
         | (x1 == x2 && p1 == p2) = ((c1 .+ c2, p1, x1), Nothing)
         | otherwise = (a, Just b)
     simpMaybe expr@((c,p,x), maybe)
-        | isNothing maybe = ((simplify c, p, x), Nothing)
+        | isNothing maybe = ((simplifyExprSingleVar c, p, x), Nothing)
         | otherwise = expr
     (ts', us') = (unwrapCode ts, unwrapCode us)
     simplifiedMaybes = map simpMaybe $ zipWith add ts' us'
@@ -1321,7 +1294,7 @@ mulCodesM ts us
         | (x1 == x2) = ((c1 .* c2, p1 .+ p2, x1), Nothing)
         | otherwise = (a, Just b)
     simpMaybe expr@((c,p,x), maybe)
-        | isNothing maybe = ((simplify c, simplify p, x), Nothing)
+        | isNothing maybe = ((simplifyExprSingleVar c, simplifyExprSingleVar p, x), Nothing)
         | otherwise = expr
     (ts', us') = (unwrapCode ts, unwrapCode us)
     simplifiedMaybes = map simpMaybe $ zipWith mul ts' us'
@@ -1349,7 +1322,7 @@ divCodesM ts us
         | (x1 == x2) = ((c1 ./ c2, p1 .- p2, x1), Nothing)
         | otherwise = (a, Just b)
     simpMaybe expr@((c,p,x), maybe)
-        | isNothing maybe = ((simplify c, simplify p, x), Nothing)
+        | isNothing maybe = ((simplifyExprSingleVar c, simplifyExprSingleVar p, x), Nothing)
         | otherwise = expr
     (ts', us') = (unwrapCode ts, unwrapCode us)
     simplifiedMaybes = map simpMaybe $ zipWith div ts' us'
@@ -1423,6 +1396,13 @@ isMul _ = False
 isDiv :: Expr -> Bool
 isDiv (Div _ _) = True
 isDiv _ = False
+
+isNegDiv :: Expr -> Bool
+isNegDiv e = if isNeg e then (isDiv (getNeg e)) else False
+
+isGenDiv :: Expr -> Bool
+isGenDiv e = isDiv e || isNegDiv e
+
 
 getUpper :: Expr -> Expr
 getUpper (Div numer _) = numer
@@ -2190,6 +2170,7 @@ psuh _ e = e
 
 -- testing negExplicit (distribute (negExplicit e)) = negExplicit e
 -- testing distribute (neg (distribute e)) = distribute e
+-- TODO fix: x(x+1)^3 does not distribute properly.
 -- postcondition:
 -- 1) distributes minus signs
 -- 2) distributes neg signs
@@ -2225,7 +2206,7 @@ distribute expr
         as = splitAS (dist a)
         bs = splitAS (dist b)
         zipper ys x = zipWith Mul (replicate (length ys) x) ys
-        zipperAll xs ys = simplify $ rebuildAS $ map simplify $ concatMap (zipper xs) ys
+        zipperAll xs ys = simplifyExprSingleVar $ rebuildAS $ map simplifyExprSingleVar $ concatMap (zipper xs) ys
     -- NOTE TODO check if correct, the previous place of this block was after neg frac.
     dist (Neg e)
         | isAdd e = (dist (Neg a)) .- (dist b)
@@ -2358,7 +2339,7 @@ sameArgs (F f) (F g)
 sameArgs _ _ = False
 
 
---- TODO start here next time to finish off simplifyFunctions to identify if same constructor. 
+--- TODO start here next time to finish off simplifyFunctions to identify if same constructor.
 {-sameF :: Expr -> Expr -> Bool
 sameF (F f) (F g) = all isSin fs || all isCos fs || all isTan fs || all isCsc fs
     || all isSec fs || all isCot fs || all isArcsin fs || all isArccos fs || all isArctan fs
