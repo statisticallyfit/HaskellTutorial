@@ -1,10 +1,12 @@
 {-# LANGUAGE FlexibleContexts #-}
-module Main where
+module Simplification where
 
 import Types
-import Encoders
-import Util.Specific
-import Util.General
+import Encoder
+import Toolset
+import Internal
+
+
 
 
 simplify' :: Expr -> Expr

@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
-module ExprPlan where
+module PlanExpr where
 
 {-import Test.QuickCheck -- (Arbitrary, arbitrary, elements)
 import Test.QuickCheck.Checkers
@@ -29,8 +29,8 @@ data Function a
 
 data Op = AddOp | SubOp | MulOp | DivOp | PowOp deriving (Eq)
 
-type RationalNum = Ratio Int
-data Fraction = Rate RationalNum deriving (Eq)
+-- type RationalNum =
+data Fraction = Rate (Ratio Int) deriving (Eq)
 
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
     | Pow Expr Expr | Neg Expr | Num Int | Frac Fraction | Var String | F (Function Expr)
@@ -88,7 +88,7 @@ instance Functor Function where
     fmap f (Arccoth x) = Arccoth (f x)
     fmap f (E x) = E (f x)
     fmap f (Ln x) = Ln (f x)
-    fmap f (Log base x) = Log (f base) (f x)
+    fmap f (Log base x) = Log (f base) (f x) -- todo fix so we don't do operations on base - create new Log10 type?
 
 
 instance Show Op where
@@ -99,7 +99,7 @@ instance Show Op where
     show PowOp = "(^)"
 
 
--- TODO idea: count num elements and then decide whether ot put brackets.
+-- TODO idea: count num elements and then decide whether to put brackets.
 -- Example: x^6 * 4 is shown as 4x^6 while 4 * (x+3) is shown as 4(x+3)
 -- idea: glued things are wrapped each.
 -- NOTE original
@@ -245,7 +245,7 @@ instance Show a => Show (Function a) where
     show (Ln e) = "ln(" ++ show e ++ ")"
     show (Log b a) = "log" ++ show b ++ "(" ++ show a ++ ")"
 
-
+-- note: temporary
 x = Var "x"
 y = Var "y"
 z = Var "z"
@@ -522,6 +522,9 @@ simplifyFunctions e = e-}
 
 -- note gets a list of all var names in an expression
 -- (except for function args and for pow exponent)
+
+
+
 vars :: Expr -> [String]
 vars expr = nub $ getVars [] expr
     where

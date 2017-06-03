@@ -1,11 +1,10 @@
 {-# LANGUAGE FlexibleContexts #-}
-module Encoders where
+module Encoder where
 
 import Types
-import Main
-
-import Util.Specific
-import Util.General
+import Simplification
+import Toolset
+import Internal
 
 ------------------------------ Dealing with Polynomials ---------------------------------
 

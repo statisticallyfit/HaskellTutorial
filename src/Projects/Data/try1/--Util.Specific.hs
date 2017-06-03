@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-
 module Util.Specific where
 
 import Types
@@ -420,3 +421,5 @@ isMono e
 -- needs to get input from chisel where either fully div or fully mul.
 isPoly :: Expr -> Bool
 isPoly e = ((not $ hasFunction e) || (all isMono (splitAll e))) && (not $ isExponential e)
+
+-}

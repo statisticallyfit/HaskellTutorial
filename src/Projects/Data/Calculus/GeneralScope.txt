@@ -1,0 +1,2 @@
+* no floating point numbers are used - just int and fraction.
+* not a multivariable calculator - just uses single-variable.
