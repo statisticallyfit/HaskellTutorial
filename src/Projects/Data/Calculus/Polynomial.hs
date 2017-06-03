@@ -23,9 +23,9 @@ makeFraction num denom = Rate $ num % denom
 
 -- Adds the polynomials in the Codes.
 addPoly :: Code -> Code -> Code
-addPoly (Poly ps) (Poly qs) = Poly (zipWith (+) ps' qs')
+addPoly (Poly p) (Poly q) = Poly (zipWith (+) p' q')
     where
-    (ps', qs') = fillZeroes (Poly ps) (Poly qs)
+    (Poly p', Poly q') = fillZeroes (Poly p) (Poly q)
 
 
 
@@ -42,13 +42,13 @@ get (Poly p) = p
 -- TODO: replace the other elongate with this new one
 -- Adds zeroes to the end of one of the lists inside the Code so they are the same length.
 fillZeroes :: Code -> Code -> (Code, Code)
-fillZeroes c1@(Poly p1) c2@(Poly p2)
-    | len1 > len2 = (c1, c2 ++ zeroes)
-    | len1 < len2 = (c1 ++ zeroes, c2)
-    | otherwise = (c1, c2)
+fillZeroes c@(Poly p) k@(Poly q)
+    | len1 > len2 = (c, Poly (q ++ zeroes))
+    | len1 < len2 = (Poly (p ++ zeroes), k)
+    | otherwise = (c, k)
     where
-        len1 = length p1
-        len2 = length p2
+        len1 = length p
+        len2 = length q
         zero = makeFraction 0 1
         zeroes = replicate (abs (len1 - len2)) zero
 
@@ -56,7 +56,7 @@ fillZeroes c1@(Poly p1) c2@(Poly p2)
 
 -- test: addPoly produces polynomial with correct coefficient and power (index of coeff in list)
 testAddPolyCorrect :: Code -> Code -> Bool
-testAddPolyCorrect c1 c2 = addPoly c1 c2 == result
+testAddPolyCorrect p q = addPoly p q == result
     where
-        (Poly p1, Poly p2) = fillZeroes c1 c2
-        result = Poly $ map sum (transpose [p1, p2])
+        (Poly p', Poly q') = fillZeroes p q
+        result = Poly $ map sum (transpose [p', q'])
