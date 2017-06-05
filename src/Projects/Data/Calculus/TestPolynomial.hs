@@ -4,6 +4,10 @@ import Polynomial
 import Types
 import ArbitraryDeclarations
 
+import Data.List
+
+import Test.QuickCheck (Arbitrary, arbitrary, quickCheck, frequency)
+
 ------------------------------------------------ TESTS---------------------------------------------
 --- Hel.per methods
 get :: Code -> [Coeff]

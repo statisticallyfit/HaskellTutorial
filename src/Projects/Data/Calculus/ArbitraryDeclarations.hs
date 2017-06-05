@@ -1,21 +1,29 @@
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
 module ArbitraryDeclarations where
 
 
 import Types
 import Polynomial
 
+import Data.List
+
+import Test.QuickCheck (Arbitrary, arbitrary, quickCheck, frequency)
+
 
 instance Arbitrary Coeff where
     arbitrary = do
         int <- arbitrary
         frac <- arbitrary
-        frequency [(1, Whole int), (1, Rational frac)]
+        frequency [
+            (1, return $ Whole int),
+            (1, return $ Rational frac)]
 
 
 instance Arbitrary Fraction where
     arbitrary = do
         ratio <- arbitrary
-        return (Rate ratio)
+        return ratio
 
 
 instance Arbitrary Expr where
@@ -32,9 +40,8 @@ instance Arbitrary Expr where
             (1, return $ Pow e1 e2),
             (1, return $ Neg e1),
             (1, return $ Num coeff),
-            (1, return $ Var x), -- string variable x declared in types file.
-            (1, return $ Func func)
-        ]
+            (1, return $ Var "x"), -- string variable x declared in types file.
+            (1, return $ Func func)]
 
 
 instance Arbitrary a => Arbitrary (Function a) where
@@ -68,26 +75,25 @@ instance Arbitrary a => Arbitrary (Function a) where
             (1, return $ Arccoth x),
             (1, return $ Ln x),
             (1, return $ Exp x),
-            (1, return $ Log b x)
-        ]
+            (1, return $ Log b x)]
 
+
+
+instance Arbitrary Vignette where
+    arbitrary = do
+        exprTuples <- arbitrary
+        return exprTuples
 
 instance Arbitrary Code where
     arbitrary = do
         xs <- arbitrary
-        e1 <- arbitrary
-        e2 <- arbitrary
-        e3 <- arbitrary
+        expr <- arbitrary
+        vignetteList <- arbitrary
         frequency [
             (1, return (Poly xs)),
-            (1, return (Trig (e1, e2, e3))),
-            (1, return (InverseTrig (e1, e2, e3))),
-            (1, return (Hyperbolic (e1, e2, e3))),
-            (1, return (InverseHyperbolic (e1, e2, e3))),
-            (1, return (Exponential (e1, e2, e3))),
-            (1, return (Logarithmic (e1, e2, e3)))
-        ]
-
-
-
-
+            (1, return (Trig vignetteList)),
+            (1, return (InverseTrig vignetteList)),
+            (1, return (Hyperbolic vignetteList)),
+            (1, return (InverseHyperbolic vignetteList)),
+            (1, return (Exponential expr)),
+            (1, return (Logarithmic vignetteList))]
