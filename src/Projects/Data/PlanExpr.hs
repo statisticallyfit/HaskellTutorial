@@ -1,9 +1,9 @@
 {-# LANGUAGE FlexibleContexts #-}
 module PlanExpr where
 
-{-import Test.QuickCheck -- (Arbitrary, arbitrary, elements)
-import Test.QuickCheck.Checkers
-import Test.QuickCheck.Classes-}
+import Test.QuickCheck (Arbitrary, arbitrary, elements)
+--import Test.QuickCheck.Checkers
+--import Test.QuickCheck.Classes
 import Control.Monad hiding (join)
 import Control.Applicative
 import Data.Char

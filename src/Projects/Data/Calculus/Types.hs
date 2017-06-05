@@ -21,27 +21,27 @@ data Function a
       Csch a | Sech a | Coth a |
       Arcsinh a | Arccosh a | Arctanh a |
       Arccsch a | Arcsech a | Arccoth a |
-      Ln a | Exp a | Log a a -- first expr is base
+      Ln a | Exp a | Log a a -- note: first expr is base
     deriving (Eq)
 
 data Op = AddOp | SubOp | MulOp | DivOp | PowOp deriving (Eq)
 
--- type RationalNum = Ratio Int
+
 data Fraction = Rate (Ratio Int) deriving (Eq)
-data Coef = Whole Int | Rational Fraction deriving (Eq)
+data Coeff = Whole Int | Rational Fraction deriving (Eq)
 
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
-    | Pow Expr Expr | Neg Expr | Num Coef | Var String | Func (Function Expr)
+    | Pow Expr Expr | Neg Expr | Num Coeff | Var String | Func (Function Expr)
     deriving (Eq)
     -- Num Int | Frac Fraction
 
--- type Coeff = Int
-type ExprTuple = (Expr, Expr)
 
--- todo rename description type to tuple or something
-data Code = Poly [Fraction] | Trig [ExprTuple] | InvTrig [ExprTuple]
-    | Hyperbolic [ExprTuple] | InvHyp [ExprTuple] | Exponential Expr
-    | Logarithmic ExprTuple
+type Vignette = (Expr, Expr)
+
+data Code = Poly [Coeff]
+    | Trig [Vignette] | InverseTrig [Vignette]
+    | Hyperbolic [Vignette] | InverseHyperbolic [Vignette]
+    | Exponential Expr | Logarithmic [Vignette] -- holds ln and log
     deriving (Eq, Show)
 
 
@@ -80,9 +80,33 @@ instance Show Fraction where
 
 
 ------------------------------------------------------------------------------------------------
--- Coef Instances
+-- Coeff Instances
 
-instance Show Coef where
+instance Num Coeff where
+    negate (Whole int) = Whole $ negate int
+    negate (Rational frac) = Rational $ negate frac
+
+    (Whole x) + (Whole y) = Whole $ x + y
+    (Rational x) + (Rational y) = Rational $ x + y
+
+    (Whole x) * (Whole y) = Whole $ x * y
+    (Rational x) * (Rational y) = Rational $ x * y
+
+    fromInteger num = Whole $ fromInteger num
+
+    abs (Whole int) = Whole $ abs int
+    abs (Rational frac) = Rational $ abs frac
+
+    signum (Whole int) = Whole $ signum int
+    signum (Rational frac) = Rational $ signum frac
+
+
+instance Ord Coeff where
+    compare (Whole x) (Whole y) = compare x y
+    compare (Rational x) (Rational y) = compare x y
+
+
+instance Show Coeff where
     show (Whole int) = show int
     show (Rational frac) = show frac
 
@@ -115,7 +139,7 @@ instance Functor Function where
     fmap f (Arccsch x) = Arccsch (f x)
     fmap f (Arcsech x) = Arcsech (f x)
     fmap f (Arccoth x) = Arccoth (f x)
-    fmap f (E x) = E (f x)
+    fmap f (Exp x) = Exp (f x)
     fmap f (Ln x) = Ln (f x)
     fmap f (Log base x) = Log (f base) (f x)
 
@@ -145,7 +169,7 @@ instance Show a => Show (Function a) where
     show (Arccsch e) = "arccsch(" ++ show e ++ ")"
     show (Arcsech e) = "arcsech(" ++ show e ++ ")"
     show (Arccoth e) = "arccoth(" ++ show e ++ ")"
-    show (E e) = "e^(" ++ show e ++ ")"
+    show (Exp e) = "e^(" ++ show e ++ ")"
     show (Ln e) = "ln(" ++ show e ++ ")"
     show (Log b a) = "log" ++ show b ++ "(" ++ show a ++ ")"
 
