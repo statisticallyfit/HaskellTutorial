@@ -89,7 +89,12 @@ instance Functor Function where
     fmap f (E x) = E (f x)
     fmap f (Ln x) = Ln (f x)
     fmap f (Log base x) = Log (f base) (f x) -- todo fix so we don't do operations on base - create new Log10 type?
-
+    -- todo on second thought, maybe just calling simplify on the base is necessary
+    -- and when truly simplified, the simplify call on base will yield original base.
+    -- And error won't be thrown as here for other functions on simplifying expressions, just
+    -- note for functor because of kinds types (?). So no need to change, just because we modify
+    -- note base for functor doesn't mean we are obliged by compiler to modify base for simplifying
+    -- note functions!!!
 
 instance Show Op where
     show AddOp = "(+)"

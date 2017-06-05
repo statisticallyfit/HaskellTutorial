@@ -21,28 +21,43 @@ data Function a
       Csch a | Sech a | Coth a |
       Arcsinh a | Arccosh a | Arctanh a |
       Arccsch a | Arcsech a | Arccoth a |
-      Ln a | E a | Log a a -- first expr is base
+      Ln a | Exp a | Log a a -- first expr is base
     deriving (Eq)
 
 data Op = AddOp | SubOp | MulOp | DivOp | PowOp deriving (Eq)
 
-type RationalNum = Ratio Int
-data Fraction = Rate RationalNum deriving (Eq)
+-- type RationalNum = Ratio Int
+data Fraction = Rate (Ratio Int) deriving (Eq)
+data Coef = Whole Int | Rational Fraction deriving (Eq)
 
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
-    | Pow Expr Expr | Neg Expr | Num Int | Frac Fraction | Var String | Func (Function Expr)
+    | Pow Expr Expr | Neg Expr | Num Coef | Var String | Func (Function Expr)
     deriving (Eq)
+    -- Num Int | Frac Fraction
 
-type Coeff = Int
-type Description = (Expr, Expr, Expr)
+-- type Coeff = Int
+type ExprTuple = (Expr, Expr)
 
 -- todo rename description type to tuple or something
-data Code = Poly [Fraction] | Trig [Description] | InvTrig [Description]
-    | Hyperbolic [Description] | InvHyp [Description] | Logarithmic [Description]
+data Code = Poly [Fraction] | Trig [ExprTuple] | InvTrig [ExprTuple]
+    | Hyperbolic [ExprTuple] | InvHyp [ExprTuple] | Exponential Expr
+    | Logarithmic ExprTuple
     deriving (Eq, Show)
 
 
 
+------------------------------------------------------------------------------------------------
+-- Op Instances
+
+
+instance Show Op where
+    show AddOp = "(+)"
+    show SubOp = "(-)"
+    show MulOp = "(*)"
+    show DivOp = "(/)"
+    show PowOp = "(^)"
+------------------------------------------------------------------------------------------------
+-- Fraction Instances
 
 
 instance Num Fraction where
@@ -57,12 +72,23 @@ instance Ord Fraction where
     compare (Rate r1) (Rate r2) = compare r1 r2
 
 
-
 instance Show Fraction where
     show (Rate ratio)
         | numerator ratio == 0 = show 0
         | denominator ratio == 1 = show (numerator ratio)
         | otherwise = (show (numerator ratio)) ++ "/" ++ (show (denominator ratio))
+
+
+------------------------------------------------------------------------------------------------
+-- Coef Instances
+
+instance Show Coef where
+    show (Whole int) = show int
+    show (Rational frac) = show frac
+
+
+------------------------------------------------------------------------------------------------
+-- Function Instances
 
 instance Functor Function where
     fmap f (Sin x) = Sin (f x)
@@ -94,27 +120,6 @@ instance Functor Function where
     fmap f (Log base x) = Log (f base) (f x)
 
 
-instance Show Op where
-    show AddOp = "(+)"
-    show SubOp = "(-)"
-    show MulOp = "(*)"
-    show DivOp = "(/)"
-    show PowOp = "(^)"
-
-
-instance Show Expr where
-    show (Var x) = x
-    show (Num n) = show n
-    show (Frac fraction) = show fraction
-    show (Func func) = show func
-    show (Neg e) = "-(" ++ show e ++ ")"
-    show (Add e1 e2) = show e1 ++ " + " ++ show e2
-    show (Sub e1 e2) = show e1 ++ " - (" ++ show e2 ++ ")"
-    show (Mul e1 e2) = show e1 ++ " * " ++ show e2
-    show (Div e1 e2) = "(" ++ show e1 ++ ") / (" ++ show e2 ++ ")"
-    show (Pow base exp) = show base ++ "^(" ++ show exp ++ ")"
-
-
 instance Show a => Show (Function a) where
     show (Sin e) = "sin(" ++ show e ++ ")"
     show (Cos e) = "cos(" ++ show e ++ ")"
@@ -143,6 +148,25 @@ instance Show a => Show (Function a) where
     show (E e) = "e^(" ++ show e ++ ")"
     show (Ln e) = "ln(" ++ show e ++ ")"
     show (Log b a) = "log" ++ show b ++ "(" ++ show a ++ ")"
+
+------------------------------------------------------------------------------------------------
+-- Expr Instances
+
+instance Show Expr where
+    show (Var x) = x
+    show (Num (Whole int)) = show int
+    show (Num (Rational frac)) = "(" ++ show frac ++ ")"
+    -- show (Num n) = show n
+    -- show (Frac fraction) = show fraction
+    show (Func func) = show func
+    show (Neg e) = "-(" ++ show e ++ ")"
+    show (Add e1 e2) = show e1 ++ " + " ++ show e2
+    show (Sub e1 e2) = show e1 ++ " - (" ++ show e2 ++ ")"
+    show (Mul e1 e2) = show e1 ++ " * " ++ show e2
+    show (Div e1 e2) = "(" ++ show e1 ++ ") / (" ++ show e2 ++ ")"
+    show (Pow base exp) = show base ++ "^(" ++ show exp ++ ")"
+
+------------------------------------------------------------------------------------------------
 
 
 x = Var "x"
