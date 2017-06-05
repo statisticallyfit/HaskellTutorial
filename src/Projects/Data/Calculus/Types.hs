@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 module Types where
 
 
@@ -27,7 +28,7 @@ data Function a
 data Op = AddOp | SubOp | MulOp | DivOp | PowOp deriving (Eq)
 
 
-data Fraction = Rate (Ratio Int) deriving (Eq)
+type Fraction = Ratio Int
 data Coeff = Whole Int | Rational Fraction deriving (Eq)
 
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
@@ -59,6 +60,7 @@ instance Show Op where
 ------------------------------------------------------------------------------------------------
 -- Fraction Instances
 
+{-
 
 instance Num Fraction where
     negate (Rate ratio) = Rate $ negate ratio
@@ -78,6 +80,17 @@ instance Show Fraction where
         | denominator ratio == 1 = show (numerator ratio)
         | otherwise = (show (numerator ratio)) ++ "/" ++ (show (denominator ratio))
 
+------------------------------------------------------------------------------------------------
+
+-}
+
+instance {-# OVERLAPPING #-} Show Fraction where
+    show ratio
+        | numerator ratio == 0 = "0"
+        | denominator ratio == 1 = show (numerator ratio)
+        | otherwise = (show (numerator ratio)) ++ "/" ++ (show (denominator ratio))
+
+
 
 ------------------------------------------------------------------------------------------------
 -- Coeff Instances
@@ -87,9 +100,29 @@ instance Num Coeff where
     negate (Rational frac) = Rational $ negate frac
 
     (Whole x) + (Whole y) = Whole $ x + y
+    (Whole x) + (Rational y)
+        | denominator z == one = Whole $ numerator z
+        | otherwise = Rational z
+        where
+            z = x % 1 + y
+            one = 1 :: Int
+    (Rational x) + (Whole y)
+        | denominator z == 1 = Whole $ numerator z
+        | otherwise = Rational z
+        where z = x + y % 1
     (Rational x) + (Rational y) = Rational $ x + y
 
     (Whole x) * (Whole y) = Whole $ x * y
+    (Whole x) * (Rational y)
+        | denominator z == one = Whole $ numerator z
+        | otherwise = Rational z
+        where
+            z = x % 1 * y
+            one = 1 :: Int
+    (Rational x) * (Whole y)
+        | denominator z == 1 = Whole $ numerator z
+        | otherwise = Rational z
+        where z = x * (y % 1)
     (Rational x) * (Rational y) = Rational $ x * y
 
     fromInteger num = Whole $ fromInteger num
@@ -186,7 +219,7 @@ instance Show Expr where
     show (Neg e) = "-(" ++ show e ++ ")"
     show (Add e1 e2) = show e1 ++ " + " ++ show e2
     show (Sub e1 e2) = show e1 ++ " - (" ++ show e2 ++ ")"
-    show (Mul e1 e2) = show e1 ++ " * " ++ show e2
+    show (Mul e1 e2) = show e1 ++ show e2
     show (Div e1 e2) = "(" ++ show e1 ++ ") / (" ++ show e2 ++ ")"
     show (Pow base exp) = show base ++ "^(" ++ show exp ++ ")"
 
