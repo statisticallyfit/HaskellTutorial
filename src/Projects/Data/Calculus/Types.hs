@@ -4,12 +4,13 @@ module Types where
 
 
 import Control.Monad hiding (join)
-import Control.Applicative
+import Control.Applicative hiding (Const)
 import Data.Char
 import Numeric -- math library
 import Data.Maybe
 import Data.List
-import Data.Ratio hiding (show)
+import Data.Ratio hiding (show, Rational)
+import Prelude hiding (Rational)
 
 
 
@@ -28,21 +29,32 @@ data Function a
 data Op = AddOp | SubOp | MulOp | DivOp | PowOp deriving (Eq)
 
 
-type Fraction = Ratio Int
-data Coeff = Whole Int | Rational Fraction deriving (Eq)
+type Rational = Ratio Int
+data Const = Integer Int | Quotient Rational deriving (Eq)
 
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
-    | Pow Expr Expr | Neg Expr | Num Coeff | Var String | Func (Function Expr)
+    | Pow Expr Expr | Neg Expr | Num Const | Var String | Func (Function Expr)
     deriving (Eq)
     -- Num Int | Frac Fraction
 
 
 type Vignette = (Expr, Expr)
 
-data Code = Poly [Coeff]
-    | Trig [Vignette] | InverseTrig [Vignette]
-    | Hyperbolic [Vignette] | InverseHyperbolic [Vignette]
-    | Exponential Expr | Logarithmic [Vignette] -- holds ln and log
+{-data Polynomial = Poly [Const]
+data Trigonometric = Trig [Vignette]
+data InvTrigonometric = InvTrig [Vignette]
+data Hyperbolic = Hyper [Vignette]
+data InvHyperbolic = InvHyper [Vignette]
+data Exponential = Expo Expr
+data Logarithmic = Loga [Vignette]-}
+-- data Code a = Code a
+
+
+data Code = Poly [Const]
+    | Trig [Vignette] | InvTrig [Vignette]
+    | Hyperbolic [Vignette] | InvHyperbolic [Vignette]
+    | {-Exponential Expr |-} Logarithmic (Vignette, Vignette) -- holds ln and log
+    | Empty -- just a Nil placeholder for the addPoly function, etc.
     deriving (Eq, Show)
 
 
@@ -84,7 +96,7 @@ instance Show Fraction where
 
 -}
 
-instance {-# OVERLAPPING #-} Show Fraction where
+instance {-# OVERLAPPING #-} Show Rational where
     show ratio
         | numerator ratio == 0 = "0"
         | denominator ratio == 1 = show (numerator ratio)
@@ -93,55 +105,55 @@ instance {-# OVERLAPPING #-} Show Fraction where
 
 
 ------------------------------------------------------------------------------------------------
--- Coeff Instances
+-- Const Instances
 
-instance Num Coeff where
-    negate (Whole int) = Whole $ negate int
-    negate (Rational frac) = Rational $ negate frac
+instance Num Const where
+    negate (Integer int) = Integer $ negate int
+    negate (Quotient frac) = Quotient $ negate frac
 
-    (Whole x) + (Whole y) = Whole $ x + y
-    (Whole x) + (Rational y)
-        | denominator z == one = Whole $ numerator z
-        | otherwise = Rational z
+    (Integer x) + (Integer y) = Integer $ x + y
+    (Integer x) + (Quotient y)
+        | denominator z == one = Integer $ numerator z
+        | otherwise = Quotient z
         where
             z = x % 1 + y
             one = 1 :: Int
-    (Rational x) + (Whole y)
-        | denominator z == 1 = Whole $ numerator z
-        | otherwise = Rational z
+    (Quotient x) + (Integer y)
+        | denominator z == 1 = Integer $ numerator z
+        | otherwise = Quotient z
         where z = x + y % 1
-    (Rational x) + (Rational y) = Rational $ x + y
+    (Quotient x) + (Quotient y) = Quotient $ x + y
 
-    (Whole x) * (Whole y) = Whole $ x * y
-    (Whole x) * (Rational y)
-        | denominator z == one = Whole $ numerator z
-        | otherwise = Rational z
+    (Integer x) * (Integer y) = Integer $ x * y
+    (Integer x) * (Quotient y)
+        | denominator z == one = Integer $ numerator z
+        | otherwise = Quotient z
         where
             z = x % 1 * y
             one = 1 :: Int
-    (Rational x) * (Whole y)
-        | denominator z == 1 = Whole $ numerator z
-        | otherwise = Rational z
+    (Quotient x) * (Integer y)
+        | denominator z == 1 = Integer $ numerator z
+        | otherwise = Quotient z
         where z = x * (y % 1)
-    (Rational x) * (Rational y) = Rational $ x * y
+    (Quotient x) * (Quotient y) = Quotient $ x * y
 
-    fromInteger num = Whole $ fromInteger num
+    fromInteger num = Integer $ fromInteger num
 
-    abs (Whole int) = Whole $ abs int
-    abs (Rational frac) = Rational $ abs frac
+    abs (Integer int) = Integer $ abs int
+    abs (Quotient frac) = Quotient $ abs frac
 
-    signum (Whole int) = Whole $ signum int
-    signum (Rational frac) = Rational $ signum frac
-
-
-instance Ord Coeff where
-    compare (Whole x) (Whole y) = compare x y
-    compare (Rational x) (Rational y) = compare x y
+    signum (Integer int) = Integer $ signum int
+    signum (Quotient frac) = Quotient $ signum frac
 
 
-instance Show Coeff where
-    show (Whole int) = show int
-    show (Rational frac) = show frac
+instance Ord Const where
+    compare (Integer x) (Integer y) = compare x y
+    compare (Quotient x) (Quotient y) = compare x y
+
+
+instance Show Const where
+    show (Integer int) = show int
+    show (Quotient frac) = show frac
 
 
 ------------------------------------------------------------------------------------------------
@@ -211,8 +223,8 @@ instance Show a => Show (Function a) where
 
 instance Show Expr where
     show (Var x) = x
-    show (Num (Whole int)) = show int
-    show (Num (Rational frac)) = "(" ++ show frac ++ ")"
+    show (Num (Integer int)) = show int
+    show (Num (Quotient frac)) = "(" ++ show frac ++ ")"
     -- show (Num n) = show n
     -- show (Frac fraction) = show fraction
     show (Func func) = show func

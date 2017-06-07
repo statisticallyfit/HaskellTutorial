@@ -53,11 +53,11 @@ getCoefPowPair expr = (coef, pow)
 
 
 
-makeFraction :: Int -> Fraction
+--makeFraction :: Int -> Fraction
 makeFraction n = Rate $ n % 1
 
 
-meltExponent :: Expr -> Expr
+--meltExponent :: Expr -> Expr
 meltExponent (Pow constBase expo) = Pow constBase (simplifyExprMultiVar expo)
 meltExponent e = e
 

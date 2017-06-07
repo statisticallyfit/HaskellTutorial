@@ -1,8 +1,8 @@
-module TestPolynomial where
+module TestCodes where
 
-import Polynomial
+import Codes
 import Types
-import ArbitraryDeclarations
+import ArbitraryInst
 
 import Data.List
 
@@ -10,19 +10,20 @@ import Test.QuickCheck (Arbitrary, arbitrary, quickCheck, frequency)
 
 ------------------------------------------------ TESTS---------------------------------------------
 --- Hel.per methods
-get :: Code -> [Coeff]
-get (Poly p) = p
+get :: Code -> [Const]
+get (Poly ps) = ps
 
 
 ---------------------------------------------------------------------------------------------------
 
 
--- test: addPoly produces polynomial with correct coefficient and power (index of coeff in list)
+-- test: addPoly produces polynomial with correct Const and power (index of Const in list)
 testAddPolyCorrect :: Code -> Code -> Bool
-testAddPolyCorrect p q = addPoly p q == result
+testAddPolyCorrect p@(Poly ps) q@(Poly qs) = addPoly p q == result
     where
-        (Poly p', Poly q') = fillZeroes p q
-        result = Poly $ map sum (transpose [p', q'])
+        (Poly ps', Poly qs') = fillZeroes p q
+        result = Poly $ map sum (transpose [ps', qs'])
+testAddPolyCorrect _ _ = True
 
 
 

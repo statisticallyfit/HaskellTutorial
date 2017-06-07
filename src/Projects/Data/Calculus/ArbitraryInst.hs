@@ -1,26 +1,27 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
-module ArbitraryDeclarations where
+module ArbitraryInst where
 
 
 import Types
-import Polynomial
+import Codes
 
 import Data.List
+import Prelude hiding (Rational)
 
 import Test.QuickCheck (Arbitrary, arbitrary, quickCheck, frequency)
 
 
-instance Arbitrary Coeff where
+instance Arbitrary Const where
     arbitrary = do
         int <- arbitrary
         frac <- arbitrary
         frequency [
-            (1, return $ Whole int),
-            (1, return $ Rational frac)]
+            (1, return $ Integer int),
+            (1, return $ Quotient frac)]
 
 
-instance Arbitrary Fraction where
+instance Arbitrary Rational where
     arbitrary = do
         ratio <- arbitrary
         return ratio
@@ -87,13 +88,14 @@ instance Arbitrary Vignette where
 instance Arbitrary Code where
     arbitrary = do
         xs <- arbitrary
-        expr <- arbitrary
+        v1 <-  arbitrary
+        v2 <- arbitrary
         vignetteList <- arbitrary
         frequency [
             (1, return (Poly xs)),
             (1, return (Trig vignetteList)),
-            (1, return (InverseTrig vignetteList)),
+            (1, return (InvTrig vignetteList)),
             (1, return (Hyperbolic vignetteList)),
-            (1, return (InverseHyperbolic vignetteList)),
-            (1, return (Exponential expr)),
-            (1, return (Logarithmic vignetteList))]
+            (1, return (InvHyperbolic vignetteList)),
+            -- (1, return (Exponential expr)),
+            (1, return (Logarithmic (v1, v2)))]
