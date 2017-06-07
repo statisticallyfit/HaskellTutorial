@@ -7,7 +7,8 @@ import Types
 import Data.List
 import Data.Char
 import Data.Maybe
-import Data.Ratio hiding (show)
+import Data.Ratio hiding (show, Rational)
+import Prelude hiding (Rational)
 
 
 
@@ -24,7 +25,10 @@ intToConst num denom
     | otherwise = Quotient $ num % denom
 
 
-
+rationalToConst :: Rational -> Const
+rationalToConst rat
+    | denominator rat == 1 = Integer $ numerator rat
+    | otherwise = Quotient rat
 
 
 -- TODO: replace the other elongate with this new one
@@ -76,41 +80,61 @@ addPoly _ _ = Empty
 
 
 
-{-
 
 -- PRECONDITION: After chisel(). Takes individual monomial terms (Consts and vars with Consts) that must have been
 -- originally connected by Mul only. Expects chiselled input (no divs except if in PolyRational Code type).
 -- POSTCONDITION: returns single Poly [] which contains the result of the entire string of added monomials.
+
+{-
 mulPoly :: Code -> Code -> Code
 mulPoly (Poly ps) (Poly qs) = foldl1 addPoly products'
     where
     ts = zip ps [0..(length ps - 1)] -- ps can be rate type, but pows must be int type.
-    maxPow = maximum $ map (\(Poly ps) -> length ps) products
     products = map (\(n, p) -> mulOnePoly n p qs) ts
+    maxPow = maximum $ map (\(Poly ps) -> length ps) products
     products' = map Poly $ map (\(Poly ps) -> ps ++ replicate (maxPow - length ps) 0) products
+mulPoly _ _ = Empty
 
-
--- note n = Consts of poly, p = pow of poly with Consts n, q = pow of multiplied poly (accumulated)
--- (m:ms) = elements of other polynomial (added), acc = accumulated multiplications (is a list of
--- tuples that holds first the new Consts value and second the power of this Consts.
--- note Rate constructor holds RationalNum type which shadows Ratio Int
-mulOnePoly :: Fraction -> Int -> [Fraction] -> Code
-mulOnePoly (Rate n) p ms = foldl addPoly (Poly [makeFraction 0]) polyCs
-    where
-    ms' = map (\(Rate m) -> m) ms
-    ts = mul' n p 0 ms' []
-    ts' = map (\(f,s) -> (Rate f, s)) ts
-    maxPow = maximum $ map snd ts
-    zzs = replicate (maxPow + 1) 0
-    cs = map (\(c,p) -> put p c zzs) ts'
-    polyCs = map Poly cs
-    mul' _ _ _ [] acc = acc
-    mul' 0 _ _ _ acc = [(0, 0)] ++ acc
-    mul' n p q (m:ms) acc
-        | n * m == 0 = mul' n p (q + 1) ms acc
-        | otherwise = mul' n p (q + 1) ms (acc ++ [(n * m, p + q)])
 
 -}
+-- note n = poly const, p = poly pow, q = pow of multiplied poly (accumulated)
+-- (r:rs) = elements of other polynomial (added), acc = accumulated multiplications (is a list of
+-- tuples that holds first the new Consts value and second the power of this Consts).
+-- ts = list of (n, p) pairs.
+
+-- mulOnePoly :: Rational -> Int -> [Rational] -> Code
+-- PRECONDITION: n = Rational poly-coeff, p = poly pow, rs = list of poly coeffs. 
+-- POSTCONDITION: takes result of mul() and wraps it up as Code type.
+mulOnePoly n p rs = foldl addPoly (Poly [Integer 0]) polyCs
+    where
+    ts = mul n p 0 rs []
+    maxPow = maximum $ map snd ts
+    zzs = replicate (maxPow + 1) 0
+    cs = map (\(c,p) -> put p c zzs) ts
+    polyCs = map (Poly . rationalToConst) cs
+
+
+-- PRECONDITION: takes n = poly Const, p = poly pow, q = accumulator poly pow,
+-- (c:cs) = list of Consts, acc = accumulator poly Consts
+-- POSTCONDITION: returns a list of tuples of (n,p) such that the given n and p in the
+-- parameters are multiplied as a poly-pow against the values in the acc list.
+-- Simply: takes a single monomial and multiplies it against a string of added monomials.
+mul :: (Eq a, Num a, Num b) => a -> b -> b -> [a] -> [(a, b)] -> [(a, b)]
+mul _ _ _ [] acc = acc
+mul 0 _ _ _ acc = [(0, 0)] ++ acc
+mul n p q (c:cs) acc
+    | n * c == 0 = mul n p (q + 1) cs acc
+    | otherwise = mul n p (q + 1) cs (acc ++ [(n * c, p + q)])
+
+
+put :: Int -> a -> [a] -> [a]
+put _ n [] = [n]
+put index n xs
+    | index < 0 = error "index is negative "
+    | otherwise = front ++ [n] ++ (tail back)
+    where (front, back) = splitAt index xs
+          newBack = if null back then [] else (tail back)
+
 
 {-
 addCodes :: Code -> Code -> Code

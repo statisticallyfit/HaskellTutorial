@@ -2,20 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bc679e25-6068-417c-8b02-1d7896297961" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Projects/Data/Calculus/Codes.hs" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/Projects/Data/Calculus/Polynomial.hs" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/Projects/Data/try1/--Extensions.hs" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/Projects/Data/try1/--Util.Specific.hs" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/Projects/Data/try1/Encoder.hs" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/Projects/Data/try1/Internal.hs" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/Projects/Data/try1/Simplification.hs" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/Projects/Data/try1/Toolset.hs" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/Projects/Data/try1/Types.hs" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Data/Calculus/ArbitraryDeclarations.hs" afterPath="$PROJECT_DIR$/src/Projects/Data/Calculus/ArbitraryInst.hs" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Data/Calculus/TestPolynomial.hs" afterPath="$PROJECT_DIR$/src/Projects/Data/Calculus/TestCodes.hs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Data/Calculus/PolynomialOld.hs" afterPath="$PROJECT_DIR$/src/Projects/Data/Calculus/PolynomialOld.hs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Data/Calculus/Types.hs" afterPath="$PROJECT_DIR$/src/Projects/Data/Calculus/Types.hs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Data/Calculus/Codes.hs" afterPath="$PROJECT_DIR$/src/Projects/Data/Calculus/Codes.hs" />
     </list>
     <ignored path="HaskellTutorial.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -49,17 +36,17 @@
         <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/PolynomialOld.hs">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="214" column="37" selection-start-line="214" selection-start-column="37" selection-end-line="214" selection-end-column="37" />
+              <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Codes.hs" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Codes.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/Codes.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="94" column="83" selection-start-line="94" selection-start-column="83" selection-end-line="94" selection-end-column="83" />
+            <state vertical-scroll-proportion="0.6914191">
+              <caret line="105" column="82" selection-start-line="105" selection-start-column="82" selection-end-line="105" selection-end-column="82" />
               <folding />
             </state>
           </provider>
@@ -75,11 +62,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Types.hs" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Types.hs" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/Types.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.05610561">
-              <caret line="2" column="18" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="17" column="29" selection-start-line="17" selection-start-column="29" selection-end-line="17" selection-end-column="29" />
               <folding />
             </state>
           </provider>
@@ -185,10 +172,10 @@
         <option value="$PROJECT_DIR$/src/Projects/Data/Calculus/Polynomial.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Data/Calculus/TestPolynomial.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Data/Calculus/ArbitraryInstances.hs" />
-        <option value="$PROJECT_DIR$/src/Projects/Data/Calculus/Codes.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Data/Calculus/ArbitraryInst.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Data/Calculus/TestCodes.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Data/Calculus/Types.hs" />
+        <option value="$PROJECT_DIR$/src/Projects/Data/Calculus/Codes.hs" />
       </list>
     </option>
   </component>
@@ -207,7 +194,7 @@
   <component name="ProjectFrameBounds">
     <option name="x" value="81" />
     <option name="y" value="52" />
-    <option name="width" value="1074" />
+    <option name="width" value="864" />
     <option name="height" value="740" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
@@ -1090,15 +1077,15 @@
       <workItem from="1496643101192" duration="16707000" />
       <workItem from="1496726571783" duration="6579000" />
       <workItem from="1496746401722" duration="8481000" />
-      <workItem from="1496812940538" duration="1279000" />
+      <workItem from="1496812940538" duration="4757000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="634859000" />
+    <option name="totallyTimeSpent" value="638337000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="81" y="52" width="1074" height="740" extended-state="4" />
+    <frame x="81" y="52" width="864" height="740" extended-state="4" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1141,7 +1128,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="46" />
+      <option name="time" value="49" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -1410,14 +1397,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/PolynomialOld.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="214" column="37" selection-start-line="214" selection-start-column="37" selection-end-line="214" selection-end-column="37" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Data/TODOS.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1442,14 +1421,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/Codes.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="94" column="83" selection-start-line="94" selection-start-column="83" selection-end-line="94" selection-end-column="83" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/ArbitraryInst.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1466,10 +1437,26 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/PolynomialOld.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/Types.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.05610561">
-          <caret line="2" column="18" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="17" column="29" selection-start-line="17" selection-start-column="29" selection-end-line="17" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/Codes.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.6914191">
+          <caret line="105" column="82" selection-start-line="105" selection-start-column="82" selection-end-line="105" selection-end-column="82" />
           <folding />
         </state>
       </provider>
