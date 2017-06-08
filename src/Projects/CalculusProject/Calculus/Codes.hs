@@ -1,41 +1,63 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ConstraintKinds, TypeFamilies, FlexibleInstances #-}
 module Codes where
+
 
 
 import Types
 
+import GHC.Exts (Constraint)
 import Data.List
 import Data.Char
 import Data.Maybe
-import Data.Ratio hiding (show, Rational)
-import Prelude hiding (Rational)
+import Data.Ratio hiding (show)
 
+
+
+instance Encoded Monomial where
+    add = addMono
+    multiply = mulMono
+    divide = divMono
+
+instance Encoded Polynomial where
+    add = addPoly
+    multiply = mulPoly
+    divide = divPoly
+
+{-
+instance (Encoded c) => Encoded (Trigonometric c) where
+    add = addTrig -- adding trig and invtrig cases.
+    multiply = mulTrig
+    divide = divTrig
+
+instance (Encoded c) => Encoded (Hyperbolic c) where
+    add = addHyper
+    multiply = mulHyper
+    divide = divHyper
+
+instance (Encoded c) => Encoded (Logarithmic c) where
+    add = addLog
+    multiply = mulLog
+    divide = divLog
+
+-}
 
 ---------------------------------------------------------------------------------------------
 ---------------------------------------------- UTIL ------------------------------------------
 
 -- note: global for fillZeroes function
-oo = (Num 0, Num 0) -- vignette zeroes
-o = Integer 0 -- zero
 
 
-intToConst :: Int -> Int -> Const
-intToConst num denom
-    | denom == 1 = Integer num
-    | otherwise = Quotient $ num % denom
 
-
-rationalToConst :: Rational -> Const
-rationalToConst rat
-    | denominator rat == 1 = Integer $ numerator rat
-    | otherwise = Quotient rat
 
 
 -- TODO: replace the other elongate with this new one
 -- Adds zeroes to the end of one of the lists inside the Code so they are the same length.
-fillZeroes :: Encoded c -> Encoded c -> (Encoded c, Encoded c)
+fillZeroes :: Encoded c => c -> c -> (c, c)
+fillZeroes (Mono np) (Mono mq) = (Mono np, Mono mq)
 fillZeroes (Poly xs) (Poly ys) = (Poly $ fst res, Poly $ snd res)
-    where res = filler o xs ys
+    where res = filler (Integer 0) xs ys
+{-
 fillZeroes (Trig xs) (Trig ys) = (Trig $ fst res, Trig $ snd res)
     where res = filler oo xs ys
 fillZeroes (InvTrig xs) (InvTrig ys) = (InvTrig $ fst res, InvTrig $ snd res)
@@ -44,10 +66,11 @@ fillZeroes (Hyper xs) (Hyper ys) = (Hyper $ fst res, Hyper $ snd res)
     where res = filler oo xs ys
 fillZeroes (InvHyper xs) (InvHyper ys) = (InvHyper $ fst res, InvHyper $ snd res)
     where res = filler oo xs ys
-fillZeroes c1@(LogBase _) c2@(LogBase _) = (c1, c2)
--- fillZeroes c1@(Exponential _) c2@(Exponential _) = (c1, c2)
+fillZeroes (LogBase v) (LogBase w) = (LogBase v, LogBase w)
 
--- Helper function for fillZeroes - acts as the structure for the fillZeroes function, the workhorse.
+-}
+
+-- Helper function for fillZeroes - workhorse for the fillZeroes function,
 filler ::  a-> [a] -> [a] -> ([a], [a])
 filler zero xs ys
    | len1 > len2 = (xs, ys ++ zeroes)
@@ -80,7 +103,7 @@ put index n xs
 
 
 -- todo will this type work?
-addMono :: Monomial -> Monomial -> Encoded c
+addMono :: Encoded c => Monomial -> Monomial -> c
 addMono (Mono (n, p)) (Mono (m, q))
     | p == q = Mono (n + m, p)
     | otherwise = Poly [0] -- TODO IMPLEMENT HERE TO MAKE STRING OF MONOMIALS = POLY
@@ -105,7 +128,7 @@ divMono (Mono (n, p)) (Mono (m, q)) = Mono (n / m, p - q)
 
 
 -- PRECONDITION: After chisel().  Takes individual monomial terms (Consts and vars with Consts) that must have been
--- originally connected by Add, not Mul or Div. Expects chiselled input (no divs except if in PolyRational Code type).
+-- originally connected by Add, not Mul or Div.
 -- POSTCONDITION: returns single Poly [] which contains the result of the entire string of added monomials.
 addPoly :: Polynomial -> Polynomial -> Polynomial
 addPoly (Poly ps) (Poly qs) = Poly (zipWith (+) ps' qs')
@@ -123,9 +146,9 @@ mulPoly (Poly ps) (Poly qs) = foldl1 addPoly products
 
 
 
--- PRECONDITION: n = Rational poly-Const, p = poly pow, rs = list of poly Consts.
+-- PRECONDITION: n = Fraction poly-Const, p = poly pow, rs = list of poly Consts.
 -- POSTCONDITION: takes result of mul() and wraps it up as Code type.
-mulOnePoly :: Const -> Int -> [Const] -> Encoded c
+mulOnePoly :: Const -> Int -> [Const] -> Polynomial
 mulOnePoly n p rs = Poly cs -- wrapping up types
     where
     ts = mul n p 0 rs [] -- note: getting result of single monomial multiplied by added monomials.
@@ -193,7 +216,7 @@ divOnePoly (Rate den, dPow) (Rate num, nPow) = (Rate $ (a * b) % (c * d), nPow -
 ------------------------------------------ TRIG ---------------------------------------------
 
 -- TODO IMPLEMENT
-
+{-
 addTrig :: Trigonometric c -> Trigonometric c -> Trigonometric c
 addTrig (Trig xs) (Trig ys) = Trig xs -- TODO implement - shouldn't Encode be recursive for function arg?
 addTrig (InvTrig xs) (InvTrig ys) = InvTrig xs
@@ -239,7 +262,7 @@ divLog :: Logarithmic c -> Logarithmic c -> Logarithmic c
 divLog l@(LogBase (v1, v2)) (LogBase (w1, w2)) = l
 
 
-
+-}
 
 
 

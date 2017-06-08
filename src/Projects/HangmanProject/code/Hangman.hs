@@ -16,9 +16,7 @@ import Test.QuickCheck.Monadic
 type WordList = [String]
 
 filepath :: String
-filepath = "/datascience/projects/statisticallyfit/github/learningprogramming/" ++
-           "Haskell/HaskellTutorial/src/Books/ChrisAllen_HaskellFirstPrinciples/" ++
-           "chapter13_BuildingProjects/data/dict.txt"
+filepath = "/datascience/projects/statisticallyfit/github/learningprogramming/Haskell/HaskellTutorial/src/Projects/HangmanProject/data/dict.txt"
 
 
 minWordLength :: Int

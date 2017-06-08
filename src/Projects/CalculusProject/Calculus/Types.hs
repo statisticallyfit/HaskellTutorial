@@ -1,19 +1,19 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ConstraintKinds, TypeFamilies, FlexibleInstances #-}
 module Types where
 
 
+import GHC.Exts (Constraint)
 import Control.Monad hiding (join)
 import Control.Applicative hiding (Const)
 import Data.Char
 import Numeric -- math library
 import Data.Maybe
 import Data.List
-import Data.Ratio hiding (show, Rational)
-import Prelude hiding (Rational)
+import Data.Ratio hiding (show)
 
 
-
+-- TODO use record type declaration instead and maybe class for function so no parameter.
 data Function a
     = Sin a | Cos a | Tan a |
       Csc a | Sec a | Cot a |
@@ -29,8 +29,10 @@ data Function a
 data Op = AddOp | SubOp | MulOp | DivOp | PowOp deriving (Eq)
 
 
-type Rational = Ratio Int
-data Const = Integer Int | Quotient Rational deriving (Eq)
+type Fraction = Ratio Int
+data Const = Integer Int | Quotient Fraction deriving (Eq)
+-- TODO: how to make Quotient both simplify arg immediately and have numer, denom readily
+-- todo accessible, instead of calling Data.Ratio's numerator and denominator functions?
 
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
     | Pow Expr Expr | Neg Expr | Num Const | Var String | Func (Function Expr)
@@ -61,51 +63,50 @@ data Code = Mono (Const, Const) -- monomial (coeff, pow)
 -- note - add,mul,div.
 
 
-class Encoded c where
+
+{-
+
+data Encoded a = Code a {
+    add :: a -> a -> a,
+    multiply :: a -> a -> a,
+    divide :: a -> a -> a
+} deriving (Eq, Show)
+-}
+
+class Encoded c  where
     add :: c -> c -> c
     multiply :: c -> c -> c
     divide :: c -> c -> c
 
-type Vignette c = (Encoded c, Encoded c)
 
+
+type Vignette c = (Encoded c, Encoded c) -- type synonym for readability
+
+data Empty = Empty deriving (Eq)
+data Monomial = Mono (Const, Const) deriving (Eq, Show)
+data Polynomial = Poly [Const] deriving (Eq, Show)
+--data Trigonometric c = Trig [Vignette c] | InvTrig [Vignette c]
+--data Hyperbolic c = Hyper [Vignette c] | InvHyper [Vignette c]
+--data Logarithmic c = LogBase (Vignette c, Vignette c)
+
+instance Show Empty where
+    show Empty = "0"
+
+
+{-
 data Polynomial = Poly [Const]
 data Monomial = Mono (Const, Const)
-data Trigonometric c = Trig [Vignette c] | InvTrig [Vignette c]
-data Hyperbolic c = Hyper [Vignette c] | InvHyper [Vignette c]
-data Logarithmic c = LogBase (Vignette c, Vignette c)
+data Trigonometric = Trig [Vignette] | InvTrig [Vignette]
+data Hyperbolic = Hyper [Vignette] | InvHyper [Vignette]
+data Logarithmic = LogBase (Vignette, Vignette)
 
 
-instance Encoded Monomial where
-    add = addMono
-    multiply = mulMono
-    divide = divMono
-
-instance Encoded Polynomial where
-    add = addPoly
-    multiply = mulPoly
-    divide = divPoly
-
-instance Encoded c => Trigonometric c where
-    add = addTrig -- adding trig and invtrig cases.
-    multiply = mulTrig
-    divide = divTrig
-
-instance Encoded c => Hyperbolic c where
-    add = addHyper
-    multiply = mulHyper
-    divide = divHyper
-
-instance Encoded c => Logarithmic c where
-    add = addLog
-    multiply = mulLog
-    divide = divLog
-
-
-
-
+-}
+-- NOTE: instances are declared in Codes.hs file.
 
 ------------------------------------------------------------------------------------------------
 -- Op Instances
+
 
 
 instance Show Op where
@@ -115,11 +116,11 @@ instance Show Op where
     show DivOp = "(/)"
     show PowOp = "(^)"
 
-    
+
 ------------------------------------------------------------------------------------------------
 
 
-instance {-# OVERLAPPING #-} Show Rational where
+instance  {-# OVERLAPPING #-} Show Fraction where
     show ratio
         | numerator ratio == 0 = "0"
         | denominator ratio == 1 = show (numerator ratio)
@@ -130,53 +131,66 @@ instance {-# OVERLAPPING #-} Show Rational where
 ------------------------------------------------------------------------------------------------
 -- Const Instances
 
+
+
+intToConst :: Int -> Int -> Const
+intToConst num denom
+    | denominator f == 1 = Integer (numerator f)
+    | otherwise = Quotient f
+    where f = num % denom
+
+
+fracToConst :: Fraction -> Const
+fracToConst f
+    | denominator f == 1 = Integer $ numerator f
+    | otherwise = Quotient f
+
+
+
 instance Num Const where
     negate (Integer int) = Integer $ negate int
     negate (Quotient frac) = Quotient $ negate frac
 
-    (Integer x) + (Integer y) = Integer $ x + y
-    (Integer x) + (Quotient y)
-        | denominator z == one = Integer $ numerator z
-        | otherwise = Quotient z
-        where
-            z = x % 1 + y
-            one = 1 :: Int
-    (Quotient x) + (Integer y)
-        | denominator z == 1 = Integer $ numerator z
-        | otherwise = Quotient z
-        where z = x + y % 1
-    (Quotient x) + (Quotient y) = Quotient $ x + y
+    (Integer x) + (Integer y) = Integer (x + y)
+    (Integer x) + (Quotient y) = fracToConst (x % 1 + y)
+    (Quotient x) + (Integer y) = fracToConst (x + y % 1)
+    (Quotient x) + (Quotient y) = fracToConst (x + y)
 
-    (Integer x) * (Integer y) = Integer $ x * y
-    (Integer x) * (Quotient y)
-        | denominator z == one = Integer $ numerator z
-        | otherwise = Quotient z
-        where
-            z = x % 1 * y
-            one = 1 :: Int
-    (Quotient x) * (Integer y)
-        | denominator z == 1 = Integer $ numerator z
-        | otherwise = Quotient z
-        where z = x * (y % 1)
-    (Quotient x) * (Quotient y) = Quotient $ x * y
+    (Integer x) * (Integer y) = Integer (x * y)
+    (Integer x) * (Quotient y) = fracToConst (x % 1 * y)
+    (Quotient x) * (Integer y) = fracToConst (x * (y % 1))
+    (Quotient x) * (Quotient y) = fracToConst (x * y)
 
     fromInteger num = Integer $ fromInteger num
 
     abs (Integer int) = Integer $ abs int
-    abs (Quotient frac) = Quotient $ abs frac
+    abs (Quotient q) = Quotient $ abs q
 
     signum (Integer int) = Integer $ signum int
-    signum (Quotient frac) = Quotient $ signum frac
+    signum (Quotient q) = Quotient $ signum q
+
+
+
+instance Fractional Const where
+    (Integer a) / (Integer b) = fracToConst (a % b)
+    (Integer a) / (Quotient b) = fracToConst ((a % 1) * b)
+    (Quotient a) / (Integer b) = fracToConst (a * (b % 1))
+    (Quotient a) / (Quotient b) = fracToConst (a / b)
+
+    recip (Integer x) = Quotient (1 % x)
+    recip (Quotient q) = Quotient (recip q)
+
+    fromRational rat = Quotient ((fromInteger $ numerator rat) % (fromInteger $ denominator rat))
 
 
 instance Ord Const where
     compare (Integer x) (Integer y) = compare x y
-    compare (Quotient x) (Quotient y) = compare x y
+    compare (Quotient a) (Quotient b) = compare a b
 
 
 instance Show Const where
     show (Integer int) = show int
-    show (Quotient frac) = show frac
+    show (Quotient q) = show q ++ ""
 
 
 ------------------------------------------------------------------------------------------------
@@ -246,10 +260,7 @@ instance Show a => Show (Function a) where
 
 instance Show Expr where
     show (Var x) = x
-    show (Num (Integer int)) = show int
-    show (Num (Quotient frac)) = "(" ++ show frac ++ ")"
-    -- show (Num n) = show n
-    -- show (Frac fraction) = show fraction
+    show (Num const) = show const
     show (Func func) = show func
     show (Neg e) = "-(" ++ show e ++ ")"
     show (Add e1 e2) = show e1 ++ " + " ++ show e2

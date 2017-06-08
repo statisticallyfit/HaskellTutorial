@@ -2,9 +2,41 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bc679e25-6068-417c-8b02-1d7896297961" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Data/Calculus/Codes.hs" afterPath="$PROJECT_DIR$/src/Projects/Data/Calculus/Codes.hs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Data/Calculus/PolynomialOld.hs" afterPath="$PROJECT_DIR$/src/Projects/Data/Calculus/PolynomialOld.hs" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Projects/Data/Calculus/Types.hs" afterPath="$PROJECT_DIR$/src/Projects/Data/Calculus/Types.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/CipherProject/code/CaesarCipher.hs" afterPath="$PROJECT_DIR$/src/Projects/CipherProject/code/CaesarCipher.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/CipherProject/code/VigniereCipher.hs" afterPath="$PROJECT_DIR$/src/Projects/CipherProject/code/VigniereCipher.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/CipherProject/tests/TestCaesarCipher.hs" afterPath="$PROJECT_DIR$/src/Projects/CipherProject/tests/TestCaesarCipher.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/CipherProject/tests/TestVigniereCipher.hs" afterPath="$PROJECT_DIR$/src/Projects/CipherProject/tests/TestVigniereCipher.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/HangmanProject/code/Hangman.hs" afterPath="$PROJECT_DIR$/src/Projects/HangmanProject/code/Hangman.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/HangmanProject/data/dict.txt" afterPath="$PROJECT_DIR$/src/Projects/HangmanProject/data/dict.txt" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/HangmanProject/tests/TestHangman.hs" afterPath="$PROJECT_DIR$/src/Projects/HangmanProject/tests/TestHangman.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/PhoneProject/code/Phone.hs" afterPath="$PROJECT_DIR$/src/Projects/PhoneProject/code/Phone.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/PhoneProject/code/PhoneUsingEngPadNumPad_ErrorProne.hs" afterPath="$PROJECT_DIR$/src/Projects/PhoneProject/code/PhoneUsingEngPadNumPad_ErrorProne.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/Projects/PhoneProject/tests/TestPhone.hs" afterPath="$PROJECT_DIR$/src/Projects/PhoneProject/tests/TestPhone.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Data/Calculus/ArbitraryInst.hs" afterPath="$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/ArbitraryInst.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Data/Calculus/Codes.hs" afterPath="$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/Codes.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Data/Calculus/GeneralScope.txt" afterPath="$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/GeneralScope.txt" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Data/Calculus/PolynomialOld.hs" afterPath="$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/PolynomialOld.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Data/Calculus/TestCodes.hs" afterPath="$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/TestCodes.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Data/Calculus/Types.hs" afterPath="$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/Types.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Data/Calculus/testlog.hs" afterPath="$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/testlog.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Data/PlanExpr.hs" afterPath="$PROJECT_DIR$/src/Projects/CalculusProject/PlanExpr.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Data/TESTS.hs" afterPath="$PROJECT_DIR$/src/Projects/CalculusProject/TESTS.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Data/TODOS.hs" afterPath="$PROJECT_DIR$/src/Projects/CalculusProject/TODOS.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Tree/BinarySearchTree/BSTOps.hs" afterPath="$PROJECT_DIR$/src/Projects/TreeProject/BinarySearchTree/BSTOps.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Tree/BinarySearchTree/BSTTesting.hs" afterPath="$PROJECT_DIR$/src/Projects/TreeProject/BinarySearchTree/BSTTesting.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeOps.hs" afterPath="$PROJECT_DIR$/src/Projects/TreeProject/BinaryTree/BinaryTreeOps.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeTesting.hs" afterPath="$PROJECT_DIR$/src/Projects/TreeProject/BinaryTree/BinaryTreeTesting.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/HaskellTree.hs" afterPath="$PROJECT_DIR$/src/Projects/TreeProject/BinaryTree/HaskellTree.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/MoertWillamWeb.hs" afterPath="$PROJECT_DIR$/src/Projects/TreeProject/BinaryTree/MoertWillamWeb.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/MoertelWeb.hs" afterPath="$PROJECT_DIR$/src/Projects/TreeProject/BinaryTree/MoertelWeb.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Tree/BinaryTree/PrePostFoldmap.hs" afterPath="$PROJECT_DIR$/src/Projects/TreeProject/BinaryTree/PrePostFoldmap.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Expr.hs" afterPath="$PROJECT_DIR$/src/Projects/TreeProject/FormulaTree/Expr.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Rose.hs" afterPath="$PROJECT_DIR$/src/Projects/TreeProject/FormulaTree/Rose.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Test.hs" afterPath="$PROJECT_DIR$/src/Projects/TreeProject/FormulaTree/Test.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/TrashExprTreeOps.hs" afterPath="$PROJECT_DIR$/src/Projects/TreeProject/FormulaTree/TrashExprTreeOps.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/TrySimplify_Bad.hs" afterPath="$PROJECT_DIR$/src/Projects/TreeProject/FormulaTree/TrySimplify_Bad.hs" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/Projects/Tree/RoseTree/RoseTreeOps.hs" afterPath="$PROJECT_DIR$/src/Projects/TreeProject/RoseTree/RoseTreeOps.hs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="HaskellTutorial.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -34,51 +66,21 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="PolynomialOld.hs" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/PolynomialOld.hs">
+      <file leaf-file-name="Codes.hs" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/Codes.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="233" column="0" selection-start-line="233" selection-start-column="0" selection-end-line="258" selection-end-column="89" />
+            <state vertical-scroll-proportion="0.6732673">
+              <caret line="105" column="38" selection-start-line="105" selection-start-column="38" selection-end-line="105" selection-end-column="38" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Codes.hs" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/Codes.hs">
+      <file leaf-file-name="Types.hs" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/Types.hs">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="237" column="57" selection-start-line="237" selection-start-column="57" selection-end-line="237" selection-end-column="57" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Types.hs" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/Types.hs">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="2.318482">
-              <caret line="117" column="4" selection-start-line="117" selection-start-column="4" selection-end-line="117" selection-end-column="4" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="TODOS.hs" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Projects/Data/TODOS.hs">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="10" column="38" selection-start-line="10" selection-start-column="38" selection-end-line="10" selection-end-column="38" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="TESTS.hs" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Projects/Data/TESTS.hs">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="199" column="0" selection-start-line="199" selection-start-column="0" selection-end-line="199" selection-end-column="0" />
+              <caret line="85" column="28" selection-start-line="85" selection-start-column="28" selection-end-line="85" selection-end-column="28" />
               <folding />
             </state>
           </provider>
@@ -97,9 +99,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/ETypes.hs" />
-        <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/EUtils.hs" />
-        <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/EMain.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/PlanExpr.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Types.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Extensions.hs" />
@@ -148,6 +147,9 @@
         <option value="$PROJECT_DIR$/src/Projects/Data/Calculus/PolynomialOld.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Data/Calculus/Codes.hs" />
         <option value="$PROJECT_DIR$/src/Projects/Data/Calculus/Types.hs" />
+        <option value="$PROJECT_DIR$/src/Projects/HangmanProject/code/Hangman.hs" />
+        <option value="$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/Types.hs" />
+        <option value="$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/Codes.hs" />
       </list>
     </option>
   </component>
@@ -180,20 +182,124 @@
     <ConfirmationsSetting value="0" id="Remove" />
   </component>
   <component name="ProjectView">
-    <navigator proportions="" version="1">
+    <navigator currentView="ProjectPane" proportions="" version="1">
       <flattenPackages />
       <showMembers />
       <showModules />
       <showLibraryContents />
       <hideEmptyPackages ProjectPane="false" />
       <abbreviatePackageNames />
-      <autoscrollToSource ProjectPane="true" />
-      <autoscrollFromSource ProjectPane="true" />
+      <autoscrollToSource ProjectPane="false" />
+      <autoscrollFromSource ProjectPane="false" />
       <sortByType />
       <manualOrder />
       <foldersAlwaysOnTop value="true" />
     </navigator>
-    <panes />
+    <panes>
+      <pane id="PackagesPane" />
+      <pane id="Scratches" />
+      <pane id="ProjectPane">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Projects" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Projects" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="CalculusProject" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Projects" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="CalculusProject" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Calculus" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HaskellTutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+    </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="aspect.path.notification.shown" value="true" />
@@ -206,15 +312,15 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/src/Projects/Data/Calculus" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/Projects" />
       <recent name="$PROJECT_DIR$/src/Projects/Data" />
       <recent name="$PROJECT_DIR$/src/Projects/Data/Calculus" />
       <recent name="$PROJECT_DIR$/src/Projects/Calculus" />
       <recent name="$PROJECT_DIR$/src/Projects/Calculus/utils" />
-      <recent name="$PROJECT_DIR$/src/Projects/Tree/FormulaTree" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/Projects/Data/Calculus" />
     </key>
   </component>
   <component name="RunManager">
@@ -946,42 +1052,51 @@
       <workItem from="1496726571783" duration="6579000" />
       <workItem from="1496746401722" duration="8481000" />
       <workItem from="1496812940538" duration="4757000" />
-      <workItem from="1496901585681" duration="6297000" />
+      <workItem from="1496901585681" duration="22577000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="644634000" />
+    <option name="totallyTimeSpent" value="660914000" />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
   </component>
   <component name="ToolWindowManager">
     <frame x="81" y="52" width="885" height="740" extended-state="4" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3291536" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="GhcMod" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.18226121" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2628435" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Cabal" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32923618" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32855436" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32924962" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="SBT Execute" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32924962" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -997,7 +1112,19 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="51" />
+      <breakpoints>
+        <line-breakpoint enabled="true" type="haskell-line-breakpoint">
+          <url>file://$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/Codes.hs</url>
+          <line>57</line>
+          <option name="timeStamp" value="55" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="haskell-line-breakpoint">
+          <url>file://$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/Codes.hs</url>
+          <line>108</line>
+          <option name="timeStamp" value="67" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="68" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -1006,64 +1133,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/PolynomialOld.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/PolynomialOld.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeOps.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeTesting.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="78" column="19" selection-start-line="78" selection-start-column="19" selection-end-line="78" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinarySearchTree/BSTTesting.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.9425676">
-          <caret line="64" column="0" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/MoertelWeb.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="8" selection-start-line="0" selection-start-column="8" selection-end-line="0" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/PrePostFoldmap.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.1148648">
-          <caret line="77" column="19" selection-start-line="77" selection-start-column="19" selection-end-line="77" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/MoertWillamWeb.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.42647058">
-          <caret line="81" column="6" selection-start-line="81" selection-start-column="6" selection-end-line="81" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Books/ChrisAllen_HaskellFirstPrinciples/chapter21_Traversable/chapterExercises/exercise_List.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1106,14 +1175,14 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/HaskellTree.hs">
+    <entry file="file://$PROJECT_DIR$/src/Projects/TreeProject/BinaryTree/HaskellTree.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.66341466">
           <caret line="24" column="23" selection-start-line="24" selection-start-column="23" selection-end-line="24" selection-end-column="23" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeTesting.hs">
+    <entry file="file://$PROJECT_DIR$/src/Projects/TreeProject/BinaryTree/BinaryTreeTesting.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="28" column="48" selection-start-line="28" selection-start-column="48" selection-end-line="28" selection-end-column="48" />
@@ -1152,13 +1221,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinaryTree/BinaryTreeOps.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="101" column="22" selection-start-line="101" selection-start-column="22" selection-end-line="101" selection-end-column="22" />
         </state>
       </provider>
     </entry>
@@ -1211,35 +1273,28 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Expr.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="754" column="37" selection-start-line="754" selection-start-column="32" selection-end-line="754" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Rose.hs">
+    <entry file="file://$PROJECT_DIR$/src/Projects/TreeProject/FormulaTree/Rose.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="316" column="35" selection-start-line="316" selection-start-column="35" selection-end-line="316" selection-end-column="35" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/Test.hs">
+    <entry file="file://$PROJECT_DIR$/src/Projects/TreeProject/FormulaTree/Test.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="20" column="20" selection-start-line="20" selection-start-column="20" selection-end-line="20" selection-end-column="20" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/TrashExprTreeOps.hs">
+    <entry file="file://$PROJECT_DIR$/src/Projects/TreeProject/FormulaTree/TrashExprTreeOps.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="571" column="0" selection-start-line="571" selection-start-column="0" selection-end-line="571" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/FormulaTree/TrySimplify_Bad.hs">
+    <entry file="file://$PROJECT_DIR$/src/Projects/TreeProject/FormulaTree/TrySimplify_Bad.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.22222222">
           <caret line="44" column="48" selection-start-line="44" selection-start-column="48" selection-end-line="44" selection-end-column="48" />
@@ -1253,28 +1308,21 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/GeneralScope.txt">
+    <entry file="file://$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/GeneralScope.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.028052805">
           <caret line="1" column="62" selection-start-line="1" selection-start-column="62" selection-end-line="1" selection-end-column="62" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Tree/BinarySearchTree/BSTOps.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.43069306">
-          <caret line="32" column="40" selection-start-line="32" selection-start-column="38" selection-end-line="32" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/testlog.hs">
+    <entry file="file://$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/testlog.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-0.20627062">
           <caret line="5" column="10" selection-start-line="5" selection-start-column="10" selection-end-line="5" selection-end-column="10" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Data/TODOS.hs">
+    <entry file="file://$PROJECT_DIR$/src/Projects/CalculusProject/TODOS.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="10" column="38" selection-start-line="10" selection-start-column="38" selection-end-line="10" selection-end-column="38" />
@@ -1282,7 +1330,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Data/TESTS.hs">
+    <entry file="file://$PROJECT_DIR$/src/Projects/CalculusProject/TESTS.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="199" column="0" selection-start-line="199" selection-start-column="0" selection-end-line="199" selection-end-column="0" />
@@ -1290,7 +1338,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Data/PlanExpr.hs">
+    <entry file="file://$PROJECT_DIR$/src/Projects/CalculusProject/PlanExpr.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="775" column="9" selection-start-line="775" selection-start-column="0" selection-end-line="775" selection-end-column="9" />
@@ -1298,7 +1346,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/TestCodes.hs">
+    <entry file="file://$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/TestCodes.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.04620462">
           <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
@@ -1306,15 +1354,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/ArbitraryInst.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.028052805">
-          <caret line="14" column="24" selection-start-line="14" selection-start-column="24" selection-end-line="14" selection-end-column="24" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/PolynomialOld.hs">
+    <entry file="file://$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/PolynomialOld.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="233" column="0" selection-start-line="233" selection-start-column="0" selection-end-line="258" selection-end-column="89" />
@@ -1322,18 +1362,154 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/Codes.hs">
+    <entry file="file://$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/ArbitraryInst.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="237" column="57" selection-start-line="237" selection-start-column="57" selection-end-line="237" selection-end-column="57" />
+        <state vertical-scroll-proportion="0.028052805">
+          <caret line="14" column="24" selection-start-line="14" selection-start-column="24" selection-end-line="14" selection-end-column="24" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Projects/Data/Calculus/Types.hs">
+    <entry file="file://$PROJECT_DIR$/src/Projects/CipherProject/code/CaesarCipher.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="2.318482">
-          <caret line="117" column="4" selection-start-line="117" selection-start-column="4" selection-end-line="117" selection-end-column="4" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/PhoneProject/code/PhoneUsingEngPadNumPad_ErrorProne.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/TreeProject/BinaryTree/MoertelWeb.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/TreeProject/BinaryTree/BinaryTreeOps.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.028052805">
+          <caret line="101" column="22" selection-start-line="101" selection-start-column="22" selection-end-line="101" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/TreeProject/BinarySearchTree/BSTOps.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-1.5049505">
+          <caret line="32" column="40" selection-start-line="32" selection-start-column="38" selection-end-line="32" selection-end-column="40" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/TreeProject/RoseTree/RoseTreeOps.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/TreeProject/FormulaTree/Expr.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="20.209572">
+          <caret line="754" column="37" selection-start-line="754" selection-start-column="32" selection-end-line="754" selection-end-column="37" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/TreeProject/BinarySearchTree/BSTTesting.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.96369636">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/PhoneProject/tests/TestPhone.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-4.2458744">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/PhoneProject/code/Phone.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-7.387789">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/HangmanProject/data/dict.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/HangmanProject/tests/TestHangman.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-4.4983497">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/HangmanProject/code/Hangman.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-3.9653466">
+          <caret line="18" column="143" selection-start-line="18" selection-start-column="143" selection-end-line="18" selection-end-column="143" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/CipherProject/tests/TestCaesarCipher.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/CipherProject/code/VigniereCipher.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-1.2161716">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/CipherProject/tests/TestVigniereCipher.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-1.3283828">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/Types.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="85" column="28" selection-start-line="85" selection-start-column="28" selection-end-line="85" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Projects/CalculusProject/Calculus/Codes.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.6732673">
+          <caret line="105" column="38" selection-start-line="105" selection-start-column="38" selection-end-line="105" selection-end-column="38" />
           <folding />
         </state>
       </provider>
