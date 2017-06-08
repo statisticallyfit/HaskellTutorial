@@ -11,8 +11,8 @@ import Data.Ratio hiding (show, Rational)
 import Prelude hiding (Rational)
 
 
-
-------- UTIL --------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+---------------------------------------------- UTIL ------------------------------------------
 
 -- note: global for fillZeroes function
 oo = (Num 0, Num 0) -- vignette zeroes
@@ -33,18 +33,18 @@ rationalToConst rat
 
 -- TODO: replace the other elongate with this new one
 -- Adds zeroes to the end of one of the lists inside the Code so they are the same length.
-fillZeroes :: Code -> Code -> (Code, Code)
+fillZeroes :: Encoded c -> Encoded c -> (Encoded c, Encoded c)
 fillZeroes (Poly xs) (Poly ys) = (Poly $ fst res, Poly $ snd res)
     where res = filler o xs ys
 fillZeroes (Trig xs) (Trig ys) = (Trig $ fst res, Trig $ snd res)
     where res = filler oo xs ys
 fillZeroes (InvTrig xs) (InvTrig ys) = (InvTrig $ fst res, InvTrig $ snd res)
     where res = filler oo xs ys
-fillZeroes (Hyperbolic xs) (Hyperbolic ys) = (Hyperbolic $ fst res, Hyperbolic $ snd res)
+fillZeroes (Hyper xs) (Hyper ys) = (Hyper $ fst res, Hyper $ snd res)
     where res = filler oo xs ys
-fillZeroes (InvHyperbolic xs) (InvHyperbolic ys) = (InvHyperbolic $ fst res, InvHyperbolic $ snd res)
+fillZeroes (InvHyper xs) (InvHyper ys) = (InvHyper $ fst res, InvHyper $ snd res)
     where res = filler oo xs ys
-fillZeroes c1@(Logarithmic _) c2@(Logarithmic _) = (c1, c2)
+fillZeroes c1@(LogBase _) c2@(LogBase _) = (c1, c2)
 -- fillZeroes c1@(Exponential _) c2@(Exponential _) = (c1, c2)
 
 -- Helper function for fillZeroes - acts as the structure for the fillZeroes function, the workhorse.
@@ -62,43 +62,70 @@ filler zero xs ys
 
 
 
+-- PRECONDITION: index = index where to but a number in a list, n = the number, xs = the list.
+-- POSTCONDITION: returns a list that contains the number n at position index in xs, with
+-- length increased by 1. If index is not one of the positions inlist, throw error.
+put :: Int -> a -> [a] -> [a]
+put _ n [] = [n]
+put index n xs
+    | index < 0 || index >= (length xs) = error "index error. "
+    | otherwise = front ++ [n] ++ (tail back)
+    where (front, back) = splitAt index xs
+          newBack = if null back then [] else (tail back)
 
 
 
+---------------------------------------------------------------------------------------------
+------------------------------------------ MONOMIAL ---------------------------------------
 
----------------------------------------------------------------------------------------------------
---- CODES functions
+
+-- todo will this type work?
+addMono :: Monomial -> Monomial -> Encoded c
+addMono (Mono (n, p)) (Mono (m, q))
+    | p == q = Mono (n + m, p)
+    | otherwise = Poly [0] -- TODO IMPLEMENT HERE TO MAKE STRING OF MONOMIALS = POLY
+
+
+
+-- PRECONDITION: After chisel(). Takes individual monomial terms (Consts and vars with
+-- Consts) that must have been originally connected by Mul only. Individual monomial terms
+-- are represented by a list of Polynomials that have one coefficient.
+-- POSTCONDITION: returns single Poly [] which contains the result of the entire string of
+-- added monomials.
+mulMono :: Monomial -> Monomial -> Monomial
+mulMono (Mono (n, p)) (Mono (m, q)) = Mono (n * m, p + q)
+
+
+divMono :: Monomial -> Monomial -> Monomial
+divMono (Mono (n, p)) (Mono (m, q)) = Mono (n / m, p - q)
+
+
+---------------------------------------------------------------------------------------------
+------------------------------------------ POLYNOMIAL ---------------------------------------
 
 
 -- PRECONDITION: After chisel().  Takes individual monomial terms (Consts and vars with Consts) that must have been
 -- originally connected by Add, not Mul or Div. Expects chiselled input (no divs except if in PolyRational Code type).
 -- POSTCONDITION: returns single Poly [] which contains the result of the entire string of added monomials.
-addPoly :: Code -> Code -> Code
+addPoly :: Polynomial -> Polynomial -> Polynomial
 addPoly (Poly ps) (Poly qs) = Poly (zipWith (+) ps' qs')
     where (Poly ps', Poly qs') = fillZeroes (Poly ps) (Poly qs)
-addPoly _ _ = Empty
 
 
-
-
--- PRECONDITION: After chisel(). Takes individual monomial terms (Consts and vars with Consts) that must have been
--- originally connected by Mul only. Expects chiselled input (no divs except if in PolyRational Code type).
--- POSTCONDITION: returns single Poly [] which contains the result of the entire string of added monomials.
-
-
-mulPoly :: Code -> Code -> Code
-mulPoly (Poly ps) (Poly qs) = foldl1 addPoly products'
+---------------------------------------------------------------------------------------------
+-- PRECONDITION: After chisel(). Takes two polynomials (each poly contains monomials added).
+-- POSTCONDITION: multiplies the polynomials term-by term like FOIL method.
+mulPoly :: Polynomial -> Polynomial -> Polynomial
+mulPoly (Poly ps) (Poly qs) = foldl1 addPoly products
     where
     ts = zip ps [0..(length ps - 1)] -- ps can be rate type, but pows must be int type.
     products = map (\(n, p) -> mulOnePoly n p qs) ts
-    maxPow = maximum $ map (\(Poly ps) -> (length ps - 1)) products
-    products' = map Poly $ map (\(Poly ps) -> ps ++ replicate (maxPow - length ps) 0) products
-mulPoly _ _ = Empty
+
 
 
 -- PRECONDITION: n = Rational poly-Const, p = poly pow, rs = list of poly Consts.
 -- POSTCONDITION: takes result of mul() and wraps it up as Code type.
-mulOnePoly :: Const -> Int -> [Const] -> Code
+mulOnePoly :: Const -> Int -> [Const] -> Encoded c
 mulOnePoly n p rs = Poly cs -- wrapping up types
     where
     ts = mul n p 0 rs [] -- note: getting result of single monomial multiplied by added monomials.
@@ -122,26 +149,96 @@ mul n p q (c:cs) acc
     | otherwise = mul n p (q + 1) cs (acc ++ [(n * c, p + q)])
 
 
-put :: Int -> a -> [a] -> [a]
-put _ n [] = [n]
-put index n xs
-    | index < 0 = error "index is negative "
-    | otherwise = front ++ [n] ++ (tail back)
-    where (front, back) = splitAt index xs
-          newBack = if null back then [] else (tail back)
+---------------------------------------------------------------------------------------------
 
+
+divPoly :: Polynomial -> Polynomial -> Polynomial
+divPoly (Poly ps) (Poly qs) = Poly ps  -- TODO edit this function
 
 {-
-addCodes :: Code -> Code -> Code
-addCodes p@(Poly _) q@(Poly _) = addPoly p q
-addCodes t1@(Trig _) t2@(Trig _) = addTrig t1 t2
-addCodes t1@(InvTrig _) t2@(InvTrig _) = addTrig t1 t2
-addCodes h1@(Hyperbolic _) h2@(Hyperbolic _) = addTrig h1 h2
-addCodes h1@(InvHyperbolic _) h2@(InvHyperbolic _) = addTrig h1 h2
-addCodes l1@(Logarithmic _) l2@(Logarithmic _) = addLog l1 l2
-addCodes _ _ = Empty
+-- precondition: takes two polys and returns nothing if deom is separable. But ok if denom is glued.
+-- We can tell if denom is separable because if mul then there is only one nonzero element.
+-- note because we return from frunction if any numer ind are < denom ind, we don't worry about
+-- returning negative pow in divOnePoly
+divPoly :: Code -> Code -> Maybe Code
+divPoly (Poly ns) (Poly ms)
+    | denomHasMoreThanOneTerm || someNumPowsLessThanDenomPows = Nothing
+    | otherwise = Just $ foldl1 addPoly quotients
+    where
+    notZero x = not (x == (Rate 0))
+    denomHasMoreThanOneTerm = (length $ filter notZero ms) > 1
+    someNumPowsLessThanDenomPows = any (== True) $ map (\pow -> pow < dp) ps
+    dp = head $ findIndices notZero ms
+    d = ms !! dp
+    ns' = filter notZero ns
+    ps = findIndices notZero ns -- the expoonent of the variables of the nums (coeffs).
+    npPairs = zip ns' ps
+    ndpTriples = map (divOnePoly (d, dp)) npPairs
+    maxPow = maximum $ map snd ndpTriples
+    zs = map makeFraction $ replicate (maxPow + 1) 0
+    quotients = map Poly $ map (\(f,p) -> put p f zs) ndpTriples
+
+
+divOnePoly :: (Fraction, Int) -> (Fraction, Int) -> (Fraction, Int)
+divOnePoly (Rate den, dPow) (Rate num, nPow) = (Rate $ (a * b) % (c * d), nPow - dPow)
+    where (a, b, c, d) = (numerator num, denominator num, numerator den, denominator den)
 
 -}
+
+
+
+
+
+---------------------------------------------------------------------------------------------
+------------------------------------------ TRIG ---------------------------------------------
+
+-- TODO IMPLEMENT
+
+addTrig :: Trigonometric c -> Trigonometric c -> Trigonometric c
+addTrig (Trig xs) (Trig ys) = Trig xs -- TODO implement - shouldn't Encode be recursive for function arg?
+addTrig (InvTrig xs) (InvTrig ys) = InvTrig xs
+
+mulTrig :: Trigonometric c -> Trigonometric c -> Trigonometric c
+mulTrig (Trig xs) (Trig ys) = Trig xs
+mulTrig (InvTrig xs) (InvTrig ys) = InvTrig xs
+
+divTrig :: Trigonometric c -> Trigonometric c -> Trigonometric c
+divTrig (Trig xs) (Trig ys) = Trig xs
+divTrig (InvTrig xs) (InvTrig ys) = InvTrig xs
+
+---------------------------------------------------------------------------------------------
+------------------------------------------ HYPER --------------------------------------------
+
+
+-- TODO IMPLEMENT
+
+addHyper :: Hyperbolic c -> Hyperbolic c -> Hyperbolic c
+addHyper (Hyper xs) (Hyper ys) = Hyper xs -- TODO implement - shouldn't Encode be recursive for function arg?
+addHyper (InvHyper xs) (InvHyper ys) = InvHyper xs
+
+mulHyper :: Hyperbolic c -> Hyperbolic c -> Hyperbolic c
+mulHyper (Hyper xs) (Hyper ys) = Hyper xs
+mulHyper (InvHyper xs) (InvHyper ys) = InvHyper xs
+
+divHyper :: Hyperbolic c -> Hyperbolic c -> Hyperbolic c
+divHyper (Hyper xs) (Hyper ys) = Hyper xs
+divHyper (InvHyper xs) (InvHyper ys) = InvHyper xs
+
+
+---------------------------------------------------------------------------------------------
+--------------------------------------- LOGARITHM ------------------------------------------
+-- TODO IMPLEMENT
+
+addLog :: Logarithmic c -> Logarithmic c -> Logarithmic c
+addLog l@(LogBase (v1, v2)) (LogBase (w1, w2)) = l
+
+mulLog :: Logarithmic c -> Logarithmic c -> Logarithmic c
+mulLog l@(LogBase (v1, v2)) (LogBase (w1, w2)) = l
+
+divLog :: Logarithmic c -> Logarithmic c -> Logarithmic c
+divLog l@(LogBase (v1, v2)) (LogBase (w1, w2)) = l
+
+
 
 
 

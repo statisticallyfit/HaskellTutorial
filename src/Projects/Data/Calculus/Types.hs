@@ -38,24 +38,69 @@ data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
     -- Num Int | Frac Fraction
 
 
-type Vignette = (Expr, Expr)
-
-{-data Polynomial = Poly [Const]
-data Trigonometric = Trig [Vignette]
-data InvTrigonometric = InvTrig [Vignette]
-data Hyperbolic = Hyper [Vignette]
-data InvHyperbolic = InvHyper [Vignette]
-data Exponential = Expo Expr
-data Logarithmic = Loga [Vignette]-}
--- data Code a = Code a
 
 
-data Code = Poly [Const]
+
+
+
+{-
+
+data Code = Mono (Const, Const) -- monomial (coeff, pow)
+    | Poly [Const] -- a string of monomials added together (never multiplied)
     | Trig [Vignette] | InvTrig [Vignette]
     | Hyperbolic [Vignette] | InvHyperbolic [Vignette]
     | {-Exponential Expr |-} Logarithmic (Vignette, Vignette) -- holds ln and log
-    | Empty -- just a Nil placeholder for the addPoly function, etc.
+    -- | Empty -- just a Nil placeholder for the addPoly function, etc.
     deriving (Eq, Show)
+-}
+
+-- NOTE: defining the types with typeclasses instead like above because I want each
+-- note - "Code" type to be separate. instead of just having add :: Code -> Code -> Code
+-- note - we have instead separate, shorter functions for each type: addPoly :: Polynomial -> ...
+-- note - and then we get to have them all as type Encoded which has defining template functions:
+-- note - add,mul,div.
+
+
+class Encoded c where
+    add :: c -> c -> c
+    multiply :: c -> c -> c
+    divide :: c -> c -> c
+
+type Vignette c = (Encoded c, Encoded c)
+
+data Polynomial = Poly [Const]
+data Monomial = Mono (Const, Const)
+data Trigonometric c = Trig [Vignette c] | InvTrig [Vignette c]
+data Hyperbolic c = Hyper [Vignette c] | InvHyper [Vignette c]
+data Logarithmic c = LogBase (Vignette c, Vignette c)
+
+
+instance Encoded Monomial where
+    add = addMono
+    multiply = mulMono
+    divide = divMono
+
+instance Encoded Polynomial where
+    add = addPoly
+    multiply = mulPoly
+    divide = divPoly
+
+instance Encoded c => Trigonometric c where
+    add = addTrig -- adding trig and invtrig cases.
+    multiply = mulTrig
+    divide = divTrig
+
+instance Encoded c => Hyperbolic c where
+    add = addHyper
+    multiply = mulHyper
+    divide = divHyper
+
+instance Encoded c => Logarithmic c where
+    add = addLog
+    multiply = mulLog
+    divide = divLog
+
+
 
 
 
@@ -69,32 +114,10 @@ instance Show Op where
     show MulOp = "(*)"
     show DivOp = "(/)"
     show PowOp = "(^)"
-------------------------------------------------------------------------------------------------
--- Fraction Instances
 
-{-
-
-instance Num Fraction where
-    negate (Rate ratio) = Rate $ negate ratio
-    (Rate r1) + (Rate r2) = Rate $ r1 + r2 -- liftA2 (+)
-    (Rate r1) * (Rate r2) = Rate $ r1 * r2
-    fromInteger num = Rate $ (fromInteger num) % 1
-    abs (Rate ratio) = Rate $ abs ratio
-    signum (Rate ratio) = Rate $ signum ratio
-
-instance Ord Fraction where
-    compare (Rate r1) (Rate r2) = compare r1 r2
-
-
-instance Show Fraction where
-    show (Rate ratio)
-        | numerator ratio == 0 = show 0
-        | denominator ratio == 1 = show (numerator ratio)
-        | otherwise = (show (numerator ratio)) ++ "/" ++ (show (denominator ratio))
-
+    
 ------------------------------------------------------------------------------------------------
 
--}
 
 instance {-# OVERLAPPING #-} Show Rational where
     show ratio

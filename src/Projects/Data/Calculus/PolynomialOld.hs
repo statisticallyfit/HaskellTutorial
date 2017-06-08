@@ -174,6 +174,9 @@ decodePoly var (Poly ps) = rebuildAS $ filter notZero (map clean polynomials)
 
 
 
+
+{-
+
 -- Note all these functions with poly below assume the ps inside the Poly are added.
 addPoly :: Code -> Code -> Code
 addPoly (Poly ps) (Poly qs) = Poly (zipWith (+) ps' qs')
@@ -189,6 +192,7 @@ subPoly (Poly ps) (Poly qs) = Poly (zipWith (-) ps' qs')
     len = max (length ps) (length qs)
     fracZero = makeFraction 0
     (ps', qs') = (elongate len fracZero ps, elongate len fracZero qs)
+
 
 
 mulPoly :: Code -> Code -> Code
@@ -220,6 +224,7 @@ mulOnePoly (Rate n) p ms = foldl addPoly (Poly [makeFraction 0]) polyCs
         | n * m == 0 = mul' n p (q + 1) ms acc
         | otherwise = mul' n p (q + 1) ms (acc ++ [(n * m, p + q)])
 
+-}
 {- TODO were used for testing
 pps = [Rate (4 % 5), Rate 2, Rate 1, Rate (-8), Rate (1 % 9)]
 qqs = [Rate (5 % 4), Rate 9, Rate 0, Rate 1, Rate 4, Rate (-15 % 8), Rate 20]
