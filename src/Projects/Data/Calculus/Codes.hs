@@ -85,33 +85,28 @@ addPoly _ _ = Empty
 -- originally connected by Mul only. Expects chiselled input (no divs except if in PolyRational Code type).
 -- POSTCONDITION: returns single Poly [] which contains the result of the entire string of added monomials.
 
-{-
+
 mulPoly :: Code -> Code -> Code
 mulPoly (Poly ps) (Poly qs) = foldl1 addPoly products'
     where
     ts = zip ps [0..(length ps - 1)] -- ps can be rate type, but pows must be int type.
     products = map (\(n, p) -> mulOnePoly n p qs) ts
-    maxPow = maximum $ map (\(Poly ps) -> length ps) products
+    maxPow = maximum $ map (\(Poly ps) -> (length ps - 1)) products
     products' = map Poly $ map (\(Poly ps) -> ps ++ replicate (maxPow - length ps) 0) products
 mulPoly _ _ = Empty
 
 
--}
--- note n = poly const, p = poly pow, q = pow of multiplied poly (accumulated)
--- (r:rs) = elements of other polynomial (added), acc = accumulated multiplications (is a list of
--- tuples that holds first the new Consts value and second the power of this Consts).
--- ts = list of (n, p) pairs.
-
--- mulOnePoly :: Rational -> Int -> [Rational] -> Code
--- PRECONDITION: n = Rational poly-coeff, p = poly pow, rs = list of poly coeffs. 
+-- PRECONDITION: n = Rational poly-Const, p = poly pow, rs = list of poly Consts.
 -- POSTCONDITION: takes result of mul() and wraps it up as Code type.
-mulOnePoly n p rs = foldl addPoly (Poly [Integer 0]) polyCs
+mulOnePoly :: Const -> Int -> [Const] -> Code
+mulOnePoly n p rs = Poly cs -- wrapping up types
     where
-    ts = mul n p 0 rs []
+    ts = mul n p 0 rs [] -- note: getting result of single monomial multiplied by added monomials.
     maxPow = maximum $ map snd ts
-    zzs = replicate (maxPow + 1) 0
-    cs = map (\(c,p) -> put p c zzs) ts
-    polyCs = map (Poly . rationalToConst) cs
+    zzs = replicate (maxPow + 1) 0 -- making zero list long as highest poly pow.
+    ccs = map (\(c,p) -> put p c zzs) ts -- putting coefficients at correct pow-positions.
+    cs = map sum (transpose ccs) -- flattening (adding coefs at locations)
+
 
 
 -- PRECONDITION: takes n = poly Const, p = poly pow, q = accumulator poly pow,
