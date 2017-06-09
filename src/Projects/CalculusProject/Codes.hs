@@ -1,5 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE ConstraintKinds, TypeFamilies, FlexibleInstances #-}
+{-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE FlexibleInstances #-}
 module Codes where
 
 
@@ -24,7 +26,7 @@ instance Encoded Polynomial where
     multiply = mulPoly
     divide = divPoly
 
-{-
+
 instance (Encoded c) => Encoded (Trigonometric c) where
     add = addTrig -- adding trig and invtrig cases.
     multiply = mulTrig
@@ -40,35 +42,29 @@ instance (Encoded c) => Encoded (Logarithmic c) where
     multiply = mulLog
     divide = divLog
 
--}
+
 
 ---------------------------------------------------------------------------------------------
 ---------------------------------------------- UTIL ------------------------------------------
 
--- note: global for fillZeroes function
-
-
-
-
 
 -- TODO: replace the other elongate with this new one
 -- Adds zeroes to the end of one of the lists inside the Code so they are the same length.
-fillZeroes :: Encoded c => c -> c -> (c, c)
+fillZeroes :: c -> c -> (c, c)
 fillZeroes (Mono np) (Mono mq) = (Mono np, Mono mq)
 fillZeroes (Poly xs) (Poly ys) = (Poly $ fst res, Poly $ snd res)
     where res = filler (Integer 0) xs ys
-{-
 fillZeroes (Trig xs) (Trig ys) = (Trig $ fst res, Trig $ snd res)
-    where res = filler oo xs ys
+    where res = filler (Zero, Zero) xs ys
 fillZeroes (InvTrig xs) (InvTrig ys) = (InvTrig $ fst res, InvTrig $ snd res)
-    where res = filler oo xs ys
+    where res = filler (Zero, Zero) xs ys
 fillZeroes (Hyper xs) (Hyper ys) = (Hyper $ fst res, Hyper $ snd res)
-    where res = filler oo xs ys
+    where res = filler (Zero, Zero) xs ys
 fillZeroes (InvHyper xs) (InvHyper ys) = (InvHyper $ fst res, InvHyper $ snd res)
-    where res = filler oo xs ys
-fillZeroes (LogBase v) (LogBase w) = (LogBase v, LogBase w)
+    where res = filler (Zero, Zero) xs ys
+fillZeroes a@(LogBase v) b@(LogBase w) = (a, b)
 
--}
+
 
 -- Helper function for fillZeroes - workhorse for the fillZeroes function,
 filler ::  a-> [a] -> [a] -> ([a], [a])
@@ -103,10 +99,10 @@ put index n xs
 
 
 -- todo will this type work?
-addMono :: Encoded c => Monomial -> Monomial -> c
+addMono :: Monomial -> Monomial -> Monomial
 addMono (Mono (n, p)) (Mono (m, q))
     | p == q = Mono (n + m, p)
-    | otherwise = Poly [0] -- TODO IMPLEMENT HERE TO MAKE STRING OF MONOMIALS = POLY
+    | otherwise = undefined -- Poly [0] -- TODO IMPLEMENT HERE TO MAKE STRING OF MONOMIALS = POLY
 
 
 
@@ -216,18 +212,18 @@ divOnePoly (Rate den, dPow) (Rate num, nPow) = (Rate $ (a * b) % (c * d), nPow -
 ------------------------------------------ TRIG ---------------------------------------------
 
 -- TODO IMPLEMENT
-{-
+
 addTrig :: Trigonometric c -> Trigonometric c -> Trigonometric c
-addTrig (Trig xs) (Trig ys) = Trig xs -- TODO implement - shouldn't Encode be recursive for function arg?
-addTrig (InvTrig xs) (InvTrig ys) = InvTrig xs
+addTrig (Trig xs) (Trig ys) = undefined -- TODO implement - shouldn't Encode be recursive for function arg?
+addTrig (InvTrig xs) (InvTrig ys) = undefined
 
 mulTrig :: Trigonometric c -> Trigonometric c -> Trigonometric c
-mulTrig (Trig xs) (Trig ys) = Trig xs
-mulTrig (InvTrig xs) (InvTrig ys) = InvTrig xs
+mulTrig (Trig xs) (Trig ys) = undefined
+mulTrig (InvTrig xs) (InvTrig ys) = undefined
 
 divTrig :: Trigonometric c -> Trigonometric c -> Trigonometric c
-divTrig (Trig xs) (Trig ys) = Trig xs
-divTrig (InvTrig xs) (InvTrig ys) = InvTrig xs
+divTrig (Trig xs) (Trig ys) = undefined
+divTrig (InvTrig xs) (InvTrig ys) = undefined
 
 ---------------------------------------------------------------------------------------------
 ------------------------------------------ HYPER --------------------------------------------
@@ -236,16 +232,16 @@ divTrig (InvTrig xs) (InvTrig ys) = InvTrig xs
 -- TODO IMPLEMENT
 
 addHyper :: Hyperbolic c -> Hyperbolic c -> Hyperbolic c
-addHyper (Hyper xs) (Hyper ys) = Hyper xs -- TODO implement - shouldn't Encode be recursive for function arg?
-addHyper (InvHyper xs) (InvHyper ys) = InvHyper xs
+addHyper (Hyper xs) (Hyper ys) = undefined -- TODO implement - shouldn't Encode be recursive for function arg?
+addHyper (InvHyper xs) (InvHyper ys) = undefined
 
 mulHyper :: Hyperbolic c -> Hyperbolic c -> Hyperbolic c
-mulHyper (Hyper xs) (Hyper ys) = Hyper xs
-mulHyper (InvHyper xs) (InvHyper ys) = InvHyper xs
+mulHyper (Hyper xs) (Hyper ys) = undefined
+mulHyper (InvHyper xs) (InvHyper ys) = undefined
 
 divHyper :: Hyperbolic c -> Hyperbolic c -> Hyperbolic c
-divHyper (Hyper xs) (Hyper ys) = Hyper xs
-divHyper (InvHyper xs) (InvHyper ys) = InvHyper xs
+divHyper (Hyper xs) (Hyper ys) = undefined
+divHyper (InvHyper xs) (InvHyper ys) = undefined
 
 
 ---------------------------------------------------------------------------------------------
@@ -253,16 +249,16 @@ divHyper (InvHyper xs) (InvHyper ys) = InvHyper xs
 -- TODO IMPLEMENT
 
 addLog :: Logarithmic c -> Logarithmic c -> Logarithmic c
-addLog l@(LogBase (v1, v2)) (LogBase (w1, w2)) = l
+addLog (LogBase (v1, v2)) (LogBase (w1, w2)) = undefined
 
 mulLog :: Logarithmic c -> Logarithmic c -> Logarithmic c
-mulLog l@(LogBase (v1, v2)) (LogBase (w1, w2)) = l
+mulLog (LogBase (v1, v2)) (LogBase (w1, w2)) = undefined
 
 divLog :: Logarithmic c -> Logarithmic c -> Logarithmic c
-divLog l@(LogBase (v1, v2)) (LogBase (w1, w2)) = l
+divLog (LogBase (v1, v2)) (LogBase (w1, w2)) = undefined
 
 
--}
+
 
 
 

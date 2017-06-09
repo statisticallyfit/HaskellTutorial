@@ -79,34 +79,25 @@ class Encoded c  where
     divide :: c -> c -> c
 
 
+-- type Vignette c = (Encoded c, Encoded c) -- type synonym for readability -- TODO remove Encoded? leave c?
 
-type Vignette c = (Encoded c, Encoded c) -- type synonym for readability
-
-data Empty = Empty deriving (Eq)
+data Zero = Zero deriving (Eq)
 data Monomial = Mono (Const, Const) deriving (Eq, Show)
 data Polynomial = Poly [Const] deriving (Eq, Show)
---data Trigonometric c = Trig [Vignette c] | InvTrig [Vignette c]
---data Hyperbolic c = Hyper [Vignette c] | InvHyper [Vignette c]
---data Logarithmic c = LogBase (Vignette c, Vignette c)
+data Trigonometric c = Trig [(c, c)] | InvTrig [(c, c)] deriving (Eq, Show)
+data Hyperbolic c = Hyper [(c, c)] | InvHyper [(c, c)] deriving (Eq, Show)
+data Logarithmic c = LogBase c c deriving (Eq, Show)
 
-instance Show Empty where
-    show Empty = "0"
-
-
-{-
-data Polynomial = Poly [Const]
-data Monomial = Mono (Const, Const)
-data Trigonometric = Trig [Vignette] | InvTrig [Vignette]
-data Hyperbolic = Hyper [Vignette] | InvHyper [Vignette]
-data Logarithmic = LogBase (Vignette, Vignette)
+instance Show Zero where
+    show Zero = "0"
 
 
--}
 -- NOTE: instances are declared in Codes.hs file.
+
+
 
 ------------------------------------------------------------------------------------------------
 -- Op Instances
-
 
 
 instance Show Op where
