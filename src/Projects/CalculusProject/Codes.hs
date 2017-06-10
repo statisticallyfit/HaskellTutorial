@@ -16,6 +16,10 @@ import Data.Ratio hiding (show)
 
 
 
+
+instance Show Zero where
+    show Zero = "0"
+
 instance Encoded Monomial where
     add = addMono
     multiply = mulMono
@@ -42,32 +46,17 @@ instance (Encoded c) => Encoded (Logarithmic c) where
     multiply = mulLog
     divide = divLog
 
-
-
 ---------------------------------------------------------------------------------------------
 ---------------------------------------------- UTIL ------------------------------------------
 
-
--- TODO: replace the other elongate with this new one
--- Adds zeroes to the end of one of the lists inside the Code so they are the same length.
-fillZeroes :: c -> c -> (c, c)
-fillZeroes (Mono np) (Mono mq) = (Mono np, Mono mq)
-fillZeroes (Poly xs) (Poly ys) = (Poly $ fst res, Poly $ snd res)
-    where res = filler (Integer 0) xs ys
-fillZeroes (Trig xs) (Trig ys) = (Trig $ fst res, Trig $ snd res)
-    where res = filler (Zero, Zero) xs ys
-fillZeroes (InvTrig xs) (InvTrig ys) = (InvTrig $ fst res, InvTrig $ snd res)
-    where res = filler (Zero, Zero) xs ys
-fillZeroes (Hyper xs) (Hyper ys) = (Hyper $ fst res, Hyper $ snd res)
-    where res = filler (Zero, Zero) xs ys
-fillZeroes (InvHyper xs) (InvHyper ys) = (InvHyper $ fst res, InvHyper $ snd res)
-    where res = filler (Zero, Zero) xs ys
-fillZeroes a@(LogBase v) b@(LogBase w) = (a, b)
+fillZeroes :: Polynomial -> Polynomial -> (Polynomial, Polynomial)
+fillZeroes (Poly xs) (Poly ys) = (Poly xs', Poly ys')
+    where (xs', ys') = filler (Whole 0) xs ys
 
 
 
 -- Helper function for fillZeroes - workhorse for the fillZeroes function,
-filler ::  a-> [a] -> [a] -> ([a], [a])
+filler ::  a -> [a] -> [a] -> ([a], [a])
 filler zero xs ys
    | len1 > len2 = (xs, ys ++ zeroes)
    | len1 < len2 = (xs ++ zeroes, ys)
@@ -76,8 +65,6 @@ filler zero xs ys
        len1 = length xs
        len2 = length ys
        zeroes = replicate (abs (len1 - len2)) zero
-
-
 
 
 
@@ -102,7 +89,7 @@ put index n xs
 addMono :: Monomial -> Monomial -> Monomial
 addMono (Mono (n, p)) (Mono (m, q))
     | p == q = Mono (n + m, p)
-    | otherwise = undefined -- Poly [0] -- TODO IMPLEMENT HERE TO MAKE STRING OF MONOMIALS = POLY
+    | otherwise = error "Cannot construct Monomial: powers are not equal."
 
 
 
@@ -123,9 +110,10 @@ divMono (Mono (n, p)) (Mono (m, q)) = Mono (n / m, p - q)
 ------------------------------------------ POLYNOMIAL ---------------------------------------
 
 
--- PRECONDITION: After chisel().  Takes individual monomial terms (Consts and vars with Consts) that must have been
--- originally connected by Add, not Mul or Div.
--- POSTCONDITION: returns single Poly [] which contains the result of the entire string of added monomials.
+-- PRECONDITION: After chisel().  Takes individual monomial terms (Consts and vars with Consts)
+-- that must have been originally connected by Add, not Mul or Div.
+-- POSTCONDITION: returns single Poly [] which contains the result of the entire string of added
+-- monomials.
 addPoly :: Polynomial -> Polynomial -> Polynomial
 addPoly (Poly ps) (Poly qs) = Poly (zipWith (+) ps' qs')
     where (Poly ps', Poly qs') = fillZeroes (Poly ps) (Poly qs)
@@ -170,9 +158,32 @@ mul n p q (c:cs) acc
 
 ---------------------------------------------------------------------------------------------
 
-
+-- PRECONDITION: takes top and bottom polynomial.
+-- POSTCONDITION: simplifies out common monomial terms in top and bottom.
 divPoly :: Polynomial -> Polynomial -> Polynomial
-divPoly (Poly ps) (Poly qs) = Poly ps  -- TODO edit this function
+divPoly (Poly ps) (Poly qs) = Poly [Whole 0]
+    where
+    -- dealing with coefficients.
+    (ps', qs') = (nonZero ps, nonZero qs) -- get just coefs not zeroes.
+    coefGCD = foldl1 gcd (ps' ++ qs') -- find gcd of all the polycoefs
+    (ps'', qs'') = (divCoefs ps' coefGCD, divCoefs qs'' coefGCD)-- divide polycoefs by gcd
+    -- dealing with powers.
+    (ppows, qpows) = (getIndices ps, getIndices qs)
+    minPow = minimum (ppows ++ qpows)--min pow in both top and bottom polys
+    (ppows', qpows') = (subPows ppows minPow, subPows qpows minPow)
+
+    --------- coef methods ---------------------------
+    nonZero xs = filter (/= zero) xs -- filter nonzero elements to get just polycoefs.
+    zero = Whole 0
+
+    divCoefs coefs by = map (\c -> c / by) coefs -- postcondition: elements always whole numbers.
+    --------- power methods ---------------------------
+    getIndices xs = let powIndexPairs = zip xs [0..]
+                        powIndexPairsNoZeroes = filter (\(p, i) -> p /= zero) powIndexPairs
+                    in map snd powIndexPairsNoZeroes
+
+    subPows pows by = map (\p -> p  - by) pows -- postcondition: elements never negative.
+
 
 {-
 -- precondition: takes two polys and returns nothing if deom is separable. But ok if denom is glued.
@@ -249,13 +260,13 @@ divHyper (InvHyper xs) (InvHyper ys) = undefined
 -- TODO IMPLEMENT
 
 addLog :: Logarithmic c -> Logarithmic c -> Logarithmic c
-addLog (LogBase (v1, v2)) (LogBase (w1, w2)) = undefined
+addLog = undefined
 
 mulLog :: Logarithmic c -> Logarithmic c -> Logarithmic c
-mulLog (LogBase (v1, v2)) (LogBase (w1, w2)) = undefined
+mulLog = undefined
 
 divLog :: Logarithmic c -> Logarithmic c -> Logarithmic c
-divLog (LogBase (v1, v2)) (LogBase (w1, w2)) = undefined
+divLog = undefined
 
 
 

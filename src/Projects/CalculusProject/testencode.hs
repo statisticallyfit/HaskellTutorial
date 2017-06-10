@@ -4,7 +4,7 @@ import Data.Ratio
 
 
 type Fraction = Ratio Int
-data Const = Integer Int | Quotient Fraction deriving (Eq)
+data Const = Whole Int | Quotient Fraction deriving (Eq)
 
 
 
@@ -121,7 +121,7 @@ fillZeroes :: Encoded c => c -> c -> (c, c)
 fillZeroes (Mono np) (Mono mq) = (Mono np, Mono mq)
 
 fillZeroes (Poly xs) (Poly ys) = (Poly xs', Poly ys')
-    where (xs', ys') = filler (Integer 0) xs ys
+    where (xs', ys') = filler (Whole 0) xs ys
 
 fillZeroes (Trig xs) (Trig ys) = (Trig xs', Trig ys')
     where (xs', ys') = filler (Zero, Zero) xs ys
@@ -154,7 +154,6 @@ filler zero xs ys
 
 
 
-
 ------------------------------------------------------------------------------------------------
 
 
@@ -172,7 +171,7 @@ instance  {-# OVERLAPPING #-} Show Fraction where
 
 
 instance Show Const where
-    show (Integer int) = show int
+    show (Whole int) = show int
     show (Quotient q) = show q ++ ""
 
 

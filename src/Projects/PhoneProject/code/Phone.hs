@@ -50,7 +50,7 @@ keyPad = [('1',"1"),('2',"abc2"),('3',"def3"),('4',"ghi4"),('5',"jkl5"),
 
 
 
-
+-- todo fix this over here oki doki?
 {-
 RULE key: ------------------------------------------------------------------------------
 Whenever there is a number in front during letter format, we ignore it

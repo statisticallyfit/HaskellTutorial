@@ -30,7 +30,7 @@ data Op = AddOp | SubOp | MulOp | DivOp | PowOp deriving (Eq)
 
 
 type Fraction = Ratio Int
-data Const = Integer Int | Quotient Fraction deriving (Eq)
+data Const = Whole Int | Quotient Fraction deriving (Eq)
 -- TODO: how to make Quotient both simplify arg immediately and have numer, denom readily
 -- todo accessible, instead of calling Data.Ratio's numerator and denominator functions?
 
@@ -88,12 +88,7 @@ data Trigonometric c = Trig [(c, c)] | InvTrig [(c, c)] deriving (Eq, Show)
 data Hyperbolic c = Hyper [(c, c)] | InvHyper [(c, c)] deriving (Eq, Show)
 data Logarithmic c = LogBase c c deriving (Eq, Show)
 
-instance Show Zero where
-    show Zero = "0"
-
-
--- NOTE: instances are declared in Codes.hs file.
-
+-- NOTE: instances declared in CODES file.
 
 
 ------------------------------------------------------------------------------------------------
@@ -126,61 +121,61 @@ instance  {-# OVERLAPPING #-} Show Fraction where
 
 intToConst :: Int -> Int -> Const
 intToConst num denom
-    | denominator f == 1 = Integer (numerator f)
+    | denominator f == 1 = Whole (numerator f)
     | otherwise = Quotient f
     where f = num % denom
 
 
 fracToConst :: Fraction -> Const
 fracToConst f
-    | denominator f == 1 = Integer $ numerator f
+    | denominator f == 1 = Whole $ numerator f
     | otherwise = Quotient f
 
 
 
 instance Num Const where
-    negate (Integer int) = Integer $ negate int
+    negate (Whole int) = Whole $ negate int
     negate (Quotient frac) = Quotient $ negate frac
 
-    (Integer x) + (Integer y) = Integer (x + y)
-    (Integer x) + (Quotient y) = fracToConst (x % 1 + y)
-    (Quotient x) + (Integer y) = fracToConst (x + y % 1)
+    (Whole x) + (Whole y) = Whole (x + y)
+    (Whole x) + (Quotient y) = fracToConst (x % 1 + y)
+    (Quotient x) + (Whole y) = fracToConst (x + y % 1)
     (Quotient x) + (Quotient y) = fracToConst (x + y)
 
-    (Integer x) * (Integer y) = Integer (x * y)
-    (Integer x) * (Quotient y) = fracToConst (x % 1 * y)
-    (Quotient x) * (Integer y) = fracToConst (x * (y % 1))
+    (Whole x) * (Whole y) = Whole (x * y)
+    (Whole x) * (Quotient y) = fracToConst (x % 1 * y)
+    (Quotient x) * (Whole y) = fracToConst (x * (y % 1))
     (Quotient x) * (Quotient y) = fracToConst (x * y)
 
-    fromInteger num = Integer $ fromInteger num
+    fromInteger num = Whole $ fromInteger num
 
-    abs (Integer int) = Integer $ abs int
+    abs (Whole int) = Whole $ abs int
     abs (Quotient q) = Quotient $ abs q
 
-    signum (Integer int) = Integer $ signum int
+    signum (Whole int) = Whole $ signum int
     signum (Quotient q) = Quotient $ signum q
 
 
 
 instance Fractional Const where
-    (Integer a) / (Integer b) = fracToConst (a % b)
-    (Integer a) / (Quotient b) = fracToConst ((a % 1) * b)
-    (Quotient a) / (Integer b) = fracToConst (a * (b % 1))
+    (Whole a) / (Whole b) = fracToConst (a % b)
+    (Whole a) / (Quotient b) = fracToConst ((a % 1) * b)
+    (Quotient a) / (Whole b) = fracToConst (a * (b % 1))
     (Quotient a) / (Quotient b) = fracToConst (a / b)
 
-    recip (Integer x) = Quotient (1 % x)
+    recip (Whole x) = Quotient (1 % x)
     recip (Quotient q) = Quotient (recip q)
 
     fromRational rat = Quotient ((fromInteger $ numerator rat) % (fromInteger $ denominator rat))
 
 
 instance Ord Const where
-    compare (Integer x) (Integer y) = compare x y
+    compare (Whole x) (Whole y) = compare x y
     compare (Quotient a) (Quotient b) = compare a b
 
 
 instance Show Const where
-    show (Integer int) = show int
+    show (Whole int) = show int
     show (Quotient q) = show q ++ ""
 
 
