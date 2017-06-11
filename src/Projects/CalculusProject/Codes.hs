@@ -49,6 +49,14 @@ instance (Encoded c) => Encoded (Logarithmic c) where
 ---------------------------------------------------------------------------------------------
 ---------------------------------------------- UTIL ------------------------------------------
 
+
+
+get :: Const -> Fraction
+get (Whole w) = w % 1
+get (Quotient q) = q
+
+
+
 fillZeroes :: Polynomial -> Polynomial -> (Polynomial, Polynomial)
 fillZeroes (Poly xs) (Poly ys) = (Poly xs', Poly ys')
     where (xs', ys') = filler (Whole 0) xs ys
@@ -158,31 +166,44 @@ mul n p q (c:cs) acc
 
 ---------------------------------------------------------------------------------------------
 
--- PRECONDITION: takes top and bottom polynomial.
+-- PRECONDITION: takes top and bottom polynomial, cleaned after chisel() and no such thing as
+-- Quotient (0 % 1) -- all normalized, clean input.
 -- POSTCONDITION: simplifies out common monomial terms in top and bottom.
 divPoly :: Polynomial -> Polynomial -> Polynomial
 divPoly (Poly ps) (Poly qs) = Poly [Whole 0]
     where
     -- dealing with coefficients.
-    (ps', qs') = (nonZero ps, nonZero qs) -- get just coefs not zeroes.
-    coefGCD = foldl1 gcd (ps' ++ qs') -- find gcd of all the polycoefs
-    (ps'', qs'') = (divCoefs ps' coefGCD, divCoefs qs'' coefGCD)-- divide polycoefs by gcd
+    (ps', qs') = (normalize ps, normalize qs) -- normalizing poly coefs.
+    coefGCD = foldl1 gcd (ps' ++ qs') -- find gcd of all the polycoefs.
+    [ps'', qs''] = map ((flip divCoefs) coefGCD) [ps', qs'] -- divide polycoefs by gcd.
+    [ps''', qs'''] = map Whole [ps'', qs''] -- turning them to Consts (no more Quotients)
     -- dealing with powers.
     (ppows, qpows) = (getIndices ps, getIndices qs)
-    minPow = minimum (ppows ++ qpows)--min pow in both top and bottom polys
+    minPow = minimum (ppows ++ qpows) --min pow in both top and bottom polys
     (ppows', qpows') = (subPows ppows minPow, subPows qpows minPow)
 
     --------- coef methods ---------------------------
-    nonZero xs = filter (/= zero) xs -- filter nonzero elements to get just polycoefs.
     zero = Whole 0
 
-    divCoefs coefs by = map (\c -> c / by) coefs -- postcondition: elements always whole numbers.
+    normalize coefs = map numerator normed -- getting normalized int numerator parts. Whole num.
+        where nonzeroes = filter (/= zero) coefs -- removes zeroes in Poly []
+              stripped = map get nonzeroes -- removing constructors, gets just Ratio Int types
+              maxDenom = maximum $ map denominator stripped -- get max denom to normalize fracs.
+              normed = mulCoefs stripped (maxDenom % 1) -- normalizing
+
+    mulCoefs coefs by = map (\c -> c * by) coefs -- postcondition: multiplying coefs by factor.
+    divCoefs coefs by = map (\c -> c `div` by) coefs -- postcondition: elements always whole numbers.
     --------- power methods ---------------------------
     getIndices xs = let powIndexPairs = zip xs [0..]
                         powIndexPairsNoZeroes = filter (\(p, i) -> p /= zero) powIndexPairs
                     in map snd powIndexPairsNoZeroes
 
     subPows pows by = map (\p -> p  - by) pows -- postcondition: elements never negative.
+
+    --------- wrapping-up data methods ---------------------------
+    tupleToPoly :: (Const, Const) -> Polynomial
+    tupleToPoly (n, p) =
+        where replicate (get p)
 
 
 {-
