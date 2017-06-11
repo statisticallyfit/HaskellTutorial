@@ -106,6 +106,7 @@ instance Show Op where
 ------------------------------------------------------------------------------------------------
 
 
+
 instance  {-# OVERLAPPING #-} Show Fraction where
     show ratio
         | numerator ratio == 0 = "0"
@@ -130,6 +131,11 @@ fracToConst :: Fraction -> Const
 fracToConst f
     | denominator f == 1 = Whole $ numerator f
     | otherwise = Quotient f
+
+
+fracsToConst :: Fraction -> Fraction -> Const
+fracsToConst a b = fracToConst f
+    where f = (numerator a * denominator b) % (denominator a * numerator b)
 
 
 
@@ -172,6 +178,20 @@ instance Fractional Const where
 instance Ord Const where
     compare (Whole x) (Whole y) = compare x y
     compare (Quotient a) (Quotient b) = compare a b
+
+
+{-
+
+instance Integral Const where
+    quotRem (Whole a) (Whole b) = (Whole $ div a b, Whole $ mod a b)
+    quotRem (Whole a) (Quotient b) = (fracsToConst (a % 1) b, Whole 0)
+    quotRem (Quotient a) (Whole b) = (fracsToConst a (b % 1), Whole 0)
+    quotRem (Quotient a) (Quotient b) = (fracsToConst a b, Whole 0)
+
+    toInteger (Whole w) = toInteger w
+    -- toInteger (Quotient q) =
+-}
+
 
 
 instance Show Const where
