@@ -89,6 +89,56 @@ insert index n xs
 
 
 
+
+
+
+
+------------------------------
+-- divPoly utils:
+
+
+--------- coef methods ---------------------------
+zero :: Const
+zero = Whole 0
+
+normalize :: [Const] -> [Int]
+normalize coefs = map numerator normed -- getting normalized int numerator parts. Whole num.
+    where nonzeroes = filter (/= zero) coefs -- removes zeroes in Poly []
+          stripped = map get nonzeroes -- removing constructors, gets just Ratio Int types
+          maxDenom = maximum $ map denominator stripped -- get max denom to normalize fracs.
+          normed = mulCoefs stripped (maxDenom % 1) -- normalizing
+
+mulCoefs :: [Fraction] -> Fraction -> [Fraction]
+mulCoefs coefs by = map (\c -> c * by) coefs -- postcondition: multiplying coefs by factor.
+
+divCoefs :: [Int] -> Int -> [Int]
+divCoefs coefs by = map (\c -> c `div` by) coefs -- postcondition: elements always whole numbers.
+--------- power methods ---------------------------
+getIndices :: [Const] -> [Int]
+getIndices xs = let powIndexPairs = zip xs [0..]
+                    powIndexPairsNoZeroes = filter (\(p, i) -> p /= zero) powIndexPairs
+                in map snd powIndexPairsNoZeroes
+
+-- precondition: by num is never greater than any of the pows.
+-- postcondition: elements never negative.
+subPows :: [Int] -> Int -> [Int]
+subPows pows by = map (\p -> p - by) pows
+
+--------- wrapping-up data methods ---------------------------
+tupleToPoly :: (Const, Int) -> Polynomial
+tupleToPoly (n, p) = Poly $ insert p n zeroes
+    where zeroes = map Whole $ replicate (p + 1) 0
+
+
+
+
+
+
+
+
+
+
+
 ---------------------------------------------------------------------------------------------
 ------------------------------------------ MONOMIAL ---------------------------------------
 
@@ -169,10 +219,14 @@ mul n p q (c:cs) acc
 -- PRECONDITION: takes top and bottom polynomial, cleaned after chisel() and no such thing as
 -- Quotient (0 % 1) -- all normalized, clean input. Polynomial means also all integer powers.
 -- POSTCONDITION: simplifies out common monomial terms in top and bottom.
-divPoly :: Polynomial -> Polynomial -> Polynomial -- (Polynomial, Polynomial)
-divPoly (Poly ps) (Poly qs) = (numeratorPoly) --, denominatorPoly)
+divPoly = undefined
+
+divPoly1 :: Polynomial -> Polynomial -> (Polynomial, Polynomial)
+divPoly1 (Poly ps) (Poly qs) = (numeratorPoly, denominatorPoly)
     where
     -- dealing with coefficients.
+    ps = map Whole [0,0,12,0,6,24]
+    qs = map Whole [0,0,0,4,0,6]
     (ps', qs') = (normalize ps, normalize qs) -- normalizing poly coefs.
     coefGCD = foldl1 gcd (ps' ++ qs') -- find gcd of all the polycoefs.
     [ps'', qs''] = map ((flip divCoefs) coefGCD) [ps', qs'] -- divide polycoefs by gcd.
@@ -184,38 +238,6 @@ divPoly (Poly ps) (Poly qs) = (numeratorPoly) --, denominatorPoly)
     -- wrapping up data
     numeratorPoly = foldl1 addPoly $ map tupleToPoly (zip ps''' ppows') -- making poly numerator
     denominatorPoly = foldl1 addPoly $ map tupleToPoly (zip qs''' qpows')
-
-    --------- coef methods ---------------------------
-    zero :: Const
-    zero = Whole 0
-
-    normalize :: [Const] -> [Int]
-    normalize coefs = map numerator normed -- getting normalized int numerator parts. Whole num.
-        where nonzeroes = filter (/= zero) coefs -- removes zeroes in Poly []
-              stripped = map get nonzeroes -- removing constructors, gets just Ratio Int types
-              maxDenom = maximum $ map denominator stripped -- get max denom to normalize fracs.
-              normed = mulCoefs stripped (maxDenom % 1) -- normalizing
-
-    mulCoefs :: [Fraction] -> Int -> [Int]
-    mulCoefs coefs by = map (\c -> c * by) coefs -- postcondition: multiplying coefs by factor.
-
-    divCoefs :: [Int] -> Int -> [Int]
-    divCoefs coefs by = map (\c -> c `div` by) coefs -- postcondition: elements always whole numbers.
-    --------- power methods ---------------------------
-    getIndices :: [Const] -> [Int]
-    getIndices xs = let powIndexPairs = zip xs [0..]
-                        powIndexPairsNoZeroes = filter (\(p, i) -> p /= zero) powIndexPairs
-                    in map snd powIndexPairsNoZeroes
-
-    -- precondition: by num is never greater than any of the pows.
-    -- postcondition: elements never negative.
-    subPows :: [Int] -> Int -> [Int]
-    subPows pows by = map (\p -> p - by) pows
-
-    --------- wrapping-up data methods ---------------------------
-    tupleToPoly :: (Const, Int) -> Polynomial
-    tupleToPoly (n, p) = Poly $ insert n zeroes
-        where zeroes = replicate p 0
 
 
 {-

@@ -39,7 +39,7 @@
         <entry file="file://$PROJECT_DIR$/src/Projects/CalculusProject/Types.hs">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="171" column="9" selection-start-line="171" selection-start-column="9" selection-end-line="171" selection-end-column="9" />
+              <caret line="122" column="11" selection-start-line="122" selection-start-column="11" selection-end-line="122" selection-end-column="11" />
               <folding />
             </state>
           </provider>
@@ -48,8 +48,8 @@
       <file leaf-file-name="Codes.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Projects/CalculusProject/Codes.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.122112215">
-              <caret line="191" column="27" selection-start-line="191" selection-start-column="27" selection-end-line="191" selection-end-column="27" />
+            <state vertical-scroll-proportion="-2.8118813">
+              <caret line="94" column="0" selection-start-line="94" selection-start-column="0" selection-end-line="94" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -146,9 +146,9 @@
     <treeState />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="81" />
+    <option name="x" value="79" />
     <option name="y" value="52" />
-    <option name="width" value="937" />
+    <option name="width" value="927" />
     <option name="height" value="740" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
@@ -958,11 +958,12 @@
       <workItem from="1497178931747" duration="7540000" />
       <workItem from="1497247772400" duration="610000" />
       <workItem from="1497274326817" duration="3827000" />
+      <workItem from="1497334832827" duration="2180000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="697068000" />
+    <option name="totallyTimeSpent" value="699248000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -974,7 +975,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="81" y="52" width="937" height="740" extended-state="4" />
+    <frame x="79" y="52" width="927" height="740" extended-state="4" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1028,24 +1029,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="haskell-line-breakpoint">
-          <url>file://$PROJECT_DIR$/src/Projects/CalculusProject/Codes.hs</url>
-          <line>192</line>
-          <option name="timeStamp" value="79" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="haskell-line-breakpoint">
-          <url>file://$PROJECT_DIR$/src/Projects/CalculusProject/Codes.hs</url>
-          <line>216</line>
-          <option name="timeStamp" value="81" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="haskell-line-breakpoint">
-          <url>file://$PROJECT_DIR$/src/Projects/CalculusProject/Codes.hs</url>
-          <line>196</line>
-          <option name="timeStamp" value="82" />
-        </line-breakpoint>
-      </breakpoints>
-      <option name="time" value="83" />
+      <option name="time" value="84" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -1401,15 +1385,15 @@
     <entry file="file://$PROJECT_DIR$/src/Projects/CalculusProject/Types.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="171" column="9" selection-start-line="171" selection-start-column="9" selection-end-line="171" selection-end-column="9" />
+          <caret line="122" column="11" selection-start-line="122" selection-start-column="11" selection-end-line="122" selection-end-column="11" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Projects/CalculusProject/Codes.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.122112215">
-          <caret line="191" column="27" selection-start-line="191" selection-start-column="27" selection-end-line="191" selection-end-column="27" />
+        <state vertical-scroll-proportion="-2.8118813">
+          <caret line="94" column="0" selection-start-line="94" selection-start-column="0" selection-end-line="94" selection-end-column="0" />
           <folding />
         </state>
       </provider>
