@@ -37,51 +37,17 @@ data Const = Whole Int | Quotient Fraction deriving (Eq)
 data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
     | Pow Expr Expr | Neg Expr | Num Const | Var String | Func (Function Expr)
     deriving (Eq)
-    -- Num Int | Frac Fraction
 
 
 
-
-
-
-
-{-
-
-data Code = Mono (Const, Const) -- monomial (coeff, pow)
-    | Poly [Const] -- a string of monomials added together (never multiplied)
-    | Trig [Vignette] | InvTrig [Vignette]
-    | Hyperbolic [Vignette] | InvHyperbolic [Vignette]
-    | {-Exponential Expr |-} Logarithmic (Vignette, Vignette) -- holds ln and log
-    -- | Empty -- just a Nil placeholder for the addPoly function, etc.
-    deriving (Eq, Show)
--}
-
--- NOTE: defining the types with typeclasses instead like above because I want each
--- note - "Code" type to be separate. instead of just having add :: Code -> Code -> Code
--- note - we have instead separate, shorter functions for each type: addPoly :: Polynomial -> ...
--- note - and then we get to have them all as type Encoded which has defining template functions:
--- note - add,mul,div.
-
-
-
-{-
-
-data Encoded a = Code a {
-    add :: a -> a -> a,
-    multiply :: a -> a -> a,
-    divide :: a -> a -> a
-} deriving (Eq, Show)
--}
 
 class Encoded c  where
     add :: c -> c -> c
     multiply :: c -> c -> c
-    divide :: c -> c -> c
+    divide :: c -> c -> (c, Maybe c)
 
 
--- type Vignette c = (Encoded c, Encoded c) -- type synonym for readability -- TODO remove Encoded? leave c?
-
-data Zero = Zero deriving (Eq)
+data Null = Null deriving (Eq)
 data Monomial = Mono (Const, Const) deriving (Eq, Show)
 data Polynomial = Poly [Const] deriving (Eq, Show)
 data Trigonometric c = Trig [(c, c)] | InvTrig [(c, c)] deriving (Eq, Show)

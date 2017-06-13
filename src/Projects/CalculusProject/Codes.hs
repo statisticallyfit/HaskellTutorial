@@ -17,8 +17,8 @@ import Data.Ratio hiding (show)
 
 
 
-instance Show Zero where
-    show Zero = "0"
+instance Show Null where
+    show Null = "?"
 
 instance Encoded Monomial where
     add = addMono
@@ -159,9 +159,14 @@ addMono (Mono (n, p)) (Mono (m, q))
 mulMono :: Monomial -> Monomial -> Monomial
 mulMono (Mono (n, p)) (Mono (m, q)) = Mono (n * m, p + q)
 
+-- PRECONDITION: After chisel, takes two monomials and divides them. PREC: p >= q.
+-- POSTCONDITION: divided monomials, with power >= 0.
+-- note: always Nothing in tuple because this type basket is meant for the divPoly outlier
+divMono :: Monomial -> Monomial -> (Monomial, Maybe Monomial)
+divMono (Mono (n, p)) (Mono (m, q)) = (Mono (n / m, p - q), Nothing)
 
-divMono :: Monomial -> Monomial -> Monomial
-divMono (Mono (n, p)) (Mono (m, q)) = Mono (n / m, p - q)
+
+
 
 
 ---------------------------------------------------------------------------------------------
@@ -171,10 +176,14 @@ divMono (Mono (n, p)) (Mono (m, q)) = Mono (n / m, p - q)
 -- PRECONDITION: After chisel().  Takes individual monomial terms (Consts and vars with Consts)
 -- that must have been originally connected by Add, not Mul or Div.
 -- POSTCONDITION: returns single Poly [] which contains the result of the entire string of added
--- monomials.
+-- monomials. If the resulting ps list contains all zeroes or is empty, returns Poly []
 addPoly :: Polynomial -> Polynomial -> Polynomial
-addPoly (Poly ps) (Poly qs) = Poly (zipWith (+) ps' qs')
-    where (Poly ps', Poly qs') = fillZeroes (Poly ps) (Poly qs)
+addPoly (Poly ps) (Poly qs)
+    | all (== zero) result = Poly []
+    | otherwise = Poly result
+    where
+    (Poly ps', Poly qs') = fillZeroes (Poly ps) (Poly qs)
+    result = Poly (zipWith (+) ps' qs')
 
 
 ---------------------------------------------------------------------------------------------
@@ -188,8 +197,8 @@ mulPoly (Poly ps) (Poly qs) = foldl1 addPoly products
 
 
 
--- PRECONDITION: n = Fraction poly-Const, p = poly pow, rs = list of poly Consts.
--- POSTCONDITION: takes result of mul() and wraps it up as Code type.
+-- precondition: n = Fraction poly-Const, p = poly pow, rs = list of poly Consts.
+-- postcondition: takes result of mul() and wraps it up as Code type.
 mulOnePoly :: Const -> Int -> [Const] -> Polynomial
 mulOnePoly n p rs = Poly cs -- wrapping up types
     where
@@ -200,10 +209,9 @@ mulOnePoly n p rs = Poly cs -- wrapping up types
     cs = map sum (transpose ccs) -- flattening (adding coefs at locations)
 
 
-
--- PRECONDITION: takes n = poly Const, p = poly pow, q = accumulator poly pow,
+-- precondition: takes n = poly Const, p = poly pow, q = accumulator poly pow,
 -- (c:cs) = list of Consts, acc = accumulator poly Consts
--- POSTCONDITION: returns a list of tuples of (n,p) such that the given n and p in the
+-- postcondition: returns a list of tuples of (n,p) such that the given n and p in the
 -- parameters are multiplied as a poly-pow against the values in the acc list.
 -- Simply: takes a single monomial and multiplies it against a string of added monomials.
 mul :: (Eq a, Num a, Num b) => a -> b -> b -> [a] -> [(a, b)] -> [(a, b)]
@@ -219,10 +227,10 @@ mul n p q (c:cs) acc
 -- PRECONDITION: takes top and bottom polynomial, cleaned after chisel() and no such thing as
 -- Quotient (0 % 1) -- all normalized, clean input. Polynomial means also all integer powers.
 -- POSTCONDITION: simplifies out common monomial terms in top and bottom.
-divPoly = undefined
-
-divPoly1 :: Polynomial -> Polynomial -> (Polynomial, Polynomial)
-divPoly1 (Poly ps) (Poly qs) = (numeratorPoly, denominatorPoly)
+divPoly :: Polynomial -> Polynomial -> (Polynomial, Maybe Polynomial)
+divPoly (Poly ps) (Poly qs)
+    | null dp = (numeratorPoly, Nothing)
+    | otherwise = (numeratorPoly, Just denominatorPoly)
     where
     -- dealing with coefficients.
     ps = map Whole [0,0,12,0,6,24]
@@ -238,37 +246,9 @@ divPoly1 (Poly ps) (Poly qs) = (numeratorPoly, denominatorPoly)
     -- wrapping up data
     numeratorPoly = foldl1 addPoly $ map tupleToPoly (zip ps''' ppows') -- making poly numerator
     denominatorPoly = foldl1 addPoly $ map tupleToPoly (zip qs''' qpows')
+    (Poly dp) = denominatorPoly
 
 
-{-
--- precondition: takes two polys and returns nothing if deom is separable. But ok if denom is glued.
--- We can tell if denom is separable because if mul then there is only one nonzero element.
--- note because we return from frunction if any numer ind are < denom ind, we don't worry about
--- returning negative pow in divOnePoly
-divPoly :: Code -> Code -> Maybe Code
-divPoly (Poly ns) (Poly ms)
-    | denomHasMoreThanOneTerm || someNumPowsLessThanDenomPows = Nothing
-    | otherwise = Just $ foldl1 addPoly quotients
-    where
-    notZero x = not (x == (Rate 0))
-    denomHasMoreThanOneTerm = (length $ filter notZero ms) > 1
-    someNumPowsLessThanDenomPows = any (== True) $ map (\pow -> pow < dp) ps
-    dp = head $ findIndices notZero ms
-    d = ms !! dp
-    ns' = filter notZero ns
-    ps = findIndices notZero ns -- the expoonent of the variables of the nums (coeffs).
-    npPairs = zip ns' ps
-    ndpTriples = map (divOnePoly (d, dp)) npPairs
-    maxPow = maximum $ map snd ndpTriples
-    zs = map makeFraction $ replicate (maxPow + 1) 0
-    quotients = map Poly $ map (\(f,p) -> insert p f zs) ndpTriples
-
-
-divOnePoly :: (Fraction, Int) -> (Fraction, Int) -> (Fraction, Int)
-divOnePoly (Rate den, dPow) (Rate num, nPow) = (Rate $ (a * b) % (c * d), nPow - dPow)
-    where (a, b, c, d) = (numerator num, denominator num, numerator den, denominator den)
-
--}
 
 
 
@@ -277,42 +257,61 @@ divOnePoly (Rate den, dPow) (Rate num, nPow) = (Rate $ (a * b) % (c * d), nPow -
 ---------------------------------------------------------------------------------------------
 ------------------------------------------ TRIG ---------------------------------------------
 
--- TODO IMPLEMENT
+-- PRECONDITION: the trigonometrics have same args and pows, otherwise would have
+-- to return list of threeples or something.
+-- POSTCONDITION: added result, so Trig[(x^2, 2),...] + Trig[(x^2, 2),...] = Trig [(2x^2,2)...]
+addTrig :: Encoded c => Trigonometric c -> Trigonometric c -> (Trigonometric c, Maybe (Trigonometric c))
+addTrig (Trig xs) (Trig ps) = Trig $ map addTups (zip xs ps)
+addTrig (InvTrig xs) (InvTrig ps) = InvTrig $ map addTups (zip xs ps)
 
-addTrig :: Trigonometric c -> Trigonometric c -> Trigonometric c
-addTrig (Trig xs) (Trig ys) = undefined -- TODO implement - shouldn't Encode be recursive for function arg?
-addTrig (InvTrig xs) (InvTrig ys) = undefined
+addTups ((x1,p1), (x2,p2)) = (add x1 x2, add p1 p2)
+mulTups ((x1,p1), (x2,p2)) = (x1, add p1 p2)
+divTups ((x1,p1), (x2,p2)) = (x1, sub p1 p2) -- todo define sub or make Neg operator.
 
-mulTrig :: Trigonometric c -> Trigonometric c -> Trigonometric c
-mulTrig (Trig xs) (Trig ys) = undefined
-mulTrig (InvTrig xs) (InvTrig ys) = undefined
+-- PRECONDITION: the trigonometrics have same args and can have different pows.
+-- POSTCONDITION: multiplied results.
+mulTrig :: Trigonometric c -> Trigonometric c -> (Trigonometric c, Maybe (Trigonometric c))
+mulTrig (Trig xs) (Trig ps) = Trig $ map mulTups (zip xs ps)
+mulTrig (InvTrig xs) (InvTrig ps) = InvTrig $ map mulTups (zip xs ps)
 
-divTrig :: Trigonometric c -> Trigonometric c -> Trigonometric c
-divTrig (Trig xs) (Trig ys) = undefined
-divTrig (InvTrig xs) (InvTrig ys) = undefined
+
+-- PRECONDITION: the trigonometrics have same args and can have different pows.
+-- POSTCONDITION: divided results.
+divTrig :: Trigonometric c -> Trigonometric c -> (Trigonometric c, Maybe (Trigonometric c))
+divTrig (Trig xs) (Trig ps) = Trig $ map divTups (zip xs ps)
+divTrig (InvTrig xs) (InvTrig ps) = InvTrig $ map divTups (zip xs ps)
+
+
+------
+-- TRIG UTILS
+
+
+addTupls :: Encoded c => ((c, c), (c, c)) -> Maybe (c, c)
+addTupls ((x1,p1), (x2,p2))
+    | x1 == x2 && p1 == p2 = Just (add x1 x2, add p1 p2)
+    | otherwise = Nothing
+
 
 ---------------------------------------------------------------------------------------------
 ------------------------------------------ HYPER --------------------------------------------
 
 
--- TODO IMPLEMENT
-
 addHyper :: Hyperbolic c -> Hyperbolic c -> Hyperbolic c
-addHyper (Hyper xs) (Hyper ys) = undefined -- TODO implement - shouldn't Encode be recursive for function arg?
+addHyper (Hyper xs) (Hyper ys) = undefined
 addHyper (InvHyper xs) (InvHyper ys) = undefined
 
 mulHyper :: Hyperbolic c -> Hyperbolic c -> Hyperbolic c
 mulHyper (Hyper xs) (Hyper ys) = undefined
 mulHyper (InvHyper xs) (InvHyper ys) = undefined
 
-divHyper :: Hyperbolic c -> Hyperbolic c -> Hyperbolic c
+divHyper :: Hyperbolic c -> Hyperbolic c -> (Hyperbolic c, Maybe (Hyperbolic c))
 divHyper (Hyper xs) (Hyper ys) = undefined
 divHyper (InvHyper xs) (InvHyper ys) = undefined
 
 
 ---------------------------------------------------------------------------------------------
 --------------------------------------- LOGARITHM ------------------------------------------
--- TODO IMPLEMENT
+
 
 addLog :: Logarithmic c -> Logarithmic c -> Logarithmic c
 addLog = undefined
@@ -320,7 +319,7 @@ addLog = undefined
 mulLog :: Logarithmic c -> Logarithmic c -> Logarithmic c
 mulLog = undefined
 
-divLog :: Logarithmic c -> Logarithmic c -> Logarithmic c
+divLog :: Logarithmic c -> Logarithmic c -> (Logarithmic c, Maybe (Logarithmic c))
 divLog = undefined
 
 
