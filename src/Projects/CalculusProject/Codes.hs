@@ -22,27 +22,32 @@ instance Show Null where
 
 instance Encoded Monomial where
     add = addMono
+    sub = subMono
     multiply = mulMono
     divide = divMono
 
 instance Encoded Polynomial where
     add = addPoly
+    sub = subPoly
     multiply = mulPoly
     divide = divPoly
 
 
 instance (Encoded c) => Encoded (Trigonometric c) where
     add = addTrig -- adding trig and invtrig cases.
+    sub = subTrig
     multiply = mulTrig
     divide = divTrig
 
 instance (Encoded c) => Encoded (Hyperbolic c) where
     add = addHyper
+    sub = subHyper
     multiply = mulHyper
     divide = divHyper
 
 instance (Encoded c) => Encoded (Logarithmic c) where
     add = addLog
+    sub = subLog
     multiply = mulLog
     divide = divLog
 
@@ -142,12 +147,17 @@ tupleToPoly (n, p) = Poly $ insert p n zeroes
 ---------------------------------------------------------------------------------------------
 ------------------------------------------ MONOMIAL ---------------------------------------
 
-
--- todo will this type work?
+-- PRECONDITION: powers must be equal
+-- POSTCONDITION: added monomials
 addMono :: Monomial -> Monomial -> Monomial
-addMono (Mono (n, p)) (Mono (m, q))
-    | p == q = Mono (n + m, p)
-    | otherwise = error "Cannot construct Monomial: powers are not equal."
+addMono (Mono (n, p)) (Mono (m, q)) = Mono (n + m, p)
+
+
+
+-- PRECONDITION: powers must be equal
+-- POSTCONDITION: subtracted monomials
+subMono :: Monomial -> Monomial -> Monomial
+subMono (Mono (n, p)) (Mono (m, q)) = Mono (n - m, p)
 
 
 
@@ -184,6 +194,10 @@ addPoly (Poly ps) (Poly qs)
     where
     (Poly ps', Poly qs') = fillZeroes (Poly ps) (Poly qs)
     result = Poly (zipWith (+) ps' qs')
+
+
+subPoly :: Polynomial -> Polynomial -> Polynomial
+subPoly (Poly ps) (Poly qs) = addPoly (Poly ps) (Poly $ map negate qs)
 
 
 ---------------------------------------------------------------------------------------------
@@ -264,7 +278,9 @@ addTrig :: Encoded c => Trigonometric c -> Trigonometric c -> (Trigonometric c, 
 addTrig (Trig xs) (Trig ps) = Trig $ map addTups (zip xs ps)
 addTrig (InvTrig xs) (InvTrig ps) = InvTrig $ map addTups (zip xs ps)
 
-addTups ((x1,p1), (x2,p2)) = (add x1 x2, add p1 p2)
+
+addTups ((x1,p1), (x2,p2)) = (add x1 x2, p1)
+subTups ((x1,p1), (x2,p2)) = (sub x1 x2, p1)
 mulTups ((x1,p1), (x2,p2)) = (x1, add p1 p2)
 divTups ((x1,p1), (x2,p2)) = (x1, sub p1 p2) -- todo define sub or make Neg operator.
 

@@ -43,6 +43,7 @@ data Expr = Add Expr Expr | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
 
 class Encoded c  where
     add :: c -> c -> c
+    sub :: c -> c -> c
     multiply :: c -> c -> c
     divide :: c -> c -> (c, Maybe c)
 
