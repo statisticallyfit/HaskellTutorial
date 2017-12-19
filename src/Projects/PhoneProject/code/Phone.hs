@@ -95,7 +95,6 @@ unravel (c,p) = alphas !! (p - 1)
     where alphas = (snd $ head $ filter ((== c) . fst) keyPad)
 
 
-
 ------------------------------------------------------------------------------------------
 
 -- NOTE The communication functions
