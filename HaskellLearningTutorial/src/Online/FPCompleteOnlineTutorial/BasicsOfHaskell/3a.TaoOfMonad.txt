@@ -1,0 +1,11 @@
+-- 1. runtime calls main which produces a monadic action
+-- 2. this monadic action when given universe as input,
+-- produces a new modified universe
+-- 3. we continue living in this new universe.
+
+ -- The do notation is used to sequence monadic actions.
+ -- The <- operator in the do notation means bind the value
+ -- on the right side to the name on the left of <-.
+
+ -- the way actions are glued together is the essence of the Monad.
+
