@@ -21,4 +21,3 @@ main = do
     print $ Only (Sum 1) <> Nada
     print $ Only [1] <> Nada
     print $ Nada <> Only (Sum 1)
-
