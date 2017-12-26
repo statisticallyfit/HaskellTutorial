@@ -54,11 +54,18 @@ goodInputLetter lt = elem (toLower lt) ['a'..'z']
 inRange low high x = x >= low && x <= high
 ------------------------------------------------------------------------------------------
 
-
-main :: IO()
-main = hspec $ do
+runTests = hspec $ do
     testIdentityCode
     testLowToInt
     testUppToInt
     testIntToLow
     testIntToUpp
+
+-- 
+-- main :: IO()
+-- main = hspec $ do
+--     testIdentityCode
+--     testLowToInt
+--     testUppToInt
+--     testIntToLow
+--     testIntToUpp

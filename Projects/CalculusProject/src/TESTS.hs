@@ -1,12 +1,9 @@
 {-# LANGUAGE FlexibleContexts #-}
-module Tests where
+module TESTS where
 
 import Types
-import Encoders
-import Extensions
-import Main
-import Utils
-import UtilsGeneral
+import Codes
+import ArbitraryInst
 
 e1 :: Expr
 e1 = Num(4) .* x .* (F (Sin x)) .* Num(2) .* (F (Cos x)) .* Num(5) .* Num(2) .* Num(3) .* (F (Tan x))

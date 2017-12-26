@@ -1,6 +1,7 @@
 module Main where
 
-import Lib
+import CaesarCipher
+import VigniereCipher
 
 main :: IO ()
-main = someFunc
+main = putStrLn "Just some output"

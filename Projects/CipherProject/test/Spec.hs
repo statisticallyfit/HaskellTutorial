@@ -1,2 +1,10 @@
+module Spec where
+
+import Test.Hspec
+import Test.QuickCheck
+
+import TestCaesarCipher
+-- import TestVigniereCipher
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = TestCaesarCipher.runTests 

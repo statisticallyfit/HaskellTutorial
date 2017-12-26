@@ -10,7 +10,6 @@ type Token = Char
 type Text = [[Token]]
 type Presses = Int -- >= 1
 type FingerMove = (Token, Presses)
-
 -- note distinguishing between uppercase and lower case so there is no more
 -- need to check in functions if the arg Token in Button is lower or uppercase.
 -- note SwitchFormat refers to switching from letters + punctuation to numbers

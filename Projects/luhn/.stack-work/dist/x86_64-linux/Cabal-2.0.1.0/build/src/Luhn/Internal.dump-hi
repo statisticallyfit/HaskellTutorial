@@ -1,0 +1,137 @@
+
+==================== FINAL INTERFACE ====================
+2017-12-26 16:07:28.049396 UTC
+
+interface luhn-0.1.0-GAfyMFg7U1OB2Mw9c5IaBi:Luhn.Internal 8022
+  interface hash: f43e87bd8694be997e9bac6814c87a4c
+  ABI hash: c80d64d482125fbcbc7f49944cd39ec1
+  export-list hash: acf74b0bbdf133c802fe611fc9a7972f
+  orphan hash: 693e9af84d3dfcc71e640e005bdc5e2e
+  flag hash: a111434d37a21f104f52d8e7982a0271
+  sig of: Nothing
+  used TH splices: False
+  where
+exports:
+  Luhn.Internal.doubleEveryOther
+  Luhn.Internal.fromDigits
+  Luhn.Internal.sumDigits
+  Luhn.Internal.toDigits
+module dependencies:
+package dependencies: base-4.10.1.0* ghc-prim-0.5.1.1
+                      integer-gmp-1.0.1.0
+orphans: base-4.10.1.0:GHC.Float base-4.10.1.0:GHC.Base
+family instance modules: base-4.10.1.0:Control.Applicative
+                         base-4.10.1.0:Data.Either base-4.10.1.0:Data.Functor.Const
+                         base-4.10.1.0:Data.Functor.Identity base-4.10.1.0:Data.Monoid
+                         base-4.10.1.0:Data.Type.Equality base-4.10.1.0:GHC.Generics
+                         base-4.10.1.0:GHC.IO.Exception base-4.10.1.0:GHC.TypeLits
+                         base-4.10.1.0:GHC.TypeNats
+import  -/  base-4.10.1.0:Data.Foldable 9ed87455d68e87ff2b5b8725eae9897e
+import  -/  base-4.10.1.0:GHC.Base 782fd99b5e36f3698a26179a49afca64
+import  -/  base-4.10.1.0:GHC.List e3060fbeb44ce0038e6b4dedf2dd9cf1
+import  -/  base-4.10.1.0:GHC.Num 6e1dc5d36d99a802edb39b92bb1923b8
+import  -/  base-4.10.1.0:GHC.Real 3c62834bc25e762eabc44149c4cc142d
+import  -/  base-4.10.1.0:Prelude 31945b7d0084063347fc52506d3a4020
+import  -/  ghc-prim-0.5.1.1:GHC.Classes 93e2660065dce9329577e83d76d8f0d4
+import  -/  integer-gmp-1.0.1.0:GHC.Integer.Type 5fa81108482c33b62ec3ac7464eece96
+6cd55ad88862a41db48374a8ff09018c
+  $trModule :: GHC.Types.Module
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.Module
+                   Luhn.Internal.$trModule3
+                   Luhn.Internal.$trModule1) -}
+60f4189204b15a2def0dec56f70aa53f
+  $trModule1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS Luhn.Internal.$trModule2) -}
+33c29773e0cdd940462b1310a7ba0127
+  $trModule2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Luhn.Internal"#) -}
+328376501f72aab2d665ecb6e471f83a
+  $trModule3 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS Luhn.Internal.$trModule4) -}
+77851f5c2402b303952a02f0e29af336
+  $trModule4 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("luhn-0.1.0-GAfyMFg7U1OB2Mw9c5IaBi"#) -}
+2acfc3a949ea55ae47508ee4e4d5286d
+  $wgo ::
+    GHC.Integer.Type.Integer
+    -> (# GHC.Integer.Type.Integer, [GHC.Integer.Type.Integer] #)
+  {- Arity: 1, Strictness: <S,1*U>, Inline: [0] -}
+4448ddefa6214ab2f2580433fb0806e5
+  doubleEveryOther ::
+    [GHC.Integer.Type.Integer] -> [GHC.Integer.Type.Integer]
+  {- Arity: 1, Strictness: <L,1*U>,
+     Unfolding: (\ (x :: [GHC.Integer.Type.Integer]) ->
+                 GHC.List.reverse1
+                   @ GHC.Integer.Type.Integer
+                   (GHC.List.zipWith
+                      @ GHC.Integer.Type.Integer
+                      @ GHC.Integer.Type.Integer
+                      @ GHC.Integer.Type.Integer
+                      GHC.Integer.Type.timesInteger
+                      Luhn.Internal.doubleEveryOther_xs'
+                      (GHC.List.reverse1
+                         @ GHC.Integer.Type.Integer
+                         x
+                         (GHC.Types.[] @ GHC.Integer.Type.Integer)))
+                   (GHC.Types.[] @ GHC.Integer.Type.Integer)) -}
+734047bf7b0da64a141dc6458aa37645
+  doubleEveryOther_xs' :: [GHC.Integer.Type.Integer]
+c62be7d1ddab04967a60f2ac7dd7d283
+  fromDigits ::
+    [GHC.Integer.Type.Integer] -> GHC.Integer.Type.Integer
+  {- Arity: 1, Strictness: <L,1*U>,
+     Unfolding: (\ (x :: [GHC.Integer.Type.Integer]) ->
+                 Luhn.Internal.fromDigits_go2
+                   Luhn.Internal.fromDigits2
+                   (GHC.List.reverse1
+                      @ GHC.Integer.Type.Integer
+                      x
+                      (GHC.Types.[] @ GHC.Integer.Type.Integer))
+                   Luhn.Internal.fromDigits1) -}
+320bf4312c7b7fe883d1a82edcc87341
+  fromDigits1 :: GHC.Integer.Type.Integer
+  {- HasNoCafRefs, Unfolding: (0) -}
+636328cda443885bb8e83b67ea67f73c
+  fromDigits2 :: [GHC.Integer.Type.Integer]
+  {- Unfolding: (case Luhn.Internal.$wgo
+                        Luhn.Internal.fromDigits1 of ww { (#,#) ww1 ww2 ->
+                 GHC.Types.: @ GHC.Integer.Type.Integer ww1 ww2 }) -}
+0d66c5dddc4bd64b851243412cbc1cc9
+  fromDigits_go2 ::
+    [GHC.Integer.Type.Integer]
+    -> [GHC.Integer.Type.Integer]
+    -> GHC.Integer.Type.Integer
+    -> GHC.Integer.Type.Integer
+  {- Arity: 3, Strictness: <S,1*U><L,1*U><S,1*U> -}
+89232205294b44acf2a1c9553d57ed51
+  sumDigits :: [GHC.Integer.Type.Integer] -> GHC.Integer.Type.Integer
+  {- Arity: 1, Strictness: <S,1*U>,
+     Unfolding: (\ (x :: [GHC.Integer.Type.Integer]) ->
+                 Luhn.Internal.sumDigits_go x Luhn.Internal.fromDigits1) -}
+6a434e1aa9f17c54765a5fed5c48c2fb
+  sumDigits_go ::
+    [GHC.Integer.Type.Integer]
+    -> GHC.Integer.Type.Integer -> GHC.Integer.Type.Integer
+  {- Arity: 2, Strictness: <S,1*U><S,U> -}
+291063fb65e6f832e0301e0bdebad566
+  toDigits :: GHC.Integer.Type.Integer -> [GHC.Integer.Type.Integer]
+  {- Arity: 1,
+     Unfolding: (Luhn.Internal.toDigits_go
+                   (GHC.Types.[] @ GHC.Integer.Type.Integer)) -}
+3108bb56bad065b346b44f4a40476a86
+  toDigits_go ::
+    [GHC.Integer.Type.Integer]
+    -> GHC.Integer.Type.Integer -> [GHC.Integer.Type.Integer]
+  {- Arity: 2, Strictness: <L,U><S,U> -}
+vectorised variables:
+vectorised tycons:
+vectorised reused tycons:
+parallel variables:
+parallel tycons:
+trusted: safe
+require own pkg trusted: False
+
