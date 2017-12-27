@@ -1,5 +1,4 @@
-{-# START_FILE Main.hs #-}
-module Main where
+module Online.FPCompleteOnlineTutorial.BasicsOfHaskell.SymbolicCalculator.Main where
 
 import qualified Data.Map as M
 import Lexer (tokenize)

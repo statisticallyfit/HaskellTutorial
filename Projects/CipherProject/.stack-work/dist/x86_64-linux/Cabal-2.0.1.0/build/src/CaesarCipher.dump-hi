@@ -1,0 +1,207 @@
+
+==================== FINAL INTERFACE ====================
+2017-12-27 13:02:10.92394 UTC
+
+interface CipherProject-0.1.0.0-6aVBBJTfOYKCgrWVl8MqEa:CaesarCipher 8022
+  interface hash: aad0276d3ca1933e9d969379ae8f7119
+  ABI hash: 76dfab56577a36ded7e8314b71fcca0f
+  export-list hash: 5bb69683f55c673b08d6eaec1b8a24d9
+  orphan hash: 693e9af84d3dfcc71e640e005bdc5e2e
+  flag hash: d3f9096bac2e1e79f6ff76d0840aa157
+  sig of: Nothing
+  used TH splices: False
+  where
+exports:
+  CaesarCipher.decode
+  CaesarCipher.encode
+  CaesarCipher.intToLow
+  CaesarCipher.intToUpp
+  CaesarCipher.lowToInt
+  CaesarCipher.shift
+  CaesarCipher.uppToInt
+module dependencies:
+package dependencies: base-4.10.1.0* ghc-prim-0.5.1.1
+                      integer-gmp-1.0.1.0
+orphans: base-4.10.1.0:GHC.Float base-4.10.1.0:GHC.Base
+family instance modules: base-4.10.1.0:Control.Applicative
+                         base-4.10.1.0:Data.Either base-4.10.1.0:Data.Functor.Const
+                         base-4.10.1.0:Data.Functor.Identity base-4.10.1.0:Data.Monoid
+                         base-4.10.1.0:Data.Type.Equality base-4.10.1.0:GHC.Generics
+                         base-4.10.1.0:GHC.IO.Exception base-4.10.1.0:GHC.TypeLits
+                         base-4.10.1.0:GHC.TypeNats
+import  -/  base-4.10.1.0:Data.Char fe4e3458190deeac19969ce15e33bed9
+import  -/  base-4.10.1.0:GHC.Base 782fd99b5e36f3698a26179a49afca64
+import  -/  base-4.10.1.0:GHC.Char 630ee80a10729165b02c0abeda9c6526
+import  -/  base-4.10.1.0:GHC.Num 6e1dc5d36d99a802edb39b92bb1923b8
+import  -/  base-4.10.1.0:GHC.Real 3c62834bc25e762eabc44149c4cc142d
+import  -/  base-4.10.1.0:GHC.Unicode 49c9de4fffed0d9be65aaeb6a60b757c
+import  -/  base-4.10.1.0:Prelude 31945b7d0084063347fc52506d3a4020
+5969e2ac6b790b7f84c2e9880e051af6
+  $trModule :: GHC.Types.Module
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.Module
+                   CaesarCipher.$trModule3
+                   CaesarCipher.$trModule1) -}
+658a83d177bd8cfe3679afadb52044fd
+  $trModule1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS CaesarCipher.$trModule2) -}
+bcaa1d090bdc0daaaf8d600459269467
+  $trModule2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("CaesarCipher"#) -}
+c60d07da79adfed9ac0d0302b3db6acb
+  $trModule3 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS CaesarCipher.$trModule4) -}
+d9b2b5f97f20dc0b2af0a88e45e19790
+  $trModule4 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("CipherProject-0.1.0.0-6aVBBJTfOYKCgrWVl8MqEa"#) -}
+c10a7d769e4ef88fb408f48b5fb225eb
+  $wshift :: GHC.Types.Int -> GHC.Prim.Char# -> GHC.Prim.Char#
+  {- Arity: 2, Strictness: <L,1*U(U)><S,U>, Inline: [0],
+     Unfolding: (\ (w :: GHC.Types.Int) (ww :: GHC.Prim.Char#) ->
+                 case {__pkg_ccall base-4.10.1.0 GHC.Prim.Int#
+                                                 -> GHC.Prim.State# GHC.Prim.RealWorld
+                                                 -> (# GHC.Prim.State# GHC.Prim.RealWorld,
+                                                       GHC.Prim.Int# #)}
+                        (GHC.Prim.ord# ww)
+                        GHC.Prim.realWorld# of wild1 { (#,#) ds ds1 ->
+                 case ds1 of wild2 {
+                   DEFAULT
+                   -> case w of wild4 { GHC.Types.I# y ->
+                      case GHC.Classes.modInt#
+                             (GHC.Prim.+# (GHC.Prim.-# (GHC.Prim.ord# ww) 97#) y)
+                             26# of ww2 { DEFAULT ->
+                      let {
+                        i# :: GHC.Prim.Int# = GHC.Prim.+# 97# ww2
+                      } in
+                      case GHC.Prim.tagToEnum#
+                             @ GHC.Types.Bool
+                             (GHC.Prim.leWord# (GHC.Prim.int2Word# i#) 1114111##) of wild5 {
+                        GHC.Types.False
+                        -> case GHC.Char.$wlvl i# ret_ty GHC.Prim.Char# of {}
+                        GHC.Types.True -> GHC.Prim.chr# i# } } }
+                   0#
+                   -> case {__pkg_ccall base-4.10.1.0 GHC.Prim.Int#
+                                                      -> GHC.Prim.State# GHC.Prim.RealWorld
+                                                      -> (# GHC.Prim.State# GHC.Prim.RealWorld,
+                                                            GHC.Prim.Int# #)}
+                             (GHC.Prim.ord# ww)
+                             GHC.Prim.realWorld# of wild4 { (#,#) ds2 ds3 ->
+                      case ds3 of wild5 {
+                        DEFAULT
+                        -> case w of wild6 { GHC.Types.I# y ->
+                           case GHC.Classes.modInt#
+                                  (GHC.Prim.+# (GHC.Prim.-# (GHC.Prim.ord# ww) 65#) y)
+                                  26# of ww2 { DEFAULT ->
+                           let {
+                             i# :: GHC.Prim.Int# = GHC.Prim.+# 65# ww2
+                           } in
+                           case GHC.Prim.tagToEnum#
+                                  @ GHC.Types.Bool
+                                  (GHC.Prim.leWord# (GHC.Prim.int2Word# i#) 1114111##) of wild7 {
+                             GHC.Types.False
+                             -> case GHC.Char.$wlvl i# ret_ty GHC.Prim.Char# of {}
+                             GHC.Types.True -> GHC.Prim.chr# i# } } }
+                        0# -> ww } } } }) -}
+4419a014e39a78ff40443279f60007da
+  decode :: GHC.Types.Int -> GHC.Base.String -> GHC.Base.String
+  {- Arity: 2, Strictness: <L,1*U(U)><S,1*U>,
+     Unfolding: InlineRule (2, True, False)
+                (\ (factor :: GHC.Types.Int) (codedText :: GHC.Base.String) ->
+                 GHC.Base.build
+                   @ GHC.Types.Char
+                   (\ @ b1
+                      (c :: GHC.Types.Char -> b1 -> b1)[OneShot]
+                      (n :: b1)[OneShot] ->
+                    GHC.Base.foldr
+                      @ GHC.Types.Char
+                      @ b1
+                      (GHC.Base.mapFB
+                         @ GHC.Types.Char
+                         @ b1
+                         @ GHC.Types.Char
+                         c
+                         (CaesarCipher.shift (GHC.Num.$fNumInt_$cnegate factor)))
+                      n
+                      codedText)) -}
+f919b2934494a984b28598e11f70c974
+  encode :: GHC.Types.Int -> GHC.Base.String -> GHC.Base.String
+  {- Arity: 2, Strictness: <L,U(U)><S,1*U>,
+     Unfolding: InlineRule (2, True, False)
+                (\ (factor :: GHC.Types.Int) (originalText :: GHC.Base.String) ->
+                 GHC.Base.build
+                   @ GHC.Types.Char
+                   (\ @ b1
+                      (c :: GHC.Types.Char -> b1 -> b1)[OneShot]
+                      (n :: b1)[OneShot] ->
+                    GHC.Base.foldr
+                      @ GHC.Types.Char
+                      @ b1
+                      (GHC.Base.mapFB
+                         @ GHC.Types.Char
+                         @ b1
+                         @ GHC.Types.Char
+                         c
+                         (CaesarCipher.shift factor))
+                      n
+                      originalText)) -}
+595127c4ace7bdd98db5ba78cbb8f764
+  intToLow :: GHC.Types.Int -> GHC.Types.Char
+  {- Arity: 1, Strictness: <S(S),1*U(U)>m,
+     Unfolding: InlineRule (1, True, False)
+                (\ (n :: GHC.Types.Int) ->
+                 case n of wild1 { GHC.Types.I# y ->
+                 let {
+                   i# :: GHC.Prim.Int# = GHC.Prim.+# 97# y
+                 } in
+                 case GHC.Prim.tagToEnum#
+                        @ GHC.Types.Bool
+                        (GHC.Prim.leWord# (GHC.Prim.int2Word# i#) 1114111##) of wild2 {
+                   GHC.Types.False -> GHC.Char.$wlvl i#
+                   GHC.Types.True -> GHC.Types.C# (GHC.Prim.chr# i#) } }) -}
+f059b941e1d567584a959fb4065ceeef
+  intToUpp :: GHC.Types.Int -> GHC.Types.Char
+  {- Arity: 1, Strictness: <S(S),1*U(U)>m,
+     Unfolding: InlineRule (1, True, False)
+                (\ (n :: GHC.Types.Int) ->
+                 case n of wild1 { GHC.Types.I# y ->
+                 let {
+                   i# :: GHC.Prim.Int# = GHC.Prim.+# 65# y
+                 } in
+                 case GHC.Prim.tagToEnum#
+                        @ GHC.Types.Bool
+                        (GHC.Prim.leWord# (GHC.Prim.int2Word# i#) 1114111##) of wild2 {
+                   GHC.Types.False -> GHC.Char.$wlvl i#
+                   GHC.Types.True -> GHC.Types.C# (GHC.Prim.chr# i#) } }) -}
+826014eb8c98b0c0c2b78fcf10eba30d
+  lowToInt :: GHC.Types.Char -> GHC.Types.Int
+  {- Arity: 1, HasNoCafRefs, Strictness: <S(S),1*U(U)>m,
+     Unfolding: InlineRule (1, True, False)
+                (\ (letter :: GHC.Types.Char) ->
+                 case letter of wild { GHC.Types.C# c# ->
+                 GHC.Types.I# (GHC.Prim.-# (GHC.Prim.ord# c#) 97#) }) -}
+6f4ba79e8494d94a00b1431a4e535480
+  shift :: GHC.Types.Int -> GHC.Types.Char -> GHC.Types.Char
+  {- Arity: 2, Strictness: <L,1*U(U)><S(S),1*U(U)>m, Inline: [0],
+     Unfolding: InlineRule (2, True, False)
+                (\ (w :: GHC.Types.Int) (w1 :: GHC.Types.Char) ->
+                 case w1 of ww { GHC.Types.C# ww1 ->
+                 case CaesarCipher.$wshift w ww1 of ww2 { DEFAULT ->
+                 GHC.Types.C# ww2 } }) -}
+8f0c65b10289a80e816af0d50b985e93
+  uppToInt :: GHC.Types.Char -> GHC.Types.Int
+  {- Arity: 1, HasNoCafRefs, Strictness: <S(S),1*U(U)>m,
+     Unfolding: InlineRule (1, True, False)
+                (\ (letter :: GHC.Types.Char) ->
+                 case letter of wild { GHC.Types.C# c# ->
+                 GHC.Types.I# (GHC.Prim.-# (GHC.Prim.ord# c#) 65#) }) -}
+vectorised variables:
+vectorised tycons:
+vectorised reused tycons:
+parallel variables:
+parallel tycons:
+trusted: safe
+require own pkg trusted: False
+

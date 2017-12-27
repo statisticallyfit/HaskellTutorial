@@ -1,5 +1,4 @@
-{-# START_FILE Lexer.hs #-}
-module Lexer (Operator(..), Token(..), tokenize, lookAhead, accept) where
+module Online.FPCompleteOnlineTutorial.BasicsOfHaskell.SymbolicCalculator.Lexer (Operator(..), Token(..), tokenize, lookAhead, accept) where
 
 import Data.Char
 

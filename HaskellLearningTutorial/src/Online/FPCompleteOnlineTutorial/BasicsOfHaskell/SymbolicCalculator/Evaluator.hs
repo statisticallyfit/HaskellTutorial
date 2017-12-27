@@ -1,5 +1,4 @@
-{-# START_FILE Evaluator.hs #-}
-module Evaluator (evaluate, Evaluator (..)) where
+module Online.FPCompleteOnlineTutorial.BasicsOfHaskell.SymbolicCalculator.Evaluator (evaluate, Evaluator (..)) where
 
 import Control.Monad (liftM, ap)
 import Control.Applicative

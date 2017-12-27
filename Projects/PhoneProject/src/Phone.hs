@@ -69,7 +69,6 @@ because * is taken for capitalization.
 
 ------------------------------------------------------------------------------------------
 
--- NOTE the utility functions
 
 -- postcondition returns simple count of presses - does not consider switching pads
 -- nor capitals.

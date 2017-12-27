@@ -1,5 +1,4 @@
-{-# START_FILE Parser.hs #-}
-module Parser (Tree(..), parse)where
+module Online.FPCompleteOnlineTutorial.BasicsOfHaskell.SymbolicCalculator.Parser (Tree(..), parse)where
 
 import Lexer
 

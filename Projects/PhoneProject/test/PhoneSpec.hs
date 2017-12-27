@@ -1,4 +1,4 @@
-module PhoneSpec (main, runTests) where
+module PhoneSpec (main, spec) where
 
 import Phone
 
@@ -11,10 +11,10 @@ import Test.QuickCheck
 
 
 main :: IO ()
-main = runTests
+main = hspec spec
 
-
-runTests = hspec $ do
+spec :: Spec
+spec = do
     testIdentityRavelUnravel
     testIdentityTokenButton
     testIdentityTokenFinger

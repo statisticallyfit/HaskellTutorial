@@ -1,4 +1,4 @@
-module Lab3 where
+module Online.Coursera.Course.Lab6 where
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- LIST COMPREHENSIONS

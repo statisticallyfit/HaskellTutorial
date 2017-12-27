@@ -1,4 +1,5 @@
-module Lab4 where
+module Online.Coursera.Course.Lab8 where
+
 import Data.Char (ord, chr)
 ------------------------------------------------------------------------------------------------------------------------------
 -- RECURSIVE FUNCTIONS

@@ -7,10 +7,6 @@ import Data.List
 import System.Exit (exitSuccess)
 import System.Random (randomRIO)
 
-import Test.Hspec
-import Test.QuickCheck
-import Test.QuickCheck.Monadic
-
 
 
 type WordList = [String]
@@ -181,9 +177,9 @@ runGame puzzle = forever $ do
 
 
 ------------------------------------------------------------------------------------
-main :: IO()
-main = do
-    word <- randomWord'
-    let puzzle = freshPuzzle (fmap toLower word)
-    runGame puzzle
+-- main :: IO()
+-- main = do
+--     word <- randomWord'
+--     let puzzle = freshPuzzle (fmap toLower word)
+--     runGame puzzle
 ------------------------------------------------------------------------------------

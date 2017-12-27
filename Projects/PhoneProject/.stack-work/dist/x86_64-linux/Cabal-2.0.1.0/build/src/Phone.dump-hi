@@ -1,0 +1,1549 @@
+
+==================== FINAL INTERFACE ====================
+2017-12-27 12:42:22.363511 UTC
+
+interface PhoneProject-0.1.0.0-415UdzKEu68Kmjj7b63lq:Phone 8022
+  interface hash: 14415a87996e5850756aef317eff9028
+  ABI hash: a19e77c6a7f7ac0868cc10d865935ba9
+  export-list hash: 2414e57139d6836679fafdabd4da44c4
+  orphan hash: 693e9af84d3dfcc71e640e005bdc5e2e
+  flag hash: d3f9096bac2e1e79f6ff76d0840aa157
+  sig of: Nothing
+  used TH splices: False
+  where
+exports:
+  Phone.appears
+  Phone.buttonFingerize
+  Phone.buttonTokenize
+  Phone.convo
+  Phone.coolestLetter
+  Phone.coolestWord
+  Phone.cost
+  Phone.costIn
+  Phone.decrypt
+  Phone.encrypt
+  Phone.fingerButtonize
+  Phone.fingerTokenize
+  Phone.hmgbd
+  Phone.isSign
+  Phone.keyPad
+  Phone.mostPopularLetter
+  Phone.phone
+  Phone.presses
+  Phone.rarestWord
+  Phone.ravel
+  Phone.text
+  Phone.tokenButtonize
+  Phone.tokenFingerize
+  Phone.unravel
+  Phone.Button{Phone.CapitalLetter Phone.EngPad Phone.Letter Phone.NumPad Phone.Number Phone.Sign Phone.Spacebar}
+  Phone.ButtonGroup
+  Phone.FingerMove
+  Phone.Phone{Phone.PhonePad}
+  Phone.Presses
+  Phone.Text
+  Phone.Token
+module dependencies:
+package dependencies: base-4.10.1.0* ghc-prim-0.5.1.1
+                      integer-gmp-1.0.1.0
+orphans: base-4.10.1.0:GHC.Float base-4.10.1.0:GHC.Base
+family instance modules: base-4.10.1.0:Control.Applicative
+                         base-4.10.1.0:Data.Either base-4.10.1.0:Data.Functor.Const
+                         base-4.10.1.0:Data.Functor.Identity base-4.10.1.0:Data.Monoid
+                         base-4.10.1.0:Data.Type.Equality base-4.10.1.0:GHC.Generics
+                         base-4.10.1.0:GHC.IO.Exception base-4.10.1.0:GHC.TypeLits
+                         base-4.10.1.0:GHC.TypeNats
+import  -/  base-4.10.1.0:Data.Char fe4e3458190deeac19969ce15e33bed9
+import  -/  base-4.10.1.0:Data.Foldable 9ed87455d68e87ff2b5b8725eae9897e
+import  -/  base-4.10.1.0:Data.List 4ab7fa2a1b87502b23af891a384f0506
+import  -/  base-4.10.1.0:Data.Maybe 07738c5485acb328136bb15596f8b845
+import  -/  base-4.10.1.0:Data.OldList 555420b092ca8cf0a8f9666bc0e07dcf
+import  -/  base-4.10.1.0:Data.Tuple 8fa1305aa5032ea35e2a54fa5f1e78f9
+import  -/  base-4.10.1.0:GHC.Base 782fd99b5e36f3698a26179a49afca64
+import  -/  base-4.10.1.0:GHC.List e3060fbeb44ce0038e6b4dedf2dd9cf1
+import  -/  base-4.10.1.0:GHC.Num 6e1dc5d36d99a802edb39b92bb1923b8
+import  -/  base-4.10.1.0:GHC.Show 0a8ce2b5e533d1c2cfb7954e6736be45
+import  -/  base-4.10.1.0:GHC.Unicode 49c9de4fffed0d9be65aaeb6a60b757c
+import  -/  base-4.10.1.0:Prelude 31945b7d0084063347fc52506d3a4020
+import  -/  base-4.10.1.0:System.IO 6e5bb580370d8d71dc5888f723cea4b4
+import  -/  ghc-prim-0.5.1.1:GHC.Classes 93e2660065dce9329577e83d76d8f0d4
+import  -/  ghc-prim-0.5.1.1:GHC.Types b1fd0716441595db508c1a74387bf394
+5d5b26d3dd37197c46d52d7b89329708
+  $fEqButton :: GHC.Classes.Eq Phone.Button
+  DFunId
+  {- HasNoCafRefs, Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun:.
+                  @ Phone.Button Phone.$fEqButton_$c== Phone.$fEqButton_$c/= -}
+5d5b26d3dd37197c46d52d7b89329708
+  $fEqButton_$c/= :: Phone.Button -> Phone.Button -> GHC.Types.Bool
+  {- Arity: 2, HasNoCafRefs, Strictness: <S,1*U><S,1*U>,
+     Unfolding: InlineRule (2, True, False)
+                (\ (a :: Phone.Button) (b :: Phone.Button) ->
+                 case Phone.$fEqButton_$c== a b of wild {
+                   GHC.Types.False -> GHC.Types.True
+                   GHC.Types.True -> GHC.Types.False }) -}
+5d5b26d3dd37197c46d52d7b89329708
+  $fEqButton_$c== :: Phone.Button -> Phone.Button -> GHC.Types.Bool
+  {- Arity: 2, HasNoCafRefs, Strictness: <S,1*U><S,1*U>,
+     Unfolding: (\ (ds :: Phone.Button) (ds1 :: Phone.Button) ->
+                 case ds of wild {
+                   Phone.NumPad
+                   -> case ds1 of wild1 {
+                        DEFAULT -> GHC.Types.False Phone.NumPad -> GHC.Types.True }
+                   Phone.EngPad
+                   -> case ds1 of wild1 {
+                        DEFAULT -> GHC.Types.False Phone.EngPad -> GHC.Types.True }
+                   Phone.Spacebar
+                   -> case ds1 of wild1 {
+                        DEFAULT -> GHC.Types.False Phone.Spacebar -> GHC.Types.True }
+                   Phone.Number a1
+                   -> case ds1 of wild1 {
+                        DEFAULT -> GHC.Types.False
+                        Phone.Number b1 -> GHC.Classes.eqChar a1 b1 }
+                   Phone.CapitalLetter a1
+                   -> case ds1 of wild1 {
+                        DEFAULT -> GHC.Types.False
+                        Phone.CapitalLetter b1 -> GHC.Classes.eqChar a1 b1 }
+                   Phone.Letter a1
+                   -> case ds1 of wild1 {
+                        DEFAULT -> GHC.Types.False
+                        Phone.Letter b1 -> GHC.Classes.eqChar a1 b1 }
+                   Phone.Sign a1
+                   -> case ds1 of wild1 {
+                        DEFAULT -> GHC.Types.False
+                        Phone.Sign b1 -> GHC.Classes.eqChar a1 b1 } }) -}
+325b0583d028d6812566e2a0c37d6325
+  $fEqPhone :: GHC.Classes.Eq Phone.Phone
+  DFunId
+  {- HasNoCafRefs, Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun:.
+                  @ Phone.Phone Phone.$fEqPhone_$c== Phone.$fEqPhone_$c/= -}
+325b0583d028d6812566e2a0c37d6325
+  $fEqPhone_$c/= :: Phone.Phone -> Phone.Phone -> GHC.Types.Bool
+  {- Arity: 2, HasNoCafRefs,
+     Strictness: <S(S),1*U(1*U)><S(S),1*U(1*U)>,
+     Unfolding: InlineRule (2, True, False)
+                (\ (a :: Phone.Phone) (b :: Phone.Phone) ->
+                 case a of wild { Phone.PhonePad a1 ->
+                 case b of wild1 { Phone.PhonePad b1 ->
+                 case GHC.Classes.$fEq[]_$c==
+                        @ Phone.Button
+                        Phone.$fEqButton
+                        a1
+                        b1 of wild2 {
+                   GHC.Types.False -> GHC.Types.True
+                   GHC.Types.True -> GHC.Types.False } } }) -}
+325b0583d028d6812566e2a0c37d6325
+  $fEqPhone_$c== :: Phone.Phone -> Phone.Phone -> GHC.Types.Bool
+  {- Arity: 2, HasNoCafRefs,
+     Strictness: <S(S),1*U(1*U)><S(S),1*U(1*U)>,
+     Unfolding: InlineRule (2, True, False)
+                (\ (ds :: Phone.Phone) (ds1 :: Phone.Phone) ->
+                 case ds of wild { Phone.PhonePad a1 ->
+                 case ds1 of wild1 { Phone.PhonePad b1 ->
+                 GHC.Classes.$fEq[]_$c==
+                   @ Phone.Button
+                   Phone.$fEqButton
+                   a1
+                   b1 } }) -}
+5d5b26d3dd37197c46d52d7b89329708
+  $fShowButton :: GHC.Show.Show Phone.Button
+  DFunId
+  {- Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun:.
+                  @ Phone.Button
+                  Phone.$fShowButton_$cshowsPrec
+                  Phone.$fShowButton_$cshow
+                  Phone.$fShowButton_$cshowList -}
+5d5b26d3dd37197c46d52d7b89329708
+  $fShowButton1 :: Phone.Button -> GHC.Show.ShowS
+  {- Arity: 2,
+     Unfolding: (Phone.$fShowButton_$cshowsPrec Phone.$fShowButton2) -}
+1cfb5f1e2d8802b0ab6015c0025f6c33
+  $fShowButton10 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("EngPad"#) -}
+2e6dc4544fbbb663ff802b52da331acd
+  $fShowButton11 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.$fShowButton12) -}
+3fd28cd00599a74a22926313f0bb3b4b
+  $fShowButton12 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("NumPad"#) -}
+1635736932780d7197b6f3703e353283
+  $fShowButton2 :: GHC.Types.Int
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.I# 0#) -}
+b6453b576cc846380bc93323c4325cdf
+  $fShowButton3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Sign "#) -}
+fb512ba5e6f5394bdb8740298080f14e
+  $fShowButton4 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Letter "#) -}
+55400803189c9953bb746cafe8220e63
+  $fShowButton5 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("CapitalLetter "#) -}
+df48b79fa722cb26e2d55b6a37ac8d22
+  $fShowButton6 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Number "#) -}
+49fc9f992dc7f41392842258b0fe59ee
+  $fShowButton7 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.$fShowButton8) -}
+37057a8563ccec87825995baf17c880e
+  $fShowButton8 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Spacebar"#) -}
+7b6a48e4e020d94654a74401ece2010e
+  $fShowButton9 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.$fShowButton10) -}
+5d5b26d3dd37197c46d52d7b89329708
+  $fShowButton_$cshow :: Phone.Button -> GHC.Base.String
+  {- Arity: 1, Strictness: <S,1*U>,
+     Unfolding: (\ (x :: Phone.Button) ->
+                 case x of wild {
+                   Phone.NumPad -> Phone.$fShowButton11
+                   Phone.EngPad -> Phone.$fShowButton9
+                   Phone.Spacebar -> Phone.$fShowButton7
+                   Phone.Number b1
+                   -> GHC.CString.unpackAppendCString#
+                        Phone.$fShowButton6
+                        (case b1 of ww { GHC.Types.C# ww1 ->
+                         GHC.Show.$w$cshowsPrec3 ww1 (GHC.Types.[] @ GHC.Types.Char) })
+                   Phone.CapitalLetter b1
+                   -> GHC.CString.unpackAppendCString#
+                        Phone.$fShowButton5
+                        (case b1 of ww { GHC.Types.C# ww1 ->
+                         GHC.Show.$w$cshowsPrec3 ww1 (GHC.Types.[] @ GHC.Types.Char) })
+                   Phone.Letter b1
+                   -> GHC.CString.unpackAppendCString#
+                        Phone.$fShowButton4
+                        (case b1 of ww { GHC.Types.C# ww1 ->
+                         GHC.Show.$w$cshowsPrec3 ww1 (GHC.Types.[] @ GHC.Types.Char) })
+                   Phone.Sign b1
+                   -> GHC.CString.unpackAppendCString#
+                        Phone.$fShowButton3
+                        (case b1 of ww { GHC.Types.C# ww1 ->
+                         GHC.Show.$w$cshowsPrec3
+                           ww1
+                           (GHC.Types.[] @ GHC.Types.Char) }) }) -}
+5d5b26d3dd37197c46d52d7b89329708
+  $fShowButton_$cshowList :: [Phone.Button] -> GHC.Show.ShowS
+  {- Arity: 2,
+     Unfolding: (GHC.Show.showList__
+                   @ Phone.Button
+                   Phone.$fShowButton1) -}
+5d5b26d3dd37197c46d52d7b89329708
+  $fShowButton_$cshowsPrec ::
+    GHC.Types.Int -> Phone.Button -> GHC.Show.ShowS
+  {- Arity: 3, Strictness: <L,1*U(U)><S,1*U><L,U> -}
+325b0583d028d6812566e2a0c37d6325
+  $fShowPhone :: GHC.Show.Show Phone.Phone
+  DFunId
+  {- Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun:.
+                  @ Phone.Phone
+                  Phone.$fShowPhone_$cshowsPrec
+                  Phone.$fShowPhone_$cshow
+                  Phone.$fShowPhone_$cshowList -}
+325b0583d028d6812566e2a0c37d6325
+  $fShowPhone1 :: Phone.Phone -> GHC.Show.ShowS
+  {- Arity: 2, Strictness: <S,1*U(1*U)><L,U>,
+     Unfolding: (\ (w :: Phone.Phone) (w1 :: GHC.Base.String) ->
+                 case w of ww { Phone.PhonePad ww1 ->
+                 Phone.$w$cshowsPrec 0# ww1 w1 }) -}
+325b0583d028d6812566e2a0c37d6325
+  $fShowPhone_$cshow :: Phone.Phone -> GHC.Base.String
+  {- Arity: 1, Strictness: <S,1*U(1*U)>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (x :: Phone.Phone) ->
+                 Phone.$fShowPhone_$cshowsPrec
+                   Phone.$fShowButton2
+                   x
+                   (GHC.Types.[] @ GHC.Types.Char)) -}
+325b0583d028d6812566e2a0c37d6325
+  $fShowPhone_$cshowList :: [Phone.Phone] -> GHC.Show.ShowS
+  {- Arity: 2,
+     Unfolding: (GHC.Show.showList__
+                   @ Phone.Phone
+                   Phone.$fShowPhone1) -}
+325b0583d028d6812566e2a0c37d6325
+  $fShowPhone_$cshowsPrec ::
+    GHC.Types.Int -> Phone.Phone -> GHC.Show.ShowS
+  {- Arity: 3, Strictness: <S(S),1*U(U)><S,1*U(1*U)><L,U>,
+     Inline: [0],
+     Unfolding: InlineRule (3, True, False)
+                (\ (w :: GHC.Types.Int)
+                   (w1 :: Phone.Phone)
+                   (w2 :: GHC.Base.String) ->
+                 case w of ww { GHC.Types.I# ww1 ->
+                 case w1 of ww2 { Phone.PhonePad ww3 ->
+                 Phone.$w$cshowsPrec ww1 ww3 w2 } }) -}
+979357568d99b37231be94f9b4863ea7
+  $tc'CapitalLetter :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   7927271213678886179##
+                   12399142970916436479##
+                   Phone.$trModule
+                   Phone.$tc'CapitalLetter2
+                   0#
+                   Phone.$tc'CapitalLetter1) -}
+d3ee5932e7fedb437b0245b648084831
+  $tc'CapitalLetter1 :: GHC.Types.KindRep
+  {- HasNoCafRefs, Strictness: m4, Inline: [~] -}
+f536c8d3561eb124446d68fea63e7f2a
+  $tc'CapitalLetter2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS Phone.$tc'CapitalLetter3) -}
+8500656fea644a5d77a1f4e2d5186232
+  $tc'CapitalLetter3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'CapitalLetter"#) -}
+c361cc877b4c4933718430c4d298e576
+  $tc'EngPad :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   13999403554880470576##
+                   17317023118340303742##
+                   Phone.$trModule
+                   Phone.$tc'EngPad2
+                   0#
+                   Phone.$tc'EngPad1) -}
+3b2d3bfb5998fd030714dedfc8d0b0f8
+  $tc'EngPad1 :: GHC.Types.KindRep
+  {- HasNoCafRefs, Strictness: m1, Inline: [~] -}
+effecbdddc77dc06e13cf03743a9f1da
+  $tc'EngPad2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS Phone.$tc'EngPad3) -}
+ec26a9861e760f347c2e220d8c58e59e
+  $tc'EngPad3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'EngPad"#) -}
+c23640bbf0c37a295bf34a120b4b13a1
+  $tc'Letter :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   11520126483485325938##
+                   2724720239063861275##
+                   Phone.$trModule
+                   Phone.$tc'Letter1
+                   0#
+                   Phone.$tc'CapitalLetter1) -}
+bdc0579c75afc6e299871b2c78e9d67b
+  $tc'Letter1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS Phone.$tc'Letter2) -}
+efafbc1e2dc81280e4a66f43f78939dd
+  $tc'Letter2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'Letter"#) -}
+e908be442b67d5f368acfc710c174032
+  $tc'NumPad :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   13613568995681377199##
+                   8329573089405395749##
+                   Phone.$trModule
+                   Phone.$tc'NumPad1
+                   0#
+                   Phone.$tc'EngPad1) -}
+0a2d202f180fa9dc28fb62505fb4349a
+  $tc'NumPad1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS Phone.$tc'NumPad2) -}
+cda58c6199a7ce84c5b613210c792f55
+  $tc'NumPad2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'NumPad"#) -}
+5b004d344c97f5a3e5521150207b6fa9
+  $tc'Number :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   15679383636330698916##
+                   17438799416715055573##
+                   Phone.$trModule
+                   Phone.$tc'Number1
+                   0#
+                   Phone.$tc'CapitalLetter1) -}
+4b9a2c970dbf3056a02f10081b554176
+  $tc'Number1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS Phone.$tc'Number2) -}
+dac0cfa62a08ecdd90a494e8019187e4
+  $tc'Number2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'Number"#) -}
+4186eda388ec4d60ccdd9837b05968ca
+  $tc'PhonePad :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   1802165645806856135##
+                   4212874522214700373##
+                   Phone.$trModule
+                   Phone.$tc'PhonePad2
+                   0#
+                   Phone.$tc'PhonePad1) -}
+d294262c916015bfaed15c31d8aee20e
+  $tc'PhonePad1 :: GHC.Types.KindRep
+  {- HasNoCafRefs, Strictness: m4, Inline: [~] -}
+6f34087252589d4a9cfd096ec284ef6d
+  $tc'PhonePad2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS Phone.$tc'PhonePad3) -}
+d706bc3c0187b37aa18add2d6684a49d
+  $tc'PhonePad3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'PhonePad"#) -}
+d9704559226cb7a98acbb0bef58cd598
+  $tc'Sign :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   13820042274123967087##
+                   10783525800086669739##
+                   Phone.$trModule
+                   Phone.$tc'Sign1
+                   0#
+                   Phone.$tc'CapitalLetter1) -}
+5e8bca35c2e16ad668c9c7c5c60613be
+  $tc'Sign1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS Phone.$tc'Sign2) -}
+08995bb4c77725fa4d70a94dfbce8e5b
+  $tc'Sign2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'Sign"#) -}
+28863d772faeb5c3f07424a8c2e77457
+  $tc'Spacebar :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   10762364622151723930##
+                   8819591971003051020##
+                   Phone.$trModule
+                   Phone.$tc'Spacebar1
+                   0#
+                   Phone.$tc'EngPad1) -}
+8a3e93b6c320cb27000f097eef431e62
+  $tc'Spacebar1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS Phone.$tc'Spacebar2) -}
+cb277abef01852eef5d17f02eaae9900
+  $tc'Spacebar2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'Spacebar"#) -}
+37aed80371e8982f769f9ab61cdf83dd
+  $tcButton :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   12535311990801142809##
+                   18192829227362408866##
+                   Phone.$trModule
+                   Phone.$tcButton1
+                   0#
+                   GHC.Types.krep$*) -}
+c220069c664f44cb748d454d57b11749
+  $tcButton1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS Phone.$tcButton2) -}
+8df5a740bc00ac35d1d4ddd762950db2
+  $tcButton2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Button"#) -}
+119f9fd8f972a05434787b66d3eda9dc
+  $tcPhone :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   2524609340256137244##
+                   2434959223850516723##
+                   Phone.$trModule
+                   Phone.$trModule1
+                   0#
+                   GHC.Types.krep$*) -}
+24040db1450f90d091192bf7ad3f4051
+  $trModule :: GHC.Types.Module
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.Module Phone.$trModule3 Phone.$trModule1) -}
+d87e1e0a591c00d9fc55cb6fe5acabfd
+  $trModule1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS Phone.$trModule2) -}
+10d8b9b91dfe4a3a3158aab74b65cafe
+  $trModule2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Phone"#) -}
+9cc1d10f007e2a75f1b1a861057186f5
+  $trModule3 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS Phone.$trModule4) -}
+55ef2fe93d2a9a2ae9f237c0fa85c82a
+  $trModule4 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("PhoneProject-0.1.0.0-415UdzKEu68Kmjj7b63lq"#) -}
+e967990172c18595c3babc730df383d8
+  $w$cshowsPrec ::
+    GHC.Prim.Int#
+    -> [Phone.Button] -> GHC.Base.String -> GHC.Base.String
+  {- Arity: 3, Strictness: <S,U><L,1*U><L,U>, Inline: [0] -}
+28f201e5bea1fc433527437e0a6bdbc5
+  $wappears :: Phone.Token -> Phone.Text -> GHC.Prim.Int#
+  {- Arity: 2, HasNoCafRefs, Strictness: <L,U(U)><S,1*U>,
+     Inline: [0],
+     Unfolding: (\ (w :: Phone.Token) (w1 :: Phone.Text) ->
+                 letrec {
+                   $wgo :: [[Phone.Token]]
+                           -> GHC.Prim.Int# -> GHC.Prim.Int# -> GHC.Prim.Int#
+                     <join 3> {- Arity: 3, Strictness: <S,1*U><L,U><S,U>, Inline: [0] -}
+                   = \ (w2 :: [[Phone.Token]])
+                       (w3 :: GHC.Prim.Int#)
+                       (ww :: GHC.Prim.Int#) ->
+                     case w2 of wild {
+                       [] -> ww
+                       : y ys
+                       -> letrec {
+                            $wgo1 :: [Phone.Token]
+                                     -> GHC.Prim.Int# -> GHC.Prim.Int# -> GHC.Prim.Int#
+                              <join 3> {- Arity: 3, Strictness: <S,1*U><S,U><S,U>, Inline: [0] -}
+                            = \ (w4 :: [Phone.Token])
+                                (w5 :: GHC.Prim.Int#)
+                                (ww1 :: GHC.Prim.Int#) ->
+                              case w4 of wild1 {
+                                [] -> $wgo ys w5 ww1
+                                : y1 ys1
+                                -> case w of wild2 { GHC.Types.C# x ->
+                                   case y1 of wild3 { GHC.Types.C# y2 ->
+                                   case GHC.Prim.tagToEnum#
+                                          @ GHC.Types.Bool
+                                          (GHC.Prim.eqChar# x y2) of wild4 {
+                                     GHC.Types.False -> $wgo1 ys1 (GHC.Prim.+# w5 1#) ww1
+                                     GHC.Types.True
+                                     -> $wgo1 ys1 (GHC.Prim.+# w5 1#) (GHC.Prim.+# ww1 1#) } } } }
+                          } in
+                          $wgo1 y w3 ww }
+                 } in
+                 $wgo w1 0# 0#) -}
+22a9b617e2609435ab37843ec65bdfb6
+  $wcost :: GHC.Prim.Char# -> GHC.Prim.Int#
+  {- Arity: 1, Strictness: <S,U>, Inline: [0],
+     Unfolding: (\ (ww :: GHC.Prim.Char#) ->
+                 case {__pkg_ccall base-4.10.1.0 GHC.Prim.Int#
+                                                 -> GHC.Prim.State# GHC.Prim.RealWorld
+                                                 -> (# GHC.Prim.State# GHC.Prim.RealWorld,
+                                                       GHC.Prim.Int# #)}
+                        (GHC.Prim.ord# ww)
+                        GHC.Prim.realWorld# of wild1 { (#,#) ds ds1 ->
+                 case ds1 of wild2 {
+                   DEFAULT
+                   -> case Phone.$wpresses (GHC.Types.C# ww) of ww1 { DEFAULT ->
+                      GHC.Prim.+# 1# ww1 }
+                   0# -> Phone.$wpresses (GHC.Types.C# ww) } }) -}
+93434bf74ddbdce4c12c99c0e322ed50
+  $wpresses :: Phone.Token -> GHC.Prim.Int#
+  {- Arity: 1, Strictness: <L,1*U(U)>, Inline: [0],
+     Unfolding: (\ (w :: Phone.Token) ->
+                 case Data.Maybe.catMaybes1
+                        @ GHC.Types.Int
+                        (GHC.Base.map
+                           @ (Phone.Token, GHC.Base.String)
+                           @ (GHC.Base.Maybe GHC.Types.Int)
+                           (let {
+                              f :: GHC.Types.Char
+                              = case w of ww { GHC.Types.C# ww1 ->
+                                case {__pkg_ccall base-4.10.1.0 GHC.Prim.Int#
+                                                                -> GHC.Prim.State#
+                                                                     GHC.Prim.RealWorld
+                                                                -> (# GHC.Prim.State#
+                                                                        GHC.Prim.RealWorld,
+                                                                      GHC.Prim.Int# #)}
+                                       (GHC.Prim.ord# ww1)
+                                       GHC.Prim.realWorld# of wild { (#,#) ds ds1 ->
+                                case GHC.Prim.tagToEnum#
+                                       @ GHC.Types.Bool
+                                       (GHC.Prim.leWord#
+                                          (GHC.Prim.int2Word# ds1)
+                                          1114111##) of wild1 {
+                                  GHC.Types.False -> GHC.Char.$wlvl ds1
+                                  GHC.Types.True -> GHC.Types.C# (GHC.Prim.chr# ds1) } } }
+                            } in
+                            let {
+                              f1 :: GHC.Types.Char -> GHC.Types.Bool {- Arity: 1 -}
+                              = GHC.Classes.eqChar f
+                            } in
+                            \ (x :: (Phone.Token, GHC.Base.String)) ->
+                            case x of wild { (,) ds1 y ->
+                            Data.OldList.findIndex @ GHC.Types.Char f1 y })
+                           Phone.keyPad) of wild {
+                   [] -> case GHC.List.badHead ret_ty GHC.Prim.Int# of {}
+                   : x ds1
+                   -> case x of wild1 { GHC.Types.I# y -> GHC.Prim.+# 1# y } }) -}
+8acd1b25bff523feaf53081bea64a3e9
+  $wravel :: Phone.Token -> (# Phone.Token, Phone.Presses #)
+  {- Arity: 1, Strictness: <L,1*U(U)>, Inline: [0],
+     Unfolding: (\ (w :: Phone.Token) ->
+                 let {
+                   tok' :: GHC.Types.Char
+                   = case w of ww { GHC.Types.C# ww1 ->
+                     case {__pkg_ccall base-4.10.1.0 GHC.Prim.Int#
+                                                     -> GHC.Prim.State# GHC.Prim.RealWorld
+                                                     -> (# GHC.Prim.State# GHC.Prim.RealWorld,
+                                                           GHC.Prim.Int# #)}
+                            (GHC.Prim.ord# ww1)
+                            GHC.Prim.realWorld# of wild { (#,#) ds ds1 ->
+                     case GHC.Prim.tagToEnum#
+                            @ GHC.Types.Bool
+                            (GHC.Prim.leWord# (GHC.Prim.int2Word# ds1) 1114111##) of wild1 {
+                       GHC.Types.False -> GHC.Char.$wlvl ds1
+                       GHC.Types.True -> GHC.Types.C# (GHC.Prim.chr# ds1) } } }
+                 } in
+                 (# letrec {
+                      go :: [(Phone.Token, [GHC.Types.Char])] -> Phone.Token
+                        <join 1> {- Arity: 1, Strictness: <S,1*U> -}
+                      = \ (ds :: [(Phone.Token, [GHC.Types.Char])]) ->
+                        case ds of wild {
+                          [] -> case GHC.List.badHead ret_ty Phone.Token of {}
+                          : y ys
+                          -> case y of wild1 { (,) ds1 y1 ->
+                             case GHC.List.elem
+                                    @ GHC.Types.Char
+                                    GHC.Classes.$fEqChar
+                                    tok'
+                                    y1 of wild2 {
+                               GHC.Types.False -> go ys GHC.Types.True -> ds1 } } }
+                    } in
+                    go Phone.keyPad,
+                    Phone.presses tok' #)) -}
+986462bde0e2f11087830ee17ba86cc3
+  $wunravel :: GHC.Prim.Char# -> GHC.Prim.Int# -> Phone.Token
+  {- Arity: 2, Strictness: <S,U><S,U>, Inline: [0],
+     Unfolding: (\ (ww :: GHC.Prim.Char#) (ww1 :: GHC.Prim.Int#) ->
+                 letrec {
+                   go :: [(Phone.Token, GHC.Base.String)] -> Phone.Token
+                     <join 1> {- Arity: 1, Strictness: <S,1*U> -}
+                   = \ (ds :: [(Phone.Token, GHC.Base.String)]) ->
+                     case ds of wild {
+                       [] -> case GHC.List.badHead ret_ty Phone.Token of {}
+                       : y ys
+                       -> case y of wild1 { (,) x ds1 ->
+                          case x of wild2 { GHC.Types.C# x1 ->
+                          case GHC.Prim.tagToEnum#
+                                 @ GHC.Types.Bool
+                                 (GHC.Prim.eqChar# x1 ww) of wild3 {
+                            GHC.Types.False -> go ys
+                            GHC.Types.True
+                            -> GHC.List.$w!! @ GHC.Types.Char ds1 (GHC.Prim.-# ww1 1#) } } } }
+                 } in
+                 go Phone.keyPad) -}
+5d5b26d3dd37197c46d52d7b89329708
+  data Button
+    = NumPad
+    | EngPad
+    | Spacebar
+    | Number Phone.Token
+    | CapitalLetter Phone.Token
+    | Letter Phone.Token
+    | Sign Phone.Token
+399a1d27e3a29cb778ea411cb39b9be7
+  type ButtonGroup = [Phone.Button]
+644b3f9f6468e4cc737d95b0da73c06a
+  type FingerMove = (Phone.Token, Phone.Presses)
+325b0583d028d6812566e2a0c37d6325
+  data Phone = PhonePad [Phone.Button]
+223b1e8fd8dbdcf5e98c7950ed2062e7
+  type Presses = GHC.Types.Int
+1549b4b7d672e469762cac2d5c046611
+  type Text = [[Phone.Token]]
+5c52b53e2f7ec37c41a33320c4090463
+  type Token = GHC.Types.Char
+e98b65e7ab5dbf7488b8cfb6bec09d67
+  appears :: Phone.Token -> Phone.Text -> GHC.Types.Int
+  {- Arity: 2, HasNoCafRefs, Strictness: <L,U(U)><S,1*U>m,
+     Inline: [0],
+     Unfolding: InlineRule (2, True, False)
+                (\ (w :: Phone.Token) (w1 :: Phone.Text) ->
+                 case Phone.$wappears w w1 of ww { DEFAULT -> GHC.Types.I# ww }) -}
+51f31c0d1287cafc08f127f499732bcf
+  buttonFingerize :: [Phone.Button] -> [Phone.FingerMove]
+  {- Arity: 1, Strictness: <S,1*U> -}
+6b0f04237455df1717259635ceb6309c
+  buttonTokenize :: [Phone.Button] -> [Phone.Token]
+  {- Arity: 1, Strictness: <S,1*U> -}
+ec958461f9f34427086ea20d54367708
+  convo :: Phone.Text
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ [Phone.Token]
+                   Phone.convo23
+                   Phone.convo1) -}
+876b6175e736fcd00cbdc3f32779bf8e
+  convo1 :: [[Phone.Token]]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ [Phone.Token]
+                   Phone.convo21
+                   Phone.convo2) -}
+8326c4b7cd0ebf07aad4b6f911ac103f
+  convo10 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("Haha thanks just making sure rofl ur turn"#) -}
+7c6f283e7383337311491802394b79fd
+  convo11 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.convo12) -}
+daa1c7d14332018c6d72763d00953acb
+  convo12 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Lol ya"#) -}
+6c0657d37eb8b241eb028cfa7ee689cb
+  convo13 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.convo14) -}
+67cc096f4d9b3e96aa552ed3c701bc8c
+  convo14 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Ok. Do u think I am pretty Lol"#) -}
+61c5a3a64cad36544891d0bd72a257f1
+  convo15 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.convo16) -}
+b4630c6c1f01c72f5920afa6e0ddf119
+  convo16 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Wow ur cool haha. Ur turn"#) -}
+2d0389fd8db9537e32a0eef71b1c2eae
+  convo17 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.convo18) -}
+d619edaab26e8e557304574061b980db
+  convo18 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("Lol ok. Have u ever tasted cotton candy lol"#) -}
+8f1249028c71359cb2770ffb0d4996e2
+  convo19 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.convo20) -}
+74e9b998374f6bbcea296cc2a0ab7768
+  convo2 :: [[Phone.Token]]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ [Phone.Token]
+                   Phone.convo19
+                   Phone.convo3) -}
+0c83f4891d74e226d43ce729b5d2512b
+  convo20 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("U 1st haha"#) -}
+4c55cd9dc370da2f035dd16e6ac71ee1
+  convo21 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.convo22) -}
+f0be331ad5b3bda61a3da610be2fe01c
+  convo22 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Ya"#) -}
+b339de096bfd9058ce2645924bfda5e1
+  convo23 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.convo24) -}
+f3d423c316b1ca2805e16025af421cc5
+  convo24 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Wanna play 20 questions"#) -}
+e47680e94cdea5e73da63a0786d4e5fe
+  convo3 :: [[Phone.Token]]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ [Phone.Token]
+                   Phone.convo17
+                   Phone.convo4) -}
+e75772fd552c902cb54f0f71c86c0ac3
+  convo4 :: [[Phone.Token]]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ [Phone.Token]
+                   Phone.convo11
+                   Phone.convo5) -}
+8e9b512fdfcec6a1de371a03da89abf2
+  convo5 :: [[Phone.Token]]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ [Phone.Token]
+                   Phone.convo15
+                   Phone.convo6) -}
+08c5bc1c99040829d5f725ce45e46b4d
+  convo6 :: [[Phone.Token]]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ [Phone.Token]
+                   Phone.convo13
+                   Phone.convo7) -}
+bdea14c7c5a887e53414d80be89f1f6e
+  convo7 :: [[Phone.Token]]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ [Phone.Token]
+                   Phone.convo11
+                   Phone.convo8) -}
+ed6d2831b48bddf10cd4b82539a452ce
+  convo8 :: [[Phone.Token]]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ [Phone.Token]
+                   Phone.convo9
+                   (GHC.Types.[] @ [Phone.Token])) -}
+f1aa74287f26f134a4f52ef6f1b93793
+  convo9 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.convo10) -}
+ce7d81c8d9d3b7145b5c22a8989474e1
+  coolestLetter :: Phone.Text -> GHC.Types.Char
+  {- Arity: 1, Strictness: <S,1*U>,
+     Unfolding: (\ (x :: [[GHC.Types.Char]]) ->
+                 Phone.mostPopularLetter (Phone.coolestLetter_go x)) -}
+e97ff3d10b8d745e469491690b5390af
+  coolestLetter_go :: [[GHC.Types.Char]] -> [GHC.Types.Char]
+  {- Arity: 1, HasNoCafRefs, Strictness: <S,1*U> -}
+9a5d121a6840d41cfb5344fb9e7b62e5
+  coolestWord :: Phone.Text -> GHC.Base.String
+  {- Arity: 1, Strictness: <S,1*U>,
+     Unfolding: (\ (txt :: Phone.Text) ->
+                 let {
+                   ws :: [GHC.Base.String] = Phone.coolestWord_go txt
+                 } in
+                 let {
+                   occs :: [(GHC.Base.String, GHC.Types.Int)]
+                   = GHC.Base.map
+                       @ [GHC.Types.Char]
+                       @ (GHC.Base.String, GHC.Types.Int)
+                       (\ (w :: GHC.Base.String) ->
+                        (w,
+                         letrec {
+                           $wgo :: [GHC.Base.String]
+                                   -> GHC.Prim.Int# -> GHC.Prim.Int# -> GHC.Types.Int
+                             <join 3> {- Arity: 3, Strictness: <S,1*U><L,U><S,U>m,
+                                         Inline: [0] -}
+                           = \ (w1 :: [GHC.Base.String])
+                               (w2 :: GHC.Prim.Int#)
+                               (ww :: GHC.Prim.Int#) ->
+                             case w1 of wild {
+                               [] -> GHC.Types.I# ww
+                               : y ys
+                               -> case GHC.Base.eqString w y of wild1 {
+                                    GHC.Types.False -> $wgo ys (GHC.Prim.+# w2 1#) ww
+                                    GHC.Types.True
+                                    -> $wgo ys (GHC.Prim.+# w2 1#) (GHC.Prim.+# ww 1#) } }
+                         } in
+                         $wgo ws 0# 0#))
+                       ws
+                 } in
+                 case Data.OldList.findIndex
+                        @ (GHC.Base.String, GHC.Types.Int)
+                        (let {
+                           ds :: GHC.Types.Int
+                           = case GHC.Base.map
+                                    @ (GHC.Base.String, GHC.Types.Int)
+                                    @ GHC.Types.Int
+                                    (Data.Tuple.snd @ GHC.Base.String @ GHC.Types.Int)
+                                    occs of wild {
+                               [] -> GHC.List.maximum2
+                               : ipv ipv1
+                               -> case ipv of ww { GHC.Types.I# ww1 ->
+                                  case GHC.List.$wgo ipv1 ww1 of ww2 { DEFAULT ->
+                                  GHC.Types.I# ww2 } } }
+                         } in
+                         \ (x :: (GHC.Base.String, GHC.Types.Int)) ->
+                         case x of wild { (,) ds1 y -> GHC.Classes.eqInt y ds })
+                        occs of wild {
+                   GHC.Base.Nothing
+                   -> case Data.Maybe.fromJust1 ret_ty GHC.Base.String of {}
+                   GHC.Base.Just x
+                   -> case x of ww { GHC.Types.I# ww1 ->
+                      case GHC.List.$w!!
+                             @ (GHC.Base.String, GHC.Types.Int)
+                             occs
+                             ww1 of wild1 { (,) x1 ds1 ->
+                      x1 } } }) -}
+83ed3fd57d96a340edf003839025fc79
+  coolestWord_go :: [[GHC.Types.Char]] -> [GHC.Base.String]
+  {- Arity: 1, Strictness: <S,1*U> -}
+52ef7ef175b7071d23d76a7b2fb42a2c
+  cost :: Phone.Token -> Phone.Presses
+  {- Arity: 1, Strictness: <S(S),1*U(U)>m, Inline: [0],
+     Unfolding: InlineRule (1, True, False)
+                (\ (w :: Phone.Token) ->
+                 case w of ww { GHC.Types.C# ww1 ->
+                 case Phone.$wcost ww1 of ww2 { DEFAULT -> GHC.Types.I# ww2 } }) -}
+2643d5b5a0583fc74700e5af93b8e828
+  costIn :: Phone.Token -> Phone.Text -> Phone.Presses
+  {- Arity: 2, Strictness: <S(S),1*U(U)><S,1*U>m,
+     Unfolding: InlineRule (2, True, False)
+                (\ (tkn :: Phone.Token) (txt :: Phone.Text) ->
+                 case Phone.cost tkn of wild { GHC.Types.I# x ->
+                 case Phone.appears tkn txt of wild1 { GHC.Types.I# y ->
+                 GHC.Types.I# (GHC.Prim.*# x y) } }) -}
+247bb95d99de736c9412f1322f4e38c5
+  decrypt :: [[Phone.FingerMove]] -> [[Phone.Token]]
+  {- Arity: 1, Strictness: <S,1*U>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (fmss :: [[Phone.FingerMove]]) ->
+                 GHC.Base.build
+                   @ [Phone.Token]
+                   (\ @ b1
+                      (c :: [Phone.Token] -> b1 -> b1)[OneShot]
+                      (n :: b1)[OneShot] ->
+                    GHC.Base.foldr
+                      @ [Phone.FingerMove]
+                      @ b1
+                      (GHC.Base.mapFB
+                         @ [Phone.Token]
+                         @ b1
+                         @ [Phone.FingerMove]
+                         c
+                         Phone.fingerTokenize)
+                      n
+                      fmss)) -}
+1b276ac85f0075674545ca94e150f76a
+  encrypt :: [[Phone.Token]] -> [[Phone.FingerMove]]
+  {- Arity: 1, Strictness: <S,1*U>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (convo25 :: [[Phone.Token]]) ->
+                 GHC.Base.build
+                   @ [Phone.FingerMove]
+                   (\ @ b1
+                      (c :: [Phone.FingerMove] -> b1 -> b1)[OneShot]
+                      (n :: b1)[OneShot] ->
+                    GHC.Base.foldr
+                      @ [Phone.Token]
+                      @ b1
+                      (GHC.Base.mapFB
+                         @ [Phone.FingerMove]
+                         @ b1
+                         @ [Phone.Token]
+                         c
+                         Phone.tokenFingerize)
+                      n
+                      convo25)) -}
+c4b3d7390fe98f52e02a8c266d4dfe52
+  fingerButtonize :: [Phone.FingerMove] -> [Phone.Button]
+  {- Arity: 1, Strictness: <S,1*U> -}
+417976de28347a9f24ba875fe3eb7ac7
+  fingerTokenize :: [Phone.FingerMove] -> [Phone.Token]
+  {- Arity: 1, Strictness: <S,1*U>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (x :: [Phone.FingerMove]) ->
+                 Phone.buttonTokenize (Phone.fingerButtonize x)) -}
+be3900723e616c7987f1aab9bd16976a
+  hmgbd :: Phone.Text
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ [Phone.Token]
+                   Phone.hmgbd10
+                   Phone.hmgbd1) -}
+3777f16373eaadd1db237e19ef8f81b7
+  hmgbd1 :: [[Phone.Token]]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ [Phone.Token]
+                   Phone.hmgbd8
+                   Phone.hmgbd2) -}
+10c5b69c5b4f571a18e76959525ef611
+  hmgbd10 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.hmgbd11) -}
+44472c2ac30929393d2b56c8f3c5df21
+  hmgbd11 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("Hummingbirds swoop down from their perches"#) -}
+5d41d4ea2c61f72a065d178a4c1835c9
+  hmgbd2 :: [[Phone.Token]]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ [Phone.Token]
+                   Phone.hmgbd6
+                   Phone.hmgbd3) -}
+06810d4017b932568aabfd0a92542659
+  hmgbd3 :: [[Phone.Token]]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ [Phone.Token]
+                   Phone.hmgbd4
+                   (GHC.Types.[] @ [Phone.Token])) -}
+cae8dc2366a258c747512ba7fad12912
+  hmgbd4 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.hmgbd5) -}
+43fdea57fbd2638218b9c9864d8736ac
+  hmgbd5 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("hummingbirds sing"#) -}
+c96ec66d32a2530709b229dae0d00503
+  hmgbd6 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.hmgbd7) -}
+80890e3241f001d12f5321e3fc3856a3
+  hmgbd7 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Hummingbirds feed on seeds,"#) -}
+80494ab5a13612996dde437c9081914d
+  hmgbd8 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.hmgbd9) -}
+f4caedf1e6514bc6c885ed1ab80220f7
+  hmgbd9 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("and hummingbirds race to the spring"#) -}
+7732d04d9d213a9a2d592418281c9492
+  isSign :: Phone.Token -> GHC.Types.Bool
+  {- Arity: 1, Strictness: <L,U>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (tok :: Phone.Token) ->
+                 GHC.List.elem
+                   @ Phone.Token
+                   GHC.Classes.$fEqChar
+                   tok
+                   Phone.isSign1) -}
+8cd0b24826600295ab3fb19a021d9dce
+  isSign1 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.isSign2) -}
+06f7d1e9adad5ea71f27746c06fce0fe
+  isSign2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("+#.,?!"#) -}
+4ac0cbfe9e3abff8d3c0578404eac0ee
+  keyPad :: [(Phone.Token, GHC.Base.String)]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ (Phone.Token, GHC.Base.String)
+                   Phone.keyPad56
+                   Phone.keyPad1) -}
+61f93284f3ad17fe0699478bf2509316
+  keyPad1 :: [(Phone.Token, GHC.Base.String)]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ (Phone.Token, GHC.Base.String)
+                   Phone.keyPad52
+                   Phone.keyPad2) -}
+7ac73626676bcf25f327f08058040a89
+  keyPad10 :: [(Phone.Token, GHC.Base.String)]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ (Phone.Token, GHC.Base.String)
+                   Phone.keyPad16
+                   Phone.keyPad11) -}
+c1e1c64f523a17178b1b376388b1bba0
+  keyPad11 :: [(Phone.Token, GHC.Base.String)]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ (Phone.Token, GHC.Base.String)
+                   Phone.keyPad12
+                   (GHC.Types.[] @ (Phone.Token, GHC.Base.String))) -}
+6464be6c4a3d93b57c4271dc86d03428
+  keyPad12 :: (GHC.Types.Char, [GHC.Types.Char])
+  {- Strictness: m, Unfolding: ((Phone.keyPad15, Phone.keyPad13)) -}
+b11182f447a6828f5bac1d46e97ea7a1
+  keyPad13 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.keyPad14) -}
+4337f94d6dec0eadf7f69aca37af1aa0
+  keyPad14 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("#.,?!"#) -}
+cacb2695b6c8873999de94b44db2fdce
+  keyPad15 :: GHC.Types.Char
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.C# '#'#) -}
+a140b66e4456761c1de5c3fbf3f694ee
+  keyPad16 :: (GHC.Types.Char, [GHC.Types.Char])
+  {- Strictness: m, Unfolding: ((Phone.keyPad19, Phone.keyPad17)) -}
+6161a25a0fc7595cf7c666de9c5fc151
+  keyPad17 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.keyPad18) -}
+bc269cb7b9353c26d3a295a2a40ba537
+  keyPad18 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: (" ^"#) -}
+7491d88d3d681e30e644db9b4aee255e
+  keyPad19 :: GHC.Types.Char
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.C# '*'#) -}
+1ce0f56c05206ca98ac9155ff1439f7a
+  keyPad2 :: [(Phone.Token, GHC.Base.String)]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ (Phone.Token, GHC.Base.String)
+                   Phone.keyPad48
+                   Phone.keyPad3) -}
+7b59fa8ab8aeb1b8f7207c5a303c18ad
+  keyPad20 :: (GHC.Types.Char, [GHC.Types.Char])
+  {- Strictness: m, Unfolding: ((Phone.keyPad23, Phone.keyPad21)) -}
+86e9e9e6eb6042f623dc01500fd3d68d
+  keyPad21 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.keyPad22) -}
+fb136338efbd658ccd08b1133cb21316
+  keyPad22 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("+ 0"#) -}
+5cdca1bffd5e696178593c28476855e0
+  keyPad23 :: GHC.Types.Char
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.C# '0'#) -}
+1de7f0a0ee5fc0a2bb3a26ab843dc821
+  keyPad24 :: (GHC.Types.Char, [GHC.Types.Char])
+  {- Strictness: m, Unfolding: ((Phone.keyPad27, Phone.keyPad25)) -}
+c29177a8bfaddf24dc0fcbc798a7c73b
+  keyPad25 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.keyPad26) -}
+9f879cda82301b9b0f48599e0f768484
+  keyPad26 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("wxyz9"#) -}
+8c2dc3f98a5e1fb32242c4ce3b8d86b4
+  keyPad27 :: GHC.Types.Char
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.C# '9'#) -}
+b6e871db91afb1ded09056d4ce595286
+  keyPad28 :: (GHC.Types.Char, [GHC.Types.Char])
+  {- Strictness: m, Unfolding: ((Phone.keyPad31, Phone.keyPad29)) -}
+0c8d65b1fdfe6fd18d5a541aaf405c87
+  keyPad29 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.keyPad30) -}
+0d96b0959c55fb440b1249dd0c9e4219
+  keyPad3 :: [(Phone.Token, GHC.Base.String)]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ (Phone.Token, GHC.Base.String)
+                   Phone.keyPad44
+                   Phone.keyPad4) -}
+aed9e389f5a185cf0f23a996edeaecd0
+  keyPad30 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("tuv8"#) -}
+e5cce40e1daa546f2c114e1db37a676a
+  keyPad31 :: GHC.Types.Char
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.C# '8'#) -}
+69136db6654ea8febd39af9421ceb3b5
+  keyPad32 :: (GHC.Types.Char, [GHC.Types.Char])
+  {- Strictness: m, Unfolding: ((Phone.keyPad35, Phone.keyPad33)) -}
+cf85e947f97f7c6f9f92ad9016d0c9f9
+  keyPad33 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.keyPad34) -}
+46ba937893f3431ee5c39a1198bd4768
+  keyPad34 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("pqrs7"#) -}
+13111212aecf6f23216d4af3a3cef926
+  keyPad35 :: GHC.Types.Char
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.C# '7'#) -}
+a5b2a5b2ca885b1cd858a7d6260bf328
+  keyPad36 :: (GHC.Types.Char, [GHC.Types.Char])
+  {- Strictness: m, Unfolding: ((Phone.keyPad39, Phone.keyPad37)) -}
+3771a4d3248cafe96feb7ad124159e58
+  keyPad37 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.keyPad38) -}
+a914653e231e6b1663e158cb14b2471d
+  keyPad38 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("mno6"#) -}
+6a7000600dd5021eae6d915b3b3c659c
+  keyPad39 :: GHC.Types.Char
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.C# '6'#) -}
+ee1176e80300ea8b4bc143fab29c21a9
+  keyPad4 :: [(Phone.Token, GHC.Base.String)]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ (Phone.Token, GHC.Base.String)
+                   Phone.keyPad40
+                   Phone.keyPad5) -}
+5256006595956c62bd70f4b03878aaeb
+  keyPad40 :: (GHC.Types.Char, [GHC.Types.Char])
+  {- Strictness: m, Unfolding: ((Phone.keyPad43, Phone.keyPad41)) -}
+8bc5f79254a87ac1037743673a372ddd
+  keyPad41 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.keyPad42) -}
+76c245aba76088434ab3665c3c144f0d
+  keyPad42 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("jkl5"#) -}
+0ac9195c03853214f85f4867214a49f7
+  keyPad43 :: GHC.Types.Char
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.C# '5'#) -}
+1763ffd3e964bfa8187024a0df2345b5
+  keyPad44 :: (GHC.Types.Char, [GHC.Types.Char])
+  {- Strictness: m, Unfolding: ((Phone.keyPad47, Phone.keyPad45)) -}
+bf0361a738f04529005faea3673d77f6
+  keyPad45 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.keyPad46) -}
+925708d0034de718fad6d58ab52e9d3d
+  keyPad46 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("ghi4"#) -}
+b238c0c2e990350322cf8d169b4faab0
+  keyPad47 :: GHC.Types.Char
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.C# '4'#) -}
+b663ccd07c34af6696380c38ddcb5dbc
+  keyPad48 :: (GHC.Types.Char, [GHC.Types.Char])
+  {- Strictness: m, Unfolding: ((Phone.keyPad51, Phone.keyPad49)) -}
+d789c058bcdf190a36bfd27867578b76
+  keyPad49 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.keyPad50) -}
+c08469b9e6d6f1700765215bef788cdf
+  keyPad5 :: [(Phone.Token, GHC.Base.String)]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ (Phone.Token, GHC.Base.String)
+                   Phone.keyPad36
+                   Phone.keyPad6) -}
+35fda70e29fd03fb9ab31dc4587890ba
+  keyPad50 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("def3"#) -}
+aeac9093da9468ba05232359d9ae24b8
+  keyPad51 :: GHC.Types.Char
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.C# '3'#) -}
+3d67b60ed88ca67a7a5873e8bfb5909d
+  keyPad52 :: (GHC.Types.Char, [GHC.Types.Char])
+  {- Strictness: m, Unfolding: ((Phone.keyPad55, Phone.keyPad53)) -}
+4594af3d889f1b6c2b30f7ec2a9162cf
+  keyPad53 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.keyPad54) -}
+5a55d07498fc4e799d4e86c31c302c28
+  keyPad54 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("abc2"#) -}
+c633442f3890e0f50c935f861b97bf11
+  keyPad55 :: GHC.Types.Char
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.C# '2'#) -}
+d5a34a60041d2603ae99e73927f13752
+  keyPad56 :: (GHC.Types.Char, [GHC.Types.Char])
+  {- Strictness: m, Unfolding: ((Phone.keyPad59, Phone.keyPad57)) -}
+07fc8970f6d6b6018597d6d1e6f5557c
+  keyPad57 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.keyPad58) -}
+708d3ed3f7eb97a45b6ad5b9e33e0455
+  keyPad58 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("1"#) -}
+6f1485d7c481af8c7647621f5545b0ba
+  keyPad59 :: GHC.Types.Char
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.C# '1'#) -}
+58b5b5dfce5f864d832c543fe84f4f6c
+  keyPad6 :: [(Phone.Token, GHC.Base.String)]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ (Phone.Token, GHC.Base.String)
+                   Phone.keyPad32
+                   Phone.keyPad7) -}
+c1827ae25123e954e1c02346703d954f
+  keyPad7 :: [(Phone.Token, GHC.Base.String)]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ (Phone.Token, GHC.Base.String)
+                   Phone.keyPad28
+                   Phone.keyPad8) -}
+01ede13c94eb39d2622e677e09928397
+  keyPad8 :: [(Phone.Token, GHC.Base.String)]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ (Phone.Token, GHC.Base.String)
+                   Phone.keyPad24
+                   Phone.keyPad9) -}
+d756ada116c5fd5a1c952d5c05a904e5
+  keyPad9 :: [(Phone.Token, GHC.Base.String)]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ (Phone.Token, GHC.Base.String)
+                   Phone.keyPad20
+                   Phone.keyPad10) -}
+f3a6d0bd516e66a6975b6d0ef78ab0c9
+  mostPopularLetter :: GHC.Base.String -> Phone.Token
+  {- Arity: 1, Strictness: <S,1*U>,
+     Unfolding: (\ (txt :: GHC.Base.String) ->
+                 let {
+                   txt' :: [GHC.Types.Char] = Phone.mostPopularLetter_go txt
+                 } in
+                 let {
+                   occs :: [(GHC.Types.Char, GHC.Types.Int)]
+                   = GHC.Base.map
+                       @ GHC.Types.Char
+                       @ (GHC.Types.Char, GHC.Types.Int)
+                       (\ (x :: GHC.Types.Char) ->
+                        (x,
+                         letrec {
+                           $wgo :: [GHC.Types.Char]
+                                   -> GHC.Prim.Int# -> GHC.Prim.Int# -> GHC.Types.Int
+                             <join 3> {- Arity: 3, Strictness: <S,1*U><L,U><S,U>m,
+                                         Inline: [0] -}
+                           = \ (w :: [GHC.Types.Char])
+                               (w1 :: GHC.Prim.Int#)
+                               (ww :: GHC.Prim.Int#) ->
+                             case w of wild {
+                               [] -> GHC.Types.I# ww
+                               : y ys
+                               -> case x of wild1 { GHC.Types.C# x1 ->
+                                  case y of wild2 { GHC.Types.C# y1 ->
+                                  case GHC.Prim.tagToEnum#
+                                         @ GHC.Types.Bool
+                                         (GHC.Prim.eqChar# x1 y1) of wild3 {
+                                    GHC.Types.False -> $wgo ys (GHC.Prim.+# w1 1#) ww
+                                    GHC.Types.True
+                                    -> $wgo ys (GHC.Prim.+# w1 1#) (GHC.Prim.+# ww 1#) } } } }
+                         } in
+                         $wgo txt' 0# 0#))
+                       txt'
+                 } in
+                 case Data.OldList.findIndex
+                        @ (GHC.Types.Char, GHC.Types.Int)
+                        (let {
+                           ds :: GHC.Types.Int
+                           = case GHC.Base.map
+                                    @ (GHC.Types.Char, GHC.Types.Int)
+                                    @ GHC.Types.Int
+                                    (Data.Tuple.snd @ GHC.Types.Char @ GHC.Types.Int)
+                                    occs of wild {
+                               [] -> GHC.List.maximum2
+                               : ipv ipv1
+                               -> case ipv of ww { GHC.Types.I# ww1 ->
+                                  case GHC.List.$wgo ipv1 ww1 of ww2 { DEFAULT ->
+                                  GHC.Types.I# ww2 } } }
+                         } in
+                         \ (x :: (GHC.Types.Char, GHC.Types.Int)) ->
+                         case x of wild { (,) ds1 y -> GHC.Classes.eqInt y ds })
+                        occs of wild {
+                   GHC.Base.Nothing
+                   -> case Data.Maybe.fromJust1 ret_ty Phone.Token of {}
+                   GHC.Base.Just x
+                   -> case x of ww { GHC.Types.I# ww1 ->
+                      case GHC.List.$w!!
+                             @ (GHC.Types.Char, GHC.Types.Int)
+                             occs
+                             ww1 of wild1 { (,) x1 ds1 ->
+                      x1 } } }) -}
+a4a6212141e36ed6344c4a2bf8aaac27
+  mostPopularLetter_go :: [GHC.Types.Char] -> [GHC.Types.Char]
+  {- Arity: 1, Strictness: <S,1*U> -}
+8d37608d2ccfc126074ef6fba24f8ec8
+  phone :: GHC.Types.IO ()
+  {- Arity: 1,
+     Unfolding: InlineRule (0, True, True)
+                Phone.phone1 `cast` (Sym (GHC.Types.N:IO[0] <()>_R)) -}
+9c4d3351bf337abcbbf7ecbe8225024a
+  phone1 ::
+    GHC.Prim.State# GHC.Prim.RealWorld
+    -> (# GHC.Prim.State# GHC.Prim.RealWorld, () #)
+  {- Arity: 1,
+     Unfolding: (GHC.IO.Handle.Text.hPutStr2
+                   GHC.IO.Handle.FD.stdout
+                   Phone.phone2
+                   GHC.Types.False) -}
+19b11adf40975635a3212692a96321ae
+  phone10 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("-------------------------------------\n"#) -}
+9eedd5c72dd3a2688783724b9948795b
+  phone11 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("|   * ^     |   0 + _   |   # .,?!  |\n"#) -}
+346ea1a54f87d79dafc7586436b6cda6
+  phone12 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("|   7 PQRS  |   8 TUV   |   9 WXYZ  |\n"#) -}
+b9592d07e1f405a9a55c046dc439a300
+  phone13 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("|   4 GHI   |   5 JKL   |   6 MNO   |\n"#) -}
+9e488d1adb7f2c7d03a0bd8d74e0fd48
+  phone14 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("|   1       |   2 ABC   |   3 DEF   |\n"#) -}
+3e8348549e9e62c21eae9e16c496999b
+  phone2 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.Base.++
+                   @ GHC.Types.Char
+                   Phone.phone_break
+                   Phone.phone3) -}
+2f659c615a66304927654619af418c87
+  phone3 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackAppendCString#
+                   Phone.phone14
+                   Phone.phone4) -}
+07ead5fc13ad0e49362dd363fe6d6c0f
+  phone4 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.Base.++
+                   @ GHC.Types.Char
+                   Phone.phone_break
+                   Phone.phone5) -}
+606f6cc390ad7e2628fc66355da83672
+  phone5 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackAppendCString#
+                   Phone.phone13
+                   Phone.phone6) -}
+fb5573e575f242db3c7fcdd6c2fff331
+  phone6 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.Base.++
+                   @ GHC.Types.Char
+                   Phone.phone_break
+                   Phone.phone7) -}
+c0d41e8ae28b2c9d4cb41f58d2804f0e
+  phone7 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackAppendCString#
+                   Phone.phone12
+                   Phone.phone8) -}
+26be2568d1f3268ac11db157ddc30810
+  phone8 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.Base.++
+                   @ GHC.Types.Char
+                   Phone.phone_break
+                   Phone.phone9) -}
+e24fd10b513b66d85e7e08ba003c98f8
+  phone9 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackAppendCString#
+                   Phone.phone11
+                   Phone.phone_break) -}
+022c259e9429ac17a80a844586c77c38
+  phone_break :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.phone10) -}
+b40c552b89406d6e507d025d498d09df
+  presses :: Phone.Token -> Phone.Presses
+  {- Arity: 1, Strictness: <L,1*U(U)>m, Inline: [0],
+     Unfolding: InlineRule (1, True, False)
+                (\ (w :: Phone.Token) ->
+                 case Phone.$wpresses w of ww { DEFAULT -> GHC.Types.I# ww }) -}
+cb48955facd15d7457f5cff808faa8bf
+  rarestWord :: Phone.Text -> GHC.Base.String
+  {- Arity: 1, Strictness: <S,1*U>,
+     Unfolding: (\ (txt :: Phone.Text) ->
+                 let {
+                   ws :: [GHC.Base.String] = Phone.rarestWord_go txt
+                 } in
+                 let {
+                   occs :: [(GHC.Base.String, GHC.Types.Int)]
+                   = GHC.Base.map
+                       @ [GHC.Types.Char]
+                       @ (GHC.Base.String, GHC.Types.Int)
+                       (\ (w :: GHC.Base.String) ->
+                        (w,
+                         letrec {
+                           $wgo :: [GHC.Base.String]
+                                   -> GHC.Prim.Int# -> GHC.Prim.Int# -> GHC.Types.Int
+                             <join 3> {- Arity: 3, Strictness: <S,1*U><L,U><S,U>m,
+                                         Inline: [0] -}
+                           = \ (w1 :: [GHC.Base.String])
+                               (w2 :: GHC.Prim.Int#)
+                               (ww :: GHC.Prim.Int#) ->
+                             case w1 of wild {
+                               [] -> GHC.Types.I# ww
+                               : y ys
+                               -> case GHC.Base.eqString w y of wild1 {
+                                    GHC.Types.False -> $wgo ys (GHC.Prim.+# w2 1#) ww
+                                    GHC.Types.True
+                                    -> $wgo ys (GHC.Prim.+# w2 1#) (GHC.Prim.+# ww 1#) } }
+                         } in
+                         $wgo ws 0# 0#))
+                       ws
+                 } in
+                 case Data.OldList.findIndex
+                        @ (GHC.Base.String, GHC.Types.Int)
+                        (let {
+                           ds :: GHC.Types.Int
+                           = case GHC.Base.map
+                                    @ (GHC.Base.String, GHC.Types.Int)
+                                    @ GHC.Types.Int
+                                    (Data.Tuple.snd @ GHC.Base.String @ GHC.Types.Int)
+                                    occs of wild {
+                               [] -> GHC.List.minimum2
+                               : ipv ipv1
+                               -> case ipv of ww { GHC.Types.I# ww1 ->
+                                  case GHC.List.$wgo1 ipv1 ww1 of ww2 { DEFAULT ->
+                                  GHC.Types.I# ww2 } } }
+                         } in
+                         \ (x :: (GHC.Base.String, GHC.Types.Int)) ->
+                         case x of wild { (,) ds1 y -> GHC.Classes.eqInt y ds })
+                        occs of wild {
+                   GHC.Base.Nothing
+                   -> case Data.Maybe.fromJust1 ret_ty GHC.Base.String of {}
+                   GHC.Base.Just x
+                   -> case x of ww { GHC.Types.I# ww1 ->
+                      case GHC.List.$w!!
+                             @ (GHC.Base.String, GHC.Types.Int)
+                             occs
+                             ww1 of wild1 { (,) x1 ds1 ->
+                      x1 } } }) -}
+96a1fa4e516189099b95d22d5f8e8025
+  rarestWord_go :: [[GHC.Types.Char]] -> [GHC.Base.String]
+  {- Arity: 1, Strictness: <S,1*U> -}
+02b900e690a4167ae6ee5578147e7f92
+  ravel :: Phone.Token -> Phone.FingerMove
+  {- Arity: 1, Strictness: <L,1*U(U)>m, Inline: [0],
+     Unfolding: InlineRule (1, True, False)
+                (\ (w :: Phone.Token) ->
+                 case Phone.$wravel w of ww { (#,#) ww1 ww2 -> (ww1, ww2) }) -}
+92f70bceac098ce823af1d0907c2b432
+  text :: Phone.Text
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ [Phone.Token]
+                   Phone.text19
+                   Phone.text1) -}
+632664f3a7b0c206268080a4359e285a
+  text1 :: [[Phone.Token]]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ [Phone.Token]
+                   Phone.text17
+                   Phone.text2) -}
+82174882bb11abec8159515affbf7054
+  text10 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Glowing crystal caves."#) -}
+7decb053eb54044801ca66bd1774f27b
+  text11 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.text12) -}
+9cc3d0917ed58536b2d4242cca7b1761
+  text12 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("Traced frozen lava scoured by 10 winds."#) -}
+050fcc5994aa0ded05bbaa06569009f7
+  text13 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.text14) -}
+34e4a3188c06dfb3a13f1f13287d5fb5
+  text14 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("Fog on the lake rises in golden splendor."#) -}
+1724d8c6bd386ffb31fe21c06d0e9a61
+  text15 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.text16) -}
+e1a6f43fec813d3c9c4b076498fcb26c
+  text16 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("Morning dew settles on lilac bushes"#) -}
+de24cfe54de8469dcbd3e0be154dcb05
+  text17 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.text18) -}
+ded242432fc17cf5b0fdf34fb0ab39a9
+  text18 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("40 Swallows sing in the grey dawn."#) -}
+d55eb3e205e9634ebbed994306350012
+  text19 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.text20) -}
+872b1032da7d72f62bf81a26bf0913e8
+  text2 :: [[Phone.Token]]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ [Phone.Token]
+                   Phone.text15
+                   Phone.text3) -}
+c0f2fe4db147a2c3dd43933cf790c09d
+  text20 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("The night sky is littered with 1000s of stars."#) -}
+e316258eb85171d0f13f329d94b7662d
+  text3 :: [[Phone.Token]]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ [Phone.Token]
+                   Phone.text13
+                   Phone.text4) -}
+6ae14e8a21bab49dc4ea9136716a0ded
+  text4 :: [[Phone.Token]]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ [Phone.Token]
+                   Phone.text11
+                   Phone.text5) -}
+168534c2d20477081bfffacae9448e21
+  text5 :: [[Phone.Token]]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.: @ [Phone.Token] Phone.text9 Phone.text6) -}
+780747420b0f0e84989c619ce6310fd4
+  text6 :: [[Phone.Token]]
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ [Phone.Token]
+                   Phone.text7
+                   (GHC.Types.[] @ [Phone.Token])) -}
+65cb794f200238152ddac24a28b7878f
+  text7 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.text8) -}
+e027151510a9a138ec5574056655b2b2
+  text8 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("+ #,.?!123abc123..?.abc"#) -}
+a80a18790bd96578a50255cd2c604167
+  text9 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# Phone.text10) -}
+79e3f1ff3561e40d72360652477a5b9c
+  tokenButtonize :: [Phone.Token] -> [Phone.Button]
+  {- Arity: 1, Strictness: <S,1*U> -}
+de362ec3b512d41d1bac3ec3a5c1df9a
+  tokenFingerize :: [Phone.Token] -> [Phone.FingerMove]
+  {- Arity: 1, Strictness: <S,1*U>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (x :: [Phone.Token]) ->
+                 Phone.buttonFingerize (Phone.tokenButtonize x)) -}
+65969036ff6bd727d04156649767b6d0
+  unravel :: Phone.FingerMove -> Phone.Token
+  {- Arity: 1, Strictness: <S(S(S)S(S)),1*U(1*U(U),1*U(U))>,
+     Inline: [0],
+     Unfolding: InlineRule (1, True, False)
+                (\ (w :: Phone.FingerMove) ->
+                 case w of ww { (,) ww1 ww2 ->
+                 case ww1 of ww3 { GHC.Types.C# ww4 ->
+                 case ww2 of ww5 { GHC.Types.I# ww6 ->
+                 Phone.$wunravel ww4 ww6 } } }) -}
+instance [safe] GHC.Classes.Eq [Phone.Button] = Phone.$fEqButton
+instance [safe] GHC.Classes.Eq [Phone.Phone] = Phone.$fEqPhone
+instance [safe] GHC.Show.Show [Phone.Button] = Phone.$fShowButton
+instance [safe] GHC.Show.Show [Phone.Phone] = Phone.$fShowPhone
+vectorised variables:
+vectorised tycons:
+vectorised reused tycons:
+parallel variables:
+parallel tycons:
+trusted: safe
+require own pkg trusted: False
+

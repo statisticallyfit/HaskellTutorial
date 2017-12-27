@@ -1,3 +1,5 @@
+module Online.Coursera.Course.Quiz5 where
+
 -- exercise 11
 xs = 1 : [x + 1 | x <- xs]
 
