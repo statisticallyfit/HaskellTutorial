@@ -29,12 +29,12 @@ version :: Version
 version = Version [0,1,0,0] []
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 
-bindir     = "/datascience/projects/statisticallyfit/github/Haskell/HaskellTutorial/Projects/CipherProject/.stack-work/install/x86_64-linux/lts-10.1/8.2.2/bin"
-libdir     = "/datascience/projects/statisticallyfit/github/Haskell/HaskellTutorial/Projects/CipherProject/.stack-work/install/x86_64-linux/lts-10.1/8.2.2/lib/x86_64-linux-ghc-8.2.2/CipherProject-0.1.0.0-C0hvpTpXtjiHkP0YrnQUO2-CipherProject-test"
-dynlibdir  = "/datascience/projects/statisticallyfit/github/Haskell/HaskellTutorial/Projects/CipherProject/.stack-work/install/x86_64-linux/lts-10.1/8.2.2/lib/x86_64-linux-ghc-8.2.2"
-datadir    = "/datascience/projects/statisticallyfit/github/Haskell/HaskellTutorial/Projects/CipherProject/.stack-work/install/x86_64-linux/lts-10.1/8.2.2/share/x86_64-linux-ghc-8.2.2/CipherProject-0.1.0.0"
-libexecdir = "/datascience/projects/statisticallyfit/github/Haskell/HaskellTutorial/Projects/CipherProject/.stack-work/install/x86_64-linux/lts-10.1/8.2.2/libexec/x86_64-linux-ghc-8.2.2/CipherProject-0.1.0.0"
-sysconfdir = "/datascience/projects/statisticallyfit/github/Haskell/HaskellTutorial/Projects/CipherProject/.stack-work/install/x86_64-linux/lts-10.1/8.2.2/etc"
+bindir     = "/development/projects/statisticallyfit/github/learningprogramming/Haskell/Learning/HaskellTutorial/learningprojects/CipherProject/.stack-work/install/x86_64-linux/lts-10.1/8.2.2/bin"
+libdir     = "/development/projects/statisticallyfit/github/learningprogramming/Haskell/Learning/HaskellTutorial/learningprojects/CipherProject/.stack-work/install/x86_64-linux/lts-10.1/8.2.2/lib/x86_64-linux-ghc-8.2.2/CipherProject-0.1.0.0-C0hvpTpXtjiHkP0YrnQUO2-CipherProject-test"
+dynlibdir  = "/development/projects/statisticallyfit/github/learningprogramming/Haskell/Learning/HaskellTutorial/learningprojects/CipherProject/.stack-work/install/x86_64-linux/lts-10.1/8.2.2/lib/x86_64-linux-ghc-8.2.2"
+datadir    = "/development/projects/statisticallyfit/github/learningprogramming/Haskell/Learning/HaskellTutorial/learningprojects/CipherProject/.stack-work/install/x86_64-linux/lts-10.1/8.2.2/share/x86_64-linux-ghc-8.2.2/CipherProject-0.1.0.0"
+libexecdir = "/development/projects/statisticallyfit/github/learningprogramming/Haskell/Learning/HaskellTutorial/learningprojects/CipherProject/.stack-work/install/x86_64-linux/lts-10.1/8.2.2/libexec/x86_64-linux-ghc-8.2.2/CipherProject-0.1.0.0"
+sysconfdir = "/development/projects/statisticallyfit/github/learningprogramming/Haskell/Learning/HaskellTutorial/learningprojects/CipherProject/.stack-work/install/x86_64-linux/lts-10.1/8.2.2/etc"
 
 getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: IO FilePath
 getBinDir = catchIO (getEnv "CipherProject_bindir") (\_ -> return bindir)

@@ -1,11 +1,11 @@
 
 ==================== FINAL INTERFACE ====================
-2017-12-27 13:02:10.92394 UTC
+2018-11-30 09:57:40.97161 UTC
 
-interface CipherProject-0.1.0.0-6aVBBJTfOYKCgrWVl8MqEa:CaesarCipher 8022
-  interface hash: aad0276d3ca1933e9d969379ae8f7119
-  ABI hash: 76dfab56577a36ded7e8314b71fcca0f
-  export-list hash: 5bb69683f55c673b08d6eaec1b8a24d9
+interface CipherProject-0.1.0.0-1WnM0gxR3TI7GmTbdxvJUR:CaesarCipher 8022
+  interface hash: 39ad6368fd7078d72ae2ad72ac0e1fa5
+  ABI hash: 038b5c53ba13b03e2d47694b84381fb7
+  export-list hash: 7854824550f4172b4fee916a36b4a26a
   orphan hash: 693e9af84d3dfcc71e640e005bdc5e2e
   flag hash: d3f9096bac2e1e79f6ff76d0840aa157
   sig of: Nothing
@@ -36,28 +36,28 @@ import  -/  base-4.10.1.0:GHC.Num 6e1dc5d36d99a802edb39b92bb1923b8
 import  -/  base-4.10.1.0:GHC.Real 3c62834bc25e762eabc44149c4cc142d
 import  -/  base-4.10.1.0:GHC.Unicode 49c9de4fffed0d9be65aaeb6a60b757c
 import  -/  base-4.10.1.0:Prelude 31945b7d0084063347fc52506d3a4020
-5969e2ac6b790b7f84c2e9880e051af6
+23e89e2f84645cbc7f266665a5c32d03
   $trModule :: GHC.Types.Module
   {- HasNoCafRefs, Strictness: m,
      Unfolding: (GHC.Types.Module
                    CaesarCipher.$trModule3
                    CaesarCipher.$trModule1) -}
-658a83d177bd8cfe3679afadb52044fd
+0321284ed4c01d1fa4eeedda4d2bcf31
   $trModule1 :: GHC.Types.TrName
   {- HasNoCafRefs, Strictness: m1,
      Unfolding: (GHC.Types.TrNameS CaesarCipher.$trModule2) -}
-bcaa1d090bdc0daaaf8d600459269467
+54be2e682f5afc05b86e3cee0c071136
   $trModule2 :: GHC.Prim.Addr#
   {- HasNoCafRefs, Unfolding: ("CaesarCipher"#) -}
-c60d07da79adfed9ac0d0302b3db6acb
+8a3b47d71e2a5aa773ee62666325d4fd
   $trModule3 :: GHC.Types.TrName
   {- HasNoCafRefs, Strictness: m1,
      Unfolding: (GHC.Types.TrNameS CaesarCipher.$trModule4) -}
-d9b2b5f97f20dc0b2af0a88e45e19790
+035cc574a67afb7f5bb1d153c67fa6a9
   $trModule4 :: GHC.Prim.Addr#
   {- HasNoCafRefs,
-     Unfolding: ("CipherProject-0.1.0.0-6aVBBJTfOYKCgrWVl8MqEa"#) -}
-c10a7d769e4ef88fb408f48b5fb225eb
+     Unfolding: ("CipherProject-0.1.0.0-1WnM0gxR3TI7GmTbdxvJUR"#) -}
+7a1bca8c0f4c3a014aba9c9a1cc35d77
   $wshift :: GHC.Types.Int -> GHC.Prim.Char# -> GHC.Prim.Char#
   {- Arity: 2, Strictness: <L,1*U(U)><S,U>, Inline: [0],
      Unfolding: (\ (w :: GHC.Types.Int) (ww :: GHC.Prim.Char#) ->
@@ -105,7 +105,7 @@ c10a7d769e4ef88fb408f48b5fb225eb
                              -> case GHC.Char.$wlvl i# ret_ty GHC.Prim.Char# of {}
                              GHC.Types.True -> GHC.Prim.chr# i# } } }
                         0# -> ww } } } }) -}
-4419a014e39a78ff40443279f60007da
+ea6fbc802bd12f9e9541bfe91e79579d
   decode :: GHC.Types.Int -> GHC.Base.String -> GHC.Base.String
   {- Arity: 2, Strictness: <L,1*U(U)><S,1*U>,
      Unfolding: InlineRule (2, True, False)
@@ -126,7 +126,7 @@ c10a7d769e4ef88fb408f48b5fb225eb
                          (CaesarCipher.shift (GHC.Num.$fNumInt_$cnegate factor)))
                       n
                       codedText)) -}
-f919b2934494a984b28598e11f70c974
+36a4e0803163ea02ea69692869078311
   encode :: GHC.Types.Int -> GHC.Base.String -> GHC.Base.String
   {- Arity: 2, Strictness: <L,U(U)><S,1*U>,
      Unfolding: InlineRule (2, True, False)
@@ -147,7 +147,7 @@ f919b2934494a984b28598e11f70c974
                          (CaesarCipher.shift factor))
                       n
                       originalText)) -}
-595127c4ace7bdd98db5ba78cbb8f764
+97895947ffb70ac7b8f2f789a7cda4fa
   intToLow :: GHC.Types.Int -> GHC.Types.Char
   {- Arity: 1, Strictness: <S(S),1*U(U)>m,
      Unfolding: InlineRule (1, True, False)
@@ -161,7 +161,7 @@ f919b2934494a984b28598e11f70c974
                         (GHC.Prim.leWord# (GHC.Prim.int2Word# i#) 1114111##) of wild2 {
                    GHC.Types.False -> GHC.Char.$wlvl i#
                    GHC.Types.True -> GHC.Types.C# (GHC.Prim.chr# i#) } }) -}
-f059b941e1d567584a959fb4065ceeef
+dfb11e38fdf86288a49c458b11cdf8a5
   intToUpp :: GHC.Types.Int -> GHC.Types.Char
   {- Arity: 1, Strictness: <S(S),1*U(U)>m,
      Unfolding: InlineRule (1, True, False)
@@ -175,14 +175,14 @@ f059b941e1d567584a959fb4065ceeef
                         (GHC.Prim.leWord# (GHC.Prim.int2Word# i#) 1114111##) of wild2 {
                    GHC.Types.False -> GHC.Char.$wlvl i#
                    GHC.Types.True -> GHC.Types.C# (GHC.Prim.chr# i#) } }) -}
-826014eb8c98b0c0c2b78fcf10eba30d
+1886c025a9a12018b117d682207006ec
   lowToInt :: GHC.Types.Char -> GHC.Types.Int
   {- Arity: 1, HasNoCafRefs, Strictness: <S(S),1*U(U)>m,
      Unfolding: InlineRule (1, True, False)
                 (\ (letter :: GHC.Types.Char) ->
                  case letter of wild { GHC.Types.C# c# ->
                  GHC.Types.I# (GHC.Prim.-# (GHC.Prim.ord# c#) 97#) }) -}
-6f4ba79e8494d94a00b1431a4e535480
+b30b27f753533c570df8124b5acee99c
   shift :: GHC.Types.Int -> GHC.Types.Char -> GHC.Types.Char
   {- Arity: 2, Strictness: <L,1*U(U)><S(S),1*U(U)>m, Inline: [0],
      Unfolding: InlineRule (2, True, False)
@@ -190,7 +190,7 @@ f059b941e1d567584a959fb4065ceeef
                  case w1 of ww { GHC.Types.C# ww1 ->
                  case CaesarCipher.$wshift w ww1 of ww2 { DEFAULT ->
                  GHC.Types.C# ww2 } }) -}
-8f0c65b10289a80e816af0d50b985e93
+c6e792d670a89d2d4834e32707bbc9b9
   uppToInt :: GHC.Types.Char -> GHC.Types.Int
   {- Arity: 1, HasNoCafRefs, Strictness: <S(S),1*U(U)>m,
      Unfolding: InlineRule (1, True, False)

@@ -55,15 +55,37 @@
   (major1) == 2 && (major2) == 10 && (minor) <= 1)
 #endif /* MIN_VERSION_QuickCheck */
 
-/* tool gcc-4.8 */
+/* tool alex-3.2.3 */
+#ifndef TOOL_VERSION_alex
+#define TOOL_VERSION_alex "3.2.3"
+#endif /* TOOL_VERSION_alex */
+#ifndef MIN_TOOL_VERSION_alex
+#define MIN_TOOL_VERSION_alex(major1,major2,minor) (\
+  (major1) <  3 || \
+  (major1) == 3 && (major2) <  2 || \
+  (major1) == 3 && (major2) == 2 && (minor) <= 3)
+#endif /* MIN_TOOL_VERSION_alex */
+
+/* tool c2hs-0.28.3 */
+#ifndef TOOL_VERSION_c2hs
+#define TOOL_VERSION_c2hs "0.28.3"
+#endif /* TOOL_VERSION_c2hs */
+#ifndef MIN_TOOL_VERSION_c2hs
+#define MIN_TOOL_VERSION_c2hs(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  28 || \
+  (major1) == 0 && (major2) == 28 && (minor) <= 3)
+#endif /* MIN_TOOL_VERSION_c2hs */
+
+/* tool gcc-7 */
 #ifndef TOOL_VERSION_gcc
-#define TOOL_VERSION_gcc "4.8"
+#define TOOL_VERSION_gcc "7"
 #endif /* TOOL_VERSION_gcc */
 #ifndef MIN_TOOL_VERSION_gcc
 #define MIN_TOOL_VERSION_gcc(major1,major2,minor) (\
-  (major1) <  4 || \
-  (major1) == 4 && (major2) <  8 || \
-  (major1) == 4 && (major2) == 8 && (minor) <= 0)
+  (major1) <  7 || \
+  (major1) == 7 && (major2) <  0 || \
+  (major1) == 7 && (major2) == 0 && (minor) <= 0)
 #endif /* MIN_TOOL_VERSION_gcc */
 
 /* tool ghc-8.2.2 */
@@ -98,6 +120,17 @@
   (major1) == 2 && (major2) <  18 || \
   (major1) == 2 && (major2) == 18 && (minor) <= 1)
 #endif /* MIN_TOOL_VERSION_haddock */
+
+/* tool happy-1.19.8 */
+#ifndef TOOL_VERSION_happy
+#define TOOL_VERSION_happy "1.19.8"
+#endif /* TOOL_VERSION_happy */
+#ifndef MIN_TOOL_VERSION_happy
+#define MIN_TOOL_VERSION_happy(major1,major2,minor) (\
+  (major1) <  1 || \
+  (major1) == 1 && (major2) <  19 || \
+  (major1) == 1 && (major2) == 19 && (minor) <= 8)
+#endif /* MIN_TOOL_VERSION_happy */
 
 /* tool hpc-0.67 */
 #ifndef TOOL_VERSION_hpc

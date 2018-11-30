@@ -38,6 +38,7 @@ testLowToInt = describe "converts lowercase alphabet into number from 0..25" $ d
                    then (inRange 0 25 $ lowToInt (toLower letter))
                    else True -- shuttle test along
 
+
 testUppToInt :: SpecWith()
 testUppToInt = describe "converts uppercase alphabet into number from 0 to 25" $ do
     it "from 'A'..'Z' --->  0 .. 25" $ property $

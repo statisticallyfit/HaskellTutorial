@@ -1,11 +1,11 @@
 
 ==================== FINAL INTERFACE ====================
-2017-12-27 13:02:11.09855 UTC
+2018-11-30 09:57:41.331834 UTC
 
-interface CipherProject-0.1.0.0-6aVBBJTfOYKCgrWVl8MqEa:VigniereCipher 8022
-  interface hash: a947ce9d65ac630b958dccfd9ad90d4f
-  ABI hash: 29264d33ad73e265f1fa834a7abec1c1
-  export-list hash: 42ffe595b7f2ba7ab68175bc5d6e9c26
+interface CipherProject-0.1.0.0-1WnM0gxR3TI7GmTbdxvJUR:VigniereCipher 8022
+  interface hash: c81614d8dc612d4d24e6f0ba7e9900c1
+  ABI hash: c97c6f06b2d6f13db770129d86961cf6
+  export-list hash: 9b8808fa5c0a6177a133fce3cb9c6704
   orphan hash: 693e9af84d3dfcc71e640e005bdc5e2e
   flag hash: d3f9096bac2e1e79f6ff76d0840aa157
   sig of: Nothing
@@ -33,9 +33,9 @@ family instance modules: base-4.10.1.0:Control.Applicative
                          base-4.10.1.0:Data.Type.Equality base-4.10.1.0:GHC.Generics
                          base-4.10.1.0:GHC.IO.Exception base-4.10.1.0:GHC.TypeLits
                          base-4.10.1.0:GHC.TypeNats
-import  -/  CaesarCipher 76dfab56577a36ded7e8314b71fcca0f
-  exports: 5bb69683f55c673b08d6eaec1b8a24d9
-  shift 6f4ba79e8494d94a00b1431a4e535480
+import  -/  CaesarCipher 038b5c53ba13b03e2d47694b84381fb7
+  exports: 7854824550f4172b4fee916a36b4a26a
+  shift b30b27f753533c570df8124b5acee99c
 import  -/  base-4.10.1.0:Data.Char fe4e3458190deeac19969ce15e33bed9
 import  -/  base-4.10.1.0:Data.Foldable 9ed87455d68e87ff2b5b8725eae9897e
 import  -/  base-4.10.1.0:Data.List 4ab7fa2a1b87502b23af891a384f0506
@@ -46,34 +46,34 @@ import  -/  base-4.10.1.0:GHC.Num 6e1dc5d36d99a802edb39b92bb1923b8
 import  -/  base-4.10.1.0:GHC.Unicode 49c9de4fffed0d9be65aaeb6a60b757c
 import  -/  base-4.10.1.0:Prelude 31945b7d0084063347fc52506d3a4020
 import  -/  ghc-prim-0.5.1.1:GHC.Classes 93e2660065dce9329577e83d76d8f0d4
-d760bd02f7bd4b3711212d34862f0260
+8e98339d12972e89d46be1442a75416c
   $trModule :: GHC.Types.Module
   {- HasNoCafRefs, Strictness: m,
      Unfolding: (GHC.Types.Module
                    VigniereCipher.$trModule3
                    VigniereCipher.$trModule1) -}
-3d9b757420ff00aa54a1cd8ed4ca9f08
+6ed707787b3612e2988356baac8ce2cf
   $trModule1 :: GHC.Types.TrName
   {- HasNoCafRefs, Strictness: m1,
      Unfolding: (GHC.Types.TrNameS VigniereCipher.$trModule2) -}
-95fc45a5c9cc879b28d97d480dc75f8e
+8da79257d93d1a2cace58681942ac219
   $trModule2 :: GHC.Prim.Addr#
   {- HasNoCafRefs, Unfolding: ("VigniereCipher"#) -}
-9206f7fd00871442ab32c72f25a7d16f
+cc9777dbfdbc11c8bcc38d627778abed
   $trModule3 :: GHC.Types.TrName
   {- HasNoCafRefs, Strictness: m1,
      Unfolding: (GHC.Types.TrNameS VigniereCipher.$trModule4) -}
-804d9ad3bff6873537e32116838451af
+9758f62f368bac74458d998bb09e8322
   $trModule4 :: GHC.Prim.Addr#
   {- HasNoCafRefs,
-     Unfolding: ("CipherProject-0.1.0.0-6aVBBJTfOYKCgrWVl8MqEa"#) -}
-064dacedae56be118f42bb1cd9cc0f87
+     Unfolding: ("CipherProject-0.1.0.0-1WnM0gxR3TI7GmTbdxvJUR"#) -}
+763eb8941a5a7a45899ba0f3f2507429
   type Keyword = GHC.Base.String
-59cb558ef9b801ca7fff7a0f27beb1cc
+8f00486968dd407ba50160f451d02661
   type Shift = GHC.Types.Int
-30546b664d2e81c8429500630076e1fa
+1c16ec6e5fd8a51c6065b3c04b10d4bf
   type Text = GHC.Base.String
-b3afb69090310d51eb5d70e7680f2bb7
+00a08c5dc6197078e61c74b26a5ac86a
   encodeVigniere ::
     VigniereCipher.Text
     -> VigniereCipher.Keyword -> VigniereCipher.Text
@@ -85,18 +85,18 @@ b3afb69090310d51eb5d70e7680f2bb7
                    (VigniereCipher.encodeVigniere_go2
                       (VigniereCipher.replicateKeyWord text key)
                       VigniereCipher.encodeVigniere_xs)) -}
-e9d330d1a7567454d9dc9fd710cfd30e
+a9e6b7421e049a21d58dc91f92de475a
   encodeVigniere_go1 ::
     [GHC.Types.Char] -> [GHC.Types.Int] -> [GHC.Types.Char]
   {- Arity: 2, Strictness: <S,1*U><L,1*U> -}
-6e1eae8c71c46031abf715191bb91be6
+f3a1b3a81ff8ee52ce205c9f15fcaa8f
   encodeVigniere_go2 ::
     [GHC.Types.Char] -> [GHC.Types.Char] -> [GHC.Types.Int]
   {- Arity: 2, HasNoCafRefs, Strictness: <S,1*U><L,1*U> -}
-4c0630224e8a41fc52e25d200707e4f9
+8e5b2c355ff98e6d875ffd6b43bc60fe
   encodeVigniere_xs :: [GHC.Types.Char]
   {- HasNoCafRefs, Strictness: m2 -}
-3b32e30f4dcbd46c012d57c71f7e7c30
+d83aeddd14413afd3c61b6838a2bcfc7
   getAllShifts ::
     [(GHC.Types.Char, GHC.Types.Char)] -> [VigniereCipher.Shift]
   {- Arity: 1, HasNoCafRefs, Strictness: <S,1*U>,
@@ -118,14 +118,14 @@ e9d330d1a7567454d9dc9fd710cfd30e
                          VigniereCipher.getShift)
                       n
                       pairs)) -}
-2527eb0c746581ca0e0b6cdbb716799f
+50a5bc6dcd357915c8907233d09aeee7
   getKeyShifts :: VigniereCipher.Keyword -> [VigniereCipher.Shift]
   {- Arity: 1, HasNoCafRefs, Strictness: <S,1*U>,
      Unfolding: (\ (key :: VigniereCipher.Keyword) ->
                  VigniereCipher.encodeVigniere_go2
                    key
                    VigniereCipher.encodeVigniere_xs) -}
-cde5e5bf5268a73d09311a4607fee12f
+8ee1f86b0b2929550debad30917e6ae6
   getShift ::
     (GHC.Types.Char, GHC.Types.Char) -> VigniereCipher.Shift
   {- Arity: 1, HasNoCafRefs,
@@ -144,31 +144,31 @@ cde5e5bf5268a73d09311a4607fee12f
                         (GHC.Prim.>=# x1 0#) of wild3 {
                    GHC.Types.False -> GHC.Types.I# (GHC.Prim.negateInt# x1)
                    GHC.Types.True -> GHC.Types.I# x1 } } } }) -}
-6152afa483db972b89c1d5ab7b1791ef
+a8e6e428554b85b3755de98e80c22692
   getSpaces :: VigniereCipher.Text -> [VigniereCipher.Shift]
   {- Arity: 1, HasNoCafRefs,
      Unfolding: (Data.OldList.findIndices
                    @ GHC.Types.Char
                    VigniereCipher.getSpaces1) -}
-fd8839b0b6fb1eff24dbf9049f32fda8
+e478e1839f9023b4286b92bf0281876e
   getSpaces1 :: GHC.Types.Char -> GHC.Types.Bool
   {- Arity: 1, HasNoCafRefs,
      Unfolding: (GHC.Classes.eqChar VigniereCipher.getSpaces2) -}
-b5b62954024580fbe5cd6e1b11405681
+dea73c2fdb93200a6fc3b646e4fe4900
   getSpaces2 :: GHC.Types.Char
   {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.C# ' '#) -}
-e697b8f9a35f6fc2579cffda64b07f44
+a1bbf443dd57e19c91d00ffacc38e035
   putSpaces ::
     [VigniereCipher.Shift]
     -> VigniereCipher.Keyword -> VigniereCipher.Keyword
   {- Arity: 2, HasNoCafRefs, Strictness: <S,1*U><L,1*U> -}
-501c919a87881e11a8a95908cfa4c7cf
+6046c8cc0686f0da0d7b812b647cdfac
   removeSpaces :: VigniereCipher.Text -> VigniereCipher.Text
   {- Arity: 1, HasNoCafRefs,
      Unfolding: (GHC.List.filter
                    @ GHC.Types.Char
                    VigniereCipher.removeSpaces1) -}
-06538cf4cc0caae45f5ccabab48800dc
+b51fff7738682f65bd62f5f4f0a77c4f
   removeSpaces1 :: GHC.Types.Char -> GHC.Types.Bool
   {- Arity: 1, HasNoCafRefs, Strictness: <S(S),1*U(1*U)>,
      Unfolding: InlineRule (1, True, False)
@@ -176,7 +176,7 @@ e697b8f9a35f6fc2579cffda64b07f44
                  case ds of wild { GHC.Types.C# x1 ->
                  case x1 of wild1 {
                    DEFAULT -> GHC.Types.True ' '# -> GHC.Types.False } }) -}
-1c30801292f2293473d8cd19a6502d3f
+45178257c7151dddcaeff948dfade7de
   replicateKeyWord ::
     VigniereCipher.Text
     -> VigniereCipher.Keyword -> VigniereCipher.Keyword
@@ -244,14 +244,14 @@ e697b8f9a35f6fc2579cffda64b07f44
                              go keyStart
                          } in
                          xs wild1 } })) -}
-6fa0967f2f6650130390aa6f11392f40
+01514c53ef3f8ef8bc3482e9b8074e4b
   replicateKeyWord1 :: GHC.Types.Int
   {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.I# 0#) -}
-41d526ace2487bd878d0929809f737db
+cc48589316c9dc32f75e539421073d4c
   replicateKeyWord_go ::
     [GHC.Types.Char] -> GHC.Types.Int -> GHC.Types.Int
   {- Arity: 2, Strictness: <S,1*U><L,1*U(U)> -}
-975c20cce4f04b46e62e78378a3338b2
+5305a6fa86f617fb559c3f9099f4deab
   replicateKeyWord_go1 ::
     [GHC.Types.Char] -> GHC.Prim.Int# -> [GHC.Types.Int]
   {- Arity: 2, HasNoCafRefs, Strictness: <S,1*U><L,U> -}

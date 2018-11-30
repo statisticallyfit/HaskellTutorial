@@ -57,7 +57,6 @@ occursOfMax :: Int -> Int -> Int -> Int -> Int
 occursOfMax max a b c = occursOfNum max a b c
 
 
-
 maxThreeOccurs :: Int -> Int -> Int -> (Int, Int)
 maxThreeOccurs a b c = (theMaxNum, occursOfMax theMaxNum a b c)
                         where theMaxNum = maxThree a b c
